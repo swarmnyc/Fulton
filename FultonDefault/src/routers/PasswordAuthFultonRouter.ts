@@ -1,9 +1,8 @@
-import { IFultonRouter, Post } from "Fulton";
-import { FultonContext } from "../FultonContext";
+import { IFultonRouter, Post, IFultonContext } from "Fulton";
 
 export class PasswordAuthFultonRouter implements IFultonRouter {
     @Post("")
-    auth(context: FultonContext): void {
+    auth(context: IFultonContext): void {
 
     }
 }

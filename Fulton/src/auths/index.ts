@@ -1,3 +1,4 @@
 export * from "./IUser"
 export * from "./IUserManager"
-export * from "./IFultonAuthenticate"
+export * from "./FultonAuthenticate"
+export * from "./FultonAuthorize"

@@ -1,4 +1,5 @@
 export interface IUser {
-    keyPropertyName: String
-    passowrd: String
+    email?: String
+    username?: String
+    passowrd?: String
 }

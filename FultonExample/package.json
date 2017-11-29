@@ -2,10 +2,20 @@
   "name": "fulton-example",
   "version": "1.0.0",
   "description": "",
-  "main": "build/index.js",
+  "main": "build/app.js",
+  "author": "",
+  "license": "ISC",
   "scripts": {
+    "build": "tsc -p .",
+    "debug": "ts-node --inspect-brk=9229 ./src/Debug.ts",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "author": "",
-  "license": "ISC"
+  "dependencies": {
+    "fulton": "file:../Fulton",
+    "fulton-default": "file:../FultonDefault"
+  },
+  "devDependencies": {
+    "ts-node": "^3.3.0",
+    "typescript": "^2.6.2"
+  }
 }

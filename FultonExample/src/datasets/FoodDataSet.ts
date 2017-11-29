@@ -1,6 +1,11 @@
 import { Food } from "../models/Food";
 import { MongoDataSet } from "fulton-default";
 
-export class FoodDataSet extends MongoDataSet<Food>{
+import { Injectable } from "tsioc";
 
+@Injectable()
+export class FoodDataSet extends MongoDataSet<Food>{
+    constructor() {
+        super("foods");
+    }
 }

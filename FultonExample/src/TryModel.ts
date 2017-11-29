@@ -2,7 +2,7 @@ import { FoodDataSet } from "./datasets/FoodDataSet";
 
 process.env.DbConnection = "mongodb://localhost:27017/fulton-example"
 
-var foodDs = new FoodDataSet("foods");
+var foodDs = new FoodDataSet();
 
 var food = foodDs.create({
     name: "test",

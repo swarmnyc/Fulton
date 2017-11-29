@@ -1,11 +1,9 @@
-import { IFultonContext } from "./cores/IFultonContext";
-import { IFultonRouter, AuthFultonRouter } from "./routers/FultonRouter";
-import { IUser } from "./auths/IUser";
-import { IUserManager } from "./auths/IUserManager";
+import { FultonRouter } from "./routers/FultonRouter";
+import { ILogger ,IFultonContext } from "./cores/index";
+import { IUser, FultonAuthRouter, IUserManager } from "./auths/index";
 import { Middleware } from "koa";
 import { Type } from "./cores/Type";
 import * as Koa from "koa";
-import { ILogger } from "./index";
 
 export type FultonMiddleware = (context: IFultonContext, next: () => Promise<any>) => void
 
@@ -25,7 +23,7 @@ export interface FultonAppOptions {
     userManager?: IUserManager<IUser>
 
     // auth rotuers like google, facebook, password
-    authRouters?: AuthFultonRouter[]
+    authRouters?: FultonAuthRouter[]
 
     // default take token or cookie to User, router can overwrite
     authenticates?: FultonMiddleware[]
@@ -34,7 +32,7 @@ export interface FultonAppOptions {
     defaultAuthorizes?: FultonMiddleware[]
 
     // regular routers, if null, will load all the routers under ./routers
-    routers?: IFultonRouter[]
+    routers?: FultonRouter[]
 
     // middlewares
     middlewares?: FultonMiddleware[]
@@ -59,6 +57,10 @@ export interface FultonAppOptions {
 export abstract class FultonApp {
     koaApp: Koa;
     options: FultonAppOptions
+
+    constructor(){
+        this.init();
+    }
 
     init(): void {
         this.koaApp = new Koa();

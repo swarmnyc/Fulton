@@ -1,3 +1,3 @@
 export * from "./ILogger"
-export * from "./IDataSet"
+export * from "./IFultonDataSet"
 export * from "./IFultonContext";

@@ -1,4 +1,4 @@
-import { IDateSet, DataSetQuery, DataSetWhere } from "fulton";
+import { IFultonDataSet, FultonDataSetQuery, FultonDataSetWhere } from "fulton";
 
 import { MongoClient, Db, Collection } from "mongodb"
 import { resolve } from "dns";
@@ -28,7 +28,7 @@ function connect(): Promise<Db> {
 }
 
 // Use Native Mongo Drive
-export class MongoDataSet<TModel extends MongoModel> implements IDateSet<TModel> {
+export class MongoDataSet<TModel extends MongoModel> implements IFultonDataSet<TModel> {
     tableName: string;
     collection: Promise<Collection<TModel>>
 
@@ -40,7 +40,7 @@ export class MongoDataSet<TModel extends MongoModel> implements IDateSet<TModel>
         });
     }
 
-    find(query?: DataSetQuery): Promise<TModel[]> {
+    find(query?: FultonDataSetQuery): Promise<TModel[]> {
         return this.collection.then((coll) => {
             query = query || {};
 
@@ -50,7 +50,7 @@ export class MongoDataSet<TModel extends MongoModel> implements IDateSet<TModel>
         });
     }
 
-    findOne(where: DataSetWhere): Promise<TModel> {
+    findOne(where: FultonDataSetWhere): Promise<TModel> {
         throw new Error("Method not implemented.");
     }
     
@@ -65,10 +65,10 @@ export class MongoDataSet<TModel extends MongoModel> implements IDateSet<TModel>
     update(obj: TModel): Promise<TModel> {
         throw new Error("Method not implemented.");
     }
-    updateBy(where: DataSetWhere, obj: TModel): Promise<number> {
+    updateBy(where: FultonDataSetWhere, obj: TModel): Promise<number> {
         throw new Error("Method not implemented.");
     }
-    deleteBy(where: DataSetWhere): Promise<number> {
+    deleteBy(where: FultonDataSetWhere): Promise<number> {
         throw new Error("Method not implemented.");
     }
     blukCreate(objs: TModel[]): Promise<TModel[]> {

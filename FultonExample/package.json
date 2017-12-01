@@ -14,7 +14,7 @@
     "fulton": "file:../Fulton",
     "fulton-default": "file:../FultonDefault",
     "lodash": "^4.17.4",
-    "tsioc": "^0.4.8"
+    "tsioc": "^0.4.13"
   },
   "devDependencies": {
     "ts-node": "^3.3.0",

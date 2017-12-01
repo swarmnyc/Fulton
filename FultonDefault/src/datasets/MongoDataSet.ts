@@ -1,4 +1,4 @@
-import { IFultonDataSet, FultonDataSetQuery, FultonDataSetWhere } from "fulton";
+import { IFultonDataSet, FultonQuery, FultonQueryWhere, IFultonSchema } from "fulton";
 
 import { MongoClient, Db, Collection } from "mongodb"
 import { resolve } from "dns";
@@ -29,18 +29,17 @@ function connect(): Promise<Db> {
 
 // Use Native Mongo Drive
 export class MongoDataSet<TModel extends MongoModel> implements IFultonDataSet<TModel> {
-    tableName: string;
+    scheam: IFultonSchema;
+    
     collection: Promise<Collection<TModel>>
 
-    constructor(tableName: string) {
-        this.tableName = tableName;
-
+    constructor(private tableName: string) {
         this.collection = connect().then((db) => {
             return db.collection<TModel>(this.tableName);
         });
     }
 
-    find(query?: FultonDataSetQuery): Promise<TModel[]> {
+    find(query?: FultonQuery): Promise<TModel[]> {
         return this.collection.then((coll) => {
             query = query || {};
 
@@ -50,10 +49,6 @@ export class MongoDataSet<TModel extends MongoModel> implements IFultonDataSet<T
         });
     }
 
-    findOne(where: FultonDataSetWhere): Promise<TModel> {
-        throw new Error("Method not implemented.");
-    }
-    
     create(obj: TModel): Promise<TModel> {
         return this.collection.then((coll) => {
             return coll.insert(obj).then((result) => {
@@ -62,22 +57,36 @@ export class MongoDataSet<TModel extends MongoModel> implements IFultonDataSet<T
         });
     }
 
-    update(obj: TModel): Promise<TModel> {
+    findById(id: string | number): Promise<TModel> {
         throw new Error("Method not implemented.");
     }
-    updateBy(where: FultonDataSetWhere, obj: TModel): Promise<number> {
+
+    updateById(id: string | number, obj: TModel): Promise<boolean> {
         throw new Error("Method not implemented.");
     }
-    deleteBy(where: FultonDataSetWhere): Promise<number> {
+    deleteById(id: string | number): Promise<boolean> {
+        throw new Error("Method not implemented.");
+    }
+    
+    update(obj: TModel): Promise<boolean> {
+        throw new Error("Method not implemented.");
+    }
+    delete(obj: TModel): Promise<boolean> {
+        throw new Error("Method not implemented.");
+    }
+    updateBy(where: FultonQueryWhere, obj: TModel): Promise<number> {
+        throw new Error("Method not implemented.");
+    }
+    deleteBy(where: FultonQueryWhere): Promise<number> {
         throw new Error("Method not implemented.");
     }
     blukCreate(objs: TModel[]): Promise<TModel[]> {
         throw new Error("Method not implemented.");
     }
-    blukUpdate(objs: TModel[]): Promise<TModel[]> {
+    blukUpdate(objs: TModel[]): Promise<number> {
         throw new Error("Method not implemented.");
     }
-    blukDelete(objs: TModel[]): Promise<TModel[]> {
+    blukDelete(objs: TModel[]): Promise<number> {
         throw new Error("Method not implemented.");
     }
 }

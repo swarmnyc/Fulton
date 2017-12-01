@@ -2,13 +2,12 @@ import { FultonModelRouter } from "fulton"
 import { FoodDataSet } from "../datasets/FoodDataSet";
 import { Injectable, Inject } from "tsioc";
 import { Food } from "../models/Food";
+import { FoodDataService } from "../services/FoodDataService";
 
 export default class FoodRouter extends FultonModelRouter {
-    constructor(@Inject private foodDataSet: FoodDataSet) {
-        super(foodDataSet)
-    }
+    constructor(@Inject private foodDataService: FoodDataService) {
+        super(foodDataService)
 
-    test() : Promise<Food[]>{
-        return this.foodDataSet.find();
+        this.detailDelegate = this.foodDataService.findByName;
     }
 }

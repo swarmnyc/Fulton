@@ -2,6 +2,7 @@ import { FultonRouter } from "./routers/FultonRouter";
 import { ILogger ,IFultonContext } from "./cores/index";
 import { IUser, FultonAuthRouter, IUserManager } from "./auths/index";
 import { Middleware } from "koa";
+import { IContainer, ContainerBuilder } from "tsioc";
 import { Type } from "./cores/Type";
 import * as Koa from "koa";
 
@@ -37,9 +38,6 @@ export interface FultonAppOptions {
     // middlewares
     middlewares?: FultonMiddleware[]
 
-    //Dependency Injections
-    privoiders?: Array<Type<any>>
-
     //default is console logger 
     //or just use winston directly?
     logger?: ILogger
@@ -56,6 +54,7 @@ export interface FultonAppOptions {
 
 export abstract class FultonApp {
     koaApp: Koa;
+    container: IContainer;
     options: FultonAppOptions
 
     constructor(){
@@ -66,7 +65,8 @@ export abstract class FultonApp {
         this.koaApp = new Koa();
 
         this.options = {};
-        this.onInit(this.options);
+        this.container = new ContainerBuilder().create();
+        this.onInit(this.options, this.container);
         //do somethings
     }
 
@@ -75,5 +75,5 @@ export abstract class FultonApp {
     }
 
     // events
-    abstract onInit(options: FultonAppOptions): void
+    abstract onInit(options: FultonAppOptions, container: IContainer): void
 }

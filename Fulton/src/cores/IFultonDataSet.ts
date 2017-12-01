@@ -1,36 +1,48 @@
-export interface FultonDataSetWhere {
+import { type } from "os";
+
+export interface FultonQueryWhere {
     [name: string]: any;
 }
 
-export interface DataSetFields {
+export interface FultonQueryFields {
     [name: string]: boolean;
 }
 
-export interface FultonDataSetSort {
+export interface FultonQuerySort {
     [name: string]: boolean;
 }
 
-export interface FultonDataSetQuery {
-    where?: FultonDataSetWhere;
-    fields?: DataSetFields;
-    sort?: FultonDataSetSort;
+export interface FultonQuery {
+    where?: FultonQueryWhere;
+    fields?: FultonQueryFields;
+    sort?: FultonQuerySort;
     page?: number;
     limit?: number;
 }
 
-export interface IFultonDataSet<TModel = any> {  
-    tableName?: string
+export type FultonId = number | string;
 
-    find(query?: FultonDataSetQuery): Promise<TModel[]>;
-    findOne(where: FultonDataSetWhere): Promise<TModel>;
+
+export interface IFultonSchema {
+    //?
+}
+export interface IFultonDataSet<TModel = any> {
+    scheam : IFultonSchema;
+    
+    find(query?: FultonQuery): Promise<TModel[]>;
+    findById(id: FultonId): Promise<TModel>;
     create(obj: TModel): Promise<TModel>;
-    update(obj: TModel): Promise<TModel>;
+    update(obj: TModel): Promise<boolean>;
+    delete(obj: TModel): Promise<boolean>;
 
-    updateBy(where: FultonDataSetWhere, obj: TModel): Promise<number>;
-    deleteBy(where: FultonDataSetWhere): Promise<number>;
+    updateBy(where: FultonQueryWhere, obj: TModel): Promise<number>;
+    deleteBy(where: FultonQueryWhere): Promise<number>;
+
+    updateById(id: FultonId, obj: TModel): Promise<boolean>;
+    deleteById(id: FultonId): Promise<boolean>;
 
     blukCreate(objs: TModel[]): Promise<TModel[]>;
-    blukUpdate(objs: TModel[]): Promise<TModel[]>;
-    blukDelete(objs: TModel[]): Promise<TModel[]>;
+    blukUpdate(objs: TModel[]): Promise<number>;
+    blukDelete(objs: TModel[]): Promise<number>;
 }
 

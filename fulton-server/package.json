@@ -12,14 +12,15 @@
   "license": "ISC",
   "devDependencies": {
     "@types/mongodb": "^2.2.16",
-    "koa": "^2.4.1",
-    "fulton-core": "file:../fulton-core",
     "typescript": "^2.6.1"
   },
   "dependencies": {
     "@types/koa": "^2.0.41",
     "@types/node": "^8.0.53",
     "mongodb": "^2.2.33",
-    "tsioc": "^0.4.12"
+    "koa": "^2.4.1",
+    "fulton-core": "file:../fulton-core",
+    "tsioc": "^0.4.12",
+    "typeorm": "^0.1.7"
   }
 }

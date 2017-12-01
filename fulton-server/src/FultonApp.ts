@@ -3,7 +3,6 @@ import { ILogger, IFultonContext } from "./cores/index";
 import { IUser, FultonAuthRouter, IUserManager } from "./auths/index";
 import { Middleware } from "koa";
 import { IContainer, ContainerBuilder } from "tsioc";
-import { Type } from "./cores/Type";
 import * as Koa from "koa";
 
 export type FultonMiddleware = (context: IFultonContext, next: () => Promise<any>) => void

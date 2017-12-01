@@ -1,18 +1,40 @@
-import { FoodDataSet } from "./datasets/FoodDataSet";
+import "reflect-metadata";
+import { createConnection, useContainer } from "typeorm";
+import { ContainerBuilder, Inject } from "tsioc";
+import { MongoRepository } from "typeorm/repository/MongoRepository";
+import { FoodRepository, Food } from "./entity/Food";
+import { IngredientRepository, Ingredient } from "./entity/Ingredient";
+import { FoodEntityService } from "./services/FoodDataService";
 
-process.env.DbConnection = "mongodb://localhost:27017/fulton-example"
 
-var foodDs = new FoodDataSet();
+createConnection({
+    "type": "mongodb",
+    "host": "localhost",
+    "port": 27017,
+    "database": "typeorm-test"
+ })
+    .then(async (conn) => {
+        let container = new ContainerBuilder().create();
 
-var food = foodDs.create({
-    name: "test",
-    category: "abc"
-}).then((food) => {
-    return foodDs.find()
-}).then((foods) => {
-    console.log(JSON.stringify(foods));
-    process.exit();
-}).catch((err) => {
-    console.error(err);
-    process.exit(1);
-});
+        container.registerSingleton(FoodRepository, conn.getMongoRepository(Food))
+        container.registerSingleton(IngredientRepository, conn.getMongoRepository(Ingredient))
+
+
+        container.register(FoodEntityService)
+
+        await container.get(FoodEntityService).create(null, {
+            name: "food",
+            category: "food"
+        });
+
+        var f = await container.get(IngredientRepository).insert({
+            name: "A",
+            category: "B",
+        });
+
+        console.log(f);
+    })
+    .catch((err) => {
+        console.error(err);
+        process.exit(1);
+    });

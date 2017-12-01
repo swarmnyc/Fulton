@@ -1,7 +1,6 @@
-import { IFultonContext } from "../cores/IFultonContext";
-import { IUser } from "../index";
+import { IFultonRouterContext } from "../routers/IFultonRouterContext";
 
-export function FultonDefaultAuthorize(context: IFultonContext, next: () => Promise<any>): void {
+export function FultonDefaultAuthorize(context: IFultonRouterContext, next: () => Promise<any>): void {
     if (context.user == null) {
         context.throw(401)
     } else {

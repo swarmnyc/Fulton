@@ -1,27 +1,23 @@
-import { FultonDataService } from "fulton-server";
+import { FultonEntityService, IFultonContext } from "fulton-server";
 import { Injectable, Inject } from "tsioc";
-import { Food } from "../datasets/FoodDataSet";
-import { FoodDataSet } from "../datasets/FoodDataSet";
-import { IngredientDataSet } from "../datasets/IngredientDataSet";
+import { Food, FoodRepository } from "../entity/Food";
+import { IngredientRepository } from "../entity/Ingredient";
 
 @Injectable
-export class FoodDataService extends FultonDataService<Food> {
-    constructor( @Inject public foodDataSet: FoodDataSet, @Inject public ingredientDataSet: IngredientDataSet) {
-        super(foodDataSet);
+export class FoodEntityService extends FultonEntityService<Food> {
+    constructor( @Inject public foodRepository: FoodRepository, @Inject public ingredientRepository: IngredientRepository) {
+        super(foodRepository);
     }
 
-    findByName(name: String): Promise<Food> {
-        return this.find({ where: { name: name }, limit: 1 }).then((foods) => {
-            return foods[0];
-        });
+    findByName(context: IFultonContext, name: String): Promise<Food> {
+        return this.foodRepository.findOne({ where: { name: name } });
     }
 
-    create(obj: Food): Promise<Food> {
+    create(context: IFultonContext, obj: Food): Promise<Food> {
         // do some for ingredient like
-
-        return this.foodDataSet.create(obj).then((newObj) => {
-            return this.ingredientDataSet.blukCreate(obj.ingredients).then(() => {
-                return newObj;
+        return this.foodRepository.insert(obj).then(() => {
+            return this.ingredientRepository.insertMany(obj.ingredients).then(() => {
+                return obj;
             });
         });
     }

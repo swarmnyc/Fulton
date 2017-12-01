@@ -5,15 +5,19 @@ import { IContainer } from "tsioc";
 import { FoodDataService } from "./services/FoodDataService";
 
 export class App extends FultonApp {
-    onInit(options: FultonAppOptions, container: IContainer): void {
+    async onInit(options: FultonAppOptions, container: IContainer) {
         options.authRouters = [];
         options.dotenvPath = ".test.nev";
         options.authenticates = [];
         options.middlewares = [];
-        
 
+        // register service
         container.register(FoodDataService)
     }
 }
 
-new App().start();
+let app = new App();
+
+app.start().then(() => {
+    console.log("App Start");
+});

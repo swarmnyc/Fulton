@@ -6,7 +6,7 @@ import { IngredientDataSet } from "../datasets/IngredientDataSet";
 
 @Injectable
 export class FoodDataService extends FultonDataService<Food> {
-    constructor( @Inject private foodDataSet: FoodDataSet, @Inject private ingredientDataSet: IngredientDataSet) {
+    constructor( @Inject public foodDataSet: FoodDataSet, @Inject public ingredientDataSet: IngredientDataSet) {
         super(foodDataSet);
     }
 

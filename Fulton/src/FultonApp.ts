@@ -1,5 +1,5 @@
 import { FultonRouter } from "./routers/FultonRouter";
-import { ILogger ,IFultonContext } from "./cores/index";
+import { ILogger, IFultonContext } from "./cores/index";
 import { IUser, FultonAuthRouter, IUserManager } from "./auths/index";
 import { Middleware } from "koa";
 import { IContainer, ContainerBuilder } from "tsioc";
@@ -45,11 +45,16 @@ export interface FultonAppOptions {
     //default is using output to logger
     errorHandler?: Middleware
 
-    //default is BodyParser
+    //default is [FultonQueryStringParser]
+    queryStringParsers?: Middleware[]
+
+    //default is [BodyParser]
     inputParsers?: Middleware[]
 
     //for dot env path, default is ./.env
     dotenvPath?: string;
+
+    dbConnectionOptions?: any;
 }
 
 export abstract class FultonApp {
@@ -57,23 +62,38 @@ export abstract class FultonApp {
     container: IContainer;
     options: FultonAppOptions
 
-    constructor(){
-        this.init();
+    constructor() {
     }
 
-    init(): void {
+    async init(): Promise<any> {
         this.koaApp = new Koa();
+        let container = this.createContainer();
+
+        if (container instanceof Promise) {
+            this.container = await container;
+        } else {
+            this.container = container;
+        }
 
         this.options = {};
-        this.container = new ContainerBuilder().create();
-        this.onInit(this.options, this.container);
+
+        // load routers;
+
+        await this.onInit(this.options, this.container);
         //do somethings
     }
 
-    start(): void {
+    start(): Promise<any> {
+        return new Promise(async (resolve, reject) => {
+            let follow = await this.init();
 
+        });
+    }
+
+    createContainer(): IContainer | Promise<IContainer> {
+        return new ContainerBuilder().create();
     }
 
     // events
-    abstract onInit(options: FultonAppOptions, container: IContainer): void
+    abstract onInit(options: FultonAppOptions, container: IContainer): Promise<any>
 }

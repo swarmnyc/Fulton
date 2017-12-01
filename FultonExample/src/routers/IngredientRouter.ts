@@ -8,16 +8,7 @@ export default class FoodRouter extends FultonModelRouter {
     constructor( @Inject private foodDataService: FoodDataService) {
         super(foodDataService)
 
-        this.detailDelegate = this.foodDataService.findByName;
-    }
-
-    @Get("other")
-    other1(context: IFultonContext) {
-        context.body = "other1"
-    }
-
-    @Get("other/:id")
-    other2(context: IFultonContext) {
-        context.body = "other2"
+        this.listDelegate = this.foodDataService.ingredientDataSet.find;
+        this.detailDelegate = this.foodDataService.ingredientDataSet.findById;
     }
 }

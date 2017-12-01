@@ -26,6 +26,8 @@ export type FultonId = number | string;
 export interface IFultonSchema {
     //?
 }
+
+//will try different ORM to replace this
 export interface IFultonDataSet<TModel = any> {
     scheam : IFultonSchema;
     

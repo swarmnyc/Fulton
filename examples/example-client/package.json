@@ -1,0 +1,22 @@
+{
+  "name": "example-client",
+  "version": "1.0.0",
+  "description": "",
+  "main": "./build/index.js",
+  "types": "./build/index.d.ts",
+  "scripts": {
+    "build": "tsc -p .",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "koa": "^2.4.1",
+    "typescript": "^2.6.1"
+  },
+  "dependencies": {
+    "@types/koa": "^2.0.41",
+    "@types/node": "^8.0.53",
+    "tsioc": "^0.4.12"
+  }
+}

@@ -1,0 +1,23 @@
+{
+  "name": "example-server",
+  "version": "1.0.0",
+  "description": "",
+  "main": "build/app.js",
+  "author": "",
+  "license": "ISC",
+  "scripts": {
+    "build": "tsc -p .",
+    "debug": "ts-node --inspect-brk=9229 ./src/TryRouter.ts",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+    "example-core": "file:../example-core",
+    "fulton-server": "file:../../fulton-server",
+    "lodash": "^4.17.4",
+    "tsioc": "^0.4.12"
+  },
+  "devDependencies": {
+    "ts-node": "^3.3.0",
+    "typescript": "^2.6.2"
+  }
+}

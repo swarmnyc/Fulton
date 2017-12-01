@@ -1,0 +1,25 @@
+{
+  "name": "fulton-server",
+  "version": "1.0.0",
+  "description": "",
+  "main": "./build/index.js",
+  "types": "./build/index.d.ts",
+  "scripts": {
+    "build": "tsc -p .",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@types/mongodb": "^2.2.16",
+    "koa": "^2.4.1",
+    "fulton-core": "file:../fulton-core",
+    "typescript": "^2.6.1"
+  },
+  "dependencies": {
+    "@types/koa": "^2.0.41",
+    "@types/node": "^8.0.53",
+    "mongodb": "^2.2.33",
+    "tsioc": "^0.4.12"
+  }
+}

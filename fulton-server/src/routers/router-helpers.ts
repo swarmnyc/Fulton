@@ -1,10 +1,11 @@
 import { FultonRouter } from "../index";
 import { loadModules } from "../helpers/module-helpers";
+import { Type } from "../helpers/type-helpers";
 
-export type FultonRouterLoader = (routerDirs: string[]) => Promise<FultonRouter[]>;
+export type FultonRouterLoader = (routerDirs: string[]) => Promise<Type<FultonRouter>[]>;
 
 export const defaultRouterLoader: FultonRouterLoader = async (routerDirs: string[]) => {
-    let routers: FultonRouter[] = [];
+    let routers: Type<FultonRouter>[] = [];
 
     for (const dir of routerDirs) {
         let modules = await loadModules(dir);
@@ -12,10 +13,9 @@ export const defaultRouterLoader: FultonRouterLoader = async (routerDirs: string
         for (let routerModule of modules) {
             for (let name of Object.getOwnPropertyNames(routerModule)) {
                 let routerClass = routerModule[name];
-                
+
                 if (routerClass.prototype instanceof FultonRouter) {
-                    let router = new routerClass();
-                    routers.push(router);
+                    routers.push(routerClass);
                 }
             }
         }

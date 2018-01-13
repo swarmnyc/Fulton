@@ -12,8 +12,9 @@ import { IFultonContext } from "./cores/index";
 import { IUser, FultonAuthRouter, IUserManager } from "./auths/index";
 import { FultonRouter } from "./routers/FultonRouter";
 import { FultonLoggerOptions } from "./index";
-import FultonLog from "./FultonLog";
 import { FultonRouterLoader, defaultRouterLoader } from "./routers/router-helpers";
+import { Provider, TypeProvider } from "./helpers/type-helpers";
+import FultonLog from "./FultonLog";
 
 export declare type Middleware = RequestHandler;
 
@@ -62,22 +63,35 @@ export interface FultonAppOptions {
 
     appName?: string;
 
-    /**
-     * the directory of the app, the default router loader use the value ({appDir}/routers)
-     * default is the folder of the executed file like if run "node ./src/main.js",
-     * the value of appDir is the folder of main.js
-     */
-    appDir?: string;
+    routers?: Provider[];
 
     /**
-     * the folder that router-loader looks at, default value is ["routers"], 
+     * for automatic load modules, default is disabled, 
+     * because we want to use Angular style, define types explicitly
      */
-    routerDirs?: string[];
+    loader?: {
+        /**
+         * the directory of the app, the default router loader use the value ({appDir}/routers)
+         * default is the folder of the executed file like if run "node ./src/main.js",
+         * the value of appDir is the folder of main.js
+         */
+        appDir?: string;
 
-    /**
-     * the router loader, loads all routers under the folder of {appDir}/{routersDir}
-     */
-    routerLoader?: FultonRouterLoader
+        /**
+         * if true, Fulton will load routers based on routerDirs automaticly 
+         */
+        routerLoaderEnabled?: boolean;
+
+        /**
+         * the folder that router-loader looks at, default value is ["routers"], 
+         */
+        routerDirs?: string[];
+
+        /**
+         * the router loader, loads all routers under the folder of {appDir}/{routersDir}
+         */
+        routerLoader?: FultonRouterLoader
+    }
 
     /**
      * default logger options which use winstion logger options, the default value is null
@@ -89,11 +103,32 @@ export interface FultonAppOptions {
      */
     defaultLoggerOptions?: FultonLoggerOptions;
 
+    /**
+     * the setting of http and https servers
+     */
     server?: {
+        /**
+         * default is true
+         */
         useHttp?: boolean,
+        /**
+         * default is false
+         */
         useHttps?: boolean,
+
+        /**
+         * default is 3000
+         */
         httpPort?: number,
+
+        /**
+         * default is 443
+         */
         httpsPort?: number,
+
+        /**
+         * have to provide if useHttps is true.
+         */
         sslOption?: https.ServerOptions,
     }
 }
@@ -135,9 +170,14 @@ export abstract class FultonApp {
         }
 
         // for routers
-        let dirs = this.options.routerDirs.map((dir) => path.join(this.options.appDir, dir));
-        let routers = await this.options.routerLoader(dirs);
-        await this.onInitRouters(routers);
+        let routerTypes = this.options.routers;
+        if (this.options.loader.routerLoaderEnabled) {
+            let dirs = this.options.loader.routerDirs.map((dir) => path.join(this.options.loader.appDir, dir));
+            let routers = await this.options.loader.routerLoader(dirs) as Provider[];
+            routerTypes = routers.concat(routerTypes);
+        }
+
+        //await this.onInitRouters(routerTypes);
 
         this.isInitialized = true;
     }
@@ -225,10 +265,15 @@ export abstract class FultonApp {
 
     createDefaultOptions(): FultonAppOptions {
         return {
-            appDir: path.dirname(process.mainModule.filename),
-            routerDirs: ["routers"],
-            routerLoader: defaultRouterLoader,
             appName: "FultonApp",
+            routers: [],
+            loader: {
+                appDir: path.dirname(process.mainModule.filename),
+                routerDirs: ["routers"],
+                routerLoaderEnabled: false,
+                routerLoader: defaultRouterLoader,
+
+            },
             server: {
                 useHttp: true,
                 useHttps: false,

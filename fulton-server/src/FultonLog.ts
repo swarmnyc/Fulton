@@ -79,10 +79,27 @@ export default class FultonLog {
         winston.error(msg, meta);
     }
 
+    /**
+     * create a logger, but not add it to the collection
+     * @param options the options of the logger
+     */
+    static createLogger(options: FultonLoggerOptions): FultonLogger {
+        return new winston.Logger(options);
+    }
+
+    /**
+     * get an existing logger from the collection
+     * @param name the name of the loggger
+     */
     static getLogger(name: string): FultonLogger {
         return winston.loggers.get(name);
     }
 
+    /**
+     * create a logger and add it to the collection
+     * @param name the name of the loggger
+     * @param options the options of the logger
+     */
     static addLogger(name: string, options: FultonLoggerOptions): FultonLogger {
         return winston.loggers.add(name, options);
     }

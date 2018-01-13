@@ -77,4 +77,21 @@ describe("FultonLogger", () => {
         expect(memory2.writeOutput[0] as string).toEqual("info: message");
 
     })
+
+    it("should create a new logger", () => {
+        let memory2 = new (winston.transports.Memory)({ level: "debug" });
+        let logger = FultonLog.createLogger({
+            transports: [memory2]
+        });
+
+        logger.info("message");
+
+        expect(memory.writeOutput.length).toEqual(0);
+        expect(memory.errorOutput.length).toEqual(0);
+
+        expect(memory2.errorOutput.length).toEqual(0);
+        expect(memory2.writeOutput.length).toEqual(1);
+        expect(memory2.writeOutput[0] as string).toEqual("info: message");
+
+    })
 });

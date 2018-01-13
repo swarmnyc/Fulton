@@ -12,10 +12,7 @@
   },
   "dependencies": {
     "example-core": "file:../example-core",
-    "fulton-server": "file:../../fulton-server",
-    "lodash": "^4.17.4",
-    "tsioc": "^0.4.12",
-    "typeorm": "^0.1.7"
+    "fulton-server": "file:../../fulton-server"
   },
   "devDependencies": {
     "ts-node": "^3.3.0",

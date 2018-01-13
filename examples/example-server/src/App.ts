@@ -27,9 +27,3 @@ export class App extends FultonApp {
         // register service
     }
 }
-
-let app = new App();
-
-app.start().then(() => {
-    console.log("App Start");
-});

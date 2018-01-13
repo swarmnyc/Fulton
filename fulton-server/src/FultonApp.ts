@@ -1,11 +1,19 @@
-import { FultonRouter } from "./routers/FultonRouter";
+import * as express from "express";
+import * as http from 'http';
+import * as https from 'https';
+
+import { promisify } from "util"
+
+import { Express, RequestHandler } from "express";
+import { IContainer, ContainerBuilder } from "tsioc";
+
 import { ILogger, IFultonContext } from "./cores/index";
 import { IUser, FultonAuthRouter, IUserManager } from "./auths/index";
-import { Middleware } from "koa";
-import { IContainer, ContainerBuilder } from "tsioc";
-import * as Koa from "koa";
+import { FultonRouter } from "./routers/FultonRouter";
 
-export type FultonMiddleware = (context: IFultonContext, next: () => Promise<any>) => void
+export declare type Middleware = RequestHandler;
+
+export declare type FultonIocContainer = IContainer;
 
 export interface FultonAppOptions {
     // generate AuthClient collection
@@ -25,17 +33,17 @@ export interface FultonAppOptions {
     // auth rotuers like google, facebook, password
     authRouters?: FultonAuthRouter[]
 
-    // default take token or cookie to User, router can overwrite
-    authenticates?: FultonMiddleware[]
+    // // default take token or cookie to User, router can overwrite
+    // authenticates?: FultonMiddleware[]
 
-    // check permission
-    defaultAuthorizes?: FultonMiddleware[]
+    // // check permission
+    // defaultAuthorizes?: FultonMiddleware[]
 
     // regular routers, if null, will load all the routers under ./routers
     routers?: FultonRouter[]
 
     // middlewares
-    middlewares?: FultonMiddleware[]
+    // middlewares?: FultonMiddleware[]
 
     //default is console logger 
     //or just use winston directly?
@@ -54,18 +62,33 @@ export interface FultonAppOptions {
     dotenvPath?: string;
 
     dbConnectionOptions?: any;
+
+    server?: {
+        useHttp?: boolean,
+        useHttps?: boolean,
+        httpPort?: number,
+        httpsPort?: number,
+        sslKey?: Buffer,
+        sslCert?: Buffer
+    }
 }
 
 export abstract class FultonApp {
-    koaApp: Koa;
+    isInitialized: boolean = false;
+    app: Express;
     container: IContainer;
     options: FultonAppOptions
 
     constructor() {
     }
 
-    async init(): Promise<any> {
-        this.koaApp = new Koa();
+    async init(): Promise<void> {
+        if (!this.isInitialized) {
+            return;
+        }
+
+        this.app = express();
+
         let container = this.createContainer();
 
         if (container instanceof Promise) {
@@ -74,25 +97,49 @@ export abstract class FultonApp {
             this.container = container;
         }
 
-        this.options = {};
+        this.options = this.defaultOption();
 
         // load routers;
 
         await this.onInit(this.options, this.container);
         //do somethings
+
+        this.isInitialized = true;
     }
 
-    start(): Promise<any> {
-        return new Promise(async (resolve, reject) => {
-            let follow = await this.init();
+    async start(): Promise<any> {
+        if (!this.isInitialized) {
+            await this.init();
+        }
 
-        });
+        var tasks = [];
+
+        if (this.options.server.useHttp) {
+            tasks.push(promisify<number>(http.createServer(this.app).listen)(this.options.server.httpPort))
+            tasks.push(new Promise(async (resolve, reject) => {
+                http.createServer(this.app).listen(this.options.server.httpPort);
+                
+            }));
+        }
+
     }
 
-    createContainer(): IContainer | Promise<IContainer> {
+    createContainer(): FultonIocContainer | Promise<FultonIocContainer> {
         return new ContainerBuilder().create();
     }
 
     // events
-    abstract onInit(options: FultonAppOptions, container: IContainer): Promise<any>
+    protected abstract onInit(options: FultonAppOptions, container: FultonIocContainer): void | Promise<void>;
+
+
+    defaultOption(): FultonAppOptions {
+        return {
+            server: {
+                useHttp: true,
+                useHttps: false,
+                httpPort: 3000,
+                httpsPort: 443
+            }
+        };
+    }
 }

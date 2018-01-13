@@ -6,6 +6,7 @@
   "types": "./build/index.d.ts",
   "scripts": {
     "build": "tsc -p .",
+    "build:live": "tsc -w -p .",
     "test": "jasmine-ts --config=jasmine.json",
     "test:debug": "ts-node --inspect-brk=9229 ./src/test.ts"
   },

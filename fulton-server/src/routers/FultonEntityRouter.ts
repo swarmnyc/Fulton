@@ -11,7 +11,7 @@ export type UpdateFuncDelegate<TEntity> =  (context:IFultonContext, id: any, obj
 export type DeleteFuncDelegate<TEntity> =  (context:IFultonContext, id: any) => Promise<void>;
 
 // has 5 pre-definied action based to operate Entity
-export abstract class FultonModelRouter<TEntity> extends FultonRouter {
+export abstract class FultonEntityRouter<TEntity> extends FultonRouter {
     protected listDelegate: ListFuncDelegate<TEntity>; 
     protected detailDelegate: DetailFuncDelegate<TEntity>;
     protected createDelegate: CreateFuncDelegate<TEntity>;

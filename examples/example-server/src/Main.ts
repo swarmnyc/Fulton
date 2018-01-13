@@ -1,7 +1,13 @@
-import { App } from "./App";
+import { ExampleApp } from "./ExampleApp";
 
-let app = new App();
+let app = new ExampleApp();
 
-app.start().then(() => {
-    console.log("App Start");
-});
+app.init().then(() => {
+    app.express.use("/", (req, res) => {
+        res.send("works");
+    });
+
+    app.start().then(() => {
+        console.log("App Start");
+    });
+})

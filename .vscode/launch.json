@@ -15,6 +15,18 @@
                 "test:debug"
             ],
             "port": 9229
+        },
+        {
+            "type": "node",
+            "request": "launch",
+            "name": "Launch example-server start:debug",
+            "cwd": "${workspaceFolder}/examples/example-server",
+            "runtimeExecutable": "npm",
+            "runtimeArgs": [
+                "run-script",
+                "start:debug"
+            ],
+            "port": 9229
         }
     ]
 }

@@ -1,19 +1,23 @@
 import * as express from "express";
 import * as http from 'http';
 import * as https from 'https';
+import * as path from 'path'
 
 import { promisify } from "util"
 
 import { Express, RequestHandler } from "express";
 import { IContainer, ContainerBuilder } from "tsioc";
 
-import { ILogger, IFultonContext } from "./cores/index";
+import { IFultonContext } from "./cores/index";
 import { IUser, FultonAuthRouter, IUserManager } from "./auths/index";
 import { FultonRouter } from "./routers/FultonRouter";
+import { FultonLoggerOptions } from "./index";
+import FultonLog from "./FultonLog";
+import { FultonRouterLoader, defaultRouterLoader } from "./routers/router-helpers";
 
 export declare type Middleware = RequestHandler;
 
-export declare type FultonIocContainer = IContainer;
+export declare type FultonDiContainer = IContainer;
 
 export interface FultonAppOptions {
     // generate AuthClient collection
@@ -39,15 +43,8 @@ export interface FultonAppOptions {
     // // check permission
     // defaultAuthorizes?: FultonMiddleware[]
 
-    // regular routers, if null, will load all the routers under ./routers
-    routers?: FultonRouter[]
-
     // middlewares
     // middlewares?: FultonMiddleware[]
-
-    //default is console logger 
-    //or just use winston directly?
-    logger?: ILogger
 
     //default is using output to logger
     errorHandler?: Middleware
@@ -63,77 +60,175 @@ export interface FultonAppOptions {
 
     dbConnectionOptions?: any;
 
+    appName?: string;
+
+    /**
+     * the directory of the app, the default router loader use the value ({appDir}/routers)
+     * default is the folder of the executed file like if run "node ./src/main.js",
+     * the value of appDir is the folder of main.js
+     */
+    appDir?: string;
+
+    /**
+     * the folder that router-loader looks at, default value is ["routers"], 
+     */
+    routerDirs?: string[];
+
+    /**
+     * the router loader, loads all routers under the folder of {appDir}/{routersDir}
+     */
+    routerLoader?: FultonRouterLoader
+
+    /**
+     * default logger options which use winstion logger options, the default value is null
+     * @example
+     * option.defaultLoggerOptions = {
+     *      level: "debug",
+     *      transports: []
+     * }
+     */
+    defaultLoggerOptions?: FultonLoggerOptions;
+
     server?: {
         useHttp?: boolean,
         useHttps?: boolean,
         httpPort?: number,
         httpsPort?: number,
-        sslKey?: Buffer,
-        sslCert?: Buffer
+        sslOption?: https.ServerOptions,
     }
 }
 
 export abstract class FultonApp {
-    isInitialized: boolean = false;
-    app: Express;
-    container: IContainer;
-    options: FultonAppOptions
+    private isInitialized: boolean = false;
+    private httpServer: http.Server;
+    private httpsServer: https.Server;
+
+    appName: string;
+
+    /**
+     * the instance of Express, create after init().
+     */
+    express: Express;
+    container: FultonDiContainer;
+    options: FultonAppOptions;
 
     constructor() {
+        this.options = this.createDefaultOptions();
     }
 
+    /**
+     * initialize FultonApp. It will be called on start(), if the app isn't initialized;
+     * it can be run many times, everytime call this will reset all the related objects
+     */
     async init(): Promise<void> {
-        if (!this.isInitialized) {
-            return;
-        }
+        this.express = express();
 
-        this.app = express();
-
-        let container = this.createContainer();
-
-        if (container instanceof Promise) {
-            this.container = await container;
-        } else {
-            this.container = container;
-        }
-
-        this.options = this.defaultOption();
-
-        // load routers;
+        this.container = await this.createDiContainer();
 
         await this.onInit(this.options, this.container);
-        //do somethings
+
+        this.appName = this.options.appName;
+
+        // for log
+        if (this.options.defaultLoggerOptions) {
+            FultonLog.configure(this.options.defaultLoggerOptions);
+        }
+
+        // for routers
+        let dirs = this.options.routerDirs.map((dir) => path.join(this.options.appDir, dir));
+        let routers = await this.options.routerLoader(dirs);
+        await this.onInitRouters(routers);
 
         this.isInitialized = true;
     }
 
+    /**
+     * start http server or https server. if it isn't initialized, it will call init(), too.
+     */
     async start(): Promise<any> {
         if (!this.isInitialized) {
             await this.init();
         }
 
+        if (this.httpServer || this.httpsServer) {
+            throw new Error("app is still running");
+        }
+
         var tasks = [];
 
         if (this.options.server.useHttp) {
-            tasks.push(promisify<number>(http.createServer(this.app).listen)(this.options.server.httpPort))
-            tasks.push(new Promise(async (resolve, reject) => {
-                http.createServer(this.app).listen(this.options.server.httpPort);
-                
+            tasks.push(new Promise((resolve, reject) => {
+                this.httpServer = http
+                    .createServer(this.express)
+                    .on("error", (error) => {
+                        FultonLog.error(`${this.appName} failed to start http server on port ${this.options.server.httpPort}`);
+                        this.httpServer = null;
+                        reject(error);
+                    })
+                    .listen(this.options.server.httpPort, () => {
+                        FultonLog.info(`${this.appName} is running http server on port ${this.options.server.httpPort}`)
+                        resolve()
+                    });
+
             }));
         }
 
+        if (this.options.server.useHttps) {
+            tasks.push(new Promise((resolve, reject) => {
+                this.httpsServer = https
+                    .createServer(this.options.server.sslOption, this.express)
+                    .on("error", (error) => {
+                        FultonLog.error(`${this.appName} failed to start https server on port ${this.options.server.httpsPort}`);
+                        this.httpsServer = null;
+                        reject(error);
+                    })
+                    .listen(this.options.server.httpsPort, () => {
+                        FultonLog.info(`${this.appName} is running https server on port ${this.options.server.httpsPort}`);
+                        resolve()
+                    });
+            }));
+        }
+
+        return Promise.all(tasks);
     }
 
-    createContainer(): FultonIocContainer | Promise<FultonIocContainer> {
+    /**
+     * stop http server or https server
+     */
+    stop(): Promise<any> {
+        var tasks = [];
+
+        if (this.httpServer) {
+            tasks.push(new Promise((resolve, reject) => {
+                this.httpServer.close(() => {
+                    FultonLog.info(`${name} stoped http server`);
+                    resolve();
+                })
+            }));
+        }
+
+        if (this.httpsServer) {
+            tasks.push(new Promise((resolve, reject) => {
+                this.httpServer.close(() => {
+                    FultonLog.info(`${name} stoped https server`);
+                    resolve();
+                })
+            }));
+        }
+
+        return Promise.all(tasks);
+    }
+
+    createDiContainer(): FultonDiContainer | Promise<FultonDiContainer> {
         return new ContainerBuilder().create();
     }
 
-    // events
-    protected abstract onInit(options: FultonAppOptions, container: FultonIocContainer): void | Promise<void>;
-
-
-    defaultOption(): FultonAppOptions {
+    createDefaultOptions(): FultonAppOptions {
         return {
+            appDir: path.dirname(process.mainModule.filename),
+            routerDirs: ["routers"],
+            routerLoader: defaultRouterLoader,
+            appName: "FultonApp",
             server: {
                 useHttp: true,
                 useHttps: false,
@@ -141,5 +236,12 @@ export abstract class FultonApp {
                 httpsPort: 443
             }
         };
+    }
+
+    // events
+    protected abstract onInit(options: FultonAppOptions, container: FultonDiContainer): void | Promise<void>;
+
+    protected onInitRouters(routers: FultonRouter[]): void | Promise<void> {
+
     }
 }

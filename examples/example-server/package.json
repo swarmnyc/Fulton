@@ -2,12 +2,14 @@
   "name": "example-server",
   "version": "1.0.0",
   "description": "",
-  "main": "build/app.js",
+  "main": "build/main.js",
   "author": "",
   "license": "ISC",
   "scripts": {
+    "start": "ts-node ./src/main.ts",
+    "start:debug": "ts-node --inspect-brk=9229 ./src/main.ts",
     "build": "tsc -p .",
-    "debug": "ts-node --inspect-brk=9229 ./src/TryRouter.ts",
+    "build:live": "tsc -w -p .",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "dependencies": {

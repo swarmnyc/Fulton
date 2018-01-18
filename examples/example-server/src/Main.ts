@@ -7,7 +7,5 @@ app.init().then(() => {
         res.send("works");
     });
 
-    app.start().then(() => {
-        console.log("App Start");
-    });
+    app.start();
 })

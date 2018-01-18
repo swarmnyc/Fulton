@@ -3,135 +3,15 @@ import * as http from 'http';
 import * as https from 'https';
 import * as path from 'path'
 
-import { promisify } from "util"
-
 import { Express, RequestHandler } from "express";
-import { IContainer, ContainerBuilder } from "tsioc";
+import { Container, interfaces } from "inversify";
 
-import { IFultonContext } from "./cores/index";
+import FultonLog from "./FultonLog";
 import { IUser, FultonAuthRouter, IUserManager } from "./auths/index";
 import { FultonRouter } from "./routers/FultonRouter";
-import { FultonLoggerOptions } from "./index";
-import { FultonRouterLoader, defaultRouterLoader } from "./routers/router-helpers";
 import { Provider, TypeProvider } from "./helpers/type-helpers";
-import FultonLog from "./FultonLog";
-
-export declare type Middleware = RequestHandler;
-
-export declare type FultonDiContainer = IContainer;
-
-export interface FultonAppOptions {
-    // generate AuthClient collection
-    // the client call have to have client authorisation token on auth
-    // default is false
-    oauthServerSupport?: boolean;
-
-    // generate api doc
-    enabledApiDoc?: boolean;
-
-    // default is /api/docs
-    apiDocPath?: string;
-
-    // for manage user, no default
-    userManager?: IUserManager<IUser>
-
-    // auth rotuers like google, facebook, password
-    authRouters?: FultonAuthRouter[]
-
-    // // default take token or cookie to User, router can overwrite
-    // authenticates?: FultonMiddleware[]
-
-    // // check permission
-    // defaultAuthorizes?: FultonMiddleware[]
-
-    // middlewares
-    // middlewares?: FultonMiddleware[]
-
-    //default is using output to logger
-    errorHandler?: Middleware
-
-    //default is [FultonQueryStringParser]
-    queryStringParsers?: Middleware[]
-
-    //default is [BodyParser]
-    inputParsers?: Middleware[]
-
-    //for dot env path, default is ./.env
-    dotenvPath?: string;
-
-    dbConnectionOptions?: any;
-
-    appName?: string;
-
-    routers?: Provider[];
-
-    /**
-     * for automatic load modules, default is disabled, 
-     * because we want to use Angular style, define types explicitly
-     */
-    loader?: {
-        /**
-         * the directory of the app, the default router loader use the value ({appDir}/routers)
-         * default is the folder of the executed file like if run "node ./src/main.js",
-         * the value of appDir is the folder of main.js
-         */
-        appDir?: string;
-
-        /**
-         * if true, Fulton will load routers based on routerDirs automaticly 
-         */
-        routerLoaderEnabled?: boolean;
-
-        /**
-         * the folder that router-loader looks at, default value is ["routers"], 
-         */
-        routerDirs?: string[];
-
-        /**
-         * the router loader, loads all routers under the folder of {appDir}/{routersDir}
-         */
-        routerLoader?: FultonRouterLoader
-    }
-
-    /**
-     * default logger options which use winstion logger options, the default value is null
-     * @example
-     * option.defaultLoggerOptions = {
-     *      level: "debug",
-     *      transports: []
-     * }
-     */
-    defaultLoggerOptions?: FultonLoggerOptions;
-
-    /**
-     * the setting of http and https servers
-     */
-    server?: {
-        /**
-         * default is true
-         */
-        useHttp?: boolean,
-        /**
-         * default is false
-         */
-        useHttps?: boolean,
-
-        /**
-         * default is 3000
-         */
-        httpPort?: number,
-
-        /**
-         * default is 443
-         */
-        httpsPort?: number,
-
-        /**
-         * have to provide if useHttps is true.
-         */
-        sslOption?: https.ServerOptions,
-    }
-}
+import {  } from "./services/service-helpers";
+import { FultonDiContainer, FultonAppOptions } from "./interfaces";
 
 export abstract class FultonApp {
     private isInitialized: boolean = false;
@@ -169,11 +49,13 @@ export abstract class FultonApp {
             FultonLog.configure(this.options.defaultLoggerOptions);
         }
 
+        // for services
+
         // for routers
         let routerTypes = this.options.routers;
         if (this.options.loader.routerLoaderEnabled) {
             let dirs = this.options.loader.routerDirs.map((dir) => path.join(this.options.loader.appDir, dir));
-            let routers = await this.options.loader.routerLoader(dirs) as Provider[];
+            let routers = await this.options.loader.routerLoader(dirs, true) as Provider[];
             routerTypes = routers.concat(routerTypes);
         }
 
@@ -260,19 +142,20 @@ export abstract class FultonApp {
     }
 
     createDiContainer(): FultonDiContainer | Promise<FultonDiContainer> {
-        return new ContainerBuilder().create();
+        return new Container();
     }
 
     createDefaultOptions(): FultonAppOptions {
         return {
             appName: "FultonApp",
             routers: [],
+            services: [],
             loader: {
                 appDir: path.dirname(process.mainModule.filename),
                 routerDirs: ["routers"],
                 routerLoaderEnabled: false,
-                routerLoader: defaultRouterLoader,
-
+                //routerLoader: defaultClassLoader,
+                serviceDirs: ["services"],
             },
             server: {
                 useHttp: true,

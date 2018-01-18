@@ -1,4 +1,4 @@
-import { FultonRouter } from "../../../src/index";
+import { FultonRouter } from "../../../../src/index";
 
 export class RouterB extends FultonRouter {
 

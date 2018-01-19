@@ -5,9 +5,6 @@
     "baseUrl": ".",
     "rootDir": ".",
     "sourceRoot": "./src",
-    "outDir": "./build",
-    "paths": {
-      "fulton-server": ["../../fulton-server/src"]
-    }
+    "outDir": "./build"
   }
 }

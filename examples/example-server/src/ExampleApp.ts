@@ -1,11 +1,15 @@
+//import { Food, FoodRepository } from "./entity/Food";
+
 import { FultonApp, FultonAppOptions, FultonDiContainer } from "fulton-server"
 
-import { FoodEntityService } from "./services/FoodDataService";
-import { FoodRepository, Food } from "./entity/Food";
-import { Ingredient, IngredientRepository } from "./entity/Ingredient";
+//import { FoodEntityService } from "./services/FoodDataService";
+
+//import { Ingredient, IngredientRepository } from "./entity/Ingredient";
+
+
 
 export class ExampleApp extends FultonApp {
-    protected async onInit(options: FultonAppOptions, container: FultonDiContainer): Promise<any> {
+    protected async onInit(options: FultonAppOptions): Promise<any> {
         options.appName = "ExampleApp";
         // options.server.httpPort = 1234;
     

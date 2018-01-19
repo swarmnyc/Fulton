@@ -34,7 +34,7 @@ class ServiceD extends ServiceB {
 
 @injectable()
 class ServiceE {
-    constructor(public serviceA: ServiceA, public value) {
+    constructor(public serviceA: ServiceA, public value: any) {
 
     }
 }
@@ -121,7 +121,6 @@ describe('Fulton App', () => {
     })
 
     it('should register class by self with transient', async () => {
-
         let instance = app.container.get(ServiceB);
 
         expect(instance).toBeTruthy();
@@ -210,6 +209,6 @@ describe('Fulton App', () => {
     it('should create routers', async () => {
         expect(app.routers.length).toEqual(2);
         expect(app.routers[0].path).toEqual("/A");
-        expect((app.routers[1] as RouterB).serviceB.value).toEqual("b");   
+        expect((app.routers[1] as RouterB).serviceB.value).toEqual("b");
     });
 });

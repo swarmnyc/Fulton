@@ -139,7 +139,7 @@ export abstract class FultonApp {
         if (this.httpServer) {
             tasks.push(new Promise((resolve, reject) => {
                 this.httpServer.close(() => {
-                    FultonLog.info(`${name} stoped http server`);
+                    FultonLog.info(`${this.appName} stoped http server`);
                     resolve();
                 })
             }));
@@ -148,7 +148,7 @@ export abstract class FultonApp {
         if (this.httpsServer) {
             tasks.push(new Promise((resolve, reject) => {
                 this.httpServer.close(() => {
-                    FultonLog.info(`${name} stoped https server`);
+                    FultonLog.info(`${this.appName} stoped https server`);
                     resolve();
                 })
             }));
@@ -193,41 +193,44 @@ export abstract class FultonApp {
 
             return router;
         });
-        
+
         this.onInitRouters(routers);
     }
 
     protected registerTypes(providers: Provider[]): Identifier[] {
-        let ids = [];
+        let ids: Identifier[] = [];
 
         if (providers == null)
-            return;
+            return ids;
 
         for (const provider of providers as any[]) {
-            let binding;
             if (isFunction(provider)) {
-                binding = this.container.bind(provider as TypeProvider).toSelf();
+                this.container.bind(provider as TypeProvider).toSelf();
                 ids.push(provider);
             } else if (provider.useValue) {
-                binding = this.container.bind(provider.provide).toConstantValue(provider.useValue);
+                this.container.bind(provider.provide).toConstantValue(provider.useValue);
             } else if (provider.useClass) {
-                binding = this.container.bind(provider.provide).to(provider.useClass);
+                let binding = this.container.bind(provider.provide).to(provider.useClass);
+
+                if (provider.useSingleton == true) {
+                    binding.inSingletonScope();
+                }
             } else if (provider.useFactory) {
-                binding = this.container.bind(provider.provide).toFactory((ctx) => {
+                this.container.bind(provider.provide).toFactory((ctx) => {
                     return provider.useFactory(ctx.container);
                 });
             } else if (provider.useFunction) {
-                binding = this.container.bind(provider.provide).toDynamicValue((ctx) => {
+                let binding = this.container.bind(provider.provide).toDynamicValue((ctx) => {
                     return provider.useFunction(ctx.container);
                 });
+
+                if (provider.useSingleton == true) {
+                    binding.inSingletonScope();
+                }
             }
 
             if (provider.provide) {
                 ids.push(provider.provide);
-            }
-
-            if (provider.useSingleton == true) {
-                binding.inSingletonScope();
             }
         }
 
@@ -237,5 +240,5 @@ export abstract class FultonApp {
     // events
     protected abstract onInit(options: FultonAppOptions): void | Promise<void>;
 
-    protected onInitRouters(routers: FultonRouter[]): void | Promise<void> {}
+    protected onInitRouters(routers: FultonRouter[]): void | Promise<void> { }
 }

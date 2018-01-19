@@ -60,7 +60,7 @@ export interface FunctionProvider {
 export declare type Provider = TypeProvider | ValueProvider | ClassProvider | FactoryProvider | FunctionProvider;
 
 export function getIdentifiers(providers: Provider[]): Identifier[] {
-    let ids = [];
+    let ids: Identifier[] = [];
     if (providers == null)
         return ids;
 

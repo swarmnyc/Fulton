@@ -9,8 +9,8 @@ import { FultonAppOptions, FultonDiContainer } from "./interfaces";
 import { FultonAuthRouter, IUser, IUserManager } from "./auths/index";
 import { Identifier, Provider, Type, TypeProvider, ValueProvider } from "./helpers/type-helpers";
 
-import FultonLog from "./FultonLog";
-import { FultonRouter } from "./routers/FultonRouter";
+import FultonLog from "./fulton-log";
+import { FultonRouter } from "./routers/fulton-router";
 import { FultonService } from "./services";
 import { defaultClassLoader } from "./helpers/module-helpers";
 import { isFunction } from "util";

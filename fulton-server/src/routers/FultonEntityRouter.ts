@@ -1,4 +1,4 @@
-import { FultonRouter } from "./FultonRouter";
+import { FultonRouter } from "./fulton-router";
 import { FultonEntityService } from "../services/FultonEntityService";
 import { IFultonContext } from "../cores/IFultonContext";
 import { FindManyOptions } from "typeorm";

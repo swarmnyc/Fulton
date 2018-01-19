@@ -1,5 +1,6 @@
-import { FultonRouter } from "./FultonRouter";
-import { Middleware } from "../index";
+import { Middleware, httpGet } from "../index";
+
+import { FultonRouter } from "./fulton-router";
 import { router } from "./route-decorators";
 
 let beforeMiddlewares: Middleware[] = [
@@ -16,7 +17,10 @@ let afterMiddlewares: Middleware[] = [
 
 @router("/A", "abc")
 export class RouterA extends FultonRouter {
-
+    @httpGet()
+    get() {
+        
+    }
 }
 
 @router("/B", "efg", beforeMiddlewares, afterMiddlewares)

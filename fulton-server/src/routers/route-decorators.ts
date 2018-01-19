@@ -27,7 +27,7 @@ export function router(path: PathIdentifier, doc?: any, beforeMiddlewares?: Midd
     };
 }
 
-export function httpGet(url: string, doc?: any) {
+export function httpGet(path?: PathIdentifier, doc?: any, beforeMiddlewares?: Middleware[], afterMiddlewares?: Middleware[]) {
     return function (target: any, propertyKey: string, descriptor: PropertyDescriptor) {
 
     };

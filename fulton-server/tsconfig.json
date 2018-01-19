@@ -6,9 +6,5 @@
     "rootDir": ".",
     "sourceRoot": "./src",
     "outDir": "./build"
-  },
-  "exclude": [
-    "spec",
-    "**/*.spec.ts"
-  ]
+  }
 }

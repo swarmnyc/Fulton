@@ -1,4 +1,4 @@
-import FultonLog from "../src/FultonLog";
+import FultonLog from "./fulton-log";
 import { WriteStream } from "fs";
 import * as winston from "winston"
 

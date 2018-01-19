@@ -3,7 +3,7 @@ import "reflect-metadata";
 import * as https from 'https';
 
 import { FultonClassLoader } from "./helpers/module-helpers";
-import { FultonLoggerOptions } from "./FultonLog";
+import { FultonLoggerOptions } from "./fulton-log";
 import { FultonRouter } from "./routers";
 import { FultonService } from "./services";
 import { Provider } from "./helpers/type-helpers";

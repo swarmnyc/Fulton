@@ -3,15 +3,17 @@ import * as http from 'http';
 import * as https from 'https';
 import * as path from 'path'
 
-import { Express, RequestHandler } from "express";
 import { Container, interfaces } from "inversify";
+import { Express, RequestHandler } from "express";
+import { FultonAppOptions, FultonDiContainer } from "./interfaces";
+import { FultonAuthRouter, IUser, IUserManager } from "./auths/index";
+import { Provider, Type, TypeProvider, ValueProvider } from "./helpers/type-helpers";
 
 import FultonLog from "./FultonLog";
-import { IUser, FultonAuthRouter, IUserManager } from "./auths/index";
 import { FultonRouter } from "./routers/FultonRouter";
-import { Provider, TypeProvider } from "./helpers/type-helpers";
-import {  } from "./services/service-helpers";
-import { FultonDiContainer, FultonAppOptions } from "./interfaces";
+import { FultonService } from "./services";
+import { defaultClassLoader } from "./helpers/module-helpers";
+import { isFunction } from "util";
 
 export abstract class FultonApp {
     private isInitialized: boolean = false;
@@ -40,7 +42,7 @@ export abstract class FultonApp {
 
         this.container = await this.createDiContainer();
 
-        await this.onInit(this.options, this.container);
+        await this.onInit(this.options);
 
         this.appName = this.options.appName;
 
@@ -49,15 +51,27 @@ export abstract class FultonApp {
             FultonLog.configure(this.options.defaultLoggerOptions);
         }
 
+        this.registerTypes(this.options.providers || []);
+
         // for services
+        let serviceTypes = this.options.services || [];
+        if (this.options.loader.routerLoaderEnabled) {
+            let dirs = this.options.loader.routerDirs.map((dir) => path.join(this.options.loader.appDir, dir));
+            let routers = await this.options.loader.routerLoader(dirs, true) as Provider[];
+            serviceTypes = routers.concat(serviceTypes);
+        }
+
+        this.registerTypes(serviceTypes);
 
         // for routers
-        let routerTypes = this.options.routers;
+        let routerTypes = this.options.routers || [];
         if (this.options.loader.routerLoaderEnabled) {
             let dirs = this.options.loader.routerDirs.map((dir) => path.join(this.options.loader.appDir, dir));
             let routers = await this.options.loader.routerLoader(dirs, true) as Provider[];
             routerTypes = routers.concat(routerTypes);
         }
+
+        this.registerTypes(routerTypes);
 
         //await this.onInitRouters(routerTypes);
 
@@ -150,12 +164,15 @@ export abstract class FultonApp {
             appName: "FultonApp",
             routers: [],
             services: [],
+            providers: [],
             loader: {
                 appDir: path.dirname(process.mainModule.filename),
                 routerDirs: ["routers"],
                 routerLoaderEnabled: false,
-                //routerLoader: defaultClassLoader,
+                routerLoader: defaultClassLoader(FultonRouter),
                 serviceDirs: ["services"],
+                serviceLoaderEnabled: false,
+                serviceLoader: defaultClassLoader(FultonService)
             },
             server: {
                 useHttp: true,
@@ -167,9 +184,37 @@ export abstract class FultonApp {
     }
 
     // events
-    protected abstract onInit(options: FultonAppOptions, container: FultonDiContainer): void | Promise<void>;
+    protected abstract onInit(options: FultonAppOptions): void | Promise<void>;
 
     protected onInitRouters(routers: FultonRouter[]): void | Promise<void> {
 
+    }
+
+    registerTypes(providers: Provider[]) {
+        if (providers == null)
+            return;
+
+        for (const provider of providers as any[]) {
+            let binding;
+            if (isFunction(provider)) {
+                binding = this.container.bind(provider as TypeProvider).toSelf();
+            } else if (provider.useValue) {
+                binding = this.container.bind(provider.provide).toConstantValue(provider.useValue);
+            } else if (provider.useClass) {
+                binding = this.container.bind(provider.provide).to(provider.useClass);
+            } else if (provider.useFactory) {
+                binding = this.container.bind(provider.provide).toFactory((ctx) => {
+                    return provider.useFactory(ctx.container);
+                });
+            } else if (provider.useFunction) {
+                binding = this.container.bind(provider.provide).toDynamicValue((ctx) => {
+                    return provider.useFunction(ctx.container);
+                });
+            }
+
+            if (provider.useSingleton == true) {
+                binding.inSingletonScope();
+            }
+        }
     }
 }

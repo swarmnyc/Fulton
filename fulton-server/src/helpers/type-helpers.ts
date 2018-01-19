@@ -1,3 +1,7 @@
+import { FultonDiContainer } from "../index";
+
+export type Identifier<T = any> = (string | symbol | Type<T>);
+
 export interface Type<T = any> extends Function {
 }
 
@@ -5,19 +9,51 @@ export interface TypeProvider extends Type {
 }
 
 export interface ClassProvider {
-    provide: any;
+    provide: Identifier;
     useClass: Type;
+
+    /**
+     * use Singleton pattern if true, default is false;
+     */
+    useSingleton?: boolean;
 }
 
 export interface ValueProvider {
-    provide: any;
+    provide: Identifier;
     useValue: any;
 }
 
+export type Factory<T=any> = (...args: any[]) => T;
 export interface FactoryProvider {
-    provide: any;
-    useFactory: Function;
-    deps?: any[];
+    provide: Identifier;
+    /**
+     * @example
+     * //register
+     * options.service = [
+     *  { provide: ServiceB, useFactory: (container) => {
+     *      return (arg) => {
+     *          // can use container to get instance
+     *          return container.get(ServiceA) || new ServiceA()
+     *      }
+     *    }
+     *  }
+     * ]
+     * 
+     * //to get value
+     * let factory = app.container.get<Factory<ServiceB>>(ServiceB);
+     * let instance = factory("arg");
+     */
+    useFactory: (container: FultonDiContainer) => Factory;
 }
 
-export declare type Provider = TypeProvider | ValueProvider | ClassProvider | FactoryProvider;
+export interface FunctionProvider {
+    provide: Identifier;
+    useFunction: (container: FultonDiContainer) => any;
+
+    /**
+     * use Singleton pattern if true, default is false;
+     */
+    useSingleton?: boolean;
+}
+
+export declare type Provider = TypeProvider | ValueProvider | ClassProvider | FactoryProvider | FunctionProvider;

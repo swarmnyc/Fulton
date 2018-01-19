@@ -1,18 +1,21 @@
-import { RequestHandler } from "express";
-import { interfaces } from "inversify";
-import * as https from 'https';
-import { Provider } from "./helpers/type-helpers";
+import "reflect-metadata";
 
-import { FultonLoggerOptions } from "./FultonLog";
+import * as https from 'https';
 
 import { FultonClassLoader } from "./helpers/module-helpers";
+import { FultonLoggerOptions } from "./FultonLog";
 import { FultonRouter } from "./routers";
 import { FultonService } from "./services";
+import { Provider } from "./helpers/type-helpers";
+import { RequestHandler } from "express";
+import { interfaces } from "inversify";
 
+export { injectable, inject } from "inversify";
 
 export declare type Middleware = RequestHandler;
 
 export declare type FultonDiContainer = interfaces.Container;
+
 
 export interface FultonAppOptions {
     // generate AuthClient collection
@@ -56,6 +59,8 @@ export interface FultonAppOptions {
     dbConnectionOptions?: any;
 
     appName?: string;
+
+    providers?: Provider[];
 
     routers?: Provider[];
 

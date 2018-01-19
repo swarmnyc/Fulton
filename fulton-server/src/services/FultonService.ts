@@ -1,7 +1,9 @@
-import { FultonDiContainer } from "../interfaces";
+import { FultonDiContainer, injectable } from "../interfaces";
+
 import { Type } from "../helpers/type-helpers";
 
 // regular Router
+@injectable()
 export abstract class FultonService {
     namespace: string;
 

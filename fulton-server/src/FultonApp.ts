@@ -7,7 +7,7 @@ import { Container, interfaces } from "inversify";
 import { Express, RequestHandler } from "express";
 import { FultonAppOptions, FultonDiContainer } from "./interfaces";
 import { FultonAuthRouter, IUser, IUserManager } from "./auths/index";
-import { Provider, Type, TypeProvider, ValueProvider } from "./helpers/type-helpers";
+import { Identifier, Provider, Type, TypeProvider, ValueProvider } from "./helpers/type-helpers";
 
 import FultonLog from "./FultonLog";
 import { FultonRouter } from "./routers/FultonRouter";
@@ -71,7 +71,9 @@ export abstract class FultonApp {
             routerTypes = routers.concat(routerTypes);
         }
 
-        this.registerTypes(routerTypes);
+        let routerIds = this.registerTypes(routerTypes);
+
+        this.initRouters(routerIds);
 
         //await this.onInitRouters(routerTypes);
 
@@ -155,11 +157,11 @@ export abstract class FultonApp {
         return Promise.all(tasks);
     }
 
-    createDiContainer(): FultonDiContainer | Promise<FultonDiContainer> {
+    protected createDiContainer(): FultonDiContainer | Promise<FultonDiContainer> {
         return new Container();
     }
 
-    createDefaultOptions(): FultonAppOptions {
+    protected createDefaultOptions(): FultonAppOptions {
         return {
             appName: "FultonApp",
             routers: [],
@@ -183,14 +185,21 @@ export abstract class FultonApp {
         };
     }
 
-    // events
-    protected abstract onInit(options: FultonAppOptions): void | Promise<void>;
+    protected initRouters(routerTypes: Identifier<FultonRouter>[]) {
+        let routers = routerTypes.map((id) => {
+            let router = this.container.get<FultonRouter>(id);
+            router.app = this;
+            router.init();
 
-    protected onInitRouters(routers: FultonRouter[]): void | Promise<void> {
-
+            return router;
+        });
+        
+        this.onInitRouters(routers);
     }
 
-    registerTypes(providers: Provider[]) {
+    protected registerTypes(providers: Provider[]): Identifier[] {
+        let ids = [];
+
         if (providers == null)
             return;
 
@@ -198,6 +207,7 @@ export abstract class FultonApp {
             let binding;
             if (isFunction(provider)) {
                 binding = this.container.bind(provider as TypeProvider).toSelf();
+                ids.push(provider);
             } else if (provider.useValue) {
                 binding = this.container.bind(provider.provide).toConstantValue(provider.useValue);
             } else if (provider.useClass) {
@@ -212,9 +222,20 @@ export abstract class FultonApp {
                 });
             }
 
+            if (provider.provide) {
+                ids.push(provider.provide);
+            }
+
             if (provider.useSingleton == true) {
                 binding.inSingletonScope();
             }
         }
+
+        return ids;
     }
+
+    // events
+    protected abstract onInit(options: FultonAppOptions): void | Promise<void>;
+
+    protected onInitRouters(routers: FultonRouter[]): void | Promise<void> {}
 }

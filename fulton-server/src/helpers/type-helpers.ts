@@ -1,4 +1,5 @@
 import { FultonDiContainer } from "../index";
+import { isFunction } from "util";
 
 export type Identifier<T = any> = (string | symbol | Type<T>);
 
@@ -57,3 +58,19 @@ export interface FunctionProvider {
 }
 
 export declare type Provider = TypeProvider | ValueProvider | ClassProvider | FactoryProvider | FunctionProvider;
+
+export function getIdentifiers(providers: Provider[]): Identifier[] {
+    let ids = [];
+    if (providers == null)
+        return ids;
+
+    for (const provider of providers as any[]) {
+        if (isFunction(provider)) {
+            ids.push(provider);
+        } else if (provider.provide) {
+            ids.push(provider.provide);
+        }
+    }
+
+    return ids;
+}

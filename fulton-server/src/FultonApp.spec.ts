@@ -1,4 +1,4 @@
-import { Factory, FultonApp, FultonAppOptions, FultonDiContainer, FultonService, inject, injectable } from "./index";
+import { Factory, FultonApp, FultonAppOptions, FultonDiContainer, FultonRouter, FultonService, inject, injectable, router } from "./index";
 
 @injectable()
 class ServiceA extends FultonService {
@@ -46,6 +46,20 @@ class ApiService {
     }
 }
 
+@router("/A")
+class RouterA extends FultonRouter {
+    constructor(public serviceA: ServiceA) {
+        super();
+    }
+}
+
+@router("/B")
+class RouterB extends FultonRouter {
+    constructor(public serviceB: ServiceB) {
+        super();
+    }
+}
+
 class MyFultonApp extends FultonApp {
     protected onInit(options: FultonAppOptions): void | Promise<void> {
         options.providers = [
@@ -85,12 +99,21 @@ class MyFultonApp extends FultonApp {
                 }
             }
         ];
+
+        options.routers = [
+            RouterA,
+            RouterB
+        ];
     }
 
+    routers: FultonRouter[];
+    protected onInitRouters(routers: FultonRouter[]) {
+        this.routers = routers;
+    }
 }
 
 describe('Fulton App', () => {
-    let app: FultonApp;
+    let app: MyFultonApp;
 
     beforeEach(() => {
         app = new MyFultonApp();
@@ -182,5 +205,11 @@ describe('Fulton App', () => {
 
         expect(instance).toBeTruthy();
         expect(instance.apiKey).toEqual("abcd");
+    });
+
+    it('should create routers', async () => {
+        expect(app.routers.length).toEqual(2);
+        expect(app.routers[0].path).toEqual("/A");
+        expect((app.routers[1] as RouterB).serviceB.value).toEqual("b");   
     });
 });

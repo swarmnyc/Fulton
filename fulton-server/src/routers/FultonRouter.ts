@@ -1,17 +1,32 @@
-import { FultonDiContainer } from "../interfaces";
-import { IFultonContext } from "../cores/IFultonContext";
-import { Type } from "../helpers/type-helpers";
+import { FultonDiContainer, PathIdentifier, injectable } from "../interfaces";
+import { RouterMetadata, getRouterMetadata } from "./route-decorators-helpers";
 
-// regular Router
+import { FultonApp } from "../index";
+import { Identifier } from "../helpers/type-helpers";
+
+@injectable()
 export abstract class FultonRouter {
-    namespace: string;
+    private metadata: RouterMetadata
 
-    container: FultonDiContainer;
+    path: PathIdentifier;
+    app: FultonApp;
 
-    get<T>(type: Type<T>) : T {
-        let instance = this.container.get(type);
-        // to do
-        
-        return instance
+    constructor() {
+        this.loadMetadata();
+    }
+
+    init() {
+        this.onInit();
+    }
+
+    loadMetadata(){
+        this.metadata = getRouterMetadata(this.constructor);
+        if (this.metadata) {
+            this.path = this.metadata.path;
+        }
+    }
+
+    protected onInit() {
+
     }
 }

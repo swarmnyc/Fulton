@@ -14,6 +14,8 @@ export { injectable, inject } from "inversify";
 
 export declare type Middleware = RequestHandler;
 
+export declare type PathIdentifier = (string | RegExp | (string | RegExp)[]);
+
 export declare type FultonDiContainer = interfaces.Container;
 
 

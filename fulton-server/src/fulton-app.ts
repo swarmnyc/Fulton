@@ -1,6 +1,8 @@
+import * as bodyParser from 'body-parser';
 import * as express from "express";
 import * as http from 'http';
 import * as https from 'https';
+import * as lodash from 'lodash';
 import * as path from 'path';
 import * as winston from 'winston';
 
@@ -57,6 +59,15 @@ export abstract class FultonApp {
         // for log
         this.initLogging();
 
+        // for bodyParsers
+        this.initBodyParsers();
+
+        // for index
+        this.initIndex();
+
+        // for bodyParsers
+        this.initStaticFile();
+
         // for providers
         this.registerTypes(this.options.providers || []);
 
@@ -65,9 +76,6 @@ export abstract class FultonApp {
 
         // for routers
         await this.initRouters();
-
-        // for index
-        this.initIndex();
 
         // for errorHandler
         if (this.options.errorHandler) {
@@ -173,13 +181,21 @@ export abstract class FultonApp {
             routers: [],
             services: [],
             providers: [],
+            bodyParsers: [
+                bodyParser.json({
+                    type: function (req) {
+                        return lodash.includes(["application/json", "application/vnd.api+json"], req.headers['content-type'])
+                    }
+                }),
+                bodyParser.urlencoded({ extended: true })],
+            staticFile: {},
             index: {
                 indexEnabled: Env.getBoolean(`${prefix}.index.indexEnabled`, true)
             },
             logging: {
                 defaultLevel: Env.get(`${prefix}.logging.defaultLevel`) as FultonLoggerLevel,
                 defaultLoggerColorized: Env.getBoolean(`${prefix}.logging.defaultLoggerColorized`, true),
-                httpLogEnabled: Env.getBoolean(`${prefix}.logging.httpLogEnabled`, false)                
+                httpLogEnabled: Env.getBoolean(`${prefix}.logging.httpLogEnabled`, false)
             },
             errorHandler: defaultErrorHandler,
             loader: {
@@ -192,7 +208,7 @@ export abstract class FultonApp {
                 serviceLoader: defaultClassLoader(FultonService)
             },
             server: {
-                useHttp:  Env.getBoolean(`${prefix}.server.useHttp`, true),
+                useHttp: Env.getBoolean(`${prefix}.server.useHttp`, true),
                 useHttps: Env.getBoolean(`${prefix}.server.useHttps`, false),
                 httpPort: Env.getInt(`${prefix}.server.httpPort`, 80),
                 httpsPort: Env.getInt(`${prefix}.server.httpsPort`, 443)
@@ -201,6 +217,10 @@ export abstract class FultonApp {
     }
 
     protected initLogging(): void {
+        if (this.options.logging.defaultLevel) {
+            FultonLog.level = this.options.logging.defaultLevel;
+        }
+
         if (this.options.logging.defaultOptions) {
             FultonLog.configure(this.options.logging.defaultOptions);
         }
@@ -211,6 +231,18 @@ export abstract class FultonApp {
 
         if (this.options.logging.httpLogEnabled) {
             // TODO: 
+        }
+    }
+
+    protected initStaticFile(): void {
+        if (this.options.staticFile.staticFileEnabled) {
+            // TODO: 
+        }
+    }
+
+    protected initBodyParsers(): void {
+        if (lodash.some(this.options.bodyParsers)) {
+            this.server.use(...this.options.bodyParsers);
         }
     }
 

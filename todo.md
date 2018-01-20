@@ -7,3 +7,4 @@
     - db
 - doc
 - http logger
+- static files

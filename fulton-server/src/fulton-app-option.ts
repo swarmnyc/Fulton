@@ -80,6 +80,11 @@ export interface FultonAppOptions {
     services?: Provider[];
 
     /**
+     * default is [bodyParser.json(), bodyParser.urlencoded({ extended: true })]
+     */
+    bodyParsers?: Middleware[];
+
+    /**
      * for automatic load modules, default is disabled, 
      * because we want to use Angular style, define types explicitly
      */
@@ -155,6 +160,10 @@ export interface FultonAppOptions {
          * }
          */
         httpLogOptions?: FultonLoggerOptions;
+    }
+
+    staticFile?: {
+        staticFileEnabled?: boolean;
     }
 
     /**

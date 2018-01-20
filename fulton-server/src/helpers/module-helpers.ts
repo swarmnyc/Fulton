@@ -1,5 +1,6 @@
 import * as fs from "fs"
 import * as path from "path"
+
 import { Type } from "./type-helpers";
 
 const supportExtensions = [".js", ".ts"];
@@ -25,7 +26,7 @@ export function loadModules<T=any>(dir: string, recursive: boolean = true): Prom
                 if (stat.isDirectory()) {
                     if (recursive) {
                         let subModules = await loadModules(filepath, recursive);
-                        modules.push.apply(modules, subModules);
+                        modules.push(...subModules);
                     }
                 } else {
                     if (supportExtensions.indexOf(path.extname(filename)) > -1) {

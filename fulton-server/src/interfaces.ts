@@ -1,5 +1,6 @@
 import "reflect-metadata";
 
+import * as express from "express";
 import * as https from 'https';
 
 import { FultonClassLoader } from "./helpers/module-helpers";
@@ -7,17 +8,23 @@ import { FultonLoggerOptions } from "./fulton-log";
 import { FultonRouter } from "./routers";
 import { FultonService } from "./services";
 import { Provider } from "./helpers/type-helpers";
-import { RequestHandler } from "express";
 import { interfaces } from "inversify";
 
 export { injectable, inject } from "inversify";
 
-export declare type Middleware = RequestHandler;
+export type Middleware = express.RequestHandler;
 
-export declare type PathIdentifier = (string | RegExp | (string | RegExp)[]);
+export type ErrorMiddleware = express.ErrorRequestHandler;
 
-export declare type FultonDiContainer = interfaces.Container;
+export type PathIdentifier = (string | RegExp | (string | RegExp)[]);
 
+export type FultonDiContainer = interfaces.Container;
+
+export interface Request extends express.Request {
+}
+
+export interface Response extends express.Response {
+}
 
 export interface FultonAppOptions {
     // generate AuthClient collection
@@ -46,9 +53,6 @@ export interface FultonAppOptions {
     // middlewares
     // middlewares?: FultonMiddleware[]
 
-    //default is using output to logger
-    errorHandler?: Middleware
-
     //default is [FultonQueryStringParser]
     queryStringParsers?: Middleware[]
 
@@ -60,7 +64,30 @@ export interface FultonAppOptions {
 
     dbConnectionOptions?: any;
 
+    /**
+     * app name, default is class name
+     */
     appName?: string;
+
+    /**
+     * the handler for /, can be file path, file buffer or function
+     */
+    indexHandler?: Middleware;
+
+    /**
+     * the index file, like index.html
+     */
+    indexFilePath?: string;
+
+    /**
+     * return the static message when call /
+     */
+    indexMessage?: string;
+
+    /**
+     * default is using output to logger
+     */
+    errorHandler?: ErrorMiddleware;
 
     providers?: Provider[];
 

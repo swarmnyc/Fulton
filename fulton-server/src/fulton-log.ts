@@ -1,4 +1,6 @@
 import * as winston from "winston"
+
+import { FultonApp } from "./index";
 import { NPMLoggingLevel } from "winston";
 
 /**
@@ -60,23 +62,23 @@ export default class FultonLog {
     }
 
     static log(level: string, msg: string, ...meta: any[]): void {
-        winston.log(level, msg, meta);
+        winston.log(level, msg, ...meta);
     }
 
     static debug(msg: string, ...meta: any[]): void {
-        winston.debug(msg, meta);
+        winston.debug(msg, ...meta);
     }
 
     static info(msg: string, ...meta: any[]): void {
-        winston.info(msg, meta);
+        winston.info(msg, ...meta);
     }
 
     static warn(msg: string, ...meta: any[]): void {
-        winston.warn(msg, meta);
+        winston.warn(msg, ...meta);
     }
 
     static error(msg: string, ...meta: any[]): void {
-        winston.error(msg, meta);
+        winston.error(msg, ...meta);
     }
 
     /**
@@ -104,3 +106,5 @@ export default class FultonLog {
         return winston.loggers.add(name, options);
     }
 }
+
+(winston.default.transports.console as any).colorize = true;

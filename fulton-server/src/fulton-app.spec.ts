@@ -208,7 +208,8 @@ describe('Fulton App', () => {
 
     it('should create routers', async () => {
         expect(app.routers.length).toEqual(2);
-        expect(app.routers[0].path).toEqual("/A");
+        expect(app.routers[0]["app"]).toBeTruthy();
+        expect(app.routers[0]["metadata"].router.path).toEqual("/A");
         expect((app.routers[1] as RouterB).serviceB.value).toEqual("b");
     });
 });

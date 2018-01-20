@@ -4,14 +4,15 @@ import * as https from 'https';
 import * as path from 'path'
 
 import { Container, interfaces } from "inversify";
+import { ErrorMiddleware, FultonAppOptions, FultonDiContainer, Middleware, Request, Response } from "./interfaces";
 import { Express, RequestHandler } from "express";
-import { FultonAppOptions, FultonDiContainer } from "./interfaces";
 import { FultonAuthRouter, IUser, IUserManager } from "./auths/index";
 import { Identifier, Provider, Type, TypeProvider, ValueProvider } from "./helpers/type-helpers";
 
 import FultonLog from "./fulton-log";
 import { FultonRouter } from "./routers/fulton-router";
 import { FultonService } from "./services";
+import { KEY_FULTON_APP } from "./constants";
 import { defaultClassLoader } from "./helpers/module-helpers";
 import { isFunction } from "util";
 
@@ -41,16 +42,18 @@ export abstract class FultonApp {
         this.express = express();
 
         this.container = await this.createDiContainer();
+        this.container.bind(KEY_FULTON_APP).toConstantValue(this);
 
         await this.onInit(this.options);
 
-        this.appName = this.options.appName;
+        this.appName = this.options.appName || this.constructor.name;
 
         // for log
         if (this.options.defaultLoggerOptions) {
             FultonLog.configure(this.options.defaultLoggerOptions);
         }
 
+        // for providers
         this.registerTypes(this.options.providers || []);
 
         // for services
@@ -75,7 +78,13 @@ export abstract class FultonApp {
 
         this.initRouters(routerIds);
 
-        //await this.onInitRouters(routerTypes);
+        // for indexHandler
+        this.processIndex();
+
+        // for errorHandler
+        if (this.options.errorHandler) {
+            this.express.use(this.options.errorHandler);
+        }
 
         this.isInitialized = true;
     }
@@ -85,11 +94,14 @@ export abstract class FultonApp {
      */
     async start(): Promise<any> {
         if (!this.isInitialized) {
-            await this.init();
+            await this.init().catch((err) => {
+                FultonLog.error(`${this.appName} failed to initialization`, err);
+                throw err;
+            });
         }
 
         if (this.httpServer || this.httpsServer) {
-            throw new Error("app is still running");
+            throw new Error(`${this.appName} is still running`);
         }
 
         var tasks = [];
@@ -167,6 +179,7 @@ export abstract class FultonApp {
             routers: [],
             services: [],
             providers: [],
+            errorHandler: this.defaultErrorHandler,
             loader: {
                 appDir: path.dirname(process.mainModule.filename),
                 routerDirs: ["routers"],
@@ -188,7 +201,6 @@ export abstract class FultonApp {
     protected initRouters(routerTypes: Identifier<FultonRouter>[]) {
         let routers = routerTypes.map((id) => {
             let router = this.container.get<FultonRouter>(id);
-            router.app = this;
             router.init();
 
             return router;
@@ -241,4 +253,33 @@ export abstract class FultonApp {
     protected abstract onInit(options: FultonAppOptions): void | Promise<void>;
 
     protected onInitRouters(routers: FultonRouter[]): void | Promise<void> { }
+
+    protected processIndex() {
+        if (this.options.indexHandler) {
+            this.express.all("/", this.options.indexHandler);
+            return;
+        }
+
+        if (this.options.indexFilePath) {
+            this.express.all("/", (res, req) => {
+                req.sendFile(path.resolve(this.options.indexFilePath));
+            });
+
+            return;
+        }
+
+        if (this.options.indexMessage) {
+            this.express.all("/", (res, req) => {
+                req.send(this.options.indexMessage);
+            });
+
+            return;
+        }
+    }
+
+    private defaultErrorHandler: ErrorMiddleware = (err: any, req: Request, res: Response, next: Middleware) => {
+        FultonLog.error(`${req.method} ${req.url}\nrequest: %O\nerror: %s`, { httpHeaders: req.headers, httpBody: req.body }, err.stack);
+
+        res.sendStatus(500);
+    }
 }

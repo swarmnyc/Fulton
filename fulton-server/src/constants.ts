@@ -1,0 +1,1 @@
+export const KEY_FULTON_APP = "__FultonApp__";

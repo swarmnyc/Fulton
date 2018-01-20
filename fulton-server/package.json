@@ -15,12 +15,13 @@
   "license": "ISC",
   "devDependencies": {
     "@types/jasmine": "^2.8.4",
+    "@types/lodash": "^4.14.93",
     "@types/mongodb": "^3.0.0",
+    "fulton-core": "file:../fulton-core",
     "jasmine": "^2.8.0",
     "jasmine-ts": "^0.2.1",
     "rimraf": "^2.6.2",
-    "typescript": "^2.6.2",
-    "fulton-core": "file:../fulton-core"
+    "typescript": "^2.6.2"
   },
   "dependencies": {
     "@types/express": "^4.11.0",
@@ -30,6 +31,7 @@
     "@types/winston": "^2.3.7",
     "express": "^4.16.2",
     "inversify": "^4.9.0",
+    "lodash": "^4.17.4",
     "mongodb": "^3.0.1",
     "passport": "^0.4.0",
     "reflect-metadata": "^0.1.12",

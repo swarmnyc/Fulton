@@ -1,18 +1,25 @@
-//import { Food, FoodRepository } from "./entity/Food";
-
 import { FultonApp, FultonAppOptions, FultonDiContainer } from "fulton-server"
 
-//import { FoodEntityService } from "./services/FoodDataService";
-
-//import { Ingredient, IngredientRepository } from "./entity/Ingredient";
-
-
+import { FoodRouter } from "./routers/FoodRouter";
 
 export class ExampleApp extends FultonApp {
     protected async onInit(options: FultonAppOptions): Promise<any> {
         options.appName = "ExampleApp";
+
+        options.routers = [
+            FoodRouter
+        ];
+
+        options.indexMessage = "hello world";
+
+        options.indexFilePath = "./assets/index.html";
+
+        options.indexHandler = (req, res, next) => {
+            res.send("Hello World!!");
+        };
+
         // options.server.httpPort = 1234;
-    
+
         // options.authRouters = [];
         // options.dotenvPath = ".test.nev";
 

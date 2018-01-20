@@ -1,14 +1,16 @@
 import * as express from "express";
 import * as http from 'http';
 import * as https from 'https';
-import * as path from 'path'
+import * as path from 'path';
+import * as winston from 'winston';
 
 import { Container, interfaces } from "inversify";
-import { ErrorMiddleware, FultonAppOptions, FultonDiContainer, Middleware, Request, Response } from "./interfaces";
+import { ErrorMiddleware, FultonDiContainer, Middleware, Request, Response } from "./interfaces";
 import { Express, RequestHandler } from "express";
 import { FultonAuthRouter, IUser, IUserManager } from "./auths/index";
 import { Identifier, Provider, Type, TypeProvider, ValueProvider } from "./helpers/type-helpers";
 
+import { FultonAppOptions } from "./fulton-app-option";
 import FultonLog from "./fulton-log";
 import { FultonRouter } from "./routers/fulton-router";
 import { FultonService } from "./services";
@@ -49,37 +51,19 @@ export abstract class FultonApp {
         this.appName = this.options.appName || this.constructor.name;
 
         // for log
-        if (this.options.defaultLoggerOptions) {
-            FultonLog.configure(this.options.defaultLoggerOptions);
-        }
+        this.initLogging();
 
         // for providers
         this.registerTypes(this.options.providers || []);
 
         // for services
-        let serviceTypes = this.options.services || [];
-        if (this.options.loader.routerLoaderEnabled) {
-            let dirs = this.options.loader.routerDirs.map((dir) => path.join(this.options.loader.appDir, dir));
-            let routers = await this.options.loader.routerLoader(dirs, true) as Provider[];
-            serviceTypes = routers.concat(serviceTypes);
-        }
-
-        this.registerTypes(serviceTypes);
+        await this.initServices();
 
         // for routers
-        let routerTypes = this.options.routers || [];
-        if (this.options.loader.routerLoaderEnabled) {
-            let dirs = this.options.loader.routerDirs.map((dir) => path.join(this.options.loader.appDir, dir));
-            let routers = await this.options.loader.routerLoader(dirs, true) as Provider[];
-            routerTypes = routers.concat(routerTypes);
-        }
+        await this.initRouters();
 
-        let routerIds = this.registerTypes(routerTypes);
-
-        this.initRouters(routerIds);
-
-        // for indexHandler
-        this.processIndex();
+        // for index
+        this.initIndex();
 
         // for errorHandler
         if (this.options.errorHandler) {
@@ -87,6 +71,7 @@ export abstract class FultonApp {
         }
 
         this.isInitialized = true;
+        await this.didInit();
     }
 
     /**
@@ -175,11 +160,18 @@ export abstract class FultonApp {
 
     protected createDefaultOptions(): FultonAppOptions {
         return {
-            appName: "FultonApp",
+            appName: this.constructor.name,
             routers: [],
             services: [],
             providers: [],
-            errorHandler: this.defaultErrorHandler,
+            index: {
+                indexEnabled: true
+            },
+            logging: {
+                httpLogEnabled: false,
+                defaultTransportColorized: true
+            },
+            errorHandler: defaultErrorHandler,
             loader: {
                 appDir: path.dirname(process.mainModule.filename),
                 routerDirs: ["routers"],
@@ -198,15 +190,75 @@ export abstract class FultonApp {
         };
     }
 
-    protected initRouters(routerTypes: Identifier<FultonRouter>[]) {
-        let routers = routerTypes.map((id) => {
+    protected initLogging(): void {
+        if (this.options.logging.defaultOptions) {
+            FultonLog.configure(this.options.logging.defaultOptions);
+        }
+
+        if (this.options.logging.defaultTransportColorized) {
+            (winston.default.transports.console as any).colorize = true;
+        }
+
+        if (this.options.logging.httpLogEnabled) {
+            // TODO: 
+        }
+    }
+
+    protected async initServices(): Promise<void> {
+        let serviceTypes = this.options.services || [];
+        if (this.options.loader.routerLoaderEnabled) {
+            let dirs = this.options.loader.routerDirs.map((dir) => path.join(this.options.loader.appDir, dir));
+            let routers = await this.options.loader.routerLoader(dirs, true) as Provider[];
+            serviceTypes = routers.concat(serviceTypes);
+        }
+
+        this.registerTypes(serviceTypes);
+    }
+
+    protected async initRouters(): Promise<void> {
+        let routerTypes = this.options.routers || [];
+        if (this.options.loader.routerLoaderEnabled) {
+            let dirs = this.options.loader.routerDirs.map((dir) => path.join(this.options.loader.appDir, dir));
+            let routers = await this.options.loader.routerLoader(dirs, true) as Provider[];
+            routerTypes = routers.concat(routerTypes);
+        }
+
+        let routerIds = this.registerTypes(routerTypes);
+        let routers = routerIds.map((id) => {
             let router = this.container.get<FultonRouter>(id);
             router.init();
 
             return router;
         });
 
-        this.onInitRouters(routers);
+        await this.onInitRouters(routers);
+    }
+
+    protected initIndex(): void {
+        if (!this.options.index.indexEnabled) {
+            return
+        }
+
+        if (this.options.index.handler) {
+            this.express.all("/", this.options.index.handler);
+            return;
+        }
+
+        if (this.options.index.filepath) {
+            this.express.all("/", (res, req) => {
+                req.sendFile(path.resolve(this.options.index.filepath));
+            });
+
+            return;
+        }
+
+        if (this.options.index.message) {
+            this.express.all("/", (res, req) => {
+                req.send(this.options.index.message);
+            });
+
+            return;
+        }
     }
 
     protected registerTypes(providers: Provider[]): Identifier[] {
@@ -252,34 +304,13 @@ export abstract class FultonApp {
     // events
     protected abstract onInit(options: FultonAppOptions): void | Promise<void>;
 
+    protected didInit(): void | Promise<void> { }
+
     protected onInitRouters(routers: FultonRouter[]): void | Promise<void> { }
+}
 
-    protected processIndex() {
-        if (this.options.indexHandler) {
-            this.express.all("/", this.options.indexHandler);
-            return;
-        }
+let defaultErrorHandler: ErrorMiddleware = (err: any, req: Request, res: Response, next: Middleware) => {
+    FultonLog.error(`${req.method} ${req.url}\nrequest: %O\nerror: %s`, { httpHeaders: req.headers, httpBody: req.body }, err.stack);
 
-        if (this.options.indexFilePath) {
-            this.express.all("/", (res, req) => {
-                req.sendFile(path.resolve(this.options.indexFilePath));
-            });
-
-            return;
-        }
-
-        if (this.options.indexMessage) {
-            this.express.all("/", (res, req) => {
-                req.send(this.options.indexMessage);
-            });
-
-            return;
-        }
-    }
-
-    private defaultErrorHandler: ErrorMiddleware = (err: any, req: Request, res: Response, next: Middleware) => {
-        FultonLog.error(`${req.method} ${req.url}\nrequest: %O\nerror: %s`, { httpHeaders: req.headers, httpBody: req.body }, err.stack);
-
-        res.sendStatus(500);
-    }
+    res.sendStatus(500);
 }

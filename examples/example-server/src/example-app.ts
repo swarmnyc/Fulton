@@ -4,17 +4,15 @@ import { FoodRouter } from "./routers/food-router";
 
 export class ExampleApp extends FultonApp {
     protected async onInit(options: FultonAppOptions): Promise<any> {
-        options.appName = "ExampleApp";
-
         options.routers = [
             FoodRouter
         ];
 
-        options.indexMessage = "hello world";
+        options.index.message = "hello world";
 
-        options.indexFilePath = "./assets/index.html";
+        options.index.filepath = "./assets/index.html";
 
-        options.indexHandler = (req, res, next) => {
+        options.index.handler = (req, res, next) => {
             res.send("Hello World!!");
         };
 

@@ -106,5 +106,3 @@ export default class FultonLog {
         return winston.loggers.add(name, options);
     }
 }
-
-(winston.default.transports.console as any).colorize = true;

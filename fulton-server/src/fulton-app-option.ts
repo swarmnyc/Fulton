@@ -1,7 +1,7 @@
 import * as https from 'https';
 
 import { ErrorMiddleware, Middleware } from './interfaces';
-import { FultonRouter, FultonService } from './index';
+import { FultonLoggerLevel, FultonRouter, FultonService } from './index';
 
 import { FultonClassLoader } from './helpers/module-helpers';
 import { FultonLoggerOptions } from './fulton-log';
@@ -41,11 +41,6 @@ export interface FultonAppOptions {
     dotenvPath?: string;
 
     dbConnectionOptions?: any;
-
-    /**
-     * app name, use in output, parser. default is class name
-     */
-    appName?: string;
 
     /**
      * behavior for "/" request, only one of three methods active at the same time.
@@ -128,6 +123,7 @@ export interface FultonAppOptions {
     }
 
     logging?: {
+        defaultLevel?: FultonLoggerLevel;
         /**
          * if not null, reset winstion default logger with this value, the default value is null
          * @example
@@ -142,7 +138,7 @@ export interface FultonAppOptions {
          * is default log transport collorized
          * default is procces.env[`${appName}.options.logging.httpLogEnabled`] or true
          */
-        defaultTransportColorized?: boolean;
+        defaultLoggerColorized?: boolean;
 
         /**
          * if true, log every http request.

@@ -212,4 +212,39 @@ describe('Fulton App', () => {
         expect(app.routers[0]["metadata"].router.path).toEqual("/A");
         expect((app.routers[1] as RouterB).serviceB.value).toEqual("b");
     });
+
+    it('should init options', async () => {
+        expect(app.options.logging.defaultLevel).toEqual(undefined);
+
+        process.env[`${app.appName}.options.index.indexEnabled`] = "0"
+
+        process.env[`${app.appName}.options.logging.defaultLevel`] = "info"        
+        process.env[`${app.appName}.options.logging.defaultLoggerColorized`] = "false"
+        process.env[`${app.appName}.options.logging.httpLogEnabled`] = "1"
+
+        process.env[`${app.appName}.options.server.useHttp`] = "0"
+        process.env[`${app.appName}.options.server.useHttps`] = "true"
+        process.env[`${app.appName}.options.server.httpPort`] = "777"
+        process.env[`${app.appName}.options.server.httpsPort`] = "999"
+        
+        app["initOptions"](true);
+
+        expect(app.options.index.indexEnabled).toEqual(false);
+
+        expect(app.options.logging.defaultLevel).toEqual("info");
+        expect(app.options.logging.defaultLoggerColorized).toEqual(false);
+        expect(app.options.logging.httpLogEnabled).toEqual(true);
+        
+        expect(app.options.server.useHttp).toEqual(false);
+        expect(app.options.server.useHttps).toEqual(true);
+        expect(app.options.server.httpPort).toEqual(777);
+        expect(app.options.server.httpsPort).toEqual(999);
+    });
+
+    it('should reset options or not', async () => {
+        process.env[`${app.appName}.options.server.httpPort`] = "80"
+        app.options.server.httpPort = 888;
+        app["initOptions"](false);
+        expect(app.options.server.httpPort).toEqual(888);
+    });
 });

@@ -10,8 +10,10 @@ import { Express, RequestHandler } from "express";
 import { FultonAuthRouter, IUser, IUserManager } from "./auths/index";
 import { Identifier, Provider, Type, TypeProvider, ValueProvider } from "./helpers/type-helpers";
 
+import Env from "./helpers/env-helpers";
 import { FultonAppOptions } from "./fulton-app-option";
 import FultonLog from "./fulton-log";
+import { FultonLoggerLevel } from "./index";
 import { FultonRouter } from "./routers/fulton-router";
 import { FultonService } from "./services";
 import { KEY_FULTON_APP } from "./constants";
@@ -23,6 +25,10 @@ export abstract class FultonApp {
     private httpServer: http.Server;
     private httpsServer: https.Server;
 
+    /**
+     * app name, use in output, parser. default is class name.
+     * have to set the value before onInit();
+     */
     appName: string;
 
     /**
@@ -33,22 +39,20 @@ export abstract class FultonApp {
     options: FultonAppOptions;
 
     constructor() {
-        this.options = this.createDefaultOptions();
+        this.appName = this.constructor.name;
     }
 
     /**
      * initialize FultonApp. It will be called on start(), if the app isn't initialized;
      * it can be run many times, everytime call this will reset all the related objects
      */
-    async init(): Promise<void> {
+    async init(reiniOptions = false): Promise<void> {
+        this.initOptions(reiniOptions);
+        this.initDiContainer();
+
         this.express = express();
 
-        this.container = await this.createDiContainer();
-        this.container.bind(KEY_FULTON_APP).toConstantValue(this);
-
         await this.onInit(this.options);
-
-        this.appName = this.options.appName || this.constructor.name;
 
         // for log
         this.initLogging();
@@ -154,22 +158,28 @@ export abstract class FultonApp {
         return Promise.all(tasks);
     }
 
-    protected createDiContainer(): FultonDiContainer | Promise<FultonDiContainer> {
-        return new Container();
+    protected initDiContainer() {
+        this.container = new Container();
+        this.container.bind(KEY_FULTON_APP).toConstantValue(this);
     }
 
-    protected createDefaultOptions(): FultonAppOptions {
-        return {
-            appName: this.constructor.name,
+    protected initOptions(resetOptions: boolean): void {
+        if (this.options && !resetOptions)
+            return;
+
+        let prefix = `${this.appName}.options`;
+
+        this.options = {
             routers: [],
             services: [],
             providers: [],
             index: {
-                indexEnabled: true
+                indexEnabled: Env.getBoolean(`${prefix}.index.indexEnabled`, true)
             },
             logging: {
-                httpLogEnabled: false,
-                defaultTransportColorized: true
+                defaultLevel: Env.get(`${prefix}.logging.defaultLevel`) as FultonLoggerLevel,
+                defaultLoggerColorized: Env.getBoolean(`${prefix}.logging.defaultLoggerColorized`, true),
+                httpLogEnabled: Env.getBoolean(`${prefix}.logging.httpLogEnabled`, false)                
             },
             errorHandler: defaultErrorHandler,
             loader: {
@@ -182,10 +192,10 @@ export abstract class FultonApp {
                 serviceLoader: defaultClassLoader(FultonService)
             },
             server: {
-                useHttp: true,
-                useHttps: false,
-                httpPort: 3000,
-                httpsPort: 443
+                useHttp:  Env.getBoolean(`${prefix}.server.useHttp`, true),
+                useHttps: Env.getBoolean(`${prefix}.server.useHttps`, false),
+                httpPort: Env.getInt(`${prefix}.server.httpPort`, 80),
+                httpsPort: Env.getInt(`${prefix}.server.httpsPort`, 443)
             }
         };
     }
@@ -195,7 +205,7 @@ export abstract class FultonApp {
             FultonLog.configure(this.options.logging.defaultOptions);
         }
 
-        if (this.options.logging.defaultTransportColorized) {
+        if (this.options.logging.defaultLoggerColorized) {
             (winston.default.transports.console as any).colorize = true;
         }
 

@@ -1,4 +1,3 @@
-import * as bodyParser from 'body-parser';
 import * as express from "express";
 import * as http from 'http';
 import * as https from 'https';
@@ -8,18 +7,17 @@ import * as winston from 'winston';
 
 import { Container, interfaces } from "inversify";
 import { ErrorMiddleware, FultonDiContainer, Middleware, Request, Response } from "./interfaces";
-import { Express, RequestHandler } from "express";
 import { FultonAuthRouter, IUser, IUserManager } from "./auths/index";
 import { Identifier, Provider, Type, TypeProvider, ValueProvider } from "./helpers/type-helpers";
 
 import Env from "./helpers/env-helpers";
-import { FultonAppOptions } from "./fulton-app-option";
+import { Express } from "express";
+import { FultonAppOptions } from "./fulton-app-options";
 import FultonLog from "./fulton-log";
 import { FultonLoggerLevel } from "./index";
 import { FultonRouter } from "./routers/fulton-router";
 import { FultonService } from "./services";
 import { KEY_FULTON_APP } from "./constants";
-import { defaultClassLoader } from "./helpers/module-helpers";
 import { isFunction } from "util";
 
 export abstract class FultonApp {
@@ -103,7 +101,7 @@ export abstract class FultonApp {
 
         var tasks = [];
 
-        if (this.options.server.useHttp) {
+        if (this.options.server.httpEnabled) {
             tasks.push(new Promise((resolve, reject) => {
                 this.httpServer = http
                     .createServer(this.server)
@@ -120,8 +118,15 @@ export abstract class FultonApp {
             }));
         }
 
-        if (this.options.server.useHttps) {
+        if (this.options.server.httpsEnabled) {
             tasks.push(new Promise((resolve, reject) => {
+                if (!this.options.server.sslOption) {
+                    let error = `${this.appName} failed to start because https is enabled but sslOption was given`;
+                    FultonLog.error(error);
+                    reject(error);
+                    return;
+                }
+
                 this.httpsServer = https
                     .createServer(this.options.server.sslOption, this.server)
                     .on("error", (error) => {
@@ -175,45 +180,7 @@ export abstract class FultonApp {
         if (this.options && !resetOptions)
             return;
 
-        let prefix = `${this.appName}.options`;
-
-        this.options = {
-            routers: [],
-            services: [],
-            providers: [],
-            bodyParsers: [
-                bodyParser.json({
-                    type: function (req) {
-                        return lodash.includes(["application/json", "application/vnd.api+json"], req.headers['content-type'])
-                    }
-                }),
-                bodyParser.urlencoded({ extended: true })],
-            staticFile: {},
-            index: {
-                indexEnabled: Env.getBoolean(`${prefix}.index.indexEnabled`, true)
-            },
-            logging: {
-                defaultLevel: Env.get(`${prefix}.logging.defaultLevel`) as FultonLoggerLevel,
-                defaultLoggerColorized: Env.getBoolean(`${prefix}.logging.defaultLoggerColorized`, true),
-                httpLogEnabled: Env.getBoolean(`${prefix}.logging.httpLogEnabled`, false)
-            },
-            errorHandler: defaultErrorHandler,
-            loader: {
-                appDir: path.dirname(process.mainModule.filename),
-                routerDirs: ["routers"],
-                routerLoaderEnabled: false,
-                routerLoader: defaultClassLoader(FultonRouter),
-                serviceDirs: ["services"],
-                serviceLoaderEnabled: false,
-                serviceLoader: defaultClassLoader(FultonService)
-            },
-            server: {
-                useHttp: Env.getBoolean(`${prefix}.server.useHttp`, true),
-                useHttps: Env.getBoolean(`${prefix}.server.useHttps`, false),
-                httpPort: Env.getInt(`${prefix}.server.httpPort`, 80),
-                httpsPort: Env.getInt(`${prefix}.server.httpsPort`, 443)
-            }
-        };
+        this.options = new FultonAppOptions(this.appName);
     }
 
     protected initLogging(): void {
@@ -235,7 +202,7 @@ export abstract class FultonApp {
     }
 
     protected initStaticFile(): void {
-        if (this.options.staticFile.staticFileEnabled) {
+        if (this.options.staticFile.enabled) {
             // TODO: 
         }
     }
@@ -277,7 +244,7 @@ export abstract class FultonApp {
     }
 
     protected initIndex(): void {
-        if (!this.options.index.indexEnabled) {
+        if (!this.options.index.enabled) {
             return
         }
 
@@ -349,10 +316,4 @@ export abstract class FultonApp {
     protected didInit(): void | Promise<void> { }
 
     protected onInitRouters(routers: FultonRouter[]): void | Promise<void> { }
-}
-
-let defaultErrorHandler: ErrorMiddleware = (err: any, req: Request, res: Response, next: Middleware) => {
-    FultonLog.error(`${req.method} ${req.url}\nrequest: %O\nerror: %s`, { httpHeaders: req.headers, httpBody: req.body }, err.stack);
-
-    res.sendStatus(500);
 }

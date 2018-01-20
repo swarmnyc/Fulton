@@ -1,5 +1,5 @@
 export * from "./fulton-app";
-export * from "./fulton-app-option";
+export * from "./fulton-app-options";
 export * from "./fulton-log";
 export * from "./interfaces";
 

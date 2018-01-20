@@ -216,27 +216,27 @@ describe('Fulton App', () => {
     it('should init options', async () => {
         expect(app.options.logging.defaultLevel).toEqual(undefined);
 
-        process.env[`${app.appName}.options.index.indexEnabled`] = "0"
+        process.env[`${app.appName}.options.index.enabled`] = "0"
 
         process.env[`${app.appName}.options.logging.defaultLevel`] = "info"
         process.env[`${app.appName}.options.logging.defaultLoggerColorized`] = "false"
         process.env[`${app.appName}.options.logging.httpLogEnabled`] = "1"
 
-        process.env[`${app.appName}.options.server.useHttp`] = "0"
-        process.env[`${app.appName}.options.server.useHttps`] = "true"
+        process.env[`${app.appName}.options.server.httpEnabled`] = "0"
+        process.env[`${app.appName}.options.server.httpsEnabled`] = "true"
         process.env[`${app.appName}.options.server.httpPort`] = "777"
         process.env[`${app.appName}.options.server.httpsPort`] = "999"
 
         app["initOptions"](true);
 
-        expect(app.options.index.indexEnabled).toEqual(false);
+        expect(app.options.index.enabled).toEqual(false);
 
         expect(app.options.logging.defaultLevel).toEqual("info");
         expect(app.options.logging.defaultLoggerColorized).toEqual(false);
         expect(app.options.logging.httpLogEnabled).toEqual(true);
 
-        expect(app.options.server.useHttp).toEqual(false);
-        expect(app.options.server.useHttps).toEqual(true);
+        expect(app.options.server.httpEnabled).toEqual(false);
+        expect(app.options.server.httpsEnabled).toEqual(true);
         expect(app.options.server.httpPort).toEqual(777);
         expect(app.options.server.httpsPort).toEqual(999);
     });

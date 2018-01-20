@@ -34,7 +34,7 @@ export abstract class FultonApp {
     /**
      * the instance of Express, create after init().
      */
-    express: Express;
+    server: Express;
     container: FultonDiContainer;
     options: FultonAppOptions;
 
@@ -50,7 +50,7 @@ export abstract class FultonApp {
         this.initOptions(reiniOptions);
         this.initDiContainer();
 
-        this.express = express();
+        this.server = express();
 
         await this.onInit(this.options);
 
@@ -71,7 +71,7 @@ export abstract class FultonApp {
 
         // for errorHandler
         if (this.options.errorHandler) {
-            this.express.use(this.options.errorHandler);
+            this.server.use(this.options.errorHandler);
         }
 
         this.isInitialized = true;
@@ -98,7 +98,7 @@ export abstract class FultonApp {
         if (this.options.server.useHttp) {
             tasks.push(new Promise((resolve, reject) => {
                 this.httpServer = http
-                    .createServer(this.express)
+                    .createServer(this.server)
                     .on("error", (error) => {
                         FultonLog.error(`${this.appName} failed to start http server on port ${this.options.server.httpPort}`);
                         this.httpServer = null;
@@ -115,7 +115,7 @@ export abstract class FultonApp {
         if (this.options.server.useHttps) {
             tasks.push(new Promise((resolve, reject) => {
                 this.httpsServer = https
-                    .createServer(this.options.server.sslOption, this.express)
+                    .createServer(this.options.server.sslOption, this.server)
                     .on("error", (error) => {
                         FultonLog.error(`${this.appName} failed to start https server on port ${this.options.server.httpsPort}`);
                         this.httpsServer = null;
@@ -250,12 +250,12 @@ export abstract class FultonApp {
         }
 
         if (this.options.index.handler) {
-            this.express.all("/", this.options.index.handler);
+            this.server.all("/", this.options.index.handler);
             return;
         }
 
         if (this.options.index.filepath) {
-            this.express.all("/", (res, req) => {
+            this.server.all("/", (res, req) => {
                 req.sendFile(path.resolve(this.options.index.filepath));
             });
 
@@ -263,7 +263,7 @@ export abstract class FultonApp {
         }
 
         if (this.options.index.message) {
-            this.express.all("/", (res, req) => {
+            this.server.all("/", (res, req) => {
                 req.send(this.options.index.message);
             });
 

@@ -54,7 +54,7 @@ export abstract class FultonRouter {
             router.use(lodash.get(router, this.metadata.errorhandler));
         }
 
-        this.app.express.use(this.metadata.router.path, router);
+        this.app.server.use(this.metadata.router.path, router);
     }
 
     protected onInit() { }

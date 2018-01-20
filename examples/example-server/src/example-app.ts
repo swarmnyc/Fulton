@@ -1,6 +1,6 @@
 import { FultonApp, FultonAppOptions, FultonDiContainer } from "fulton-server"
 
-import { FoodRouter } from "./routers/FoodRouter";
+import { FoodRouter } from "./routers/food-router";
 
 export class ExampleApp extends FultonApp {
     protected async onInit(options: FultonAppOptions): Promise<any> {

@@ -1,4 +1,4 @@
-import { ExampleApp } from "./ExampleApp";
+import { ExampleApp } from "./example-app";
 
 let app = new ExampleApp();
 

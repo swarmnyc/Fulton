@@ -1,5 +1,6 @@
+import { KEY_ROUTER_ERROR_HANDLER_METADATA, KEY_ROUTER_HTTP_METHOD_LIST_METADATA, KEY_ROUTER_METADATA } from "../constants";
 import { PathIdentifier, injectable } from "../interfaces";
-import { RouterMetadata, RouterMethodMetadata, keys } from "./route-decorators-helpers";
+import { RouterMetadata, RouterMethodMetadata } from "./route-decorators-helpers";
 
 import { Middleware } from "../index";
 
@@ -11,12 +12,11 @@ import { Middleware } from "../index";
  * @param afterMiddlewares 
  */
 export function router(path: PathIdentifier, doc?: any, ...middlewares: Middleware[]): any {
-    let injectableFunc = injectable()
     return function (target: any) {
-        injectableFunc(target);
+        injectable()(target);
 
         Reflect.defineMetadata(
-            keys.router,
+            KEY_ROUTER_METADATA,
             {
                 path,
                 doc,
@@ -28,7 +28,7 @@ export function router(path: PathIdentifier, doc?: any, ...middlewares: Middlewa
 
 export function errorHandler() {
     return function (target: any, property: string, descriptor: PropertyDescriptor) {
-        Reflect.defineMetadata(keys.routerErrorHandler, property, target.constructor);
+        Reflect.defineMetadata(KEY_ROUTER_ERROR_HANDLER_METADATA, property, target.constructor);
     };
 }
 
@@ -122,11 +122,11 @@ export function httpMethod(method: string, path: PathIdentifier = "/", doc?: any
 
         let metadataList: RouterMethodMetadata[];
 
-        if (Reflect.hasOwnMetadata(keys.routerHttpMethodList, target.constructor)) {
-            metadataList = Reflect.getOwnMetadata(keys.routerHttpMethodList, target.constructor);
+        if (Reflect.hasOwnMetadata(KEY_ROUTER_HTTP_METHOD_LIST_METADATA, target.constructor)) {
+            metadataList = Reflect.getOwnMetadata(KEY_ROUTER_HTTP_METHOD_LIST_METADATA, target.constructor);
         } else {
             metadataList = [];
-            Reflect.defineMetadata(keys.routerHttpMethodList, metadataList, target.constructor);
+            Reflect.defineMetadata(KEY_ROUTER_HTTP_METHOD_LIST_METADATA, metadataList, target.constructor);
         }
 
         metadataList.push(metadata);

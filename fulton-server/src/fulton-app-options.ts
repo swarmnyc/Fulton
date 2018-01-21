@@ -3,15 +3,15 @@ import * as https from 'https';
 import * as lodash from 'lodash';
 import * as path from 'path';
 
+import { ConnectionOptions, Repository } from 'typeorm';
 import { ErrorMiddleware, Middleware, Request, Response } from './interfaces';
-import FultonLog, { FultonLoggerOptions } from './fulton-log';
-import { FultonLoggerLevel, FultonRouter, FultonService, defaultClassLoader } from './index';
+import { FultonClassLoader, defaultClassLoader } from './helpers/module-helpers';
+import FultonLog, { FultonLoggerLevel, FultonLoggerOptions } from './fulton-log';
+import { FultonRouter, FultonService } from './index';
+import { Provider, TypeProvider, } from './helpers/type-helpers';
 
-import { ConnectionOptions } from 'typeorm';
 import Env from './helpers/env';
-import { FultonClassLoader } from './helpers/module-helpers';
 import Helper from './helpers/helper';
-import { Provider } from './helpers/type-helpers';
 
 export class FultonAppOptions {
     // generate AuthClient collection
@@ -53,7 +53,7 @@ export class FultonAppOptions {
      * and 
      * FultonApp.options.database.url is the sortcut of FultonApp.options.databases[default].url
      * 
-     * if empty it will use typeorm.json on the root folder, for more information see typeorm
+     * if the map is empty, it will use typeorm.json, for more information see [typeorm](http://typeorm.io/)
      */
     databases: Map<string, ConnectionOptions> = new Map();
 
@@ -92,7 +92,7 @@ export class FultonAppOptions {
 
     routers: Provider[] = [];
 
-    repositories: Provider[] = [];
+    repositories: TypeProvider[] = [];
 
     services: Provider[] = [];
 
@@ -142,6 +142,21 @@ export class FultonAppOptions {
          * the router loader, loads all routers under the folder of {appDir}/{routersDir}
          */
         serviceLoader: FultonClassLoader<FultonService>
+
+        /**
+         * if true, Fulton will load services based on routerDirs automaticly 
+         */
+        repositoryLoaderEnabled: boolean;
+
+        /**
+         * the folder that router-loader looks at, default value is ["repositories"], 
+         */
+        repositoryDirs: string[];
+
+        /**
+         * the router loader, loads all routers under the folder of {appDir}/{routersDir}
+         */
+        repositoryLoader: FultonClassLoader<Repository<any>>
     }
 
     logging: {
@@ -239,12 +254,18 @@ export class FultonAppOptions {
 
         this.loader = {
             appDir: path.dirname(process.mainModule.filename),
-            routerDirs: ["routers"],
+
             routerLoaderEnabled: false,
+            routerDirs: ["routers"],
             routerLoader: defaultClassLoader(FultonRouter),
-            serviceDirs: ["services"],
+
             serviceLoaderEnabled: false,
-            serviceLoader: defaultClassLoader(FultonService)
+            serviceDirs: ["services"],
+            serviceLoader: defaultClassLoader(FultonService),
+
+            repositoryLoaderEnabled: false,
+            repositoryDirs: ["repositories"],
+            repositoryLoader: defaultClassLoader(Repository)
         };
 
         this.server = {

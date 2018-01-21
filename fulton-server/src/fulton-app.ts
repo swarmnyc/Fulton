@@ -5,11 +5,11 @@ import * as lodash from 'lodash';
 import * as path from 'path';
 import * as winston from 'winston';
 
+import { ConnectionOptions, createConnections } from "typeorm";
 import { Container, interfaces } from "inversify";
 import { ErrorMiddleware, FultonDiContainer, Middleware, Request, Response } from "./interfaces";
 import { Identifier, Provider, Type, TypeProvider, ValueProvider } from "./helpers/type-helpers";
 
-import { ConnectionOptions } from "typeorm/connection/ConnectionOptions";
 import Env from "./helpers/env";
 import { Express } from "express";
 import { FultonAppOptions } from "./fulton-app-options";
@@ -18,7 +18,8 @@ import { FultonLoggerLevel } from "./index";
 import { FultonRouter } from "./routers/fulton-router";
 import { FultonService } from "./services";
 import { KEY_FULTON_APP } from "./constants";
-import { createConnections } from "typeorm";
+import { createRepository } from "./repositories/repository-helpers";
+import { getRepositoryMetadata } from "./repositories/repository-decorator-helper";
 import { isFunction } from "util";
 
 export abstract class FultonApp {
@@ -72,7 +73,11 @@ export abstract class FultonApp {
         // for providers
         this.registerTypes(this.options.providers || []);
 
+        // for databases
         await this.initDatabases();
+
+        // for repositories
+        await this.initRepositories();
 
         // for services
         await this.initServices();
@@ -198,7 +203,9 @@ export abstract class FultonApp {
         }
 
         if (this.options.logging.defaultLoggerColorized) {
-            (winston.default.transports.console as any).colorize = true;
+            if (winston.default.transports.console) {
+                (winston.default.transports.console as any).colorize = true;
+            }
         }
 
         if (this.options.logging.httpLogEnabled) {
@@ -224,39 +231,58 @@ export abstract class FultonApp {
             options = Array.from(this.options.databases.values());
         }
 
-        let connections = await createConnections(options);
+        return createConnections(options).catch((error) => {
+            FultonLog.error("initDatabases fails", error);
+            throw error;
+        }) as Promise<any>;
+    }
 
-        
+    protected async initRepositories(): Promise<void> {
+        let providers = this.options.repositories || [];
+        if (this.options.loader.repositoryLoaderEnabled) {
+            let dirs = this.options.loader.repositoryDirs.map((dir) => path.join(this.options.loader.appDir, dir));
+            let loadedProviders = await this.options.loader.repositoryLoader(dirs, true) as TypeProvider[];
+            providers = loadedProviders.concat(providers);
+        }
+
+        // reposities needs to be singleton to integrate typeorm and inversify
+        let newProviders: ValueProvider[] = providers.map((provider) => {
+            return {
+                provide: provider,
+                useValue: createRepository(this.container, provider)
+            }
+        });
+
+        this.registerTypes(newProviders);
     }
 
     protected async initServices(): Promise<void> {
-        let serviceTypes = this.options.services || [];
-        if (this.options.loader.routerLoaderEnabled) {
-            let dirs = this.options.loader.routerDirs.map((dir) => path.join(this.options.loader.appDir, dir));
-            let routers = await this.options.loader.routerLoader(dirs, true) as Provider[];
-            serviceTypes = routers.concat(serviceTypes);
+        let providers = this.options.services || [];
+        if (this.options.loader.serviceLoaderEnabled) {
+            let dirs = this.options.loader.serviceDirs.map((dir) => path.join(this.options.loader.appDir, dir));
+            let loadedProviders = await this.options.loader.serviceLoader(dirs, true) as Provider[];
+            providers = loadedProviders.concat(providers);
         }
 
-        this.registerTypes(serviceTypes);
+        this.registerTypes(providers);
     }
 
     protected async initRouters(): Promise<void> {
-        let routerTypes = this.options.routers || [];
+        let prodivers = this.options.routers || [];
         if (this.options.loader.routerLoaderEnabled) {
             let dirs = this.options.loader.routerDirs.map((dir) => path.join(this.options.loader.appDir, dir));
-            let routers = await this.options.loader.routerLoader(dirs, true) as Provider[];
-            routerTypes = routers.concat(routerTypes);
+            let loadProviders = await this.options.loader.routerLoader(dirs, true) as Provider[];
+            prodivers = loadProviders.concat(prodivers);
         }
 
-        let routerIds = this.registerTypes(routerTypes);
-        let routers = routerIds.map((id) => {
+        let ids = this.registerTypes(prodivers);
+        let routers = ids.map((id) => {
             let router = this.container.get<FultonRouter>(id);
-            router.init();
+
+            router.init(); //register router to express
 
             return router;
         });
-
-        await this.onInitRouters(routers);
     }
 
     protected initIndex(): void {
@@ -330,6 +356,4 @@ export abstract class FultonApp {
     protected abstract onInit(options: FultonAppOptions): void | Promise<void>;
 
     protected didInit(): void | Promise<void> { }
-
-    protected onInitRouters(routers: FultonRouter[]): void | Promise<void> { }
 }

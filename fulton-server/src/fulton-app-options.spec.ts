@@ -9,6 +9,10 @@ class MyFultonApp extends FultonApp {
     protected initDatabases() : Promise<void> {
         return;
     }
+
+    protected initRepositories() : Promise<void> {
+        return;
+    }
 }
 
 describe('Fulton App Options', () => {

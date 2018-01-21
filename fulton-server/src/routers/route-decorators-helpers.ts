@@ -1,12 +1,8 @@
+import { KEY_ROUTER_ERROR_HANDLER_METADATA, KEY_ROUTER_HTTP_METHOD_LIST_METADATA, KEY_ROUTER_METADATA } from "../constants";
+
 import { FultonRouter } from "./fulton-router";
 import { Middleware } from "../index";
 import { PathIdentifier } from "../interfaces";
-
-export const keys = {
-    router: "FultonDecrator.Router",
-    routerErrorHandler: "FultonDecrator.RouterErrorHandler",
-    routerHttpMethodList: "FultonDecrator.HttpMethodList"
-}
 
 export interface FullRouterMetadata {
     router: RouterMetadata,
@@ -29,11 +25,11 @@ export interface RouterMethodMetadata {
 }
 
 export function getRouterMetadata(target: any): RouterMetadata {
-    return Reflect.getOwnMetadata(keys.router, target);
+    return Reflect.getOwnMetadata(KEY_ROUTER_METADATA, target);
 }
 
 export function getRouterErrorHandler(target: any): string {
-    return Reflect.getOwnMetadata(keys.routerErrorHandler, target);
+    return Reflect.getOwnMetadata(KEY_ROUTER_ERROR_HANDLER_METADATA, target);
 }
 
 /**
@@ -41,7 +37,7 @@ export function getRouterErrorHandler(target: any): string {
  * @param target 
  */
 export function getRouterMethodMetadataList(target: any): RouterMethodMetadata[] {
-    return Reflect.getOwnMetadata(keys.routerHttpMethodList, target) || [];
+    return Reflect.getOwnMetadata(KEY_ROUTER_HTTP_METHOD_LIST_METADATA, target) || [];
 }
 
 export function getFullRouterMethodMetadata(target: any): FullRouterMetadata {

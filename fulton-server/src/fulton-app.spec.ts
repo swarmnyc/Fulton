@@ -111,7 +111,7 @@ class MyFultonApp extends FultonApp {
     }
 
     routers: FultonRouter[];
-    protected onInitRouters(routers: FultonRouter[]) {
+    protected didInitRouters(routers: FultonRouter[]) {
         this.routers = routers;
     }
 }

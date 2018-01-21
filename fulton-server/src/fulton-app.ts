@@ -5,7 +5,7 @@ import * as lodash from 'lodash';
 import * as path from 'path';
 import * as winston from 'winston';
 
-import { ConnectionOptions, createConnections } from "typeorm";
+import { ConnectionOptions, createConnections, Connection } from "typeorm";
 import { Container, interfaces } from "inversify";
 import { ErrorMiddleware, FultonDiContainer, Middleware, Request, Response } from "./interfaces";
 import { Identifier, Provider, Type, TypeProvider, ValueProvider } from "./helpers/type-helpers";
@@ -231,10 +231,12 @@ export abstract class FultonApp {
             options = Array.from(this.options.databases.values());
         }
 
-        return createConnections(options).catch((error) => {
+        let conns = await createConnections(options).catch((error) => {
             FultonLog.error("initDatabases fails", error);
             throw error;
-        }) as Promise<any>;
+        });
+
+        await this.didInitDatabases(conns);
     }
 
     protected async initRepositories(): Promise<void> {
@@ -283,6 +285,8 @@ export abstract class FultonApp {
 
             return router;
         });
+
+        await this.didInitRouters(routers);
     }
 
     protected initIndex(): void {
@@ -356,4 +360,8 @@ export abstract class FultonApp {
     protected abstract onInit(options: FultonAppOptions): void | Promise<void>;
 
     protected didInit(): void | Promise<void> { }
+
+    protected didInitRouters(routers: FultonRouter[]): void | Promise<void> { }
+
+    protected didInitDatabases(connections: Connection[]): void | Promise<void> { }
 }

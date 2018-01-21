@@ -44,7 +44,7 @@ class MyApp extends FultonApp {
     }
 }
 
-fdescribe('repository', () => {
+xdescribe('repository', () => {
     it('should be created by app', async () => {
         let app = new MyApp();
 

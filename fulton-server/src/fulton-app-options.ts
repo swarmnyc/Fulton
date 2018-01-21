@@ -7,8 +7,10 @@ import { ErrorMiddleware, Middleware, Request, Response } from './interfaces';
 import FultonLog, { FultonLoggerOptions } from './fulton-log';
 import { FultonLoggerLevel, FultonRouter, FultonService, defaultClassLoader } from './index';
 
-import Env from './helpers/env-helpers';
+import { ConnectionOptions } from 'typeorm';
+import Env from './helpers/env';
 import { FultonClassLoader } from './helpers/module-helpers';
+import Helper from './helpers/helper';
 import { Provider } from './helpers/type-helpers';
 
 export class FultonAppOptions {
@@ -44,7 +46,16 @@ export class FultonAppOptions {
     //for dot env path, default is ./.env
     dotenvPath: string;
 
-    dbConnectionOptions: any;
+    /**
+     * Databases connection options, you can defien connection options on FultonApp.onInt(),  
+     * and use procces.env[`${appName}.options.databases[{?:connectionName}].{optionName}`] to override data.
+     * for example: FultonApp.options.databases[default].url = {new url}
+     * and 
+     * FultonApp.options.database.url is the sortcut of FultonApp.options.databases[default].url
+     * 
+     * if empty it will use typeorm.json on the root folder, for more information see typeorm
+     */
+    databases: Map<string, ConnectionOptions> = new Map();
 
     /**
      * behavior for "/" request, only one of three methods active at the same time.
@@ -242,7 +253,44 @@ export class FultonAppOptions {
         }
 
         this.staticFile = {
-            enabled : Env.getBoolean(`${prefix}.staticFile.enabled`, true)
+            enabled: Env.getBoolean(`${prefix}.staticFile.enabled`, true)
+        }
+    }
+
+    loadDatabaseOptions() {
+        let defaultReg = new RegExp(`^${this.appName}\\.options\\.database\\.(\\w+?)$`, "i");
+        let namedReg = new RegExp(`^${this.appName}\\.options\\.databases\\[(\\w+?)\\]\\.(\\w+?)$`, "i");
+
+        for (const key in process.env) {
+            let connName, propName, value;
+            let match = defaultReg.exec(key)
+            if (match) {
+                connName = "default";
+                propName = match[1];
+                value = process.env[key];
+            } else if ((match = namedReg.exec(key))) {
+                connName = match[1];
+                propName = match[2];
+                value = process.env[key];
+            } else {
+                continue;
+            }
+
+            let options: any;
+            if (this.databases.has(connName)) {
+                options = this.databases.get(connName);
+            } else {
+                options = {};
+                this.databases.set(connName, options as ConnectionOptions);
+            }
+
+            if (Helper.isBoolean(value)) {
+                options[propName] = Helper.getBoolean(value);
+            } else if (Helper.isNumber(value)) {
+                options[propName] = Helper.getFloat(value);
+            } else {
+                options[propName] = value;
+            }
         }
     }
 }

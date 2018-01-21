@@ -10,7 +10,7 @@ import { ErrorMiddleware, FultonDiContainer, Middleware, Request, Response } fro
 import { FultonAuthRouter, IUser, IUserManager } from "./auths/index";
 import { Identifier, Provider, Type, TypeProvider, ValueProvider } from "./helpers/type-helpers";
 
-import Env from "./helpers/env-helpers";
+import Env from "./helpers/env";
 import { Express } from "express";
 import { FultonAppOptions } from "./fulton-app-options";
 import FultonLog from "./fulton-log";
@@ -46,13 +46,15 @@ export abstract class FultonApp {
      * initialize FultonApp. It will be called on start(), if the app isn't initialized;
      * it can be run many times, everytime call this will reset all the related objects
      */
-    async init(reiniOptions = false): Promise<void> {
-        this.initOptions(reiniOptions);
+    async init(resetOptions = false): Promise<void> {
+        this.initOptions(resetOptions);
         this.initDiContainer();
 
         this.server = express();
 
         await this.onInit(this.options);
+
+        this.options.loadDatabaseOptions();
 
         // for log
         this.initLogging();
@@ -68,6 +70,8 @@ export abstract class FultonApp {
 
         // for providers
         this.registerTypes(this.options.providers || []);
+
+        await this.initDatabases();
 
         // for services
         await this.initServices();
@@ -211,6 +215,10 @@ export abstract class FultonApp {
         if (lodash.some(this.options.bodyParsers)) {
             this.server.use(...this.options.bodyParsers);
         }
+    }
+
+    protected async initDatabases(): Promise<void> {
+        
     }
 
     protected async initServices(): Promise<void> {

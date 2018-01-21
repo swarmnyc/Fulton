@@ -1,4 +1,4 @@
-import Env from "./env-helpers";
+import Env from "./env";
 
 describe('env', () => {
     let env = process.env;

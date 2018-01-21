@@ -1,3 +1,5 @@
+import Helper from "./helper";
+
 /**
  * A helper to get process.env value
  */
@@ -13,11 +15,7 @@ export default class Env {
      * @param caseless 
      */
     static getBoolean(name: string, defaultValue: boolean = false): boolean {
-        let value = Env.get(name, null);
-        if (value == null)
-            return defaultValue;
-
-        return /^(true)|1$/i.test(value);
+        return Helper.getBoolean(Env.get(name, null), defaultValue);
     }
 
     /**
@@ -27,11 +25,7 @@ export default class Env {
      * @param caseless 
      */
     static getInt(name: string, defaultValue: number = 0): number {
-        let value = Env.get(name, null);
-        if (value == null)
-            return defaultValue;
-
-        return parseInt(value) || defaultValue;
+        return Helper.getInt(Env.get(name, null), defaultValue);
     }
 
     /**
@@ -45,7 +39,7 @@ export default class Env {
         if (value == null)
             return defaultValue;
 
-        return parseFloat(value) || defaultValue;
+        return Helper.getFloat(Env.get(name, null), defaultValue);
     }
 
     static stage: string = process.env["NODE_ENV"] || "dev";

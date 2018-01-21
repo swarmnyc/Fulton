@@ -1,3 +1,3 @@
 export * from "./fulton-service"
 
-export * from "./FultonEntityService"
+//export * from "./fulton-entity-service"

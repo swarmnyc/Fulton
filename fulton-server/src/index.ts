@@ -4,6 +4,6 @@ export * from "./fulton-log";
 export * from "./interfaces";
 
 export * from "./services";
-export * from "./auths";
+// export * from "./auths";
 export * from "./routers";
 export * from "./helpers";

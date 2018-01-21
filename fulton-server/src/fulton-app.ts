@@ -7,9 +7,9 @@ import * as winston from 'winston';
 
 import { Container, interfaces } from "inversify";
 import { ErrorMiddleware, FultonDiContainer, Middleware, Request, Response } from "./interfaces";
-import { FultonAuthRouter, IUser, IUserManager } from "./auths/index";
 import { Identifier, Provider, Type, TypeProvider, ValueProvider } from "./helpers/type-helpers";
 
+import { ConnectionOptions } from "typeorm/connection/ConnectionOptions";
 import Env from "./helpers/env";
 import { Express } from "express";
 import { FultonAppOptions } from "./fulton-app-options";
@@ -18,6 +18,7 @@ import { FultonLoggerLevel } from "./index";
 import { FultonRouter } from "./routers/fulton-router";
 import { FultonService } from "./services";
 import { KEY_FULTON_APP } from "./constants";
+import { createConnections } from "typeorm";
 import { isFunction } from "util";
 
 export abstract class FultonApp {
@@ -218,6 +219,13 @@ export abstract class FultonApp {
     }
 
     protected async initDatabases(): Promise<void> {
+        let options: ConnectionOptions[];
+        if (this.options.databases.size > 0) {
+            options = Array.from(this.options.databases.values());
+        }
+
+        let connections = await createConnections(options);
+
         
     }
 

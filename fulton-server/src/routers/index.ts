@@ -1,4 +1,3 @@
 export * from "./fulton-router"
-export * from "./FultonEntityRouter"
-export * from "./IFultonRouterContext"
+export * from "./fulton-entity-router"
 export * from "./route-decorators"

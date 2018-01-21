@@ -5,6 +5,10 @@ import { MongoConnectionOptions } from "typeorm/driver/mongodb/MongoConnectionOp
 class MyFultonApp extends FultonApp {
     protected onInit(options: FultonAppOptions): void | Promise<void> {
     }
+
+    protected initDatabases() : Promise<void> {
+        return;
+    }
 }
 
 describe('Fulton App Options', () => {

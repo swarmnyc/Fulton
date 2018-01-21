@@ -106,6 +106,10 @@ class MyFultonApp extends FultonApp {
         ];
     }
 
+    protected initDatabases() : Promise<void> {
+        return;
+    }
+
     routers: FultonRouter[];
     protected onInitRouters(routers: FultonRouter[]) {
         this.routers = routers;

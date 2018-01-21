@@ -92,6 +92,8 @@ export class FultonAppOptions {
 
     routers: Provider[] = [];
 
+    repositories: Provider[] = [];
+
     services: Provider[] = [];
 
     /**

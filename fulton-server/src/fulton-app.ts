@@ -226,12 +226,26 @@ export abstract class FultonApp {
     }
 
     protected async initDatabases(): Promise<void> {
-        let options: ConnectionOptions[];
+        let dbOptions: ConnectionOptions[];
         if (this.options.databases.size > 0) {
-            options = Array.from(this.options.databases.values());
+            dbOptions = [];
+            this.options.databases.forEach((conn, name) => {
+                lodash.set(conn, "name", name);
+                if (lodash.some(this.options.entities)) {
+                    dbOptions.forEach((option) => {
+                        if (option.entities) {
+                            let arr = option.entities as any[];
+                            arr.push(this.options.entities);
+                        } else {
+                            lodash.set(option, "entities", this.options.entities);
+                        }
+                    });
+                }
+                dbOptions.push(conn);
+            });
         }
 
-        let conns = await createConnections(options).catch((error) => {
+        let conns = await createConnections(dbOptions).catch((error) => {
             FultonLog.error("initDatabases fails", error);
             throw error;
         });

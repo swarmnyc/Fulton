@@ -7,7 +7,7 @@ import { ConnectionOptions, Repository } from 'typeorm';
 import { ErrorMiddleware, Middleware, Request, Response } from './interfaces';
 import { FultonClassLoader, defaultClassLoader } from './helpers/module-helpers';
 import FultonLog, { FultonLoggerLevel, FultonLoggerOptions } from './fulton-log';
-import { FultonRouter, FultonService } from './index';
+import { FultonRouter, FultonService, Type } from './index';
 import { Provider, TypeProvider, } from './helpers/type-helpers';
 
 import Env from './helpers/env';
@@ -95,6 +95,13 @@ export class FultonAppOptions {
     repositories: TypeProvider[] = [];
 
     services: Provider[] = [];
+
+    /**
+     * the entities for typeorm, the value will concatenate all database CollectionOptions.entities
+     * you can directly defien enitiies on each CollectionOptions
+     * typeorm will automatically road entities under ./entities
+     */
+    entities: Type[] = [];
 
     /**
      * default is [bodyParser.json(), bodyParser.urlencoded({ extended: true })]

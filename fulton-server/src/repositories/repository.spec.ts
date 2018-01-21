@@ -26,18 +26,27 @@ class FoodRepository extends MongoRepository<Food> {
     public injectValue2: number;
 }
 
+@repository(Food, "conn2")
+class FoodRepository2 extends MongoRepository<Food> {
+}
+
 // the test needs database connections
 class MyApp extends FultonApp {
     protected onInit(options: FultonAppOptions): void | Promise<void> {
         options.databases.set("default", {
             type: "mongodb",
-            url: "mongodb://localhost:27017/fulton-test",
-            entities: [
-                Food
-            ]
+            url: "mongodb://localhost:27017/fulton-test"
         });
 
-        options.repositories.push(FoodRepository);
+        options.databases.set("conn2", {
+            type: "mongodb",
+            url: "mongodb://localhost:27017/fulton-test2",
+            entities: [Food]
+        });
+
+        options.entities = [Food];
+
+        options.repositories = [FoodRepository, FoodRepository2];
 
         options.providers.push({ provide: "injectValue1", useValue: "test1" })
         options.providers.push({ provide: "injectValue2", useValue: 123 })
@@ -68,6 +77,33 @@ xdescribe('repository', () => {
         }
 
         await foodRepo.save(food);
+
+        expect(food.id).toBeTruthy();
+    });
+
+    it('should be created multiple connections', async () => {
+        let app = new MyApp();
+
+        await app.init();
+
+        let foodRepo1 = app.container.get(FoodRepository); // should be the same
+        let food: Food = {
+            name: "name",
+            category: "category"
+        }
+
+        await foodRepo1.save(food);
+
+        expect(food.id).toBeTruthy();
+
+        let foodRepo2 = app.container.get(FoodRepository2);
+
+        food = {
+            name: "name",
+            category: "category"
+        }
+        
+        await foodRepo2.save(food);
 
         expect(food.id).toBeTruthy();
     });

@@ -60,7 +60,7 @@ export class FultonAppOptions {
         /**
          * if true, log every http request.
          * 
-         * default is procces.env["{appName}.options.index.enabled"] or true
+         * default is procces.env["{appName}.options.index.enabled"] or false
          */
         enabled: boolean;
 
@@ -321,6 +321,10 @@ export class FultonAppOptions {
      * the settings for serving static files
      */
     staticFile: {
+        /**
+         * if true, app will serve static files.
+         * default is procces.env["{appName}.options.staticFile.enabled] or false
+         */
         enabled: boolean;
     }
 
@@ -359,26 +363,13 @@ export class FultonAppOptions {
     }
 
     constructor(private appName: string) {
-        let prefix = `${this.appName}.options`;
-
-        this.bodyParsers = [
-            bodyParser.json({
-                type: function (req) {
-                    return lodash.includes(["application/json", "application/vnd.api+json"], req.headers['content-type'])
-                }
-            }),
-            bodyParser.urlencoded({ extended: true })
-        ];
-
         this.index = {
-            enabled: Env.getBoolean(`${prefix}.index.enabled`, true)
+            enabled: false
         };
 
         this.logging = {
-            defaultLoggerLevel: Env.get(`${prefix}.logging.defaultLoggerLevel`) as FultonLoggerLevel,
-            defaultLoggerColorized: Env.getBoolean(`${prefix}.logging.defaultLoggerColorized`, true),
-            httpLoggerEnabled: Env.getBoolean(`${prefix}.logging.httpLoggerEnabled`, false),
-            httpLoggerOptions: null,
+            defaultLoggerColorized: true,
+            httpLoggerEnabled: false,
             httpLoggerMiddlewares: []
         };
 
@@ -387,32 +378,57 @@ export class FultonAppOptions {
         this.loader = {
             appDir: path.dirname(process.mainModule.filename),
 
-            routerLoaderEnabled: Env.getBoolean(`${prefix}.loader.routerLoaderEnabled`, false),
+            routerLoaderEnabled: false,
             routerDirs: ["routers"],
             routerLoader: defaultClassLoader(FultonRouter),
 
-            serviceLoaderEnabled: Env.getBoolean(`${prefix}.loader.serviceLoaderEnabled`, false),
+            serviceLoaderEnabled: false,
             serviceDirs: ["services"],
             serviceLoader: defaultClassLoader(FultonService),
 
-            repositoryLoaderEnabled: Env.getBoolean(`${prefix}.loader.repositoryLoaderEnabled`, false),
+            repositoryLoaderEnabled: false,
             repositoryDirs: ["repositories"],
             repositoryLoader: defaultClassLoader(Repository)
         };
 
         this.server = {
-            httpEnabled: Env.getBoolean(`${prefix}.server.httpEnabled`, true),
-            httpsEnabled: Env.getBoolean(`${prefix}.server.httpsEnabled`, false),
-            httpPort: Env.getInt(`${prefix}.server.httpPort`, 80),
-            httpsPort: Env.getInt(`${prefix}.server.httpsPort`, 443)
+            httpEnabled: true,
+            httpsEnabled: false,
+            httpPort: 80,
+            httpsPort: 443
         }
 
         this.staticFile = {
-            enabled: Env.getBoolean(`${prefix}.staticFile.enabled`, true)
+            enabled: false
         }
     }
 
-    loadDatabaseOptions() {
+    loadEnvOptions() {
+        let prefix = `${this.appName}.options`;
+
+        this.index.enabled = Env.getBoolean(`${prefix}.index.enabled`, this.index.enabled)
+
+        this.logging.defaultLoggerLevel = Env.get(`${prefix}.logging.defaultLoggerLevel`, this.logging.defaultLoggerLevel) as FultonLoggerLevel        
+        this.logging.defaultLoggerColorized = Env.getBoolean(`${prefix}.logging.defaultLoggerColorized`, this.logging.defaultLoggerColorized)
+        this.logging.httpLoggerEnabled = Env.getBoolean(`${prefix}.logging.httpLoggerEnabled`, this.logging.httpLoggerEnabled)
+
+        this.loader.routerLoaderEnabled = Env.getBoolean(`${prefix}.loader.routerLoaderEnabled`, this.loader.routerLoaderEnabled)
+        this.loader.serviceLoaderEnabled = Env.getBoolean(`${prefix}.loader.serviceLoaderEnabled`, this.loader.serviceLoaderEnabled)
+        this.loader.repositoryLoaderEnabled = Env.getBoolean(`${prefix}.loader.repositoryLoaderEnabled`, this.loader.repositoryLoaderEnabled)
+
+        this.server.httpEnabled = Env.getBoolean(`${prefix}.server.httpEnabled`, this.server.httpEnabled)
+        this.server.httpsEnabled = Env.getBoolean(`${prefix}.server.httpsEnabled`, this.server.httpsEnabled)
+        
+        this.server.httpPort = Env.getInt(`${prefix}.server.httpPort`, this.server.httpPort)
+        this.server.httpsPort = Env.getInt(`${prefix}.server.httpsPort`, this.server.httpsPort)
+
+
+        this.staticFile.enabled = Env.getBoolean(`${prefix}.staticFile.enabled`, this.staticFile.enabled)
+
+        this.loadEnvDatabaseOptions();
+    }
+
+    loadEnvDatabaseOptions() {
         let defaultReg = new RegExp(`^${this.appName}\\.options\\.database\\.(\\w+?)$`, "i");
         let namedReg = new RegExp(`^${this.appName}\\.options\\.databases\\[(\\w+?)\\]\\.(\\w+?)$`, "i");
 

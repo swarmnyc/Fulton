@@ -48,27 +48,15 @@ export abstract class FultonApp {
      * initialize FultonApp. It will be called on start(), if the app isn't initialized;
      * it can be run many times, everytime call this will reset all the related objects
      */
-    async init(resetOptions = false): Promise<void> {
-        this.initOptions(resetOptions);
+    async init(): Promise<void> {
+        this.options = new FultonAppOptions(this.appName);
+        
         this.initDiContainer();
 
         this.server = express();
 
         await this.onInit(this.options);
-
-        this.options.loadDatabaseOptions();
-
-        // for log
-        this.initLogging();
-
-        // for bodyParsers
-        this.initBodyParsers();
-
-        // for index
-        this.initIndex();
-
-        // for bodyParsers
-        this.initStaticFile();
+        this.options.loadEnvOptions();
 
         // for providers
         this.registerTypes(this.options.providers || []);
@@ -81,6 +69,18 @@ export abstract class FultonApp {
 
         // for services
         await this.initServices();
+
+        // for log
+        this.initLogging();
+
+        // for bodyParsers
+        this.initBodyParsers();
+
+        // for index
+        this.initIndex();
+
+        // for bodyParsers
+        this.initStaticFile();
 
         // for routers
         await this.initRouters();
@@ -186,13 +186,6 @@ export abstract class FultonApp {
         this.container.bind(KEY_FULTON_APP).toConstantValue(this);
     }
 
-    protected initOptions(resetOptions: boolean): void {
-        if (this.options && !resetOptions)
-            return;
-
-        this.options = new FultonAppOptions(this.appName);
-    }
-
     protected initLogging(): void {
         if (this.options.logging.defaultLoggerLevel) {
             FultonLog.level = this.options.logging.defaultLoggerLevel;
@@ -226,6 +219,8 @@ export abstract class FultonApp {
     }
 
     protected async initDatabases(): Promise<void> {
+        this.options.loadEnvOptions();
+        
         let dbOptions: ConnectionOptions[];
         if (this.options.databases.size > 0) {
             dbOptions = [];

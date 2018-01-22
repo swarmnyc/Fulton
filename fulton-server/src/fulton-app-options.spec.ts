@@ -3,6 +3,7 @@ import { MongoConnectionOptions } from "typeorm/driver/mongodb/MongoConnectionOp
 
 class MyFultonApp extends FultonApp {
     protected onInit(options: FultonAppOptions): void | Promise<void> {
+        options.server.httpPort = 888;
     }
 
     protected initDatabases() : Promise<void> {
@@ -18,7 +19,7 @@ describe('Fulton App Options', () => {
     it('should init options', async () => {
         let app = new MyFultonApp();
 
-        process.env[`${app.appName}.options.index.enabled`] = "0"
+        process.env[`${app.appName}.options.index.enabled`] = "1"
 
         process.env[`${app.appName}.options.logging.defaultLoggerLevel`] = "info"
         process.env[`${app.appName}.options.logging.defaultLoggerColorized`] = "false"
@@ -29,9 +30,9 @@ describe('Fulton App Options', () => {
         process.env[`${app.appName}.options.server.httpPort`] = "777"
         process.env[`${app.appName}.options.server.httpsPort`] = "999"
 
-        await app.init(true);
+        await app.init();
 
-        expect(app.options.index.enabled).toEqual(false);
+        expect(app.options.index.enabled).toEqual(true);
 
         expect(app.options.logging.defaultLoggerLevel).toEqual("info");
         expect(app.options.logging.defaultLoggerColorized).toEqual(false);
@@ -43,14 +44,12 @@ describe('Fulton App Options', () => {
         expect(app.options.server.httpsPort).toEqual(999);
     });
 
-    it('should reset options or not', async () => {
-        let app = new MyFultonApp();
+    it('should override', async () => {
+        process.env[`MyFultonApp.options.server.httpPort`] = "777"
 
-        process.env[`${app.appName}.options.server.httpPort`] = "80"
-        await app.init(true);
-        app.options.server.httpPort = 888;
-        await app.init(false);
-        expect(app.options.server.httpPort).toEqual(888);
+        let app = new MyFultonApp();
+        await app.init();
+        expect(app.options.server.httpPort).toEqual(777);
     });
 
     it('should load default database options', async () => {
@@ -61,7 +60,7 @@ describe('Fulton App Options', () => {
         process.env[`test.options.database.authSource`] = "true."
         process.env[`test.options.database.port`] = "80"
 
-        options.loadDatabaseOptions();
+        options.loadEnvOptions();
 
         let dbOptions = options.databases.get("default") as MongoConnectionOptions;
         expect(dbOptions).toBeTruthy();
@@ -79,7 +78,7 @@ describe('Fulton App Options', () => {
         process.env[`test.options.databases[test].authSource`] = "true."
         process.env[`test.options.databases[test].port`] = "80"
 
-        options.loadDatabaseOptions();
+        options.loadEnvOptions();
 
         let dbOptions = options.databases.get("test") as MongoConnectionOptions;
         expect(dbOptions).toBeTruthy();
@@ -93,7 +92,7 @@ describe('Fulton App Options', () => {
         process.env[`test.options.databases[test2].authSource`] = "true."
         process.env[`test.options.databases[test2].port`] = "80"
 
-        options.loadDatabaseOptions();
+        options.loadEnvOptions();
 
         dbOptions = options.databases.get("test2") as MongoConnectionOptions;
         expect(dbOptions).toBeTruthy();
@@ -113,7 +112,7 @@ describe('Fulton App Options', () => {
 
         process.env[`test.options.databases[test3].url`] = "http://test"
         
-        options.loadDatabaseOptions();
+        options.loadEnvOptions();
 
         let dbOptions = options.databases.get("test3") as MongoConnectionOptions;
         expect(dbOptions).toBeTruthy();

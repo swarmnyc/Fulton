@@ -58,9 +58,9 @@ export class FultonAppOptions {
      */
     index: {
         /**
-         * if true, log every http request.
-         * 
-         * default is procces.env["{appName}.options.index.enabled"] or false
+         * If true, log every http request.
+         * The default is false.
+         * It can be overrided by procces.env["{appName}.options.index.enabled"]
          */
         enabled: boolean;
 
@@ -216,6 +216,8 @@ export class FultonAppOptions {
 
         /**
          * if true, Fulton will load routers based on routerDirs automatically 
+         * the default value is false
+         * It can be overrided by procces.env["{appName}.options.loader.routerLoaderEnabled"]
          */
         routerLoaderEnabled: boolean;
 
@@ -232,6 +234,8 @@ export class FultonAppOptions {
 
         /**
          * if true, Fulton will load services based on serviceDirs automatically 
+         * the default value is false
+         * It can be overrided by procces.env["{appName}.options.loader.serviceLoaderEnabled"]
          */
         serviceLoaderEnabled: boolean;
 
@@ -247,7 +251,9 @@ export class FultonAppOptions {
         serviceLoader: FultonClassLoader<FultonService>
 
         /**
-         * if true, Fulton will load repositories based on repositoryDirs automatically 
+         * if true, Fulton will load repositories based on repositoryDirs automatically
+         * the default value is false
+         * It can be overrided by procces.env["{appName}.options.loader.repositoryLoaderEnabled"] 
          */
         repositoryLoaderEnabled: boolean;
 
@@ -270,7 +276,8 @@ export class FultonAppOptions {
 
         /**
          * the default logger logging level
-         * default is procces.env["{appName}.options.logging.defaultLoggerLevel"] or "debug" 
+         * default is "debug"
+         * It can be overrided by procces.env["{appName}.options.logging.defaultLoggerLevel"]
          */
         defaultLoggerLevel?: FultonLoggerLevel;
 
@@ -289,19 +296,21 @@ export class FultonAppOptions {
 
         /**
          * enable default logger console transport colorized
-         * default is procces.env["{appName}.options.logging.defaultLoggerColorized"] or true
+         * the default value is true
+         * It can be overrided by procces.env["{appName}.options.logging.defaultLoggerColorized"]
          */
         defaultLoggerColorized?: boolean;
 
         /**
          * if true, app will logs every http requests.
-         * default is procces.env["${appName}.options.logging.httpLoggerEnabled"] or false
+         * the default value is false
+         * It can be overrided by procces.env["${appName}.options.logging.httpLoggerEnabled"]
          */
         httpLoggerEnabled: boolean;
 
         /**
-         * the options for http logger, default is console, 
-         * ignore, if httpLogMiddleware has values
+         * the options for http logger, default value is console, 
+         * this value will be ignored, if httpLogMiddlewares has values
          * ```
          * option.httpLogOptions = {
          *      level: "debug",
@@ -323,7 +332,8 @@ export class FultonAppOptions {
     staticFile: {
         /**
          * if true, app will serve static files.
-         * default is procces.env["{appName}.options.staticFile.enabled] or false
+         * the default value is false
+         * It can be overrided by procces.env["{appName}.options.staticFile.enabled]
          */
         enabled: boolean;
 
@@ -336,7 +346,8 @@ export class FultonAppOptions {
     cors: {
         /**
          * if true, app will enable cors.
-         * default is procces.env["{appName}.options.cors.enabled] or false
+         * the default value is false
+         * It can be overrided by procces.env["{appName}.options.cors.enabled]
          */
         enabled: boolean;
 
@@ -349,25 +360,29 @@ export class FultonAppOptions {
     server: {
         /**
          * if true, start a http server
-         * default is procces.env["{appName}.options.server.httpEnabled] or true
+         * the default value is true
+         * It can be overrided by procces.env["{appName}.options.server.httpEnabled]
          */
         httpEnabled: boolean,
 
         /**
          * if true, start a https server
-         * default is procces.env["{appName}.options.server.httpsEnabled] or false
+         * the default value is false
+         * It can be overrided by procces.env["{appName}.options.server.httpsEnabled]
          */
         httpsEnabled: boolean,
 
         /**
          * the port for http
-         * default is procces.env["{appName}.options.server.httpPort"] or 80
+         * the default value is 80
+         * It can be overrided by procces.env["{appName}.options.server.httpPort"]
          */
         httpPort: number,
 
         /**
          * the port for https 
-         * default is procces.env["{appName}.options.server.httpsPort"] or 443
+         * the default value is 443
+         * It can be overrided by procces.env["{appName}.options.server.httpsPort"]
          */
         httpsPort: number,
 
@@ -375,6 +390,20 @@ export class FultonAppOptions {
          * ssl options, must to provide if httpsEnabled is true.
          */
         sslOptions?: https.ServerOptions,
+
+        /**
+         * if true, app will start in cluster mode
+         * the default value is false
+         * It can be overrided by procces.env["{appName}.options.server.clusterEnabled]
+         */
+        clusterEnabled?: boolean
+
+        /**
+         * the number of worker for cluster
+         * the default value is 0, which will use the number of cup cores
+         * It can be overrided by procces.env["{appName}.options.server.clusterWorkerNumber]
+         */
+        clusterWorkerNumber?: number
     }
 
     constructor(private appName: string) {
@@ -410,7 +439,9 @@ export class FultonAppOptions {
             httpEnabled: true,
             httpsEnabled: false,
             httpPort: 80,
-            httpsPort: 443
+            httpsPort: 443,
+            clusterEnabled: false,
+            clusterWorkerNumber: 0
         }
 
         this.staticFile = {
@@ -422,12 +453,15 @@ export class FultonAppOptions {
         }
     }
 
+    /**
+     * load options from environment to override the current options 
+     */
     loadEnvOptions() {
         let prefix = `${this.appName}.options`;
 
         this.index.enabled = Env.getBoolean(`${prefix}.index.enabled`, this.index.enabled)
 
-        this.logging.defaultLoggerLevel = Env.get(`${prefix}.logging.defaultLoggerLevel`, this.logging.defaultLoggerLevel) as FultonLoggerLevel        
+        this.logging.defaultLoggerLevel = Env.get(`${prefix}.logging.defaultLoggerLevel`, this.logging.defaultLoggerLevel) as FultonLoggerLevel
         this.logging.defaultLoggerColorized = Env.getBoolean(`${prefix}.logging.defaultLoggerColorized`, this.logging.defaultLoggerColorized)
         this.logging.httpLoggerEnabled = Env.getBoolean(`${prefix}.logging.httpLoggerEnabled`, this.logging.httpLoggerEnabled)
 
@@ -437,10 +471,12 @@ export class FultonAppOptions {
 
         this.server.httpEnabled = Env.getBoolean(`${prefix}.server.httpEnabled`, this.server.httpEnabled)
         this.server.httpsEnabled = Env.getBoolean(`${prefix}.server.httpsEnabled`, this.server.httpsEnabled)
-        
+
         this.server.httpPort = Env.getInt(`${prefix}.server.httpPort`, this.server.httpPort)
         this.server.httpsPort = Env.getInt(`${prefix}.server.httpsPort`, this.server.httpsPort)
 
+        this.server.clusterEnabled = Env.getBoolean(`${prefix}.server.clusterEnabled`, this.server.clusterEnabled)
+        this.server.clusterWorkerNumber = Env.getInt(`${prefix}.server.clusterWorkerNumber`, this.server.clusterWorkerNumber)
 
         this.staticFile.enabled = Env.getBoolean(`${prefix}.staticFile.enabled`, this.staticFile.enabled)
         this.cors.enabled = Env.getBoolean(`${prefix}.cors.enabled`, this.cors.enabled)
@@ -448,6 +484,9 @@ export class FultonAppOptions {
         this.loadEnvDatabaseOptions();
     }
 
+    /**
+     * load database options from environment to override the current database options 
+     */
     loadEnvDatabaseOptions() {
         let defaultReg = new RegExp(`^${this.appName}\\.options\\.database\\.(\\w+?)$`, "i");
         let namedReg = new RegExp(`^${this.appName}\\.options\\.databases\\[(\\w+?)\\]\\.(\\w+?)$`, "i");
@@ -488,6 +527,5 @@ export class FultonAppOptions {
 
 let defaultErrorHandler: ErrorMiddleware = (err: any, req: Request, res: Response, next: Middleware) => {
     FultonLog.error(`${req.method} ${req.url}\nrequest: %O\nerror: %s`, { httpHeaders: req.headers, httpBody: req.body }, err.stack);
-
     res.sendStatus(500);
 }

@@ -85,12 +85,16 @@ export abstract class FultonApp {
 
         this.isInitialized = true;
         await this.didInit();
+
+        fultonDebug("Options: %O", this.options);
     }
 
     /**
      * start http server or https server. if it isn't initialized, it will call init(), too.
      */
     async start(): Promise<any> {
+        //TODO: implements cluster mode.
+
         if (!this.isInitialized) {
             await this.init().catch((err) => {
                 FultonLog.error(`${this.appName} failed to initialization`, err);
@@ -279,7 +283,14 @@ export abstract class FultonApp {
         }
 
         if (this.options.logging.httpLoggerEnabled) {
-            // TODO: 
+            if (lodash.some(this.options.logging.httpLoggerMiddlewares)) {
+                this.server.use(...this.options.logging.httpLoggerMiddlewares);
+            } else {
+                let logger = FultonLog.addLogger("httpLogger", this.options.logging.httpLoggerOptions);
+                this.server.use((req, res, next) => {
+
+                });
+            }
         }
     }
 

@@ -4,7 +4,7 @@ import { RequestHandler } from "express"
 /**
  * async and await wrap, if return true, will call next
  */
-export const asyncHandler = function (middleware: Middleware) : any | Promise<any> {
+export const asyncWrap = function (middleware: Middleware) : any | Promise<any> {
     return (req: Request, res: Response, next: NextFunction) => {
         Promise
             .resolve(middleware(req, res, next))

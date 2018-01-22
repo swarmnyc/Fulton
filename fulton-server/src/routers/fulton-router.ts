@@ -1,7 +1,7 @@
 import * as assert from "assert";
 import * as lodash from "lodash";
 
-import { ErrorMiddleware, FultonApp, Request, Response, Middleware, asyncHandler } from "../index";
+import { ErrorMiddleware, FultonApp, Request, Response, Middleware, asyncWrap } from "../index";
 import { FullRouterMetadata, RouterMetadata, getFullRouterMethodMetadata, getRouterMetadata } from "./route-decorators-helpers";
 import { FultonDiContainer, PathIdentifier, Inject, Injectable } from "../interfaces";
 import { IRouterMatcher, Router } from "express";
@@ -72,7 +72,7 @@ export abstract class FultonRouter {
             }
 
             let method = lodash.get(this, methodMetadata.property);
-            middlewares.push(asyncHandler(method));
+            middlewares.push(asyncWrap(method));
 
             routeMethod.call(router, methodMetadata.path, middlewares)
         }

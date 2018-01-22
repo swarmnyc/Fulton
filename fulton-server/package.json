@@ -14,9 +14,11 @@
   "author": "",
   "license": "ISC",
   "devDependencies": {
+    "@types/debug": "0.0.30",
     "@types/jasmine": "^2.8.4",
     "@types/lodash": "^4.14.93",
     "@types/mongodb": "^2.2.20",
+    "debug": "^3.1.0",
     "fulton-core": "file:../fulton-core",
     "jasmine": "^2.9.0",
     "jasmine-ts": "^0.2.1",

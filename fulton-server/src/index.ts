@@ -1,3 +1,5 @@
+import "./helpers/debug"
+
 export * from "./fulton-app";
 export * from "./fulton-app-options";
 export * from "./fulton-log";

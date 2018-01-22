@@ -9,12 +9,20 @@ export class ExampleApp extends FultonApp {
         ];
 
         options.index.message = "hello world";
-
         options.index.filepath = "./assets/index.html";
-
         options.index.handler = (req, res, next) => {
             res.send("Hello World!!");
         };
+
+        options.staticFile.enabled = true;
+        options.staticFile.folders = [
+            { path: "/public", folder: "./assets/" },
+            { folder: "./assets/" }
+        ]
+
+        this.server.all("/error", (req, res) => {
+            throw new Error("test error handler");
+        })
 
         // options.server.httpPort = 1234;
 
@@ -33,5 +41,9 @@ export class ExampleApp extends FultonApp {
         // })
 
         // register service
+    }
+
+    didInit() {
+
     }
 }

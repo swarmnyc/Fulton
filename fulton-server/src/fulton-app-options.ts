@@ -5,7 +5,7 @@ import * as path from 'path';
 import * as winston from 'winston';
 
 import { ConnectionOptions, Repository } from 'typeorm';
-import { ErrorMiddleware, Middleware } from './interfaces';
+import { ErrorMiddleware, Middleware, PathIdentifier } from './interfaces';
 import { FultonClassLoader, defaultClassLoader } from './helpers/module-helpers';
 import { FultonLoggerLevel, FultonLoggerOptions } from './fulton-log';
 import { FultonRouter, FultonService, Type } from './index';
@@ -14,6 +14,8 @@ import { Provider, TypeProvider, } from './helpers/type-helpers';
 import Env from './helpers/env';
 import Helper from './helpers/helper';
 import { defaultErrorHandler, default404ErrorHandler } from './middlewares/error-handlers';
+import { ServeStaticOptions } from 'serve-static';
+
 
 export class FultonAppOptions {
     // generate AuthClient collection
@@ -204,13 +206,13 @@ export class FultonAppOptions {
     entities: Type[] = [];
 
     /**
-     * middlewares for parse request.body
+     * app level middlewares for parse request.body
      * default is [express.json(), express.urlencoded({ extended: true })]
      */
     bodyParsers: Middleware[];
 
     /**
-     * custom middlewares, they will be placed before routers
+     * app level custom middlewares, they will be placed before routers
      */
     middlewares: Middleware[] = [];
 
@@ -322,7 +324,7 @@ export class FultonAppOptions {
 
         /**
          * the options for http logger, it is winston options 
-         * this value will be ignored, if httpLogMiddlewares has values
+         * this value will be ignored, if httpLogMiddlewares is not empty
          * 
          * ### default value
          * ```
@@ -340,12 +342,13 @@ export class FultonAppOptions {
 
         /**
          * custom middlewares for http logging, like morgan or others
+         * default is []
          */
         httpLoggerMiddlewares?: Middleware[];
     }
 
     /**
-     * the settings for serving static files
+     * the options for serving static files
      */
     staticFile: {
         /**
@@ -353,13 +356,48 @@ export class FultonAppOptions {
          * the default value is false
          * It can be overrided by procces.env["{appName}.options.staticFile.enabled]
          */
-        enabled: boolean;
+        enabled?: boolean;
 
-        //TODO: implement it
+        /**
+         * the folders and options of static files.
+         * the default value is [], this value will be ignored if middlewares is not empty.
+         * 
+         * ## equivalent
+         * ```
+         * // if path is null
+         * app.use(express.static(folder, options))
+         * 
+         * // if path is not null
+         * app.use(path, express.static(folder, options))
+         * ```
+         */
+        folders?: {
+            path?: PathIdentifier,
+            folder: string,
+            options?: ServeStaticOptions
+        }[]
+
+
+        /**
+         * custom middlewares for serving static files
+         * default is []
+         * ## equivalent
+         * ```
+         * // if path is null
+         * app.use(middleware)
+         * 
+         * // if path is not null
+         * app.use(path, middleware)
+         * ```
+         */
+        middlewares?: {
+            path?: PathIdentifier,
+            middleware: Middleware
+        }[]
     }
 
     /**
-     * the settings for cors
+     * app level cors middlewares
      */
     cors: {
         /**
@@ -474,7 +512,9 @@ export class FultonAppOptions {
         }
 
         this.staticFile = {
-            enabled: false
+            enabled: false,
+            folders: [],
+            middlewares: []
         }
 
         this.cors = {

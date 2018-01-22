@@ -60,7 +60,7 @@ export abstract class FultonApp {
         this.options.loadEnvOptions();
 
         await this.initLogging();
-        
+
         await this.initProviders();
 
         await this.initDatabases();
@@ -303,7 +303,23 @@ export abstract class FultonApp {
 
     protected initStaticFile(): void | Promise<void> {
         if (this.options.staticFile.enabled) {
-            // TODO: 
+            if (lodash.some(this.options.staticFile.middlewares)) {
+                this.options.staticFile.middlewares.forEach(opt => {
+                    if (opt.path) {
+                        this.server.use(opt.path, opt.middleware);
+                    } else {
+                        this.server.use(opt.middleware);
+                    }
+                });
+            } else {
+                this.options.staticFile.folders.forEach(opt => {
+                    if (opt.path) {
+                        this.server.use(opt.path, express.static(opt.folder, opt.options));
+                    } else {
+                        this.server.use(express.static(opt.folder, opt.options));
+                    }
+                })
+            }
         }
     }
 

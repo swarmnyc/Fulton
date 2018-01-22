@@ -15,6 +15,7 @@ import Env from './helpers/env';
 import Helper from './helpers/helper';
 import { defaultErrorHandler, default404ErrorHandler } from './middlewares/error-handlers';
 import { ServeStaticOptions } from 'serve-static';
+import { CorsOptions } from 'cors';
 
 
 export class FultonAppOptions {
@@ -244,7 +245,7 @@ export class FultonAppOptions {
          * the router loader (a function), loads all routers under the folders of routerDirs
          * default is FultonClassLoader
          */
-        routerLoader: FultonClassLoader<FultonRouter>
+        routerLoader: FultonClassLoader<FultonRouter>;
 
         /**
          * if true, Fulton will load services based on serviceDirs automatically 
@@ -262,7 +263,7 @@ export class FultonAppOptions {
          * the router loader (a function), loads all services under the folders of all serviceDirs
          * default is FultonClassLoader
          */
-        serviceLoader: FultonClassLoader<FultonService>
+        serviceLoader: FultonClassLoader<FultonService>;
 
         /**
          * if true, Fulton will load repositories based on repositoryDirs automatically
@@ -280,7 +281,7 @@ export class FultonAppOptions {
          * the respository loader (a function), it loads all respositories under the folders of all repositoryDirs
          * default is FultonClassLoader
          */
-        repositoryLoader: FultonClassLoader<Repository<any>>
+        repositoryLoader: FultonClassLoader<Repository<any>>;
     }
 
     /**
@@ -372,9 +373,9 @@ export class FultonAppOptions {
          * ```
          */
         folders?: {
-            path?: PathIdentifier,
-            folder: string,
-            options?: ServeStaticOptions
+            path?: PathIdentifier;
+            folder: string;
+            options?: ServeStaticOptions;
         }[]
 
 
@@ -391,8 +392,8 @@ export class FultonAppOptions {
          * ```
          */
         middlewares?: {
-            path?: PathIdentifier,
-            middleware: Middleware
+            path?: PathIdentifier;
+            middleware: Middleware;
         }[]
     }
 
@@ -407,7 +408,22 @@ export class FultonAppOptions {
          */
         enabled: boolean;
 
-        //TODO: implement it
+        /**
+         * the options for cors.
+         * the default value is null, 
+         * this value will be ignored if middlewares is not empty.
+         * 
+         * ## equivalent
+         * ```
+         * app.use(cors.static(options))
+         * ```
+         */
+        options?: CorsOptions;
+
+        /**
+         * custom middlewares for cors
+         */
+        middlewares?: Middleware[]
     }
 
     /**
@@ -509,17 +525,19 @@ export class FultonAppOptions {
             httpsPort: 443,
             clusterEnabled: false,
             clusterWorkerNumber: 0
-        }
+        };
 
         this.staticFile = {
             enabled: false,
             folders: [],
             middlewares: []
-        }
+        };
 
         this.cors = {
-            enabled: false
-        }
+            enabled: false,
+            options: null,
+            middlewares: []
+        };
 
         this.bodyParsers = [
             express.json({
@@ -528,7 +546,7 @@ export class FultonAppOptions {
                 }
             }),
             express.urlencoded({ extended: true })
-        ]
+        ];
     }
 
     /**

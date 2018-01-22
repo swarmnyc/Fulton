@@ -22,7 +22,9 @@ export class ExampleApp extends FultonApp {
 
         this.server.all("/error", (req, res) => {
             throw new Error("test error handler");
-        })
+        });
+
+        options.cors.enabled = true;
 
         // options.server.httpPort = 1234;
 

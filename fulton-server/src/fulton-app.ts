@@ -4,6 +4,7 @@ import * as https from 'https';
 import * as lodash from 'lodash';
 import * as path from 'path';
 import * as winston from 'winston';
+import * as cors from 'cors';
 
 import { ConnectionOptions, createConnections, Connection } from "typeorm";
 import { Container, interfaces } from "inversify";
@@ -51,8 +52,8 @@ export abstract class FultonApp {
      */
     async init(): Promise<void> {
         this.options = new FultonAppOptions(this.appName);
-        this.server = express();
-        this.server.locals.fulton = this;
+
+        await this.initServer();
 
         await this.initDiContainer();
 
@@ -180,6 +181,12 @@ export abstract class FultonApp {
         }
 
         return Promise.all(tasks);
+    }
+
+    protected initServer(): void | Promise<void> {
+        this.server = express();
+        this.server.locals.fulton = this;
+        this.server.disable('x-powered-by');
     }
 
     protected initDiContainer(): void | Promise<void> {
@@ -325,7 +332,11 @@ export abstract class FultonApp {
 
     protected initCors(): void | Promise<void> {
         if (this.options.cors.enabled) {
-            // TODO: 
+            if (lodash.some(this.options.cors.middlewares)) {
+                this.server.use(...this.options.cors.middlewares);
+            } else {
+                this.server.use(cors(this.options.cors.options));
+            }
         }
     }
 

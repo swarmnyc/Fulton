@@ -16,6 +16,8 @@ export type PathIdentifier = (string | RegExp | (string | RegExp)[]);
 
 export type FultonDiContainer = interfaces.Container;
 
+export { NextFunction } from "express";
+
 export interface Request extends express.Request {
 }
 

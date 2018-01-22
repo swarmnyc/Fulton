@@ -1,10 +1,10 @@
 import * as assert from "assert";
 import * as lodash from "lodash";
 
-import { ErrorMiddleware, FultonApp } from "../index";
+import { ErrorMiddleware, FultonApp, Request, Response, Middleware, asyncHandler } from "../index";
 import { FullRouterMetadata, RouterMetadata, getFullRouterMethodMetadata, getRouterMetadata } from "./route-decorators-helpers";
 import { FultonDiContainer, PathIdentifier, Inject, Injectable } from "../interfaces";
-import { IRouterMatcher, RequestHandler, Router } from "express";
+import { IRouterMatcher, Router } from "express";
 
 import { Identifier } from "../helpers/type-helpers";
 import { KEY_FULTON_APP } from "../constants";
@@ -46,9 +46,9 @@ export abstract class FultonRouter {
         this.onInit();
 
         assert(this.metadata.router, `${this.constructor.name} don't have @router(path) decorator`)
-        if(this.metadata.router)
+        if (this.metadata.router)
 
-        var router = Router();
+            var router = Router();
 
         if (lodash.some(this.metadata.router.middlewares)) {
             router.use(...this.metadata.router.middlewares);
@@ -56,13 +56,14 @@ export abstract class FultonRouter {
 
         for (const methodMetadata of this.metadata.methods) {
             let routeMethod: IRouterMatcher<any> = lodash.get(router, methodMetadata.method);
-            let middlewares: RequestHandler[] = [];
+            let middlewares: Middleware[] = [];
 
             if (lodash.some(methodMetadata.middlewares)) {
                 middlewares.push(...methodMetadata.middlewares);
             }
 
-            middlewares.push(lodash.get(this, methodMetadata.property));
+            let method = lodash.get(this, methodMetadata.property);
+            middlewares.push(asyncHandler(method));
 
             routeMethod.call(router, methodMetadata.path, middlewares)
         }

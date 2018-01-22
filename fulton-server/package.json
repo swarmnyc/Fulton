@@ -32,7 +32,6 @@
     "@types/node": "^9.3.0",
     "@types/passport": "^0.4.2",
     "@types/winston": "^2.3.7",
-    "body-parser": "^1.18.2",
     "express": "^4.16.2",
     "inversify": "^4.9.0",
     "lodash": "^4.17.4",

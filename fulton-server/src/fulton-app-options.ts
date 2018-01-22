@@ -1,17 +1,18 @@
-import * as bodyParser from 'body-parser';
+import * as express from 'express';
 import * as https from 'https';
 import * as lodash from 'lodash';
 import * as path from 'path';
 
 import { ConnectionOptions, Repository } from 'typeorm';
-import { ErrorMiddleware, Middleware, Request, Response } from './interfaces';
+import { ErrorMiddleware, Middleware } from './interfaces';
 import { FultonClassLoader, defaultClassLoader } from './helpers/module-helpers';
-import FultonLog, { FultonLoggerLevel, FultonLoggerOptions } from './fulton-log';
+import { FultonLoggerLevel, FultonLoggerOptions } from './fulton-log';
 import { FultonRouter, FultonService, Type } from './index';
 import { Provider, TypeProvider, } from './helpers/type-helpers';
 
 import Env from './helpers/env';
 import Helper from './helpers/helper';
+import { defaultErrorHandler } from './middlewares/error-handler';
 
 export class FultonAppOptions {
     // generate AuthClient collection
@@ -193,7 +194,7 @@ export class FultonAppOptions {
 
     /**
      * middlewares for parse request.body
-     * default is [bodyParser.json(), bodyParser.urlencoded({ extended: true })]
+     * default is [express.json(), express.urlencoded({ extended: true })]
      */
     bodyParsers: Middleware[];
 
@@ -451,6 +452,15 @@ export class FultonAppOptions {
         this.cors = {
             enabled: false
         }
+
+        this.bodyParsers = [
+            express.json({
+                type: function (req) {
+                    return lodash.includes(["application/json", "application/vnd.api+json"], req.headers['content-type'])
+                }
+            }),
+            express.urlencoded({ extended: true })
+        ]
     }
 
     /**
@@ -523,9 +533,4 @@ export class FultonAppOptions {
             }
         }
     }
-}
-
-let defaultErrorHandler: ErrorMiddleware = (err: any, req: Request, res: Response, next: Middleware) => {
-    FultonLog.error(`${req.method} ${req.url}\nrequest: %O\nerror: %s`, { httpHeaders: req.headers, httpBody: req.body }, err.stack);
-    res.sendStatus(500);
 }

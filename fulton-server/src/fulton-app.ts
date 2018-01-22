@@ -187,8 +187,12 @@ export abstract class FultonApp {
         this.registerTypes(this.options.providers || []);
     }
 
+    /**
+     * init databases, it will be ignored if repository is empty.
+     */
     protected async initDatabases(): Promise<void> {
-        this.options.loadEnvOptions();
+        if (lodash.isEmpty(this.options.repositories) && this.options.loader.repositoryLoaderEnabled == false)
+            return;
 
         let dbOptions: ConnectionOptions[];
         if (this.options.databases.size > 0) {

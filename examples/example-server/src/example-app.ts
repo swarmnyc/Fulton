@@ -34,12 +34,4 @@ export class ExampleApp extends FultonApp {
 
         // register service
     }
-
-    async initDatabases() {
-
-    }
-
-    async initRepositories() {
-
-    }
 }

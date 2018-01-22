@@ -2,9 +2,11 @@ import "reflect-metadata";
 
 import * as express from "express";
 
-import { interfaces } from "inversify";
+import { injectable, inject, interfaces } from "inversify";
 
-export { injectable, inject } from "inversify";
+export const Injectable = injectable;
+
+export const Inject = inject;
 
 export type Middleware = express.RequestHandler;
 

@@ -3,17 +3,17 @@ import * as lodash from "lodash";
 
 import { ErrorMiddleware, FultonApp } from "../index";
 import { FullRouterMetadata, RouterMetadata, getFullRouterMethodMetadata, getRouterMetadata } from "./route-decorators-helpers";
-import { FultonDiContainer, PathIdentifier, inject, injectable } from "../interfaces";
+import { FultonDiContainer, PathIdentifier, Inject, Injectable } from "../interfaces";
 import { IRouterMatcher, RequestHandler, Router } from "express";
 
 import { Identifier } from "../helpers/type-helpers";
 import { KEY_FULTON_APP } from "../constants";
 
-@injectable()
+@Injectable()
 export abstract class FultonRouter {
     protected metadata: FullRouterMetadata
     protected router: Router;
-    @inject(KEY_FULTON_APP)
+    @Inject(KEY_FULTON_APP)
     protected app: FultonApp;
 
     constructor() {

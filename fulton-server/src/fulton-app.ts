@@ -130,7 +130,7 @@ export abstract class FultonApp {
 
         if (this.options.server.httpsEnabled) {
             tasks.push(new Promise((resolve, reject) => {
-                if (!this.options.server.sslOption) {
+                if (!this.options.server.sslOptions) {
                     let error = `${this.appName} failed to start because https is enabled but sslOption was given`;
                     FultonLog.error(error);
                     reject(error);
@@ -138,7 +138,7 @@ export abstract class FultonApp {
                 }
 
                 this.httpsServer = https
-                    .createServer(this.options.server.sslOption, this.server)
+                    .createServer(this.options.server.sslOptions, this.server)
                     .on("error", (error) => {
                         FultonLog.error(`${this.appName} failed to start https server on port ${this.options.server.httpsPort}`);
                         this.httpsServer = null;
@@ -194,12 +194,12 @@ export abstract class FultonApp {
     }
 
     protected initLogging(): void {
-        if (this.options.logging.defaultLevel) {
-            FultonLog.level = this.options.logging.defaultLevel;
+        if (this.options.logging.defaultLoggerLevel) {
+            FultonLog.level = this.options.logging.defaultLoggerLevel;
         }
 
-        if (this.options.logging.defaultOptions) {
-            FultonLog.configure(this.options.logging.defaultOptions);
+        if (this.options.logging.defaultLoggerOptions) {
+            FultonLog.configure(this.options.logging.defaultLoggerOptions);
         }
 
         if (this.options.logging.defaultLoggerColorized) {
@@ -208,7 +208,7 @@ export abstract class FultonApp {
             }
         }
 
-        if (this.options.logging.httpLogEnabled) {
+        if (this.options.logging.httpLoggerEnabled) {
             // TODO: 
         }
     }

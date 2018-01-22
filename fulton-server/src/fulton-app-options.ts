@@ -17,13 +17,13 @@ export class FultonAppOptions {
     // generate AuthClient collection
     // the client call have to have client authorisation token on auth
     // default is false
-    oauthServerSupport: boolean;
+    //oauthServerSupport: boolean;
 
     // generate api doc
-    enabledApiDoc: boolean;
+    //enabledApiDoc: boolean;
 
     // default is /api/docs
-    apiDocPath: string;
+    // apiDocPath: string;
 
     // for manage user, no default
     //userManager: IUserManager<IUser>
@@ -37,38 +37,35 @@ export class FultonAppOptions {
     // // check permission
     // defaultAuthorizes: FultonMiddleware[]
 
-    //default is [FultonQueryStringParser]
-    queryStringParsers: Middleware[]
-
-    //default is [BodyParser]
-    inputParsers: Middleware[]
-
-    //for dot env path, default is ./.env
-    dotenvPath: string;
-
     /**
      * Databases connection options, you can defien connection options on FultonApp.onInt(),  
-     * and use procces.env[`${appName}.options.databases[{?:connectionName}].{optionName}`] to override data.
-     * for example: FultonApp.options.databases[default].url = {new url}
+     * and use 
+     * `procces.env["{appName}.options.databases[{connectionName}].{optionName}"]` to override data.
+     * 
+     * for example: 
+     * FultonApp.options.databases[default].url={url}
+     * 
      * and 
-     * FultonApp.options.database.url is the sortcut of FultonApp.options.databases[default].url
+     * `procces.env["{appName}.options.database.{optionName}"]` is the sortcut of 
+     * `procces.env["{appName}.options.databases[default].{optionName}"]`
      * 
      * if the map is empty, it will use typeorm.json, for more information see [typeorm](http://typeorm.io/)
      */
     databases: Map<string, ConnectionOptions> = new Map();
 
     /**
-     * behavior for "/" request, only one of three methods active at the same time.
+     * behavior for "/" request, only one of three methods can be actived at the same time.
      */
     index: {
         /**
          * if true, log every http request.
-         * default is procces.env[`${appName}.options.index.enabled`] or true
+         * 
+         * default is procces.env["{appName}.options.index.enabled"] or true
          */
         enabled: boolean;
 
         /**
-          * custom response function
+          * custom response middleware function
           */
         handler?: Middleware;
 
@@ -88,12 +85,103 @@ export class FultonAppOptions {
      */
     errorHandler: ErrorMiddleware;
 
+    /**
+     * Define values or types injections
+     * 
+     * ### Example
+     * 
+     * ``` typescript
+     * class MyApp extends FultonApp {
+     *   onInit(options){
+     *       options.providers = [
+     *           { provide: "api_key", useValue: "your key" }
+     *       ];
+     * 
+     *       options.services = [
+     *           ApiService
+     *       ];
+     *   }
+     * }
+     * 
+     * @Injectable() 
+     * class ApiService {
+     *  // apiKey is injected by container when it is created
+     *  constructor( @Inject("api_key") private apiKey: string) 
+     *  }
+     * }
+     * ```
+     */
     providers: Provider[] = [];
 
+    /**
+     * Define injections for the routers
+     * 
+     * ```
+     * class MyApp extends FultonApp {
+     *   onInit(options){
+     *       options.routers = [
+     *           FoodRouter
+     *       ];
+     *       
+     *       // turn on the router loader if you want app to load routers automatically 
+     *       options.loader.routerLoaderEnabled = true;
+     *   }
+     * }
+     * 
+     * @router("/food")
+     * class FoodRouter extends FultonRouter {
+     * }
+     * ```
+     */
     routers: Provider[] = [];
 
+    /**
+     * Define injections for the repositories
+     * 
+     * ```
+     * class MyApp extends FultonApp {
+     *   onInit(options){
+     *       options.repositories = [
+     *           FoodRepository
+     *       ];
+     * 
+     *       // turn on the repository loader if you want app to load repositories automatically 
+     *       options.loader.repositoryLoaderEnabled = true;
+     *   }
+     * }
+     * 
+     * @Injectable() 
+     * class ApiService {
+     *  constructor( @Inject("api_key") private apiKey: string) 
+     *  }
+     * }
+     * ```
+     */
     repositories: TypeProvider[] = [];
 
+    /**
+     * Define injections for the repositories
+     * 
+     * ```
+     * class MyApp extends FultonApp {
+     *   onInit(options){
+     *       options.repositories = [
+     *           FoodRepository
+     *       ];
+     * 
+     *       // turn on the repository loader if you want app to load repositories automatically 
+     *       options.loader.repositoryLoaderEnabled = true;
+     *   }
+     * }
+     * 
+     * @Entity()
+     * class Food { }
+     * 
+     * @Repository(Food)
+     * class FoodRepository extends MongoRepository<Food> {
+     * }
+     * ```
+     */
     services: Provider[] = [];
 
     /**
@@ -104,134 +192,170 @@ export class FultonAppOptions {
     entities: Type[] = [];
 
     /**
+     * middlewares for parse request.body
      * default is [bodyParser.json(), bodyParser.urlencoded({ extended: true })]
      */
     bodyParsers: Middleware[];
 
     /**
-     * for automatic load modules, default is disabled, 
+     * custom middlewares
+     */
+    middleware: Middleware[] = [];
+
+    /**
+     * for loading modules automatically, default is disabled, 
      * because we want to use Angular style, define types explicitly
      */
     loader: {
         /**
          * the directory of the app, the default router loader use the value ({appDir}/routers)
          * default is the folder of the executed file like if run "node ./src/main.js",
-         * the value of appDir is the folder of main.js
+         * the value of appDir is ./src/
          */
         appDir: string;
 
         /**
-         * if true, Fulton will load routers based on routerDirs automaticly 
+         * if true, Fulton will load routers based on routerDirs automatically 
          */
         routerLoaderEnabled: boolean;
 
         /**
-         * the folder that router-loader looks at, default value is ["routers"], 
+         * the folders that router-loader looks at, default value is ["routers"], 
          */
         routerDirs: string[];
 
         /**
-         * the router loader, loads all routers under the folder of {appDir}/{routersDir}
+         * the router loader (a function), loads all routers under the folders of routerDirs
+         * default is FultonClassLoader
          */
         routerLoader: FultonClassLoader<FultonRouter>
 
         /**
-         * if true, Fulton will load services based on routerDirs automaticly 
+         * if true, Fulton will load services based on serviceDirs automatically 
          */
         serviceLoaderEnabled: boolean;
 
         /**
-         * the folder that router-loader looks at, default value is ["services"], 
+         * the folders that service-loader looks at, default value is ["services"], 
          */
         serviceDirs: string[];
 
         /**
-         * the router loader, loads all routers under the folder of {appDir}/{routersDir}
+         * the router loader (a function), loads all services under the folders of all serviceDirs
+         * default is FultonClassLoader
          */
         serviceLoader: FultonClassLoader<FultonService>
 
         /**
-         * if true, Fulton will load services based on routerDirs automaticly 
+         * if true, Fulton will load repositories based on repositoryDirs automatically 
          */
         repositoryLoaderEnabled: boolean;
 
         /**
-         * the folder that router-loader looks at, default value is ["repositories"], 
+         * the folders that router-loader looks at, default value is ["repositories"], 
          */
         repositoryDirs: string[];
 
         /**
-         * the router loader, loads all routers under the folder of {appDir}/{routersDir}
+         * the respository loader (a function), it loads all respositories under the folders of all repositoryDirs
+         * default is FultonClassLoader
          */
         repositoryLoader: FultonClassLoader<Repository<any>>
     }
 
+    /**
+     * Logging optons
+     */
     logging: {
-        defaultLevel?: FultonLoggerLevel;
+
+        /**
+         * the default logger logging level
+         * default is procces.env["{appName}.options.logging.defaultLoggerLevel"] or "debug" 
+         */
+        defaultLoggerLevel?: FultonLoggerLevel;
+
         /**
          * if not null, reset winstion default logger with this value, the default value is null
-         * @example
+         * 
+         * ## example
+         * ```
          * option.defaultLoggerOptions = {
          *      level: "debug",
-         *      transports: []
+         *      transports: [new winston.transports.Console()]
          * }
+         * ```
          */
-        defaultOptions?: FultonLoggerOptions;
+        defaultLoggerOptions?: FultonLoggerOptions;
 
         /**
-         * is default log transport collorized
-         * default is procces.env[`${appName}.options.logging.httpLogEnabled`] or true
+         * enable default logger console transport colorized
+         * default is procces.env["{appName}.options.logging.defaultLoggerColorized"] or true
          */
-        defaultLoggerColorized: boolean;
+        defaultLoggerColorized?: boolean;
 
         /**
-         * if true, log every http request.
-         * default is procces.env[`${appName}.options.logging.httpLogEnabled`] or false
+         * if true, app will logs every http requests.
+         * default is procces.env["${appName}.options.logging.httpLoggerEnabled"] or false
          */
-        httpLogEnabled: boolean;
+        httpLoggerEnabled: boolean;
 
         /**
-         * the options for http logger, default is console
-         * @example
+         * the options for http logger, default is console, 
+         * ignore, if httpLogMiddleware has values
+         * ```
          * option.httpLogOptions = {
          *      level: "debug",
-         *      transports: []
+         *      transports: [new winston.transports.Console()]
          * }
+         * ```
          */
-        httpLogOptions: FultonLoggerOptions;
+        httpLoggerOptions?: FultonLoggerOptions;
+
+        /**
+         * custom middlewares for http logging
+         */
+        httpLoggerMiddlewares?: Middleware[];
     }
 
+    /**
+     * the settings for serving static files
+     */
     staticFile: {
         enabled: boolean;
     }
 
     /**
-     * the setting of http and https servers
+     * the settings for http and https servers
      */
     server: {
         /**
-         * default is procces.env[`${appName}.options.server.httpEnabled`] or true
+         * if true, start a http server
+         * default is procces.env["{appName}.options.server.httpEnabled] or true
          */
         httpEnabled: boolean,
+
         /**
-         * default is procces.env[`${appName}.options.server.httpsEnabled`] or false
+         * if true, start a https server
+         * default is procces.env["{appName}.options.server.httpsEnabled] or false
          */
         httpsEnabled: boolean,
 
         /**
-         * default is procces.env[`${appName}.options.server.httpPort`] or 80
+         * the port for http
+         * default is procces.env["{appName}.options.server.httpPort"] or 80
          */
         httpPort: number,
 
         /**
-         * default is procces.env[`${appName}.options.server.httpsPort`] or 443
+         * the port for https 
+         * default is procces.env["{appName}.options.server.httpsPort"] or 443
          */
         httpsPort: number,
 
         /**
-         * have to provide if httpsEnabled is true.
+         * ssl options, must to provide if httpsEnabled is true.
          */
-        sslOption?: https.ServerOptions,
+        sslOptions?: https.ServerOptions,
     }
 
     constructor(private appName: string) {
@@ -251,10 +375,11 @@ export class FultonAppOptions {
         };
 
         this.logging = {
-            defaultLevel: Env.get(`${prefix}.logging.defaultLevel`) as FultonLoggerLevel,
+            defaultLoggerLevel: Env.get(`${prefix}.logging.defaultLoggerLevel`) as FultonLoggerLevel,
             defaultLoggerColorized: Env.getBoolean(`${prefix}.logging.defaultLoggerColorized`, true),
-            httpLogEnabled: Env.getBoolean(`${prefix}.logging.httpLogEnabled`, false),
-            httpLogOptions: null
+            httpLoggerEnabled: Env.getBoolean(`${prefix}.logging.httpLoggerEnabled`, false),
+            httpLoggerOptions: null,
+            httpLoggerMiddlewares: []
         };
 
         this.errorHandler = defaultErrorHandler;
@@ -262,15 +387,15 @@ export class FultonAppOptions {
         this.loader = {
             appDir: path.dirname(process.mainModule.filename),
 
-            routerLoaderEnabled: false,
+            routerLoaderEnabled: Env.getBoolean(`${prefix}.loader.routerLoaderEnabled`, false),
             routerDirs: ["routers"],
             routerLoader: defaultClassLoader(FultonRouter),
 
-            serviceLoaderEnabled: false,
+            serviceLoaderEnabled: Env.getBoolean(`${prefix}.loader.serviceLoaderEnabled`, false),
             serviceDirs: ["services"],
             serviceLoader: defaultClassLoader(FultonService),
 
-            repositoryLoaderEnabled: false,
+            repositoryLoaderEnabled: Env.getBoolean(`${prefix}.loader.repositoryLoaderEnabled`, false),
             repositoryDirs: ["repositories"],
             repositoryLoader: defaultClassLoader(Repository)
         };

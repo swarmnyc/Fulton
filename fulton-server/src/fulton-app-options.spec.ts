@@ -1,5 +1,4 @@
-import { Factory, FultonApp, FultonAppOptions, FultonDiContainer, FultonRouter, FultonService, inject, injectable, router } from "./index";
-
+import { Factory, FultonApp, FultonAppOptions, FultonDiContainer, FultonRouter, FultonService, Inject, Injectable, router } from "./index";
 import { MongoConnectionOptions } from "typeorm/driver/mongodb/MongoConnectionOptions";
 
 class MyFultonApp extends FultonApp {
@@ -21,9 +20,9 @@ describe('Fulton App Options', () => {
 
         process.env[`${app.appName}.options.index.enabled`] = "0"
 
-        process.env[`${app.appName}.options.logging.defaultLevel`] = "info"
+        process.env[`${app.appName}.options.logging.defaultLoggerLevel`] = "info"
         process.env[`${app.appName}.options.logging.defaultLoggerColorized`] = "false"
-        process.env[`${app.appName}.options.logging.httpLogEnabled`] = "1"
+        process.env[`${app.appName}.options.logging.httpLoggerEnabled`] = "1"
 
         process.env[`${app.appName}.options.server.httpEnabled`] = "0"
         process.env[`${app.appName}.options.server.httpsEnabled`] = "true"
@@ -34,9 +33,9 @@ describe('Fulton App Options', () => {
 
         expect(app.options.index.enabled).toEqual(false);
 
-        expect(app.options.logging.defaultLevel).toEqual("info");
+        expect(app.options.logging.defaultLoggerLevel).toEqual("info");
         expect(app.options.logging.defaultLoggerColorized).toEqual(false);
-        expect(app.options.logging.httpLogEnabled).toEqual(true);
+        expect(app.options.logging.httpLoggerEnabled).toEqual(true);
 
         expect(app.options.server.httpEnabled).toEqual(false);
         expect(app.options.server.httpsEnabled).toEqual(true);

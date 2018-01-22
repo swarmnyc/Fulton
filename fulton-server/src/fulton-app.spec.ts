@@ -1,11 +1,11 @@
-import { Factory, FultonApp, FultonAppOptions, FultonDiContainer, FultonRouter, FultonService, inject, injectable, router } from "./index";
+import { Factory, FultonApp, FultonAppOptions, FultonDiContainer, FultonRouter, FultonService, Inject, Injectable, router } from "./index";
 
-@injectable()
+@Injectable()
 class ServiceA extends FultonService {
     value = "a"
 }
 
-@injectable()
+@Injectable()
 class ServiceB extends FultonService {
     constructor(public serviceA: ServiceA) {
         super();
@@ -14,7 +14,7 @@ class ServiceB extends FultonService {
     value = "b"
 }
 
-@injectable()
+@Injectable()
 class ServiceC extends ServiceB {
     constructor(public serviceA: ServiceA) {
         super(serviceA);
@@ -23,7 +23,7 @@ class ServiceC extends ServiceB {
     value = "c"
 }
 
-@injectable()
+@Injectable()
 class ServiceD extends ServiceB {
     constructor(public serviceA: ServiceA) {
         super(serviceA);
@@ -32,16 +32,16 @@ class ServiceD extends ServiceB {
     value = "d"
 }
 
-@injectable()
+@Injectable()
 class ServiceE {
     constructor(public serviceA: ServiceA, public value: any) {
 
     }
 }
 
-@injectable()
+@Injectable()
 class ApiService {
-    constructor( @inject("api_key") public apiKey: string) {
+    constructor( @Inject("api_key") public apiKey: string) {
 
     }
 }

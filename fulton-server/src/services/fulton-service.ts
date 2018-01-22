@@ -1,11 +1,11 @@
-import { FultonDiContainer, injectable } from "../interfaces";
+import { FultonDiContainer, Injectable } from "../interfaces";
 
 import { Type } from "../helpers/type-helpers";
 
 /**
  * Fulton Service
  */
-@injectable()
+@Injectable()
 export abstract class FultonService {
     
 }

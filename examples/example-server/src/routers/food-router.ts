@@ -1,4 +1,4 @@
-import { FultonEntityRouter, FultonRouter, Middleware, Request, Response, httpGet, injectable, router } from "fulton-server"
+import { FultonEntityRouter, FultonRouter, Middleware, Request, Response, httpGet, Injectable, router } from "fulton-server"
 
 @router("/food")
 export class FoodRouter extends FultonRouter {

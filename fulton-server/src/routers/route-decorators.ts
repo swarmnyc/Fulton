@@ -1,11 +1,11 @@
 import { KEY_ROUTER_ERROR_HANDLER_METADATA, KEY_ROUTER_HTTP_METHOD_LIST_METADATA, KEY_ROUTER_METADATA } from "../constants";
-import { PathIdentifier, injectable } from "../interfaces";
+import { PathIdentifier, Injectable } from "../interfaces";
 import { RouterMetadata, RouterMethodMetadata } from "./route-decorators-helpers";
 
 import { Middleware } from "../index";
 
 /**
- * router metadata, this method includes @injectable()
+ * router metadata, this method includes @Injectable()
  * @param path 
  * @param doc 
  * @param middlewares 
@@ -13,7 +13,7 @@ import { Middleware } from "../index";
  */
 export function router(path: PathIdentifier, doc?: any, ...middlewares: Middleware[]): any {
     return function (target: any) {
-        injectable()(target);
+        Injectable()(target);
 
         Reflect.defineMetadata(
             KEY_ROUTER_METADATA,

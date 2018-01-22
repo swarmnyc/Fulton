@@ -2,9 +2,9 @@ import { Column, Entity, MongoRepository, ObjectIdColumn, createConnection } fro
 
 import { FultonApp } from "../fulton-app";
 import { FultonAppOptions } from "../fulton-app-options";
-import { inject } from "inversify";
-import { repository } from "./repository-decorator";
+import { Inject } from "../interfaces";
 import { MongoClient } from "mongodb";
+import { Repository } from "./repository-decorator";
 
 @Entity("foods")
 class Food {
@@ -16,17 +16,17 @@ class Food {
     category?: String;
 }
 
-@repository(Food)
+@Repository(Food)
 class FoodRepository extends MongoRepository<Food> {
-    constructor( @inject("injectValue1") public injectValue1: string) {
+    constructor( @Inject("injectValue1") public injectValue1: string) {
         super()
     }
 
-    @inject("injectValue2")
+    @Inject("injectValue2")
     public injectValue2: number;
 }
 
-@repository(Food, "conn2")
+@Repository(Food, "conn2")
 class FoodRepository2 extends MongoRepository<Food> {
 }
 

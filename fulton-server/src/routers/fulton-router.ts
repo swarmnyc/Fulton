@@ -10,18 +10,27 @@ import { Identifier } from "../helpers/type-helpers";
 import { KEY_FULTON_APP } from "../constants";
 
 /**
- * Express Router Wrap, it support async await
+ * Express Router Wrap, it uses asyncHandler to support async await
  * 
  * ## example
  * 
  * ```
  * @Router("/Food")
  * export class FoodRouter extends FultonRouter {
- *    @httpGet()
- *    async list(req: Request, res: Response) { }
+ *    @HttpGet()
+ *    async list(req: Request, res: Response) { 
+ *      return true; //if return true, asyncHandler will all next();
+ *    }
  * 
- *    @httpGet("/:id")
- *    async detail(req: Request, res: Response) { }
+ *    @HttpGet("/:id")
+ *    async detail(req: Request, res: Response, next: NextFunction) { 
+ *       next(); // call next() yourself;
+ *    }
+ * 
+ *    @HttpPost()
+ *    async create(req: Request, res: Response) { 
+ *       // if retrun not true,  asyncHandler won't call next();
+ *    }
  * }
  * ```
  * 

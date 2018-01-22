@@ -21,6 +21,7 @@ import { KEY_FULTON_APP } from "./constants";
 import { createRepository } from "./repositories/repository-helpers";
 import { getRepositoryMetadata } from "./repositories/repository-decorator-helper";
 import { isFunction } from "util";
+import { defaultHttpLoggerHandler } from "./middlewares/http-logger";
 
 export abstract class FultonApp {
     private isInitialized: boolean = false;
@@ -51,12 +52,15 @@ export abstract class FultonApp {
     async init(): Promise<void> {
         this.options = new FultonAppOptions(this.appName);
         this.server = express();
+        this.server.locals.fulton = this;
 
         await this.initDiContainer();
 
         await this.onInit(this.options);
         this.options.loadEnvOptions();
 
+        await this.initLogging();
+        
         await this.initProviders();
 
         await this.initDatabases();
@@ -66,7 +70,7 @@ export abstract class FultonApp {
         await this.initServices();
 
         /* start express middlewares */
-        await this.initLogging();
+        await this.initHttpLogging();
 
         await this.initCors();
 
@@ -183,6 +187,22 @@ export abstract class FultonApp {
         this.container.bind(KEY_FULTON_APP).toConstantValue(this);
     }
 
+    protected initLogging(): void | Promise<void> {
+        if (this.options.logging.defaultLoggerLevel) {
+            FultonLog.level = this.options.logging.defaultLoggerLevel;
+        }
+
+        if (this.options.logging.defaultLoggerOptions) {
+            FultonLog.configure(this.options.logging.defaultLoggerOptions);
+        }
+
+        if (this.options.logging.defaultLoggerColorized) {
+            if (winston.default.transports.console) {
+                (winston.default.transports.console as any).colorize = true;
+            }
+        }
+    }
+
     protected initProviders(): void | Promise<void> {
         this.registerTypes(this.options.providers || []);
     }
@@ -271,29 +291,12 @@ export abstract class FultonApp {
         await this.didInitRouters(routers);
     }
 
-    protected initLogging(): void | Promise<void> {
-        if (this.options.logging.defaultLoggerLevel) {
-            FultonLog.level = this.options.logging.defaultLoggerLevel;
-        }
-
-        if (this.options.logging.defaultLoggerOptions) {
-            FultonLog.configure(this.options.logging.defaultLoggerOptions);
-        }
-
-        if (this.options.logging.defaultLoggerColorized) {
-            if (winston.default.transports.console) {
-                (winston.default.transports.console as any).colorize = true;
-            }
-        }
-
+    protected initHttpLogging(): void | Promise<void> {
         if (this.options.logging.httpLoggerEnabled) {
             if (lodash.some(this.options.logging.httpLoggerMiddlewares)) {
                 this.server.use(...this.options.logging.httpLoggerMiddlewares);
-            } else {
-                let logger = FultonLog.addLogger("httpLogger", this.options.logging.httpLoggerOptions);
-                this.server.use((req, res, next) => {
-
-                });
+            } else if (this.options.logging.httpLoggerOptions) {
+                this.server.use(defaultHttpLoggerHandler(this.options.logging.httpLoggerOptions));
             }
         }
     }
@@ -351,7 +354,14 @@ export abstract class FultonApp {
 
     protected initErrorHandler(): void | Promise<void> {
         if (this.options.errorHandler) {
-            this.server.use(this.options.errorHandler);
+
+            if (lodash.some(this.options.errorHandler.error404Middlewares)) {
+                this.server.use(...this.options.errorHandler.error404Middlewares);
+            }
+
+            if (lodash.some(this.options.errorHandler.errorMiddlewares)) {
+                this.server.use(...this.options.errorHandler.errorMiddlewares);
+            }
         }
     }
 

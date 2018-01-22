@@ -2,6 +2,7 @@ import * as express from 'express';
 import * as https from 'https';
 import * as lodash from 'lodash';
 import * as path from 'path';
+import * as winston from 'winston';
 
 import { ConnectionOptions, Repository } from 'typeorm';
 import { ErrorMiddleware, Middleware } from './interfaces';
@@ -12,7 +13,7 @@ import { Provider, TypeProvider, } from './helpers/type-helpers';
 
 import Env from './helpers/env';
 import Helper from './helpers/helper';
-import { defaultErrorHandler } from './middlewares/error-handler';
+import { defaultErrorHandler, default404ErrorHandler } from './middlewares/error-handlers';
 
 export class FultonAppOptions {
     // generate AuthClient collection
@@ -60,7 +61,7 @@ export class FultonAppOptions {
     index: {
         /**
          * If true, log every http request.
-         * The default is false.
+         * The default is true.
          * It can be overrided by procces.env["{appName}.options.index.enabled"]
          */
         enabled: boolean;
@@ -82,9 +83,19 @@ export class FultonAppOptions {
     }
 
     /**
-     * default is using output to logger
+     * error and 404 middlewares, they will be placed on the last.
      */
-    errorHandler: ErrorMiddleware;
+    errorHandler: {
+        /**
+         * middlewares for error, default is [fultonDefaultErrorHandler]
+         */
+        errorMiddlewares?: ErrorMiddleware[],
+
+        /**
+         * middlewares for 404 error, default is [fultonDefault404ErrorHandler]
+         */
+        error404Middlewares?: Middleware[]
+    }
 
     /**
      * Define values or types injections
@@ -199,7 +210,7 @@ export class FultonAppOptions {
     bodyParsers: Middleware[];
 
     /**
-     * custom middlewares
+     * custom middlewares, they will be placed before routers
      */
     middlewares: Middleware[] = [];
 
@@ -304,18 +315,24 @@ export class FultonAppOptions {
 
         /**
          * if true, app will logs every http requests.
-         * the default value is false
+         * the default value is true
          * It can be overrided by procces.env["${appName}.options.logging.httpLoggerEnabled"]
          */
         httpLoggerEnabled: boolean;
 
         /**
-         * the options for http logger, default value is console, 
+         * the options for http logger, it is winston options 
          * this value will be ignored, if httpLogMiddlewares has values
+         * 
+         * ### default value
          * ```
-         * option.httpLogOptions = {
-         *      level: "debug",
-         *      transports: [new winston.transports.Console()]
+         * option.httpLogOptions =  {
+         *      console: {
+         *          colorize: true,
+         *          level: "info",
+         *          showLevel: false,
+         *          label: "Http"
+         *      }
          * }
          * ```
          */
@@ -409,16 +426,27 @@ export class FultonAppOptions {
 
     constructor(private appName: string) {
         this.index = {
-            enabled: false
+            enabled: true
         };
 
         this.logging = {
             defaultLoggerColorized: true,
-            httpLoggerEnabled: false,
+            httpLoggerEnabled: true,
+            httpLoggerOptions: {
+                console: {
+                    colorize: true,
+                    level: "info",
+                    showLevel: false,
+                    label: "Http"
+                }
+            },
             httpLoggerMiddlewares: []
         };
 
-        this.errorHandler = defaultErrorHandler;
+        this.errorHandler = {
+            errorMiddlewares: [defaultErrorHandler],
+            error404Middlewares: [default404ErrorHandler]
+        };
 
         this.loader = {
             appDir: path.dirname(process.mainModule.filename),

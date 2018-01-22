@@ -200,7 +200,7 @@ export class FultonAppOptions {
     /**
      * custom middlewares
      */
-    middleware: Middleware[] = [];
+    middlewares: Middleware[] = [];
 
     /**
      * for loading modules automatically, default is disabled, 
@@ -312,7 +312,7 @@ export class FultonAppOptions {
         httpLoggerOptions?: FultonLoggerOptions;
 
         /**
-         * custom middlewares for http logging
+         * custom middlewares for http logging, like morgan or others
          */
         httpLoggerMiddlewares?: Middleware[];
     }
@@ -326,6 +326,21 @@ export class FultonAppOptions {
          * default is procces.env["{appName}.options.staticFile.enabled] or false
          */
         enabled: boolean;
+
+        //TODO: implement it
+    }
+
+    /**
+     * the settings for cors
+     */
+    cors: {
+        /**
+         * if true, app will enable cors.
+         * default is procces.env["{appName}.options.cors.enabled] or false
+         */
+        enabled: boolean;
+
+        //TODO: implement it
     }
 
     /**
@@ -401,6 +416,10 @@ export class FultonAppOptions {
         this.staticFile = {
             enabled: false
         }
+
+        this.cors = {
+            enabled: false
+        }
     }
 
     loadEnvOptions() {
@@ -424,6 +443,7 @@ export class FultonAppOptions {
 
 
         this.staticFile.enabled = Env.getBoolean(`${prefix}.staticFile.enabled`, this.staticFile.enabled)
+        this.cors.enabled = Env.getBoolean(`${prefix}.cors.enabled`, this.cors.enabled)
 
         this.loadEnvDatabaseOptions();
     }

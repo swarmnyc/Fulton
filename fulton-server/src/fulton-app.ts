@@ -50,45 +50,38 @@ export abstract class FultonApp {
      */
     async init(): Promise<void> {
         this.options = new FultonAppOptions(this.appName);
-        
-        this.initDiContainer();
-
         this.server = express();
+
+        await this.initDiContainer();
 
         await this.onInit(this.options);
         this.options.loadEnvOptions();
 
-        // for providers
-        this.registerTypes(this.options.providers || []);
+        await this.initProviders();
 
-        // for databases
         await this.initDatabases();
 
-        // for repositories
         await this.initRepositories();
 
-        // for services
         await this.initServices();
 
-        // for log
-        this.initLogging();
+        /* start express middlewares */
+        await this.initLogging();
 
-        // for bodyParsers
-        this.initBodyParsers();
+        await this.initCors();
 
-        // for index
-        this.initIndex();
+        await this.initBodyParsers();
 
-        // for bodyParsers
-        this.initStaticFile();
+        await this.initIndex();
 
-        // for routers
+        await this.initStaticFile();
+
+        await this.initMiddlewares();
+
         await this.initRouters();
 
-        // for errorHandler
-        if (this.options.errorHandler) {
-            this.server.use(this.options.errorHandler);
-        }
+        await this.initErrorHandler();
+        /* end express middlewares */
 
         this.isInitialized = true;
         await this.didInit();
@@ -181,46 +174,18 @@ export abstract class FultonApp {
         return Promise.all(tasks);
     }
 
-    protected initDiContainer() {
+    protected initDiContainer(): void | Promise<void> {
         this.container = new Container();
         this.container.bind(KEY_FULTON_APP).toConstantValue(this);
     }
 
-    protected initLogging(): void {
-        if (this.options.logging.defaultLoggerLevel) {
-            FultonLog.level = this.options.logging.defaultLoggerLevel;
-        }
-
-        if (this.options.logging.defaultLoggerOptions) {
-            FultonLog.configure(this.options.logging.defaultLoggerOptions);
-        }
-
-        if (this.options.logging.defaultLoggerColorized) {
-            if (winston.default.transports.console) {
-                (winston.default.transports.console as any).colorize = true;
-            }
-        }
-
-        if (this.options.logging.httpLoggerEnabled) {
-            // TODO: 
-        }
-    }
-
-    protected initStaticFile(): void {
-        if (this.options.staticFile.enabled) {
-            // TODO: 
-        }
-    }
-
-    protected initBodyParsers(): void {
-        if (lodash.some(this.options.bodyParsers)) {
-            this.server.use(...this.options.bodyParsers);
-        }
+    protected initProviders(): void | Promise<void> {
+        this.registerTypes(this.options.providers || []);
     }
 
     protected async initDatabases(): Promise<void> {
         this.options.loadEnvOptions();
-        
+
         let dbOptions: ConnectionOptions[];
         if (this.options.databases.size > 0) {
             dbOptions = [];
@@ -298,7 +263,51 @@ export abstract class FultonApp {
         await this.didInitRouters(routers);
     }
 
-    protected initIndex(): void {
+    protected initLogging(): void | Promise<void> {
+        if (this.options.logging.defaultLoggerLevel) {
+            FultonLog.level = this.options.logging.defaultLoggerLevel;
+        }
+
+        if (this.options.logging.defaultLoggerOptions) {
+            FultonLog.configure(this.options.logging.defaultLoggerOptions);
+        }
+
+        if (this.options.logging.defaultLoggerColorized) {
+            if (winston.default.transports.console) {
+                (winston.default.transports.console as any).colorize = true;
+            }
+        }
+
+        if (this.options.logging.httpLoggerEnabled) {
+            // TODO: 
+        }
+    }
+
+    protected initStaticFile(): void | Promise<void> {
+        if (this.options.staticFile.enabled) {
+            // TODO: 
+        }
+    }
+
+    protected initCors(): void | Promise<void> {
+        if (this.options.cors.enabled) {
+            // TODO: 
+        }
+    }
+
+    protected initMiddlewares(): void | Promise<void> {
+        if (lodash.some(this.options.middlewares)) {
+            this.server.use(...this.options.middlewares);
+        }
+    }
+
+    protected initBodyParsers(): void | Promise<void> {
+        if (lodash.some(this.options.bodyParsers)) {
+            this.server.use(...this.options.bodyParsers);
+        }
+    }
+
+    protected initIndex(): void | Promise<void> {
         if (!this.options.index.enabled) {
             return
         }
@@ -322,6 +331,12 @@ export abstract class FultonApp {
             });
 
             return;
+        }
+    }
+
+    protected initErrorHandler(): void | Promise<void> {
+        if (this.options.errorHandler) {
+            this.server.use(this.options.errorHandler);
         }
     }
 
@@ -366,6 +381,11 @@ export abstract class FultonApp {
     }
 
     // events
+
+    /**
+     * to init the app. Env values for options will be loaded after onInit.
+     * @param options the options for start app
+     */
     protected abstract onInit(options: FultonAppOptions): void | Promise<void>;
 
     protected didInit(): void | Promise<void> { }

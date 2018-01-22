@@ -9,6 +9,23 @@ import { IRouterMatcher, RequestHandler, Router } from "express";
 import { Identifier } from "../helpers/type-helpers";
 import { KEY_FULTON_APP } from "../constants";
 
+/**
+ * Express Router Wrap, it support async await
+ * 
+ * ## example
+ * 
+ * ```
+ * @Router("/Food")
+ * export class FoodRouter extends FultonRouter {
+ *    @httpGet()
+ *    async list(req: Request, res: Response) { }
+ * 
+ *    @httpGet("/:id")
+ *    async detail(req: Request, res: Response) { }
+ * }
+ * ```
+ * 
+ */
 @Injectable()
 export abstract class FultonRouter {
     protected metadata: FullRouterMetadata

@@ -11,7 +11,7 @@ import { Middleware } from "../index";
  * @param middlewares 
  * @param afterMiddlewares 
  */
-export function router(path: PathIdentifier, doc?: any, ...middlewares: Middleware[]): any {
+export function Router(path: PathIdentifier, doc?: any, ...middlewares: Middleware[]): any {
     return function (target: any) {
         Injectable()(target);
 
@@ -38,8 +38,8 @@ export function errorHandler() {
  * @param doc 
  * @param middlewares 
  */
-export function all(path?: PathIdentifier, doc?: any, ...middlewares: Middleware[]) {
-    return httpMethod("all", path, doc, ...middlewares);
+export function HttpAll(path?: PathIdentifier, doc?: any, ...middlewares: Middleware[]) {
+    return HttpMethod("all", path, doc, ...middlewares);
 }
 
 /**
@@ -48,8 +48,8 @@ export function all(path?: PathIdentifier, doc?: any, ...middlewares: Middleware
  * @param doc 
  * @param middlewares 
  */
-export function httpGet(path?: PathIdentifier, doc?: any, ...middlewares: Middleware[]) {
-    return httpMethod("get", path, doc, ...middlewares);
+export function HttpGet(path?: PathIdentifier, doc?: any, ...middlewares: Middleware[]) {
+    return HttpMethod("get", path, doc, ...middlewares);
 }
 
 /**
@@ -58,8 +58,8 @@ export function httpGet(path?: PathIdentifier, doc?: any, ...middlewares: Middle
  * @param doc 
  * @param middlewares 
  */
-export function httpPost(path?: PathIdentifier, doc?: any, ...middlewares: Middleware[]) {
-    return httpMethod("post", path, doc, ...middlewares);
+export function HttpPost(path?: PathIdentifier, doc?: any, ...middlewares: Middleware[]) {
+    return HttpMethod("post", path, doc, ...middlewares);
 }
 
 /**
@@ -68,8 +68,8 @@ export function httpPost(path?: PathIdentifier, doc?: any, ...middlewares: Middl
  * @param doc 
  * @param middlewares 
  */
-export function httpPut(path?: PathIdentifier, doc?: any, ...middlewares: Middleware[]) {
-    return httpMethod("put", path, doc, ...middlewares);
+export function HttpPut(path?: PathIdentifier, doc?: any, ...middlewares: Middleware[]) {
+    return HttpMethod("put", path, doc, ...middlewares);
 }
 
 /**
@@ -78,8 +78,8 @@ export function httpPut(path?: PathIdentifier, doc?: any, ...middlewares: Middle
  * @param doc 
  * @param middlewares 
  */
-export function httpPatch(path?: PathIdentifier, doc?: any, ...middlewares: Middleware[]) {
-    return httpMethod("patch", path, doc, ...middlewares);
+export function HttpPatch(path?: PathIdentifier, doc?: any, ...middlewares: Middleware[]) {
+    return HttpMethod("patch", path, doc, ...middlewares);
 }
 
 /**
@@ -88,8 +88,8 @@ export function httpPatch(path?: PathIdentifier, doc?: any, ...middlewares: Midd
  * @param doc 
  * @param middlewares 
  */
-export function httpHead(path?: PathIdentifier, doc?: any, ...middlewares: Middleware[]) {
-    return httpMethod("head", path, doc, ...middlewares);
+export function HttpHead(path?: PathIdentifier, doc?: any, ...middlewares: Middleware[]) {
+    return HttpMethod("head", path, doc, ...middlewares);
 }
 
 /**
@@ -98,8 +98,8 @@ export function httpHead(path?: PathIdentifier, doc?: any, ...middlewares: Middl
  * @param doc 
  * @param middlewares 
  */
-export function httpDelete(path?: PathIdentifier, doc?: any, ...middlewares: Middleware[]) {
-    return httpMethod("delete", path, doc, ...middlewares);
+export function HttpDelete(path?: PathIdentifier, doc?: any, ...middlewares: Middleware[]) {
+    return HttpMethod("delete", path, doc, ...middlewares);
 }
 
 /**
@@ -109,7 +109,7 @@ export function httpDelete(path?: PathIdentifier, doc?: any, ...middlewares: Mid
  * @param doc 
  * @param middlewares 
  */
-export function httpMethod(method: string, path: PathIdentifier = "/", doc?: any, ...middlewares: Middleware[]) {
+export function HttpMethod(method: string, path: PathIdentifier = "/", doc?: any, ...middlewares: Middleware[]) {
     return function (target: any, property: string, descriptor: PropertyDescriptor) {
 
         let metadata: RouterMethodMetadata = {

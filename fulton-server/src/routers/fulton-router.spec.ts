@@ -1,11 +1,11 @@
 import * as express from 'express';
 
-import { Middleware, errorHandler, httpDelete, httpGet, httpPut } from "../index";
+import { Middleware, errorHandler, HttpDelete, HttpGet, HttpPut } from "../index";
 import { Request, Response } from "../interfaces";
 import { getFullRouterMethodMetadata, getRouterMethodMetadataList } from "./route-decorators-helpers";
 
 import { FultonRouter } from "./fulton-router";
-import { router } from "./route-decorators";
+import { Router } from "./route-decorators";
 
 let middlewares: Middleware[] = [
     function () {
@@ -13,44 +13,44 @@ let middlewares: Middleware[] = [
     }
 ]
 
-@router("/A", "abc")
+@Router("/A", "abc")
 export class RouterA extends FultonRouter {
-    @httpGet()
+    @HttpGet()
     list() { }
 
-    @httpGet("/:id")
+    @HttpGet("/:id")
     get() { }
 
     @errorHandler()
     error() { }
 }
 
-@router("/B", "efg", ...middlewares)
+@Router("/B", "efg", ...middlewares)
 export class RouterB extends FultonRouter {
 
 }
 
-@router("/C")
+@Router("/C")
 export class RouterC extends RouterA {
-    @httpGet("/list")
+    @HttpGet("/list")
     list() { }
 
-    @httpGet("/:key")
+    @HttpGet("/:key")
     get() { }
 }
 
-@router("/D")
+@Router("/D")
 export class RouterD extends RouterA {
-    @httpPut()
+    @HttpPut()
     update() { }
 
-    @httpDelete()
+    @HttpDelete()
     delete() { }
 }
 
-@router("/Food")
+@Router("/Food")
 export class FoodRouter extends FultonRouter {
-    @httpGet()
+    @HttpGet()
     list(req: Request, res: Response) { }
 }
 

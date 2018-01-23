@@ -1,4 +1,4 @@
-import { FultonApp, FultonAppOptions, FultonDiContainer } from "fulton-server"
+import { FultonApp, FultonAppOptions, FultonDiContainer, NextFunction, Request, Response } from "fulton-server"
 
 import { FoodRouter } from "./routers/food-router";
 
@@ -10,7 +10,7 @@ export class ExampleApp extends FultonApp {
 
         options.index.message = "hello world";
         options.index.filepath = "./assets/index.html";
-        options.index.handler = (req, res, next) => {
+        options.index.handler = (req: Request, res: Response, next: NextFunction) => {
             res.send("Hello World!!");
         };
 

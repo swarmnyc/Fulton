@@ -5,7 +5,7 @@ import * as path from 'path';
 import * as winston from 'winston';
 
 import { ConnectionOptions, Repository } from 'typeorm';
-import { ErrorMiddleware, Middleware, PathIdentifier } from './interfaces';
+import { ErrorMiddleware, Middleware, PathIdentifier, AppMode } from './interfaces';
 import { FultonClassLoader, defaultClassLoader } from './helpers/module-helpers';
 import { FultonLoggerLevel, FultonLoggerOptions } from './fulton-log';
 import { FultonRouter, FultonService, Type } from './index';
@@ -41,9 +41,9 @@ export class FultonAppOptions {
     // defaultAuthorizes: FultonMiddleware[]
 
     /**
-     * There are some default values for api and web.
+     * There are some default values for api and web-view.
      */
-    mode: "api" | "web" | "mixed";
+    mode: AppMode;
 
     /**
      * User manager and authentication based on passport

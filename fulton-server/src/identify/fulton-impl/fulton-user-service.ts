@@ -11,24 +11,27 @@ export class FultonUserService implements IUserService {
 
     }
 
-    find(username: string, password: string): FultonUser {
-        throw new Error("Method not implemented.");
-    }
-
-    findByOauth(soruce: string, profile: any): FultonUser {
-        throw new Error("Method not implemented.");
-    }
-
-    findByToken(token: string): FultonUser {
-        throw new Error("Method not implemented.");
-    }
-
     register(user: FultonUser): Promise<FultonUser> {
         throw new Error("Method not implemented.");
     }
 
-    issueToken(user: FultonUser, save: boolean = true) {
+    login(username: string, password: string): FultonUser {
+        throw new Error("Method not implemented.");
+    }
 
+    loginByOauth(soruce: string, profile: any): FultonUser {
+        throw new Error("Method not implemented.");
+    }
+
+    findByAccessToken(token: string): FultonUser {
+        throw new Error("Method not implemented.");
+    }
+
+    issueAccessToken(user: FultonUser) {
+    }
+
+    checkRoles(user: FultonUser, ...roles:string[]): boolean{
+        return false;
     }
 
     resetPassword(email: string) {

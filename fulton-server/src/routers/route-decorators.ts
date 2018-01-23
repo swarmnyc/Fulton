@@ -1,8 +1,6 @@
 import { KEY_ROUTER_ERROR_HANDLER_METADATA, KEY_ROUTER_HTTP_METHOD_LIST_METADATA, KEY_ROUTER_METADATA } from "../constants";
-import { PathIdentifier, Injectable, RouterDocOptions } from "../interfaces";
+import { PathIdentifier, Injectable, RouterDocOptions, HttpMethod ,Middleware, RouterActionDocOptions } from "../index";
 import { RouterMetadata, RouterMethodMetadata } from "./route-decorators-helpers";
-
-import { Middleware, RouterActionDocOptions } from "../index";
 import { isFunction } from "util";
 
 /**
@@ -57,7 +55,7 @@ export function errorHandler() {
 export function HttpAll(path?: PathIdentifier, doc?: RouterActionDocOptions, ...middlewares: Middleware[]): any
 export function HttpAll(path?: PathIdentifier, ...middlewares: Middleware[]): any
 export function HttpAll(path?: PathIdentifier, ...args: any[]): any {
-    return HttpMethod("all", path, ...args);
+    return HttpAction("all", path, ...args);
 }
 
 /**
@@ -69,7 +67,7 @@ export function HttpAll(path?: PathIdentifier, ...args: any[]): any {
 export function HttpGet(path?: PathIdentifier, doc?: RouterActionDocOptions, ...middlewares: Middleware[]): any
 export function HttpGet(path?: PathIdentifier, ...middlewares: Middleware[]): any
 export function HttpGet(path?: PathIdentifier, ...args: any[]): any {
-    return HttpMethod("get", path, ...args);
+    return HttpAction("get", path, ...args);
 }
 
 /**
@@ -81,7 +79,7 @@ export function HttpGet(path?: PathIdentifier, ...args: any[]): any {
 export function HttpPost(path?: PathIdentifier, doc?: RouterActionDocOptions, ...middlewares: Middleware[]): any
 export function HttpPost(path?: PathIdentifier, ...middlewares: Middleware[]): any
 export function HttpPost(path?: PathIdentifier, ...args: any[]): any {
-    return HttpMethod("post", path, ...args);
+    return HttpAction("post", path, ...args);
 }
 
 /**
@@ -93,7 +91,7 @@ export function HttpPost(path?: PathIdentifier, ...args: any[]): any {
 export function HttpPut(path?: PathIdentifier, doc?: RouterActionDocOptions, ...middlewares: Middleware[]): any
 export function HttpPut(path?: PathIdentifier, ...middlewares: Middleware[]): any
 export function HttpPut(path?: PathIdentifier, ...args: any[]): any {
-    return HttpMethod("put", path, ...args);
+    return HttpAction("put", path, ...args);
 }
 
 /**
@@ -105,7 +103,7 @@ export function HttpPut(path?: PathIdentifier, ...args: any[]): any {
 export function HttpPatch(path?: PathIdentifier, doc?: RouterActionDocOptions, ...middlewares: Middleware[]): any
 export function HttpPatch(path?: PathIdentifier, ...middlewares: Middleware[]): any
 export function HttpPatch(path?: PathIdentifier, ...args: any[]): any {
-    return HttpMethod("patch", path, ...args);
+    return HttpAction("patch", path, ...args);
 }
 
 /**
@@ -117,7 +115,7 @@ export function HttpPatch(path?: PathIdentifier, ...args: any[]): any {
 export function HttpHead(path?: PathIdentifier, doc?: RouterActionDocOptions, ...middlewares: Middleware[]): any
 export function HttpHead(path?: PathIdentifier, ...middlewares: Middleware[]): any
 export function HttpHead(path?: PathIdentifier, ...args: any[]): any {
-    return HttpMethod("head", path, ...args);
+    return HttpAction("head", path, ...args);
 }
 
 /**
@@ -129,7 +127,7 @@ export function HttpHead(path?: PathIdentifier, ...args: any[]): any {
 export function HttpDelete(path?: PathIdentifier, doc?: RouterActionDocOptions, ...middlewares: Middleware[]): any
 export function HttpDelete(path?: PathIdentifier, ...middlewares: Middleware[]): any
 export function HttpDelete(path?: PathIdentifier, ...args: any[]): any {
-    return HttpMethod("delete", path, ...args);
+    return HttpAction("delete", path, ...args);
 }
 
 /**
@@ -139,9 +137,9 @@ export function HttpDelete(path?: PathIdentifier, ...args: any[]): any {
  * @param doc 
  * @param middlewares 
  */
-export function HttpMethod(method: string, path: PathIdentifier, doc?: RouterActionDocOptions, ...middlewares: Middleware[]): any
-export function HttpMethod(method: string, path: PathIdentifier, ...middlewares: Middleware[]): any
-export function HttpMethod(method: string, path: PathIdentifier = "/", ...args: any[]): any {
+export function HttpAction(method: HttpMethod, path: PathIdentifier, doc?: RouterActionDocOptions, ...middlewares: Middleware[]): any
+export function HttpAction(method: HttpMethod, path: PathIdentifier, ...middlewares: Middleware[]): any
+export function HttpAction(method: HttpMethod, path: PathIdentifier = "/", ...args: any[]): any {
     return function (target: any, property: string, descriptor: PropertyDescriptor) {
         let doc, middlewares;
 

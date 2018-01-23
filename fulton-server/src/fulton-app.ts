@@ -44,6 +44,7 @@ export abstract class FultonApp {
 
     constructor() {
         this.appName = this.constructor.name;
+        this.options = new FultonAppOptions(this.appName);        
     }
 
     /**
@@ -51,8 +52,6 @@ export abstract class FultonApp {
      * it can be run many times, everytime call this will reset all the related objects
      */
     async init(): Promise<void> {
-        this.options = new FultonAppOptions(this.appName);
-
         await this.initServer();
 
         await this.initDiContainer();

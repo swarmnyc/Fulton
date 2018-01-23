@@ -1,11 +1,11 @@
 import * as express from 'express';
 
-import { Middleware, errorHandler, HttpDelete, HttpGet, HttpPut } from "../index";
+import { Middleware, errorHandler, authenticate, authorize, authorizeByRole } from "../index";
 import { Request, Response } from "../interfaces";
 import { getFullRouterMethodMetadata, getRouterMethodMetadataList } from "./route-decorators-helpers";
 
 import { FultonRouter } from "./fulton-router";
-import { Router } from "./route-decorators";
+import { Router, HttpPost, HttpDelete, HttpGet, HttpPut } from "./route-decorators";
 
 let middleware: Middleware = function () {
 
@@ -50,10 +50,28 @@ export class RouterD extends RouterA {
     delete() { }
 }
 
+// router level authorization
 @Router("/Food")
 export class FoodRouter extends FultonRouter {
+    // all actions needs to be authorized
     @HttpGet()
     list(req: Request, res: Response) { }
+
+    @HttpGet("/:id")
+    detail(req: Request, res: Response) { }
+}
+
+@Router("/auth")
+export class AuthRouter extends FultonRouter {
+    @HttpGet("/login")
+    loginView(req: Request, res: Response) {
+        res.render("login");
+    }
+
+    @HttpPost("/login", authenticate("local", { failureRedirect: "/auth/login" }))
+    login(req: Request, res: Response) {
+        res.redirect("/");
+    }
 }
 
 describe('Fulton Router', () => {
@@ -95,9 +113,9 @@ describe('Fulton Router', () => {
         expect(metadata.methods[0].middlewares.length).toEqual(2);
 
         expect(metadata.methods[1].path).toEqual("/:key");
-        expect(metadata.methods[1].doc.title).toEqual("get");        
+        expect(metadata.methods[1].doc.title).toEqual("get");
         expect(metadata.methods[1].middlewares.length).toEqual(3);
-        
+
         expect(metadata.errorhandler).not.toBeUndefined();
     });
 
@@ -112,7 +130,7 @@ describe('Fulton Router', () => {
         expect(metadata.methods[3].path).toEqual("/:id");
 
         expect(metadata.methods[0].method).toEqual("put");
-        expect(metadata.methods[0].middlewares.length).toEqual(3);        
+        expect(metadata.methods[0].middlewares.length).toEqual(3);
         expect(metadata.methods[1].method).toEqual("delete");
     });
 

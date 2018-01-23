@@ -1,24 +1,16 @@
 import { IDebugger } from 'debug';
-import { IUser } from './src/identify/interfaces';
+import {Request, FultonUser, FuttonUserService } from './src/index';
 
-// custom helpers
+// custom types for helping development;
 
 declare global {
-    var fultonDebug: IDebugger; 
+    var fultonDebug: IDebugger;
     var fultonDebugFunc: (func: () => string | any[]) => void;
 
     namespace NodeJS {
         interface Global {
-            fultonDebug: IDebugger; 
+            fultonDebug: IDebugger;
             fultonDebugFunc: (func: () => string | any[]) => void;
-        }
-    }
-}
-
-declare global {
-    namespace Express {
-        interface Request {
-            user?: IUser;
         }
     }
 }

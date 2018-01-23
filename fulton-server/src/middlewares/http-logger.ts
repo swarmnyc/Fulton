@@ -1,17 +1,14 @@
 import FultonLog from "../fulton-log";
-import { Request, Response, Middleware } from "../interfaces";
-import { RequestHandler } from "express"
+import { Request, Response, Middleware, NextFunction } from "../interfaces";
 
 import { LoggerOptions } from "winston";
 import chalk from "chalk";
 import * as lodash from 'lodash';
-import { NextFunction } from "express-serve-static-core";
 
 // inspired from https://github.com/bithavoc/express-winston/blob/master/index.js
 
 export function defaultHttpLoggerHandler(options: LoggerOptions): Middleware {
     let logger = FultonLog.addLogger("httpLogger", options);
-
     
     return (req: Request, res: Response, next: NextFunction) => {
         res.locals.__startTime = new Date().getTime();

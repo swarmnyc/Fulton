@@ -23,3 +23,13 @@ export interface Request extends express.Request {
 
 export interface Response extends express.Response {
 }
+
+export interface RouterDocOptions {
+    title?: string;
+    description?: string;
+}
+
+export interface RouterActionDocOptions {
+    title?: string;
+    description?: string;
+}

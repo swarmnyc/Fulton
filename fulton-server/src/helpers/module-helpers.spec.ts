@@ -43,7 +43,7 @@ describe("module helper", () => {
         expect(services).toContain(ServiceB);
     });
 
-    fit("should check moduels", async () => {
+    it("should check moduels", async () => {
         expect(moduleExists("express")).toEqual(true);
         expect(moduleExists("facebook")).toEqual(false);
     });

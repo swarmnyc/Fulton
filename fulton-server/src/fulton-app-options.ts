@@ -14,7 +14,6 @@ import { default404ErrorHandler, defaultErrorHandler } from './middlewares/error
 
 import { CorsOptions } from 'cors';
 import Env from './helpers/env';
-import { FultonUserManager } from './identify/fulton-user-manager';
 import Helper from './helpers/helper';
 import { ServeStaticOptions } from 'serve-static';
 
@@ -40,6 +39,11 @@ export class FultonAppOptions {
 
     // // check permission
     // defaultAuthorizes: FultonMiddleware[]
+
+    /**
+     * There are some default values for api and web.
+     */
+    mode: "api" | "web" | "mixed";
 
     /**
      * User manager and authentication based on passport

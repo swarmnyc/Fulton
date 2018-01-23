@@ -1,5 +1,5 @@
 import { IDebugger } from 'debug';
-import { IUserManager } from './src/index';
+import { IUser } from './src/identify/interfaces';
 
 // custom helpers
 
@@ -18,8 +18,7 @@ declare global {
 declare global {
     namespace Express {
         interface Request {
-            user?: any;
-            userManager?: IUserManager
+            user?: IUser;
         }
     }
 }

@@ -1,10 +1,10 @@
 import { Request } from "../interfaces";
 
 export interface IUser {
-
+    [key: string]: any;
 }
 
-interface FultonUser extends IUser {
+export interface IFultonUser extends IUser {
     id?: string;
     email?: string;
     username?: string;
@@ -12,10 +12,9 @@ interface FultonUser extends IUser {
     accessTokens: FultonAccessToken[];
     oauth: FultonUserOauth[];
     roles: string[];
-    [key: string]: any;
 }
 
-interface FultonUserOauth {
+export interface FultonUserOauth {
     source?: string;
     userId?: string;
     accessToken?: string;
@@ -24,15 +23,16 @@ interface FultonUserOauth {
     expiredAt?: Date;
 }
 
-interface FultonAccessToken {
+export interface FultonAccessToken {
     token?: string;
     issuredAt?: Date;
     expiredAt?: Date;
     actived?: boolean;
 }
 
-export interface IUserManager {
-    findByUsernamePassword(username: string, password: string): IUser;
+export interface IUserService {
+    find(username: string, password: string): IUser;
+    findByOauth(soruce: string, profile: any): IUser;
     findByToken(token: string): IUser;
     register(user: IUser): Promise<IUser>;
 }

@@ -7,41 +7,43 @@ import { getFullRouterMethodMetadata, getRouterMethodMetadataList } from "./rout
 import { FultonRouter } from "./fulton-router";
 import { Router } from "./route-decorators";
 
-let middlewares: Middleware[] = [
-    function () {
+let middleware: Middleware = function () {
 
-    }
+}
+
+let middlewares: Middleware[] = [
+    middleware, middleware, middleware
 ]
 
-@Router("/A", "abc")
+@Router("/A", { title: "RouterA" })
 export class RouterA extends FultonRouter {
     @HttpGet()
     list() { }
 
-    @HttpGet("/:id")
+    @HttpGet("/:id", { title: "Get" })
     get() { }
 
     @errorHandler()
     error() { }
 }
 
-@Router("/B", "efg", ...middlewares)
+@Router("/B", { title: "RouterB" }, ...middlewares)
 export class RouterB extends FultonRouter {
 
 }
 
-@Router("/C")
+@Router("/C", middleware)
 export class RouterC extends RouterA {
-    @HttpGet("/list")
+    @HttpGet("/list", middleware, middleware)
     list() { }
 
-    @HttpGet("/:key")
+    @HttpGet("/:key", { title: "get" }, ...middlewares)
     get() { }
 }
 
-@Router("/D", null)
+@Router("/D", middleware, middleware)
 export class RouterD extends RouterA {
-    @HttpPut()
+    @HttpPut("/", ...middlewares)
     update() { }
 
     @HttpDelete()
@@ -51,9 +53,7 @@ export class RouterD extends RouterA {
 @Router("/Food")
 export class FoodRouter extends FultonRouter {
     @HttpGet()
-    list(req: Request, res: Response) {
-        
-    }
+    list(req: Request, res: Response) { }
 }
 
 describe('Fulton Router', () => {
@@ -61,9 +61,15 @@ describe('Fulton Router', () => {
         let router = new RouterA();
         let metadata = router["metadata"];
         expect(metadata.router.path).toEqual("/A");
-        expect(metadata.router.middlewares).toBeTruthy();
+        expect(metadata.router.doc.title).toEqual("RouterA");
+        expect(metadata.router.middlewares.length).toEqual(0);
+
         expect(metadata.methods.length).toEqual(2);
+        expect(metadata.methods[0].path).toEqual("/");
+
         expect(metadata.methods[1].path).toEqual("/:id");
+        expect(metadata.methods[1].doc.title).toEqual("Get");
+
         expect(metadata.errorhandler).not.toBeUndefined();
     });
 
@@ -71,7 +77,8 @@ describe('Fulton Router', () => {
         let router = new RouterB();
         let metadata = router["metadata"];
         expect(metadata.router.path).toEqual("/B");
-        expect(metadata.router.middlewares).toEqual(middlewares);
+        expect(metadata.router.doc.title).toEqual("RouterB");
+        expect(metadata.router.middlewares.length).toEqual(3);
         expect(metadata.errorhandler).toBeUndefined();
     });
 
@@ -79,9 +86,18 @@ describe('Fulton Router', () => {
         let router = new RouterC();
         let metadata = router["metadata"];
         expect(metadata.router.path).toEqual("/C");
+        expect(metadata.router.doc).toBeUndefined();
+        expect(metadata.router.middlewares.length).toEqual(1);
         expect(metadata.methods.length).toEqual(2);
+
         expect(metadata.methods[0].path).toEqual("/list");
+        expect(metadata.methods[0].doc).toBeUndefined();
+        expect(metadata.methods[0].middlewares.length).toEqual(2);
+
         expect(metadata.methods[1].path).toEqual("/:key");
+        expect(metadata.methods[1].doc.title).toEqual("get");        
+        expect(metadata.methods[1].middlewares.length).toEqual(3);
+        
         expect(metadata.errorhandler).not.toBeUndefined();
     });
 
@@ -89,10 +105,14 @@ describe('Fulton Router', () => {
         let router = new RouterD();
         let metadata = router["metadata"];
         expect(metadata.router.path).toEqual("/D");
+        expect(metadata.router.doc).toBeUndefined();
+        expect(metadata.router.middlewares.length).toEqual(2);
         expect(metadata.methods.length).toEqual(4);
         expect(metadata.methods[2].path).toEqual("/");
         expect(metadata.methods[3].path).toEqual("/:id");
+
         expect(metadata.methods[0].method).toEqual("put");
+        expect(metadata.methods[0].middlewares.length).toEqual(3);        
         expect(metadata.methods[1].method).toEqual("delete");
     });
 

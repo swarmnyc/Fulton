@@ -1,8 +1,7 @@
 import { KEY_ROUTER_ERROR_HANDLER_METADATA, KEY_ROUTER_HTTP_METHOD_LIST_METADATA, KEY_ROUTER_METADATA } from "../constants";
 
 import { FultonRouter } from "./fulton-router";
-import { Middleware } from "../index";
-import { PathIdentifier } from "../interfaces";
+import { PathIdentifier, Middleware, RouterDocOptions, RouterActionDocOptions } from "../interfaces";
 
 export interface FullRouterMetadata {
     router: RouterMetadata,
@@ -12,7 +11,7 @@ export interface FullRouterMetadata {
 
 export interface RouterMetadata {
     path: PathIdentifier,
-    doc: any;
+    doc: RouterDocOptions;
     middlewares: Middleware[]
 }
 
@@ -20,7 +19,7 @@ export interface RouterMethodMetadata {
     path: PathIdentifier,
     method: string,
     property: string,
-    doc: any;
+    doc: RouterActionDocOptions;
     middlewares: Middleware[]
 }
 

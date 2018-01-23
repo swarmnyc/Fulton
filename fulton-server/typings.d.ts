@@ -1,16 +1,25 @@
-import { IDebugger, IFormatters } from 'debug';
+import { IDebugger } from 'debug';
+import { IUserManager } from './src/index';
 
 // custom helpers
 
 declare global {
-    /**
-     * shortcut for debug("Fulton")
-     */
-    var fultonDebug: IDebugger; // loaded in ./src/index.ts
+    var fultonDebug: IDebugger; 
+    var fultonDebugFunc: (func: () => string | any[]) => void;
 
-    /**
-     * call the func if the debug is enabled, good for heavy output.
-     * @param func function that return [msg:string, arg1:any, arg2:any, ....] or return msg:string
-     */
-    var fultonDebugFunc: (func: () => string | any[]) => void; // loaded in ./src/index.ts
+    namespace NodeJS {
+        interface Global {
+            fultonDebug: IDebugger; 
+            fultonDebugFunc: (func: () => string | any[]) => void;
+        }
+    }
+}
+
+declare global {
+    namespace Express {
+        interface Request {
+            user?: any;
+            userManager?: IUserManager
+        }
+    }
 }

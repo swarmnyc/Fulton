@@ -1,8 +1,8 @@
-import { FultonEntityRouter, FultonRouter, Middleware, Request, Response, Injectable, HttpGet, Router } from "fulton-server"
+import { FultonEntityRouter, FultonRouter, Middleware, Request, Response, Injectable, HttpGet, Router, Inject } from "fulton-server"
 
 @Router("/food")
 export class FoodRouter extends FultonRouter {
-    // constructor( @Inject private foodDataService: FoodEntityService) {
+    // constructor(private foodDataService: FoodEntityService) {
     //     super(foodDataService)
 
     //     this.detailDelegate = this.foodDataService.findByName;

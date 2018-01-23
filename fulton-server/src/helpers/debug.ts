@@ -1,20 +1,29 @@
-import * as debug from "debug";
 import { isArray } from "util";
+import { moduleExists } from "../index";
+import { IDebugger } from "debug";
 
-let g:any = global;
+//it is loaded in ./src/index.ts
 
-/**
- * shortcut for debug("Fulton")
- */
-g.fultonDebug = debug("Fulton");
+if (moduleExists("debug")) {
+    /**
+     * shortcut for debug("Fulton")
+     */
+    global.fultonDebug = require("debug")("Fulton");
+} else {
+    // fake debug
+    global.fultonDebug = function (formatter: any, ...args: any[]): void {
+    } as any;
+
+    global.fultonDebug.enabled = false;
+}
 
 /**
  * call the func if the debug is enabled, good for heavy output.
  * @param func function that return [msg:string, arg1:any, arg2:any, ....] or return msg:string
  */
-g.fultonDebugFunc = async (func: () => any[]) => {
+global.fultonDebugFunc = (func: () => string | any[]): void => {
     if (fultonDebug.enabled) {
-        let result = await func();
+        let result = func();
 
         if (!isArray(result)) {
             result = [result]; // have to be array

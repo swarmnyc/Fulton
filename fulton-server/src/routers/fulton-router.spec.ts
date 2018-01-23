@@ -39,7 +39,7 @@ export class RouterC extends RouterA {
     get() { }
 }
 
-@Router("/D")
+@Router("/D", null)
 export class RouterD extends RouterA {
     @HttpPut()
     update() { }
@@ -51,7 +51,9 @@ export class RouterD extends RouterA {
 @Router("/Food")
 export class FoodRouter extends FultonRouter {
     @HttpGet()
-    list(req: Request, res: Response) { }
+    list(req: Request, res: Response) {
+        
+    }
 }
 
 describe('Fulton Router', () => {

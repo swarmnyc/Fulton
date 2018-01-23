@@ -1,7 +1,6 @@
 import { Repository } from "typeorm";
 import { Inject, Injectable } from "../interfaces";
-import { IUser } from "./i-user";
-import { IUserManager } from "../index";
+import { IUserManager, IUser } from "./interfaces";
 
 
 @Injectable()

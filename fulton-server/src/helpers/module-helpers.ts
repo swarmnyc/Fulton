@@ -42,24 +42,45 @@ export function loadModules<T=any>(dir: string, recursive: boolean = true): Prom
 
 export type FultonClassLoader<T> = (servicesDirs: string[], recursive?: boolean) => Promise<Type<T>[]>;
 
-export function defaultClassLoader<T>(type: Type<T>) : FultonClassLoader<Type<T>> {
+export function defaultClassLoader<T>(type: Type<T>): FultonClassLoader<Type<T>> {
     return async (routerDirs: string[], recursive: boolean = true) => {
         let routers: Type<T>[] = [];
-    
+
         for (const dir of routerDirs) {
             let modules = await loadModules(dir, recursive);
-    
+
             for (let routerModule of modules) {
                 for (let name of Object.getOwnPropertyNames(routerModule)) {
                     let routerClass = routerModule[name];
-    
+
                     if (routerClass.prototype instanceof type) {
                         routers.push(routerClass);
                     }
                 }
             }
         }
-    
+
         return routers;
     }
 }
+
+
+/**
+ * check module is exist
+ * @param name module name
+ */
+export function moduleExists(name: string) {
+    /**
+     * This is UGLY but since we're not allowed to require 'native_module'
+     * this is the only way to test if a native module (or non-native module) exist.
+     */
+    try {
+        require(name);
+    } catch (err) {
+        if (err.code === 'MODULE_NOT_FOUND') {
+            return false;
+        }
+    }
+
+    return true;
+};

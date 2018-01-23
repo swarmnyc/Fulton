@@ -44,8 +44,4 @@ export class ExampleApp extends FultonApp {
 
         // register service
     }
-
-    didInit() {
-
-    }
 }

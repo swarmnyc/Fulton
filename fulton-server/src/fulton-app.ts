@@ -75,7 +75,7 @@ export abstract class FultonApp {
 
         await this.initCors();
 
-        await this.initBodyParsers();
+        await this.initRequestParsers();
 
         await this.initIndex();
 
@@ -90,7 +90,7 @@ export abstract class FultonApp {
 
         this.isInitialized = true;
         await this.didInit();
-
+        
         fultonDebug("Options: %O", this.options);
     }
 
@@ -346,9 +346,9 @@ export abstract class FultonApp {
         }
     }
 
-    protected initBodyParsers(): void | Promise<void> {
-        if (lodash.some(this.options.bodyParsers)) {
-            this.server.use(...this.options.bodyParsers);
+    protected initRequestParsers(): void | Promise<void> {
+        if (lodash.some(this.options.requestParsers)) {
+            this.server.use(...this.options.requestParsers);
         }
     }
 

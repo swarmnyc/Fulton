@@ -8,7 +8,7 @@ import { ConnectionOptions, Repository } from 'typeorm';
 import { ErrorMiddleware, Middleware, PathIdentifier } from './interfaces';
 import { FultonClassLoader, defaultClassLoader } from './helpers/module-helpers';
 import { FultonLoggerLevel, FultonLoggerOptions } from './fulton-log';
-import { FultonRouter, FultonService, IUser, Type } from './index';
+import { FultonRouter, FultonService, Type } from './index';
 import { Provider, TypeProvider, } from './helpers/type-helpers';
 import { default404ErrorHandler, defaultErrorHandler } from './middlewares/error-handlers';
 
@@ -17,8 +17,8 @@ import Env from './helpers/env';
 import { FultonUserManager } from './identify/fulton-user-manager';
 import Helper from './helpers/helper';
 import { ServeStaticOptions } from 'serve-static';
-import { Strategy } from 'passport';
-import { IUserManager } from './identify/i-user-manager';
+
+import { IdentifyOptions } from './identify/identify-options';
 
 export class FultonAppOptions {
     // generate AuthClient collection
@@ -42,20 +42,9 @@ export class FultonAppOptions {
     // defaultAuthorizes: FultonMiddleware[]
 
     /**
-     * User register and authentication
+     * User manager and authentication based on passport
      */
-    identify: {
-        /**
-         * the default value is false
-         */
-        enabled: boolean;
-
-        userManager: IUserManager;
-
-        userRepository: Repository<IUser>;
-
-        strategies: Strategy[];
-    }
+    identify: IdentifyOptions;
 
     /**
      * Databases connection options, you can defien connection options on FultonApp.onInt(),  
@@ -222,10 +211,10 @@ export class FultonAppOptions {
     entities: Type[] = [];
 
     /**
-     * app level middlewares for parse request.body
+     * app level middlewares for parser
      * default is [express.json(), express.urlencoded({ extended: true })]
      */
-    bodyParsers: Middleware[];
+    requestParsers: Middleware[];
 
     /**
      * app level custom middlewares, they will be placed before routers
@@ -493,6 +482,10 @@ export class FultonAppOptions {
         clusterWorkerNumber?: number
     }
 
+    compression: {
+        //TODO: implement compression
+    }
+
     constructor(private appName: string) {
         this.index = {
             enabled: true
@@ -554,7 +547,7 @@ export class FultonAppOptions {
             middlewares: []
         };
 
-        this.bodyParsers = [
+        this.requestParsers = [
             express.json({
                 type: function (req) {
                     return lodash.includes(["application/json", "application/vnd.api+json"], req.headers['content-type'])
@@ -562,6 +555,8 @@ export class FultonAppOptions {
             }),
             express.urlencoded({ extended: true })
         ];
+
+        this.identify = new IdentifyOptions(this.appName);
     }
 
     /**
@@ -592,6 +587,7 @@ export class FultonAppOptions {
         this.staticFile.enabled = Env.getBoolean(`${prefix}.staticFile.enabled`, this.staticFile.enabled)
         this.cors.enabled = Env.getBoolean(`${prefix}.cors.enabled`, this.cors.enabled)
 
+        this.identify.loadEnvOptions();
         this.loadEnvDatabaseOptions();
     }
 

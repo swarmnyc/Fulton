@@ -3,7 +3,7 @@ import * as moduleA from "../../spec/helpers/modules/module-a"
 import * as moduleB from "../../spec/helpers/modules/module-b"
 import * as moduleC from "../../spec/helpers/modules/sub-modules/module-c"
 import * as moduleD from "../../spec/helpers/modules/sub-modules/sub-modules/module-d"
-import { FultonRouter, FultonService } from "../index";
+import { FultonRouter, FultonService, moduleExists } from "../index";
 import { RouterA, ServiceA } from "../../spec/helpers/classes/classes1/classes-a";
 import { RouterB, RouterC } from "../../spec/helpers/classes/classes1/classes-b";
 import RouterD, { ServiceB } from "../../spec/helpers/classes/classes2/classes-d";
@@ -41,5 +41,10 @@ describe("module helper", () => {
         expect(services.length).toEqual(2);
         expect(services).toContain(ServiceA);
         expect(services).toContain(ServiceB);
+    });
+
+    fit("should check moduels", async () => {
+        expect(moduleExists("express")).toEqual(true);
+        expect(moduleExists("facebook")).toEqual(false);
     });
 });

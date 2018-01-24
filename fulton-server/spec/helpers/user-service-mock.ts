@@ -1,10 +1,11 @@
 import { FultonUser, IUserService, AccessToken, Inject, Injectable } from "../../src/index";
 import { FultonApp } from "../../src/fulton-app";
 
-@Injectable()
 export class UserServiceMock implements IUserService<FultonUser> {
-    @Inject(FultonApp)
-    protected app: FultonApp;
+    currentUser: FultonUser;
+    
+    constructor(public app: FultonApp) {
+    }
 
     login(username: string, password: string): Promise<FultonUser> {
         if (/fail/i.test(password)) {

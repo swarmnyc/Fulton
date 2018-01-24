@@ -1,7 +1,7 @@
 import { FultonDiContainer } from "../index";
 import { isFunction } from "util";
 
-export type Identifier<T = any> = (string | symbol | Type<T>);
+export type TypeIdentifier<T = any> = (string | symbol | Type<T>);
 
 
 export interface AbstractType<T> extends Function {
@@ -15,7 +15,7 @@ export interface TypeProvider extends Type {
 }
 
 export interface ClassProvider {
-    provide: Identifier;
+    provide: TypeIdentifier;
     useClass: Type;
 
     /**
@@ -25,13 +25,13 @@ export interface ClassProvider {
 }
 
 export interface ValueProvider {
-    provide: Identifier;
+    provide: TypeIdentifier;
     useValue: any;
 }
 
 export type Factory<T=any> = (...args: any[]) => T;
 export interface FactoryProvider {
-    provide: Identifier;
+    provide: TypeIdentifier;
     /**
      * @example
      * //register
@@ -53,7 +53,7 @@ export interface FactoryProvider {
 }
 
 export interface FunctionProvider {
-    provide: Identifier;
+    provide: TypeIdentifier;
     useFunction: (container: FultonDiContainer) => any;
 
     /**
@@ -64,8 +64,8 @@ export interface FunctionProvider {
 
 export declare type Provider = TypeProvider | ValueProvider | ClassProvider | FactoryProvider | FunctionProvider;
 
-export function getIdentifiers(providers: Provider[]): Identifier[] {
-    let ids: Identifier[] = [];
+export function getIdentifiers(providers: Provider[]): TypeIdentifier[] {
+    let ids: TypeIdentifier[] = [];
     if (providers == null)
         return ids;
 

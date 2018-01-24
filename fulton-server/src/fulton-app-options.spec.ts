@@ -53,7 +53,7 @@ describe('Fulton App Options', () => {
     });
 
     it('should load default database options', async () => {
-        let options = new FultonAppOptions("test");
+        let options = new FultonAppOptions("test", "api");
 
         process.env[`test.options.database.url`] = "http://test"
         process.env[`test.options.database.cache`] = "true"
@@ -71,7 +71,7 @@ describe('Fulton App Options', () => {
     });
 
     it('should load databases options', async () => {
-        let options = new FultonAppOptions("test");
+        let options = new FultonAppOptions("test", "api");
 
         process.env[`test.options.databases[test].url`] = "http://test"
         process.env[`test.options.databases[test].cache`] = "true"
@@ -103,7 +103,7 @@ describe('Fulton App Options', () => {
     });
 
     it('should override databases options', async () => {
-        let options = new FultonAppOptions("test");
+        let options = new FultonAppOptions("test", "api");
         options.databases.set("test3", {
             type: "mongodb",
             url: "url",

@@ -1,10 +1,12 @@
-import { PathIdentifier, HttpMethod } from "../interfaces";
-import { LocalStrategyVerify, IUserService, TokenStrategyVerify } from "./interfaces";
-import { Strategy } from "passport";
-import { Middleware, FultonUserService, Type, IUser } from "../index";
-import Env from "../helpers/env";
-import { AuthorizeOptions } from "./authorizes-middlewares";
+import { AppMode, HttpMethod, PathIdentifier } from "../interfaces";
+import { FultonUserService, IUser, Middleware, Type, FultonUser } from "../index";
+import { IUserService, LocalStrategyVerify, TokenStrategyVerify } from "./interfaces";
 import { fultonLocalStrategyVerify, fultonStrategyResponse, fultonTokenStrategyVerify } from "./fulton-impl/fulton-middlewares";
+
+import { AuthorizeOptions } from "./authorizes-middlewares";
+import Env from "../helpers/env";
+import { Repository } from "typeorm";
+import { Strategy } from "passport";
 
 export class IdentifyOptions {
     /**
@@ -14,13 +16,28 @@ export class IdentifyOptions {
     enabled: boolean;
 
     /**
-     * the type of UserService
+     * the type of User
+     * the default value is FultonUser
+     */
+    userType: Type<IUser>;
+
+    /**
+     * the instance or type of User Repository
+     * the default value is typeorm Repository
+     */
+    userRepository: Type<Repository<IUser>> | Repository<IUser>;
+
+    /**
+     * the instance or type of UserService
      * the default value is FultonUserService
      * it can be used like
      * `req.userService`
-     * for all middlewares
+     * 
+     * if your user schema is like FultonUser and auth strategies is
+     * usernamn-password and bearer token, then you don't need to change this value,
+     * otherwise you have to custom your user service;
      */
-    userService: Type<IUserService<IUser>>;
+    userService: Type<IUserService<IUser>> | IUserService<IUser>;
 
     /**
      * access token duratio in seconds
@@ -236,15 +253,15 @@ export class IdentifyOptions {
     /** other passport stratogies */
     strategies: Strategy[];
 
-    constructor(private appName: string) {
+    constructor(private appName: string, private appModel: AppMode) {
         this.enabled = false;
 
+        this.userType = FultonUser;
         this.userService = FultonUserService;
+
         this.defaultAuthorizes = [];
         this.accessTokenDuration = 2592000;
 
-        this.authenticateEveryRequest = true;
-        
         this.local = {
             enabled: true,
             path: "/auth/login",
@@ -256,11 +273,17 @@ export class IdentifyOptions {
             }
         };
 
+        this.bearer = {
+            verify: fultonTokenStrategyVerify
+        }
+
         this.local.response = fultonStrategyResponse;
 
-        this.bearer = {
-            enabled: true,
-            verify: fultonTokenStrategyVerify
+        if (this.appModel == "api") {
+            this.bearer.enabled = true;
+            this.authenticateEveryRequest = true;
+        } else {
+            this.bearer.enabled = false;
         }
     }
 
@@ -269,7 +292,14 @@ export class IdentifyOptions {
      */
     loadEnvOptions() {
         let prefix = `${this.appName}.options.identify`;
-
+        // TODO: identify loadEnvOptions
         this.enabled = Env.getBoolean(`${prefix}.enabled`, this.enabled);
+    }
+
+    useDefaultImplement(): boolean {
+        return this.enabled &&
+            (this.userType == FultonUser) &&
+            (this.userRepository == null) &&
+            (this.userService == FultonUserService)
     }
 }

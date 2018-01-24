@@ -5,20 +5,17 @@ import * as lodash from 'lodash';
 import * as path from 'path';
 import * as winston from 'winston';
 import * as cors from 'cors';
-import * as passport from 'passport';
-import { Strategy as LocalStrategy, IStrategyOptionsWithRequest } from 'passport-local';
-import { Strategy as BearerStrategy } from 'passport-http-bearer';
 
 import { ConnectionOptions, createConnections, Connection } from "typeorm";
 import { Container, interfaces } from "inversify";
-import { ErrorMiddleware, FultonDiContainer, Middleware, Request, Response } from "./interfaces";
-import { Identifier, Provider, Type, TypeProvider, ValueProvider } from "./helpers/type-helpers";
+import { ErrorMiddleware, FultonDiContainer, Middleware, Request, Response, AppMode } from "./interfaces";
+import { TypeIdentifier, Provider, Type, TypeProvider, ValueProvider } from "./helpers/type-helpers";
 
 import Env from "./helpers/env";
 import { Express } from "express";
 import { FultonAppOptions } from "./fulton-app-options";
 import FultonLog from "./fulton-log";
-import { FultonLoggerLevel, LocalStrategyVerifyOptions, AuthenticateOptions, IUserService, IUser } from "./index";
+import { FultonLoggerLevel } from "./index";
 import { FultonRouter } from "./routers/fulton-router";
 import { FultonService } from "./services";
 import { createRepository } from "./repositories/repository-helpers";
@@ -26,7 +23,6 @@ import { getRepositoryMetadata } from "./repositories/repository-decorator-helpe
 import { isFunction } from "util";
 import { defaultHttpLoggerHandler } from "./middlewares/http-logger";
 import { fultonDebug } from "./helpers/debug";
-import { fultonLoadUserMiddleware } from "./identify/fulton-impl/fulton-middlewares";
 
 export abstract class FultonApp {
     private isInitialized: boolean = false;
@@ -46,9 +42,12 @@ export abstract class FultonApp {
     container: FultonDiContainer;
     options: FultonAppOptions;
 
-    constructor() {
+    /**
+     * @param mode There are some different default values for api and web-view. 
+     */
+    constructor(public readonly mode: AppMode = "api") {
         this.appName = this.constructor.name;
-        this.options = new FultonAppOptions(this.appName);
+        this.options = new FultonAppOptions(this.appName, mode);
     }
 
     /**
@@ -223,8 +222,12 @@ export abstract class FultonApp {
      * init databases, it will be ignored if repository is empty.
      */
     protected async initDatabases(): Promise<void> {
-        if (lodash.isEmpty(this.options.repositories) && this.options.loader.repositoryLoaderEnabled == false)
+        if (this.options.identify.useDefaultImplement()) {
+            // add User Entity to typeorm if identify is enabled and use FultonUser and FultonUserService
+            this.options.entities.push(this.options.identify.userType);
+        } else if (lodash.isEmpty(this.options.repositories) && this.options.loader.repositoryLoaderEnabled == false) {
             return;
+        }
 
         let dbOptions: ConnectionOptions[];
         if (this.options.databases.size > 0) {
@@ -283,64 +286,10 @@ export abstract class FultonApp {
         this.registerTypes(providers);
     }
 
-    protected async initIdentify(): Promise<void> {
-        let idOptions = this.options.identify;
-        if (idOptions.enabled) {
-            if (idOptions.userService == null) {
-                throw new Error("identify.userService can't be null when userService.enabled is true.");
-            }
-
-            let userService: IUserService<IUser> = this.container.resolve(idOptions.userService);
-
-            // register userService
-            this.server.request.constructor.prototype.userService = userService;
-
-            // register local
-            this.server.use(passport.initialize());
-
-            if (idOptions.local.enabled) {
-                let localOptions = idOptions.local;
-                let localStrategyOptions: IStrategyOptionsWithRequest = {
-                    passReqToCallback: true,
-                    usernameField: localOptions.usernameField,
-                    passwordField: localOptions.passwordField
-                }
-
-                passport.use(new LocalStrategy(localStrategyOptions, localOptions.verify));
-
-                let httpMethod = this.server[localOptions.httpMethod];
-
-                let authOptions: AuthenticateOptions;
-
-                if (this.options.mode == "api") {
-                    authOptions = {
-                        session: false,
-                        passReqToCallback: true
-                    };
-                } else {
-                    authOptions = localOptions.webViewOptions;
-                }
-
-                httpMethod.apply(this.server,
-                    [localOptions.path,
-                    [passport.authenticate("local", authOptions),
-                    localOptions.response]]);
-            }
-
-            let strategies = [];
-            if (idOptions.bearer.enabled) {
-                passport.use(new BearerStrategy({
-                    scope: null,
-                    realm: null,
-                    passReqToCallback: true
-                }, idOptions.bearer.verify));
-
-                strategies.push("bearer")
-            }
-
-            if (idOptions.authenticateEveryRequest && strategies.length > 0) {
-                this.server.use(fultonLoadUserMiddleware(strategies));
-            }
+    protected initIdentify(): void | Promise<void> {
+        if (this.options.identify.enabled) {
+            // won't load passport-* modules if it is not enabled;
+            return (require("./identify/identify-initializer")(this));
         }
     }
 
@@ -458,8 +407,8 @@ export abstract class FultonApp {
         }
     }
 
-    protected registerTypes(providers: Provider[]): Identifier[] {
-        let ids: Identifier[] = [];
+    protected registerTypes(providers: Provider[]): TypeIdentifier[] {
+        let ids: TypeIdentifier[] = [];
 
         if (providers == null)
             return ids;

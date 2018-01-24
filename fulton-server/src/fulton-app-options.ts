@@ -27,12 +27,6 @@ export class FultonAppOptions {
     // apiDocPath: string;
 
     /**
-     * There are some different default values for api and web-view.
-     * The default value is api;
-     */
-    mode: AppMode;
-
-    /**
      * User manager and authentication based on passport
      */
     identify: IdentifyOptions;
@@ -477,7 +471,7 @@ export class FultonAppOptions {
         //TODO: implement compression
     }
 
-    constructor(private appName: string) {
+    constructor(private appName: string, private appMode: AppMode) {
         this.index = {
             enabled: true
         };
@@ -547,7 +541,7 @@ export class FultonAppOptions {
             express.urlencoded({ extended: true })
         ];
 
-        this.identify = new IdentifyOptions(this.appName);
+        this.identify = new IdentifyOptions(this.appName, this.appMode);
     }
 
     /**
@@ -555,8 +549,6 @@ export class FultonAppOptions {
      */
     loadEnvOptions() {
         let prefix = `${this.appName}.options`;
-
-        this.mode = "api";
 
         this.index.enabled = Env.getBoolean(`${prefix}.index.enabled`, this.index.enabled)
 

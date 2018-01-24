@@ -31,6 +31,7 @@ export interface FultonAccessToken {
 }
 
 export interface IUserService<T extends IUser> {
+    currentUser: IUser;
     login(username: string, password: string): Promise<T>;
     loginByOauth(soruce: string, profile: any): Promise<T>;
     findByAccessToken(token: string): Promise<T>;

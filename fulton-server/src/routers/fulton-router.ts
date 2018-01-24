@@ -6,7 +6,7 @@ import { FullRouterMetadata, RouterMetadata, getFullRouterMethodMetadata, getRou
 import { FultonDiContainer, PathIdentifier, Inject, Injectable } from "../interfaces";
 import { IRouterMatcher, Router } from "express";
 
-import { Identifier } from "../helpers/type-helpers";
+import { TypeIdentifier } from "../helpers/type-helpers";
 
 /**
  * Express Router Wrap, it uses asyncHandler to support async await

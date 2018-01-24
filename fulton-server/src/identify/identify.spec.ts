@@ -8,10 +8,10 @@ import { UserServiceMock } from "../../spec/helpers/user-service-mock";
 class MyApp extends FultonApp {
     protected onInit(options: FultonAppOptions): void | Promise<void> {
         this.options.identify.enabled = true;
-        this.options.identify.userService = UserServiceMock;
+        this.options.identify.userService = new UserServiceMock(this);
     }
 
-    initIdentify() : Promise<void> {
+    initIdentify(): Promise<void> {
         super.initIdentify()
 
         this.server.all("/", (req, res) => {
@@ -69,7 +69,7 @@ describe('Identify local and beraer on  UserServiceMock', () => {
         expect(result.response.statusCode).toEqual(401);
     });
 
-    fit('should access with token', async () => {
+    it('should access with token', async () => {
         httpTester.setHeaders({
             "Authorization": "bearer test2-accessToken"
         })

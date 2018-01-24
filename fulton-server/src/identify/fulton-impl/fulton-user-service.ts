@@ -1,15 +1,28 @@
-import { Repository } from "typeorm";
-import { Inject, Injectable } from "../../interfaces";
-import { IUserService } from "../interfaces";
-import { FultonUserRepository } from "../index";
-import { FultonUser } from "./fulton-user";
-import { AccessToken } from "../../index";
-
 import * as passwordHash from 'password-hash';
+
+import { Inject, Injectable } from "../../interfaces";
+
+import { AccessToken } from "../../index";
+import { FultonApp } from "../../fulton-app";
+import { FultonUser } from "./fulton-user";
+import { IUserService } from "../interfaces";
+import { Repository } from "typeorm";
 
 @Injectable()
 export class FultonUserService implements IUserService<FultonUser> {
-    constructor(private userRepository: FultonUserRepository) {
+    @Inject(FultonApp)
+    protected app: FultonApp;
+
+    @Inject("UserRepository")
+    private userRepository: Repository<FultonUser>;
+
+    get currentUser(): FultonUser {
+        let zone = (global as any).Zone;
+        if (zone && zone.current.ctx) {
+            return zone.current.ctx.request.user;
+        } else {
+            return null;
+        }
     }
 
     register(user: FultonUser): Promise<FultonUser> {
@@ -31,10 +44,10 @@ export class FultonUserService implements IUserService<FultonUser> {
     }
 
     issueAccessToken(user: FultonUser): Promise<AccessToken> {
-        throw new Error("Method not implemented.");        
+        throw new Error("Method not implemented.");
     }
 
-    checkRoles(user: FultonUser, ...roles:string[]): boolean{
+    checkRoles(user: FultonUser, ...roles: string[]): boolean {
         return false;
     }
 

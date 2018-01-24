@@ -4,13 +4,13 @@ import { Entity, ObjectIdColumn, Column } from "typeorm";
 @Entity("users")
 export class FultonUser implements IFultonUser {
     @ObjectIdColumn()
-    id?: string;
+    id: string;
     @Column()
-    email?: string;
+    email: string;
     @Column()
-    username?: string;
+    username: string;
     @Column()
-    hashedPassword?: string;
+    hashedPassword: string;
     @Column()
     accessTokens: FultonAccessToken[];
     @Column()

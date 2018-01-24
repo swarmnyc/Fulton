@@ -20,28 +20,15 @@ import { ServeStaticOptions } from 'serve-static';
 import { IdentifyOptions } from './identify/identify-options';
 
 export class FultonAppOptions {
-    // generate AuthClient collection
-    // the client call have to have client authorisation token on auth
-    // default is false
-    //oauthServerSupport: boolean;
-
     // generate api doc
     //enabledApiDoc: boolean;
 
     // default is /api/docs
     // apiDocPath: string;
 
-    // auth rotuers like google, facebook, password
-    //authRouters: FultonAuthRouter[]
-
-    // // default take token or cookie to User, router can overwrite
-    // authenticates: FultonMiddleware[]
-
-    // // check permission
-    // defaultAuthorizes: FultonMiddleware[]
-
     /**
-     * There are some default values for api and web-view.
+     * There are some different default values for api and web-view.
+     * The default value is api;
      */
     mode: AppMode;
 
@@ -568,6 +555,8 @@ export class FultonAppOptions {
      */
     loadEnvOptions() {
         let prefix = `${this.appName}.options`;
+
+        this.mode = "api";
 
         this.index.enabled = Env.getBoolean(`${prefix}.index.enabled`, this.index.enabled)
 

@@ -1,7 +1,7 @@
 import * as fs from "fs"
 import * as path from "path"
 
-import { Type } from "./type-helpers";
+import { Type, AbstractType } from "./type-helpers";
 
 const supportExtensions = [".js", ".ts"];
 
@@ -40,9 +40,9 @@ export function loadModules<T=any>(dir: string, recursive: boolean = true): Prom
     });
 }
 
-export type FultonClassLoader<T> = (servicesDirs: string[], recursive?: boolean) => Promise<Type<T>[]>;
+export type FultonClassLoader<T> = (servicesDirs: string[], recursive?: boolean) => Promise<AbstractType<T>[]>;
 
-export function defaultClassLoader<T>(type: Type<T>): FultonClassLoader<Type<T>> {
+export function defaultClassLoader<T>(type: AbstractType<T>): FultonClassLoader<T> {
     return async (routerDirs: string[], recursive: boolean = true) => {
         let routers: Type<T>[] = [];
 

@@ -5,6 +5,9 @@ import * as lodash from 'lodash';
 import * as path from 'path';
 import * as winston from 'winston';
 import * as cors from 'cors';
+import * as passport from 'passport';
+import { Strategy as LocalStrategy, IStrategyOptionsWithRequest } from 'passport-local';
+import { Strategy as BearerStrategy } from 'passport-http-bearer';
 
 import { ConnectionOptions, createConnections, Connection } from "typeorm";
 import { Container, interfaces } from "inversify";
@@ -15,14 +18,15 @@ import Env from "./helpers/env";
 import { Express } from "express";
 import { FultonAppOptions } from "./fulton-app-options";
 import FultonLog from "./fulton-log";
-import { FultonLoggerLevel } from "./index";
+import { FultonLoggerLevel, LocalStrategyVerifyOptions, AuthenticateOptions, IUserService, IUser } from "./index";
 import { FultonRouter } from "./routers/fulton-router";
 import { FultonService } from "./services";
-import { KEY_FULTON_APP } from "./constants";
 import { createRepository } from "./repositories/repository-helpers";
 import { getRepositoryMetadata } from "./repositories/repository-decorator-helper";
 import { isFunction } from "util";
 import { defaultHttpLoggerHandler } from "./middlewares/http-logger";
+import { fultonDebug } from "./helpers/debug";
+import { fultonLoadUserMiddleware } from "./identify/fulton-impl/fulton-middlewares";
 
 export abstract class FultonApp {
     private isInitialized: boolean = false;
@@ -44,7 +48,7 @@ export abstract class FultonApp {
 
     constructor() {
         this.appName = this.constructor.name;
-        this.options = new FultonAppOptions(this.appName);        
+        this.options = new FultonAppOptions(this.appName);
     }
 
     /**
@@ -76,6 +80,8 @@ export abstract class FultonApp {
 
         await this.initRequestParsers();
 
+        await this.initIdentify();
+
         await this.initIndex();
 
         await this.initStaticFile();
@@ -89,7 +95,7 @@ export abstract class FultonApp {
 
         this.isInitialized = true;
         await this.didInit();
-        
+
         fultonDebug("Options: %O", this.options);
     }
 
@@ -190,7 +196,7 @@ export abstract class FultonApp {
 
     protected initDiContainer(): void | Promise<void> {
         this.container = new Container();
-        this.container.bind(KEY_FULTON_APP).toConstantValue(this);
+        this.container.bind(FultonApp).toConstantValue(this);
     }
 
     protected initLogging(): void | Promise<void> {
@@ -275,6 +281,67 @@ export abstract class FultonApp {
         }
 
         this.registerTypes(providers);
+    }
+
+    protected async initIdentify(): Promise<void> {
+        let idOptions = this.options.identify;
+        if (idOptions.enabled) {
+            if (idOptions.userService == null) {
+                throw new Error("identify.userService can't be null when userService.enabled is true.");
+            }
+
+            let userService: IUserService<IUser> = this.container.resolve(idOptions.userService);
+
+            // register userService
+            this.server.request.constructor.prototype.userService = userService;
+
+            // register local
+            this.server.use(passport.initialize());
+
+            if (idOptions.local.enabled) {
+                let localOptions = idOptions.local;
+                let localStrategyOptions: IStrategyOptionsWithRequest = {
+                    passReqToCallback: true,
+                    usernameField: localOptions.usernameField,
+                    passwordField: localOptions.passwordField
+                }
+
+                passport.use(new LocalStrategy(localStrategyOptions, localOptions.verify));
+
+                let httpMethod = this.server[localOptions.httpMethod];
+
+                let authOptions: AuthenticateOptions;
+
+                if (this.options.mode == "api") {
+                    authOptions = {
+                        session: false,
+                        passReqToCallback: true
+                    };
+                } else {
+                    authOptions = localOptions.webViewOptions;
+                }
+
+                httpMethod.apply(this.server,
+                    [localOptions.path,
+                    [passport.authenticate("local", authOptions),
+                    localOptions.response]]);
+            }
+
+            let strategies = [];
+            if (idOptions.bearer.enabled) {
+                passport.use(new BearerStrategy({
+                    scope: null,
+                    realm: null,
+                    passReqToCallback: true
+                }, idOptions.bearer.verify));
+
+                strategies.push("bearer")
+            }
+
+            if (idOptions.authenticateEveryRequest && strategies.length > 0) {
+                this.server.use(fultonLoadUserMiddleware(strategies));
+            }
+        }
     }
 
     protected async initRouters(): Promise<void> {

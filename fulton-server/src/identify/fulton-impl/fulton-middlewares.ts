@@ -1,11 +1,11 @@
 import * as lodash from 'lodash';
+import * as passport from 'passport';
 
-import { FultonUser } from "./fulton-user";
 import { LocalStrategyVerifyDone, StrategyResponseOptions, StrategyVerifyDone } from "../interfaces";
-import { Request } from "../../interfaces";
+import { Middleware, NextFunction, Request, Response } from "../../interfaces";
 
-import * as passwordHash from 'password-hash';
-import { Middleware, Response, FultonApp } from '../../index';
+import { FultonApp } from '../../fulton-app';
+import { FultonUser } from "./fulton-user";
 
 export async function fultonLocalStrategyVerify(req: Request, username: string, password: string, done: LocalStrategyVerifyDone) {
     if (!username || !password) {
@@ -13,8 +13,7 @@ export async function fultonLocalStrategyVerify(req: Request, username: string, 
     }
 
     let user = await req.userService.login(username, password) as FultonUser;
-
-    if (user && passwordHash.verify(password, user.hashedPassword)) {
+    if (user) {
         return done(null, user);
     } else {
         return done(null, false);
@@ -35,14 +34,23 @@ export async function fultonTokenStrategyVerify(req: Request, token: string, don
     }
 }
 
-export function fultonStrategyResponse(options: StrategyResponseOptions): Middleware {
-    return async function (req: Request, res: Response) {
-        let app = req.app.locals.fulton as FultonApp;
-        if (app.options.mode == "api") {
-            // after login, access token will be put on res.locals.accessToken
-            return res.locals.accessToken;
-        } else {
-            res.redirect(options.successRedirect);
-        }
-    }
+export async function fultonStrategyResponse(req: Request, res: Response) {
+    let accessToken = await req.userService.issueAccessToken(req.user);
+    res.send(accessToken);
 }
+
+export function fultonLoadUserMiddleware(strategies: string[]): Middleware {
+    return (req: Request, res: Response, next: NextFunction) => {
+        // authenticate every request to get user info.
+        passport.authenticate(strategies, { session: false },
+            function (error, user, info) {
+                if (error) {
+                    return next(error);
+                }
+                if (user) {
+                    req.user = user;
+                }
+                next();
+            })(req, res, next);
+    };
+};

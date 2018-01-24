@@ -1,21 +1,23 @@
 import * as request from 'request';
 import { FultonApp } from '../../src/index';
 import * as url from 'url';
-import { ResponseRequest, RequiredUriUrl, OptionsWithUrl, Headers } from 'request';
+import { RequiredUriUrl, OptionsWithUrl, Headers } from 'request';
 import FultonLog from '../../src/fulton-log';
+import { ClientResponse } from 'http';
 
 export interface Result {
-    response?: ResponseRequest;
+    response?: ClientResponse;
     body?: any;
 }
 
 export class HttpTester {
     private baseUrl: string;
 
-    headers: Headers;
+    private headers: Headers;
 
     constructor(private app: FultonApp) {
         FultonLog.level = "warn";
+        this.app.options.logging.httpLoggerEnabled = false;
         this.headers = {};
     }
 
@@ -29,10 +31,15 @@ export class HttpTester {
         return this.app.stop();
     }
 
+    setHeaders(headers: Headers) {
+        this.headers = headers;
+    }
+
     get(path: string, queryString?: any): Promise<Result> {
         return this.request({
             method: "get",
             url: url.resolve(this.baseUrl, path),
+            headers: this.headers,
             qs: queryString
         });
     }
@@ -41,6 +48,7 @@ export class HttpTester {
         return this.request({
             method: "post",
             url: url.resolve(this.baseUrl, path),
+            headers: this.headers,
             json: object,
         });
     }
@@ -60,16 +68,12 @@ export class HttpTester {
                 if (err) {
                     reject(err);
                 } else {
-                    if (response.statusCode >= 400) {
-                        reject(new Error(`${response.statusCode} ${response.statusMessage}`));
-                    } else {
-                        let result: any = {
-                            response: response,
-                            body: body
-                        };
+                    let result = {
+                        response: response,
+                        body: body
+                    };
 
-                        resolve(result);
-                    }
+                    resolve(result);
                 }
             })
         });

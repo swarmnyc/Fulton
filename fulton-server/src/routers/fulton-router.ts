@@ -7,7 +7,6 @@ import { FultonDiContainer, PathIdentifier, Inject, Injectable } from "../interf
 import { IRouterMatcher, Router } from "express";
 
 import { Identifier } from "../helpers/type-helpers";
-import { KEY_FULTON_APP } from "../constants";
 
 /**
  * Express Router Wrap, it uses asyncHandler to support async await
@@ -39,7 +38,7 @@ import { KEY_FULTON_APP } from "../constants";
 export abstract class FultonRouter {
     protected metadata: FullRouterMetadata
     protected router: Router;
-    @Inject(KEY_FULTON_APP)
+    @Inject(FultonApp)
     protected app: FultonApp;
 
     constructor() {

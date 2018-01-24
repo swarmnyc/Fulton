@@ -1,5 +1,3 @@
-export const KEY_FULTON_APP = "__FultonApp__";
-
 export const KEY_REPOSITORY_METADATA = "FultonDecrator.Repository";
 
 export const KEY_ROUTER_METADATA = "FultonDecrator.Router";

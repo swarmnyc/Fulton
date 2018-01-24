@@ -30,11 +30,12 @@ export interface FultonAccessToken {
     actived?: boolean;
 }
 
-export interface IUserService {
-    login(username: string, password: string): IUser;
-    loginByOauth(soruce: string, profile: any): IUser;
-    findByAccessToken(token: string): IUser;
-    register(user: IUser): Promise<IUser>;
+export interface IUserService<T extends IUser> {
+    login(username: string, password: string): Promise<T>;
+    loginByOauth(soruce: string, profile: any): Promise<T>;
+    findByAccessToken(token: string): Promise<T>;
+    register(user: T): Promise<T>;
+    issueAccessToken(user: T): Promise<AccessToken>;
 }
 
 export interface AccessToken {

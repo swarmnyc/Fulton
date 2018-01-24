@@ -3,7 +3,7 @@ import "reflect-metadata";
 import * as express from "express";
 
 import { injectable, inject, interfaces } from "inversify";
-import { IUserService } from "./identify";
+import { IUserService, IUser } from "./identify";
 
 export const Injectable = injectable;
 
@@ -22,7 +22,7 @@ export type NextFunction = express.NextFunction;
  * extends express.Request
  */
 export interface Request extends express.Request {
-    userService?: IUserService;
+    userService?: IUserService<IUser>;
     container?: FultonDiContainer;
 }
 

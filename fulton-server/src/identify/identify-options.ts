@@ -1,7 +1,7 @@
 import { PathIdentifier, HttpMethod } from "../interfaces";
 import { LocalStrategyVerify, IUserService, TokenStrategyVerify } from "./interfaces";
 import { Strategy } from "passport";
-import { Middleware, FultonUserService, Type } from "../index";
+import { Middleware, FultonUserService, Type, IUser } from "../index";
 import Env from "../helpers/env";
 import { AuthorizeOptions } from "./authorizes-middlewares";
 import { fultonLocalStrategyVerify, fultonStrategyResponse, fultonTokenStrategyVerify } from "./fulton-impl/fulton-middlewares";
@@ -20,14 +20,14 @@ export class IdentifyOptions {
      * `req.userService`
      * for all middlewares
      */
-    userService: Type<IUserService>;
+    userService: Type<IUserService<IUser>>;
 
     /**
-     * access token Expiration time in millseconds
+     * access token duratio in seconds
      * 
-     * default is a mouth = 2,592,000,000 
+     * default is a mouth = 2,592,000
      */
-    accessTokenExpirationMs: number;
+    accessTokenDuration: number;
 
     /**
      * access token type
@@ -36,11 +36,23 @@ export class IdentifyOptions {
     accessTokenType: string;
 
     /**
-     * the authenticate method
-     * if it is in api mode, it based on accessTokenType.
-     * if it is in web-mode, the value is empty.
+     * the authenticate every request to get user info, enabled strategies like "bearer"
+     * for api mode, default is true
+     * 
+     * ## if it is in api default is api mode is
+     * app.use((req, res, next) => {
+     *     // authenticate every request to get user info.
+     *     passport.authenticate(enabledStrategies, { session: false }, function (error, user, info) {
+     *         if (error) {
+     *             return next(error);
+     *         }
+     *         
+     *         // go next whatever verified state 
+     *         next();
+     *     })(req, res, next);
+     * });
      */
-    authenticates: Middleware[]
+    authenticateEveryRequest: boolean;
 
     /**
      * the authorizes apply to all router
@@ -116,6 +128,16 @@ export class IdentifyOptions {
         httpMethod?: HttpMethod;
 
         /**
+         * the default value username
+         */
+        usernameField?: string;
+
+        /**
+         * the default value password
+         */
+        passwordField?: string;
+
+        /**
          * the function to find the user
          * 
          * ### default value is
@@ -147,16 +169,33 @@ export class IdentifyOptions {
         response?: Middleware;
 
         /**
-         * for web-viwe mode
-         * the default value is /
+         * only effect on web-viwe mode
          */
-        successRedirect?: string;
+        webViewOptions: {
+            /**
+             * for web-viwe mode
+             * the default value is /
+             */
+            successRedirect?: string;
 
-        /**
-         * for web-viwe mode
-         * the default value is /auth/login
-         */
-        failureRedirect?: string;
+            /**
+             * for web-viwe mode
+             * the default value is /auth/login
+             */
+            failureRedirect?: string;
+
+            /**
+             * for web-viwe mode
+             * the default value is false
+             */
+            failureFlash?: string | boolean;
+
+            /**
+             * for aweb-viwe mode
+             * the default value is Login Failed
+             */
+            failureMessage?: string;
+        }
     }
 
     bearer: {
@@ -202,18 +241,22 @@ export class IdentifyOptions {
 
         this.userService = FultonUserService;
         this.defaultAuthorizes = [];
-        this.accessTokenExpirationMs = 2592000000;
+        this.accessTokenDuration = 2592000;
 
+        this.authenticateEveryRequest = true;
+        
         this.local = {
             enabled: true,
             path: "/auth/login",
             httpMethod: "post",
             verify: fultonLocalStrategyVerify,
-            failureRedirect: "/auth/login",
-            successRedirect: "/"
-        }
+            webViewOptions: {
+                failureRedirect: "/auth/login",
+                successRedirect: "/"
+            }
+        };
 
-        this.local.response = fultonStrategyResponse(this.local);
+        this.local.response = fultonStrategyResponse;
 
         this.bearer = {
             enabled: true,
@@ -228,7 +271,5 @@ export class IdentifyOptions {
         let prefix = `${this.appName}.options.identify`;
 
         this.enabled = Env.getBoolean(`${prefix}.enabled`, this.enabled);
-
-        this.userService = FultonUserService;
     }
 }

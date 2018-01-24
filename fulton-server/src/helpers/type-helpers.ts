@@ -3,7 +3,12 @@ import { isFunction } from "util";
 
 export type Identifier<T = any> = (string | symbol | Type<T>);
 
+
+export interface AbstractType<T> extends Function {
+}
+
 export interface Type<T = any> extends Function {
+    new(...args: any[]): T;
 }
 
 export interface TypeProvider extends Type {

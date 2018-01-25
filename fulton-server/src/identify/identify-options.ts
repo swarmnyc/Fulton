@@ -3,8 +3,8 @@ import { FultonUser, FultonUserService, IUser, Middleware, Type } from "../index
 import { IUserService, LocalStrategyVerify, TokenStrategyVerify } from "./interfaces";
 import {
     fultonDefaultAuthenticateHandler,
-    fultonDefaultRegisterHandler,
-    fultonDefaultStategySuccessHandler,
+    fultonRegisterHandler,
+    fultonStategySuccessHandler,
     fultonLocalStrategyVerify,
     fultonTokenStrategyVerify
 } from "./fulton-impl/fulton-middlewares";
@@ -282,6 +282,36 @@ export class IdentifyOptions {
         passwordField?: string;
 
         /**
+         * the options for hash password
+         */
+        passwordHashOptons?: {
+            /** 
+             * the default value is sha256
+             */
+            algorithm?: string;
+            /**
+             * the default value is 8
+             */
+            saltLength?: number;
+            /**
+             * the default value is 1
+             */
+            iterations?: number;
+        }
+
+        /**
+         * accept other fields, like nickname or phonenumber
+         * the default value is empty
+         */
+        otherFileds?: string[];
+
+        /**
+         * verify password is vaild or not
+         * the default value is /\S{6,64}/, any 4 to 64 non-whitespace characters
+         */
+        passwordVerify?: RegExp | ((pw: string) => boolean);
+
+        /**
          * the handler for register
          * the default value is fultonDefaultRegisterHandler
          */
@@ -380,7 +410,7 @@ export class IdentifyOptions {
                 failureRedirect: "/auth/login",
                 successRedirect: "/"
             },
-            apiSuccessHandler: fultonDefaultStategySuccessHandler
+            apiSuccessHandler: fultonStategySuccessHandler
         };
 
         this.register = {
@@ -390,11 +420,16 @@ export class IdentifyOptions {
             usernameField: "username",
             passwordField: "password",
             emailField: "email",
+            passwordVerify: /\S{6,64}/,
+            passwordHashOptons: {
+                algorithm: "sha256"
+            },
+            otherFileds: [],
             webViewOptions: {
                 failureRedirect: "/auth/register",
                 successRedirect: "/"
             },
-            handler: fultonDefaultRegisterHandler
+            handler: fultonRegisterHandler
         };
 
         this.bearer = {

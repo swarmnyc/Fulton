@@ -14,18 +14,10 @@ class MyApp extends FultonApp {
 
     initIdentify(): void {
         super.initIdentify()
-
-        this.server.all("/register", (req, res) => {
-            req.userService.register({
-                username: "test",
-                password: "test"
-            });
-        });
     }
 }
 
-// launch web server to test
-xdescribe('Identify local and bearer on  UserServiceMock', () => {
+xdescribe('Identify', () => {
     let app: MyApp;
     let httpTester: HttpTester;
 
@@ -43,39 +35,16 @@ xdescribe('Identify local and bearer on  UserServiceMock', () => {
         return httpTester.stop();
     });
 
-    it('should login and return access token', async () => {
-        let result = await httpTester.postJson("/auth/login", {
+    it('should register', async () => {
+        let result = await httpTester.postJson("/auth/register", {
+            email: "test@test.com",
             username: "test",
             password: "test"
         })
 
         let at: AccessToken = result.body;
         expect(at.access_token).toEqual("test-accessToken");
+        expect(at.token_type).toEqual("bearer");
         expect(at.expires_in).toEqual(2592000);
-    });
-
-    it('should login fails', async () => {
-        let result = await httpTester.postJson("/auth/login", {
-            username: "test",
-            password: "fail"
-        })
-
-        expect(result.response.statusCode).toEqual(401);
-    });
-
-    it('should access with token', async () => {
-        httpTester.setHeaders({
-            "Authorization": "bearer test2-accessToken"
-        })
-
-        let result = await httpTester.get("/")
-
-        expect(result.body).toEqual("with user:test2");
-    });
-
-    it('should access anonymously', async () => {
-        let result = await httpTester.get("/")
-
-        expect(result.body).toEqual("no user");
     });
 });

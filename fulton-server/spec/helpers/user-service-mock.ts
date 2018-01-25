@@ -1,9 +1,12 @@
-import { FultonUser, IUserService, AccessToken, Inject, Injectable } from "../../src/index";
+import * as lodash from 'lodash';
+
+import { AccessToken, FultonError, FultonUser, IUserService, Inject, Injectable, IUserRegister } from "../../src/index";
+
 import { FultonApp } from "../../src/fulton-app";
 
 export class UserServiceMock implements IUserService<FultonUser> {
     currentUser: FultonUser;
-    
+
     constructor(public app: FultonApp) {
     }
 
@@ -34,8 +37,16 @@ export class UserServiceMock implements IUserService<FultonUser> {
         }
     }
 
-    register(user: FultonUser): Promise<FultonUser> {
-        return Promise.resolve(user);
+    register(input: IUserRegister): Promise<FultonUser> {
+        let errors = new FultonError();
+
+        let newUser = lodash.pick(input, ["username", "password", "email"]);
+
+        if (errors.verifyRequireds(input, ["username", "password", "email"])) {
+            return Promise.resolve(input as FultonUser);
+        } else {
+            return Promise.reject(errors);
+        }
     }
 
     issueAccessToken(user: FultonUser): Promise<AccessToken> {

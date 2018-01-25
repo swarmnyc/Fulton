@@ -4,11 +4,16 @@ export interface IUser {
     [key: string]: any;
 }
 
+export interface IUserRegister extends IUser {
+    email?: string;
+    username?: string;
+    password?: string;
+}
+
 export interface IFultonUser extends IUser {
     id?: string;
     email?: string;
     username?: string;
-    password?: string;
     hashedPassword?: string;
     accessTokens: FultonAccessToken[];
     roles: string[];
@@ -35,7 +40,7 @@ export interface IUserService<T extends IUser> {
     login(username: string, password: string): Promise<T>;
     loginByOauth(soruce: string, profile: any): Promise<T>;
     findByAccessToken(token: string): Promise<T>;
-    register(user: T): Promise<T>;
+    register(user: IUserRegister): Promise<T>;
     issueAccessToken(user: T): Promise<AccessToken>;
     refreshAccessToken(token: string): Promise<AccessToken>;
 }

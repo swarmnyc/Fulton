@@ -1,12 +1,17 @@
 import * as lodash from 'lodash';
 import * as passport from 'passport';
 
-import { LocalStrategyVerifyDone, StrategyResponseOptions, StrategyVerifyDone } from "../interfaces";
+import { LocalStrategyVerifyDone, StrategyResponseOptions, StrategyVerifyDone, IUserRegister } from "../interfaces";
 import { Middleware, NextFunction, Request, Response } from "../../interfaces";
 
 import { FultonApp } from '../../fulton-app';
 import { FultonUser } from "./fulton-user";
+import { FultonError } from '../../common/fulton-error';
+import FultonLog from '../../fulton-log';
 
+/**
+ * for LocalStrategyVerify like login
+ */
 export async function fultonLocalStrategyVerify(req: Request, username: string, password: string, done: LocalStrategyVerifyDone) {
     if (!username || !password) {
         done(null, false);
@@ -20,6 +25,9 @@ export async function fultonLocalStrategyVerify(req: Request, username: string, 
     }
 }
 
+/**
+ * for TokenStrategyVerify like bearer
+ */
 export async function fultonTokenStrategyVerify(req: Request, token: string, done: StrategyVerifyDone) {
     if (!token) {
         done(null, false);
@@ -34,11 +42,17 @@ export async function fultonTokenStrategyVerify(req: Request, token: string, don
     }
 }
 
-export async function fultonDefaultStategySuccessHandler(req: Request, res: Response) {
+/**
+ * for StategySuccessHandler like login, bearer
+ */
+export async function fultonStategySuccessHandler(req: Request, res: Response) {
     let accessToken = await req.userService.issueAccessToken(req.user);
     res.send(accessToken);
 }
 
+/**
+ * for DefaultAuthenticateHandler 
+ */
 export function fultonDefaultAuthenticateHandler(req: Request, res: Response, next: NextFunction) {
     // authenticate every request to get user info.
     passport.authenticate(req.fultonApp.options.identify.enabledStrategies,
@@ -60,18 +74,16 @@ export function fultonDefaultAuthenticateHandler(req: Request, res: Response, ne
         })(req, res, next);
 };
 
-export function fultonDefaultRegisterHandler(req: Request, res: Response, next: NextFunction) {
+/**
+ * for register 
+ */
+export function fultonRegisterHandler(req: Request, res: Response, next: NextFunction) {
     let options = req.fultonApp.options.identify.register;
-    let input = {
-        username: req.body[options.usernameField],
-        password: req.body[options.passwordField],
-        email: req.body[options.emailField]
-    }
 
-    if (!input.username && !input.password && !input.email) {
-        res.sendStatus(400);
-        return;
-    }
+    let input = req.body;
+    input.username = req.body[options.usernameField];
+    input.password = req.body[options.passwordField];
+    input.email = req.body[options.emailField];
 
     req.userService
         .register(input)
@@ -83,4 +95,11 @@ export function fultonDefaultRegisterHandler(req: Request, res: Response, next: 
                 res.redirect(options.webViewOptions.successRedirect);
             }
         })
+        .catch((error) => {
+            if (error instanceof FultonError) {
+                res.status(400).send(error);
+            } else {
+                res.sendStatus(400);
+            }
+        });
 };

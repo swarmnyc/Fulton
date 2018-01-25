@@ -1,10 +1,7 @@
 import { Column, Entity, MongoRepository, ObjectIdColumn, createConnection } from "typeorm";
 
-import { FultonApp } from "../fulton-app";
-import { FultonAppOptions } from "../fulton-app-options";
-import { Inject } from "../interfaces";
 import { MongoClient } from "mongodb";
-import { Repository } from "./repository-decorator";
+import { Repository, Inject, FultonApp, FultonAppOptions } from "../../src/index";
 
 @Entity("foods")
 class Food {
@@ -54,11 +51,18 @@ class MyApp extends FultonApp {
 }
 
 xdescribe('repository', () => {
-    it('should be created by app', async () => {
-        let app = new MyApp();
+    let app: MyApp;
 
+    beforeAll(async () => {
+        app = new MyApp();
         await app.init();
+    });
 
+    afterAll(() => {
+        return app.stop()
+    });
+
+    it('should be created by app', async () => {
         let foodRepo = app.container.get(FoodRepository);
 
         expect(foodRepo).toBeTruthy();
@@ -82,10 +86,6 @@ xdescribe('repository', () => {
     });
 
     it('should be created multiple connections', async () => {
-        let app = new MyApp();
-
-        await app.init();
-
         let foodRepo1 = app.container.get(FoodRepository); // should be the same
         let food: Food = {
             name: "name",
@@ -102,7 +102,7 @@ xdescribe('repository', () => {
             name: "name",
             category: "category"
         }
-        
+
         await foodRepo2.save(food);
 
         expect(food.id).toBeTruthy();

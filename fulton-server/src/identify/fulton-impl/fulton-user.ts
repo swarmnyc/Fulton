@@ -5,16 +5,28 @@ import { Entity, ObjectIdColumn, Column } from "typeorm";
 export class FultonUser implements IFultonUser {
     @ObjectIdColumn()
     id: string;
-    @Column()
+
+    @Column({ unique: true, nullable: false, length: 256 })
     email: string;
-    @Column()
+
+    @Column({ unique: true, nullable: false, length: 256 })
     username: string;
-    @Column()
+
+    @Column({ length: 256 })
     hashedPassword: string;
-    @Column()
+
+    @Column({ array: true })
     accessTokens: FultonAccessToken[];
-    @Column()
-    oauth: FultonUserOauth[];
-    @Column()
+
+    @Column({ array: true })
+    oauthes: FultonUserOauth[];
+
+    @Column({ array: true })
     roles: string[];
+
+    @Column()
+    resetPasswordCode: string;
+
+    @Column()
+    resetPasswordCodeExpiredAt: Date;
 }

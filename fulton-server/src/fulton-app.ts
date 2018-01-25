@@ -28,6 +28,7 @@ export abstract class FultonApp {
     private isInitialized: boolean = false;
     private httpServer: http.Server;
     private httpsServer: https.Server;
+    private connections: Connection[];
 
     /**
      * app name, use in output, parser. default is class name.
@@ -164,7 +165,11 @@ export abstract class FultonApp {
      * stop http server or https server
      */
     stop(): Promise<any> {
-        var tasks = [];
+        var tasks: Promise<any>[] = [];
+
+        if (this.connections) {
+            tasks.push(...this.connections.map((conn) => conn.close()));
+        }
 
         if (this.httpServer) {
             tasks.push(new Promise((resolve, reject) => {
@@ -248,12 +253,12 @@ export abstract class FultonApp {
             });
         }
 
-        let conns = await createConnections(dbOptions).catch((error) => {
+        this.connections = await createConnections(dbOptions).catch((error) => {
             FultonLog.error("initDatabases fails", error);
             throw error;
         });
 
-        await this.didInitDatabases(conns);
+        await this.didInitDatabases(this.connections);
     }
 
     protected async initRepositories(): Promise<void> {

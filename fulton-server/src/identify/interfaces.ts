@@ -10,7 +10,6 @@ export interface IFultonUser extends IUser {
     username?: string;
     hashedPassword?: string;
     accessTokens: FultonAccessToken[];
-    oauth: FultonUserOauth[];
     roles: string[];
 }
 

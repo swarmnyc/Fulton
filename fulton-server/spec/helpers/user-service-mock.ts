@@ -41,7 +41,12 @@ export class UserServiceMock implements IUserService<FultonUser> {
     issueAccessToken(user: FultonUser): Promise<AccessToken> {
         return Promise.resolve({
             access_token: `${user.username}-accessToken`,
+            token_type: this.app.options.identify.accessTokenType,
             expires_in: this.app.options.identify.accessTokenDuration
         });
+    }
+
+    refreshAccessToken(token: string): Promise<AccessToken> {
+        throw new Error("Method not implemented.");
     }
 }

@@ -4,6 +4,7 @@ import * as express from "express";
 
 import { injectable, inject, interfaces } from "inversify";
 import { IUserService, IUser } from "./identify";
+import { FultonApp } from "./fulton-app";
 
 export const Injectable = injectable;
 
@@ -18,12 +19,20 @@ export type FultonDiContainer = interfaces.Container;
 
 export type NextFunction = express.NextFunction;
 
+declare global {
+    namespace Express {
+        interface Request {
+            fultonApp?: FultonApp;
+            userService?: IUserService<IUser>;
+            container?: FultonDiContainer;
+        }
+    }
+}
+
 /**
  * extends express.Request
  */
 export interface Request extends express.Request {
-    userService?: IUserService<IUser>;
-    container?: FultonDiContainer;
 }
 
 /**

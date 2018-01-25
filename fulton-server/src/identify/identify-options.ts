@@ -1,7 +1,13 @@
 import { AppMode, HttpMethod, PathIdentifier } from "../interfaces";
-import { FultonUserService, IUser, Middleware, Type, FultonUser } from "../index";
+import { FultonUser, FultonUserService, IUser, Middleware, Type } from "../index";
 import { IUserService, LocalStrategyVerify, TokenStrategyVerify } from "./interfaces";
-import { fultonLocalStrategyVerify, fultonStrategyResponse, fultonTokenStrategyVerify } from "./fulton-impl/fulton-middlewares";
+import {
+    fultonDefaultAuthenticateHandler,
+    fultonDefaultRegisterHandler,
+    fultonDefaultStategySuccessHandler,
+    fultonLocalStrategyVerify,
+    fultonTokenStrategyVerify
+} from "./fulton-impl/fulton-middlewares";
 
 import { AuthorizeOptions } from "./authorizes-middlewares";
 import Env from "../helpers/env";
@@ -53,10 +59,9 @@ export class IdentifyOptions {
     accessTokenType: string;
 
     /**
-     * the authenticate every request to get user info, enabled strategies like "bearer"
+     * the authenticate every request to get user info, enabled strategies like "bearer", "session"
      * for api mode, default is true
-     * 
-     * ## if it is in api default is api mode is
+     * ```
      * app.use((req, res, next) => {
      *     // authenticate every request to get user info.
      *     passport.authenticate(enabledStrategies, { session: false }, function (error, user, info) {
@@ -64,12 +69,21 @@ export class IdentifyOptions {
      *             return next(error);
      *         }
      *         
-     *         // go next whatever verified state 
+     *         if(!user && defaultAuthenticateErrorIfFailure){
+     *              return res.sendStatus(401)
+     *         }
+     * 
      *         next();
      *     })(req, res, next);
      * });
+     * ```
      */
-    authenticateEveryRequest: boolean;
+    defaultAuthenticate: Middleware;
+
+    /**
+     * if true, throw error if a request don't have user certification (bearer token, cookie session id, etc)
+     */
+    defaultAuthenticateErrorIfFailure: boolean;
 
     /**
      * the authorizes apply to all router
@@ -105,9 +119,9 @@ export class IdentifyOptions {
     defaultAuthorizes: Middleware[]
 
     /**
-     * the local strategy, there is no web view for it, 
+     * the local strategy for login, fulton doesn't have html for login, 
      * 
-     * for web mode, you have to add a router for it
+     * for render html, you have to add a router
      * 
      * ## example for web view
      * ```
@@ -119,7 +133,7 @@ export class IdentifyOptions {
      *     }
      * 
      *     // if you want to all logics altogether
-     *     // you can set options.identify.local.endabled = false
+     *     // you can set options.identify.login.endabled = false
      *     // and add this action.
      *     @HttpPost("/login", authenticate("local", { failureRedirect: "/auth/login" }))
      *     login(req: Request, res: Response) {
@@ -128,7 +142,7 @@ export class IdentifyOptions {
      * }
      * ```
      */
-    local: {
+    login: {
         /**
          * the default value is true
          */
@@ -140,7 +154,7 @@ export class IdentifyOptions {
         path?: PathIdentifier;
 
         /**
-         * the default value is post
+         * the default value is `post`
          */
         httpMethod?: HttpMethod;
 
@@ -175,41 +189,125 @@ export class IdentifyOptions {
         verify?: LocalStrategyVerify;
 
         /**
-         * defualt value is
-         * 
-         * if it is in api mode
-         * it return the access token
-         * 
-         * if
-         * the default value is redirectMiddleware
+         * the handler for authenticating successfully for api mode
+         * the default value is sendAccessToken
          */
-        response?: Middleware;
+        apiSuccessHandler?: Middleware;
 
         /**
-         * only effect on web-viwe mode
+         * the options for web-viwe mode
          */
-        webViewOptions: {
+        webViewOptions?: {
             /**
-             * for web-viwe mode
              * the default value is /
              */
             successRedirect?: string;
 
             /**
-             * for web-viwe mode
              * the default value is /auth/login
              */
             failureRedirect?: string;
 
             /**
-             * for web-viwe mode
              * the default value is false
              */
             failureFlash?: string | boolean;
 
             /**
-             * for aweb-viwe mode
              * the default value is Login Failed
+             */
+            failureMessage?: string;
+        }
+    }
+
+    /**
+     * the setting for register, fulton doesn't have html for register, 
+     * 
+     * for render html, you have to add a router
+     * 
+     * ## example for web view
+     * ```
+     * @Router("/auth")
+     * export class AuthRouter extends FultonRouter {
+     *     @HttpGet("/register")
+     *     registerView(req: Request, res: Response) {
+     *         res.render("register");
+     *     }
+     * 
+     *     // if you want to put all logics altogether
+     *     // you can set options.identify.register.endabled = false
+     *     // and add this action.
+     *     @HttpPost("/register"))
+     *     register(req: Request, res: Response) {
+     *         req.userService
+     *            .register(req.body)
+     *            .then(async(user)=> {
+     *                  res.redirect("/");
+     *            .catch(()=>{
+     *                  res.sendStatus(400);
+     *            });   
+     *     }
+     * }
+     * ```
+     */
+    register: {
+        /**
+         * the default value is true
+         */
+        enabled?: boolean;
+
+        /**
+         * the default value is /auth/login
+         */
+        path?: PathIdentifier;
+
+        /**
+         * the default value is `post`
+         */
+        httpMethod?: HttpMethod;
+
+        /**
+         * the default value email
+         */
+        emailField?: string;
+
+        /**
+         * the default value username
+         */
+        usernameField?: string;
+
+        /**
+         * the default value password
+         */
+        passwordField?: string;
+
+        /**
+         * the handler for register
+         * the default value is fultonDefaultRegisterHandler
+         */
+        handler?: Middleware;
+
+        /**
+         * the options for web-viwe mode
+         */
+        webViewOptions?: {
+            /**
+             * the default value is /
+             */
+            successRedirect?: string;
+
+            /**
+             * the default value is /auth/register
+             */
+            failureRedirect?: string;
+
+            /**
+             * the default value is false
+             */
+            failureFlash?: string | boolean;
+
+            /**
+             * the default value is empty
              */
             failureMessage?: string;
         }
@@ -253,6 +351,11 @@ export class IdentifyOptions {
     /** other passport stratogies */
     strategies: Strategy[];
 
+    /**
+     * the eanbled strategies, the values will be inserted after initilization.
+     */
+    readonly enabledStrategies: string[] = [];
+
     constructor(private appName: string, private appModel: AppMode) {
         this.enabled = false;
 
@@ -261,27 +364,45 @@ export class IdentifyOptions {
 
         this.defaultAuthorizes = [];
         this.accessTokenDuration = 2592000;
+        this.accessTokenType = "bearer";
 
-        this.local = {
+        this.defaultAuthenticate = fultonDefaultAuthenticateHandler;
+        this.defaultAuthenticateErrorIfFailure = false;
+
+        this.login = {
             enabled: true,
             path: "/auth/login",
             httpMethod: "post",
+            usernameField: "username",
+            passwordField: "password",
             verify: fultonLocalStrategyVerify,
             webViewOptions: {
                 failureRedirect: "/auth/login",
                 successRedirect: "/"
-            }
+            },
+            apiSuccessHandler: fultonDefaultStategySuccessHandler
+        };
+
+        this.register = {
+            enabled: true,
+            path: "/auth/register",
+            httpMethod: "post",
+            usernameField: "username",
+            passwordField: "password",
+            emailField: "email",
+            webViewOptions: {
+                failureRedirect: "/auth/register",
+                successRedirect: "/"
+            },
+            handler: fultonDefaultRegisterHandler
         };
 
         this.bearer = {
             verify: fultonTokenStrategyVerify
         }
 
-        this.local.response = fultonStrategyResponse;
-
         if (this.appModel == "api") {
             this.bearer.enabled = true;
-            this.authenticateEveryRequest = true;
         } else {
             this.bearer.enabled = false;
         }

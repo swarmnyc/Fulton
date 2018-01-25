@@ -54,4 +54,8 @@ export class FultonUserService implements IUserService<FultonUser> {
     resetPassword(email: string) {
 
     }
+
+    refreshAccessToken(token: string): Promise<AccessToken> {
+        throw new Error("Method not implemented.");
+    }
 }

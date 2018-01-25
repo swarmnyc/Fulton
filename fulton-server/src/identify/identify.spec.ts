@@ -31,7 +31,7 @@ class MyApp extends FultonApp {
 }
 
 // launch web server to test
-describe('Identify local and beraer on  UserServiceMock', () => {
+describe('Identify local and bearer on UserServiceMock', () => {
     let app: MyApp;
     let httpTester: HttpTester;
 
@@ -83,5 +83,35 @@ describe('Identify local and beraer on  UserServiceMock', () => {
         let result = await httpTester.get("/")
 
         expect(result.body).toEqual("no user");
+    });
+
+    it('should register success by json', async () => {
+        let result = await httpTester.postJson("/auth/register", {
+            email: "test@test.com",
+            username: "test3",
+            password: "test3"
+        });
+
+        let at: AccessToken = result.body;
+        expect(at.access_token).toEqual("test3-accessToken");
+        expect(at.token_type).toEqual("bearer");
+    });
+
+    it('should register success by from', async () => {
+        let result = await httpTester.postForm("/auth/register", {
+            email: "test@test.com",
+            username: "test4",
+            password: "test4"
+        });
+
+        let at: AccessToken = result.body;
+        expect(at.access_token).toEqual("test4-accessToken");
+        expect(at.token_type).toEqual("bearer");
+    });
+
+    fit('should register success by from', async () => {
+        let result = await httpTester.postForm("/auth/register");
+
+        expect(result.response.statusCode).toEqual(400);
     });
 });

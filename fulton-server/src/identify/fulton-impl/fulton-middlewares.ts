@@ -34,23 +34,54 @@ export async function fultonTokenStrategyVerify(req: Request, token: string, don
     }
 }
 
-export async function fultonStrategyResponse(req: Request, res: Response) {
+export async function fultonDefaultStategySuccessHandler(req: Request, res: Response) {
     let accessToken = await req.userService.issueAccessToken(req.user);
     res.send(accessToken);
 }
 
-export function fultonLoadUserMiddleware(strategies: string[]): Middleware {
-    return (req: Request, res: Response, next: NextFunction) => {
-        // authenticate every request to get user info.
-        passport.authenticate(strategies, { session: false },
-            function (error, user, info) {
-                if (error) {
-                    return next(error);
+export function fultonDefaultAuthenticateHandler(req: Request, res: Response, next: NextFunction) {
+    // authenticate every request to get user info.
+    passport.authenticate(req.app.locals, { session: false },
+        function (error, user, info) {
+            if (error) {
+                next(error);
+                return;
+            }
+
+            if (user) {
+                req.user = user;
+            } else {
+                if (req.fultonApp.options.identify.defaultAuthenticateErrorIfFailure) {
+                    res.sendResult(401);
+                    return;
                 }
-                if (user) {
-                    req.user = user;
-                }
-                next();
-            })(req, res, next);
-    };
+            }
+
+            next();
+        })(req, res, next);
+};
+
+export function fultonDefaultRegisterHandler(req: Request, res: Response, next: NextFunction) {
+    let options = req.fultonApp.options.identify.register;
+    let input = {
+        username: req.body[options.usernameField],
+        password: req.body[options.passwordField],
+        email: req.body[options.emailField]
+    }
+
+    if (!input.username && !input.password && !input.email) {
+        res.sendStatus(400);
+        return;
+    }
+
+    req.userService
+        .register(input)
+        .then(async (user) => {
+            if (req.fultonApp.mode == "api") {
+                let accessToken = await req.userService.issueAccessToken(user);
+                res.send(accessToken);
+            } else {
+                res.redirect(options.webViewOptions.successRedirect);
+            }
+        })
 };

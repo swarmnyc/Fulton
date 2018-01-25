@@ -4,32 +4,28 @@ import { HttpTester } from "../helpers/http-tester";
 
 
 class MyApp extends FultonApp {
-    protected onInit(options: FultonAppOptions): void | Promise<void> {
-        this.options.identify.enabled = true;
-        this.options.identify.userService = new UserServiceMock(this);
+    protected onInit(options: FultonAppOptions): void {
+        options.identify.enabled = true;
+        options.databases.set("default", {
+            type: "mongodb",
+            url: "mongodb://localhost:27017/fulton-test"
+        });
     }
 
-    initIdentify(): Promise<void> {
+    initIdentify(): void {
         super.initIdentify()
 
-        this.server.all("/", (req, res) => {
-            if (req.isAuthenticated()) {
-                res.send("with user:" + req.user.username);
-            } else {
-                res.send("no user");
-            }
+        this.server.all("/register", (req, res) => {
+            req.userService.register({
+                username: "test",
+                password: "test"
+            });
         });
-
-        this.server.get("/profile", authorize(), (req, res) => {
-            res.send(req.user);
-        });
-
-        return null;
     }
 }
 
 // launch web server to test
-xdescribe('Identify local and beraer on  UserServiceMock', () => {
+xdescribe('Identify local and bearer on  UserServiceMock', () => {
     let app: MyApp;
     let httpTester: HttpTester;
 

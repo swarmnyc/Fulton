@@ -8,9 +8,7 @@ export function defaultErrorHandler(err: any, req: Request, res: Response, next:
 }
 
 export function default404ErrorHandler(req: Request, res: Response, next: NextFunction) {
-    let fulton = res.app.locals.fulton as FultonApp;
-
-    if (!fulton.options.logging.httpLoggerEnabled) {
+    if (!req.fultonApp.options.logging.httpLoggerEnabled) {
         FultonLog.warn(`${req.method} ${req.url} 404`);
     }
 

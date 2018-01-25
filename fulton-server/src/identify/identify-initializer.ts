@@ -7,7 +7,6 @@ import { IUser, IUserService } from './interfaces';
 import { AuthenticateOptions } from './authenticate-middlewares';
 import { Strategy as BearerStrategy } from 'passport-http-bearer';
 import { FultonApp } from "../fulton-app";
-import { fultonLoadUserMiddleware } from "./fulton-impl/fulton-middlewares";
 import { getRepository } from 'typeorm';
 import { isFunction } from 'util';
 
@@ -43,20 +42,20 @@ module.exports = async function identifyInitializer(app: FultonApp) {
         // register userService
         app.server.request.constructor.prototype.userService = userService;
 
-        // register local
         app.server.use(passport.initialize());
 
-        if (idOptions.local.enabled) {
-            let localOptions = idOptions.local;
+        // register local        
+        if (idOptions.login.enabled) {
+            let loginOptions = idOptions.login;
             let localStrategyOptions: IStrategyOptionsWithRequest = {
                 passReqToCallback: true,
-                usernameField: localOptions.usernameField,
-                passwordField: localOptions.passwordField
+                usernameField: loginOptions.usernameField,
+                passwordField: loginOptions.passwordField
             }
 
-            passport.use(new LocalStrategy(localStrategyOptions, localOptions.verify));
+            passport.use(new LocalStrategy(localStrategyOptions, loginOptions.verify));
 
-            let httpMethod = app.server[localOptions.httpMethod];
+            let httpMethod = app.server[loginOptions.httpMethod];
 
             let authOptions: AuthenticateOptions;
 
@@ -66,13 +65,19 @@ module.exports = async function identifyInitializer(app: FultonApp) {
                     passReqToCallback: true
                 };
             } else {
-                authOptions = localOptions.webViewOptions;
+                authOptions = loginOptions.webViewOptions;
             }
 
             httpMethod.apply(app.server,
-                [localOptions.path,
+                [loginOptions.path,
                 [passport.authenticate("local", authOptions),
-                localOptions.response]]);
+                loginOptions.apiSuccessHandler]]);
+        }
+
+        if (idOptions.register.enabled) {
+            let registerOptions = idOptions.register;
+            let httpMethod = app.server[registerOptions.httpMethod];
+            httpMethod.call(app.server, registerOptions.path, registerOptions.handler);
         }
 
         let strategies = [];
@@ -86,8 +91,8 @@ module.exports = async function identifyInitializer(app: FultonApp) {
             strategies.push("bearer")
         }
 
-        if (idOptions.authenticateEveryRequest && strategies.length > 0) {
-            app.server.use(fultonLoadUserMiddleware(strategies));
+        if (idOptions.defaultAuthenticate && strategies.length > 0) {
+            app.server.use(idOptions.defaultAuthenticate);
         }
     }
 }

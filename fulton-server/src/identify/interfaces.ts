@@ -8,6 +8,7 @@ export interface IFultonUser extends IUser {
     id?: string;
     email?: string;
     username?: string;
+    password?: string;
     hashedPassword?: string;
     accessTokens: FultonAccessToken[];
     roles: string[];
@@ -26,7 +27,7 @@ export interface FultonAccessToken {
     token?: string;
     issuredAt?: Date;
     expiredAt?: Date;
-    actived?: boolean;
+    revoked?: boolean;
 }
 
 export interface IUserService<T extends IUser> {
@@ -36,6 +37,7 @@ export interface IUserService<T extends IUser> {
     findByAccessToken(token: string): Promise<T>;
     register(user: T): Promise<T>;
     issueAccessToken(user: T): Promise<AccessToken>;
+    refreshAccessToken(token: string): Promise<AccessToken>;
 }
 
 export interface AccessToken {

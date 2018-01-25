@@ -194,7 +194,8 @@ export abstract class FultonApp {
 
     protected initServer(): void | Promise<void> {
         this.server = express();
-        this.server.locals.fulton = this;
+        this.server.request.constructor.prototype.fultonApp = this;
+
         this.server.disable('x-powered-by');
     }
 

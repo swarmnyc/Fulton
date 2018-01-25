@@ -11,8 +11,23 @@ export class UserServiceMock implements IUserService<FultonUser> {
     }
 
     login(username: string, password: string): Promise<FultonUser> {
+        let errors = new FultonError();
+
+        if (!lodash.some(username)) {
+            errors.addError("username", "username is required")
+        }
+
+        if (!lodash.some(password)) {
+            errors.addError("password", "password is required")
+        }
+
+        if (errors.hasErrors()) {
+            return Promise.reject(errors);
+        }
+
         if (/fail/i.test(password)) {
-            return Promise.resolve(null);
+            errors.addError("$", "username or password isn't correct");
+            return Promise.reject(errors);
         } else {
             let user = new FultonUser();
             user.id = username;

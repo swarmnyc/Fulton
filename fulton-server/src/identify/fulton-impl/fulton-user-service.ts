@@ -1,24 +1,60 @@
-import * as passwordHash from 'password-hash';
+import * as crypto from 'crypto';
 import * as lodash from 'lodash';
+import * as passwordHash from 'password-hash';
 
-import { AccessToken, IFultonUser, IUserService, IUserRegister } from "../interfaces";
+import { AccessToken, FultonAccessToken, IFultonUser, IUserRegister, IUserService } from "../interfaces";
+import { EntityRepository, MongoRepository, Repository } from "typeorm";
 import { Inject, Injectable } from "../../interfaces";
 
 import { FultonApp } from "../../fulton-app";
 import { FultonError } from "../../common";
 import { FultonUser } from "./fulton-user";
-import { Repository } from "typeorm";
-import { isFunction } from 'util';
-import { throws } from 'assert';
-import { MongoEntityManager } from 'typeorm/entity-manager/MongoEntityManager';
+import { IdentifyOptions } from '../identify-options';
+
+//TODO: multiple database engines supports
+
+interface IRunner {
+    addAccessToken(user: FultonUser, userToken: FultonAccessToken): Promise<any>
+}
+
+class MongoRunner implements IRunner {
+    constructor(private userRepository: MongoRepository<FultonUser>) {
+
+    }
+
+    addAccessToken(user: FultonUser, userToken: FultonAccessToken): Promise<any> {
+        return this.userRepository.updateOne({ _id: user.id }, {
+            "$push": { "accessTokens": userToken }
+        });
+    }
+}
+
+class SqlRunner implements IRunner {
+    constructor(private userRepository: Repository<FultonUser>) {
+
+    }
+
+    addAccessToken(user: FultonUser, userToken: FultonAccessToken): Promise<any> {
+        return;
+    }
+}
+
 
 @Injectable()
 export class FultonUserService implements IUserService<FultonUser> {
-    @Inject(FultonApp)
-    protected app: FultonApp;
+    private options: IdentifyOptions;
+    private runner: IRunner;
 
-    @Inject("UserRepository")
-    private userRepository: Repository<FultonUser>;
+    constructor( @Inject(FultonApp) private app: FultonApp,
+        @Inject("UserRepository") private userRepository: Repository<FultonUser>) {
+        this.options = app.options.identify;
+
+        if (userRepository instanceof MongoRepository) {
+            this.runner = new MongoRunner(this.userRepository as MongoRepository<FultonUser>)
+        } else {
+            this.runner = new SqlRunner(this.userRepository)
+        }
+    }
 
     get currentUser(): FultonUser {
         let zone = (global as any).Zone;
@@ -32,7 +68,7 @@ export class FultonUserService implements IUserService<FultonUser> {
     async register(input: IUserRegister): Promise<FultonUser> {
         let errors = new FultonError();
         let registorOptions = this.app.options.identify.register;
-       
+
         // verify username, password, email
         errors.verifyRequireds(input, ["username", "password", "email"])
 
@@ -49,15 +85,15 @@ export class FultonUserService implements IUserService<FultonUser> {
             }
         }
 
-        if (errors.hasErrors) {
+        if (errors.hasErrors()) {
             throw errors;
         }
 
         let fileds = ["username", "email"].concat(registorOptions.otherFileds);
         let newUser = lodash.pick(input, fileds) as FultonUser;
-        
+
         newUser.email = newUser.email.toLocaleLowerCase();
-        newUser.username = newUser.username.toLocaleLowerCase(); 
+        newUser.username = newUser.username.toLocaleLowerCase();
 
         // verify existence
         let count = await this.userRepository.count({
@@ -65,8 +101,7 @@ export class FultonUserService implements IUserService<FultonUser> {
         });
 
         if (count > 0) {
-            errors.addError("username", "the username is existed.")
-            throw errors;
+            errors.addError("username", "the username is existed")
         }
 
         count = await this.userRepository.count({
@@ -74,7 +109,10 @@ export class FultonUserService implements IUserService<FultonUser> {
         });
 
         if (count > 0) {
-            errors.addError("email", "the email is existed.")
+            errors.addError("email", "the email is existed")
+        }
+
+        if (errors.hasErrors()) {
             throw errors;
         }
 
@@ -83,10 +121,30 @@ export class FultonUserService implements IUserService<FultonUser> {
         return this.userRepository.save(newUser);
     }
 
-    login(username: string, password: string): Promise<FultonUser> {
+    async login(username: string, password: string): Promise<FultonUser> {
+        let errors = new FultonError();
 
-        //passwordHash.verify(password, user.hashedPassword)
-        throw new Error("Method not implemented.");
+        if (!lodash.some(username)) {
+            errors.addError("username", "username is required")
+        }
+
+        if (!lodash.some(password)) {
+            errors.addError("password", "password is required")
+        }
+
+        if (errors.hasErrors()) {
+            throw errors;
+        }
+
+        let user = await this.userRepository.findOne({
+            username: username,
+        });
+
+        if (passwordHash.verify(password, user.hashedPassword)) {
+            return user;
+        } else {
+            throw errors.addError("$", "username or password isn't correct");
+        }
     }
 
     loginByOauth(soruce: string, profile: any): Promise<FultonUser> {
@@ -97,8 +155,25 @@ export class FultonUserService implements IUserService<FultonUser> {
         throw new Error("Method not implemented.");
     }
 
-    issueAccessToken(user: FultonUser): Promise<AccessToken> {
-        throw new Error("Method not implemented.");
+    async issueAccessToken(user: FultonUser): Promise<AccessToken> {
+        const hash = crypto.createHmac('sha256', (Math.random() * 10000).toString());
+        let token = hash.update(user.id.toString()).digest("base64");
+
+        let now = new Date();
+        let userToken = {
+            token: token,
+            issuredAt: now,
+            expiredAt: new Date(now.valueOf() + (this.app.options.identify.accessTokenDuration * 1000)),
+            revoked: false
+        };
+
+        await this.runner.addAccessToken(user, userToken);
+
+        return {
+            access_token: token,
+            token_type: this.app.options.identify.accessTokenType,
+            expires_in: this.app.options.identify.accessTokenDuration
+        }
     }
 
     checkRoles(user: FultonUser, ...roles: string[]): boolean {
@@ -110,6 +185,7 @@ export class FultonUserService implements IUserService<FultonUser> {
     }
 
     refreshAccessToken(token: string): Promise<AccessToken> {
+
         throw new Error("Method not implemented.");
     }
 }

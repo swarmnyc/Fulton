@@ -5,7 +5,7 @@ import { RequiredUriUrl, OptionsWithUrl, Headers } from 'request';
 import FultonLog from '../../src/fulton-log';
 import { ClientResponse } from 'http';
 
-export interface Result {
+export interface HttpResult {
     response?: ClientResponse;
     body?: any;
 }
@@ -35,7 +35,7 @@ export class HttpTester {
         this.headers = headers;
     }
 
-    get(path: string, queryString?: any): Promise<Result> {
+    get(path: string, queryString?: any): Promise<HttpResult> {
         return this.request({
             method: "get",
             url: url.resolve(this.baseUrl, path),
@@ -44,7 +44,7 @@ export class HttpTester {
         });
     }
 
-    postJson(path: string, object?: any): Promise<Result> {
+    postJson(path: string, object?: any): Promise<HttpResult> {
         return this.request({
             method: "post",
             url: url.resolve(this.baseUrl, path),
@@ -53,7 +53,7 @@ export class HttpTester {
         });
     }
 
-    postForm(path: string, object?: any): Promise<Result> {
+    postForm(path: string, object?: any): Promise<HttpResult> {
         return this.request({
             method: "post",
             url: url.resolve(this.baseUrl, path),
@@ -61,7 +61,7 @@ export class HttpTester {
         });
     }
 
-    request(options: OptionsWithUrl): Promise<Result> {
+    request(options: OptionsWithUrl): Promise<HttpResult> {
         return new Promise((resolve, reject) => {
             options.headers = this.headers;
             request(options, function (err, response, body) {

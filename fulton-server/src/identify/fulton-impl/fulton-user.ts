@@ -15,13 +15,13 @@ export class FultonUser implements IFultonUser {
     @Column({ length: 256 })
     hashedPassword: string;
 
-    @Column({ array: true })
+    @Column({})
     accessTokens: FultonAccessToken[];
 
-    @Column({ array: true })
+    @Column({})
     oauthes: FultonUserOauth[];
 
-    @Column({ array: true })
+    @Column({})
     roles: string[];
 
     @Column()

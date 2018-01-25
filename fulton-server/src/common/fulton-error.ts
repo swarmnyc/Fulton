@@ -15,12 +15,14 @@ export class FultonError {
         this.errors = errors || {};
     }
 
-    addError(propertyName: string, errorMessage: string) {
+    addError(propertyName: string, errorMessage: string) : FultonError {
         if (this.errors[propertyName]) {
             this.errors[propertyName].push(errorMessage);
         } else {
             this.errors[propertyName] = [errorMessage];
         }
+
+        return this;
     }
 
     verifyRequireds(target: any, propertyNames: string[], errorMessages?: string[]): boolean {

@@ -12,17 +12,14 @@ import FultonLog from '../../fulton-log';
 /**
  * for LocalStrategyVerify like login
  */
-export async function fultonLocalStrategyVerify(req: Request, username: string, password: string, done: LocalStrategyVerifyDone) {
-    if (!username || !password) {
-        done(null, false);
-    }
-
-    let user = await req.userService.login(username, password) as FultonUser;
-    if (user) {
-        return done(null, user);
-    } else {
-        return done(null, false);
-    }
+export function fultonLocalStrategyVerify(req: Request, username: string, password: string, done: LocalStrategyVerifyDone) {
+    req.userService
+        .login(username, password)
+        .then((user) => {
+            done(null, user);
+        }).catch((error) => {
+            done(error);
+        });;
 }
 
 /**
@@ -30,7 +27,7 @@ export async function fultonLocalStrategyVerify(req: Request, username: string, 
  */
 export async function fultonTokenStrategyVerify(req: Request, token: string, done: StrategyVerifyDone) {
     if (!token) {
-        done(null, false);
+        done(new FultonError({ "token": ["token is required"] }));
     }
 
     let user = await req.userService.findByAccessToken(token);

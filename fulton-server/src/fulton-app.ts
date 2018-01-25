@@ -235,26 +235,26 @@ export abstract class FultonApp {
             return;
         }
 
-        let dbOptions: ConnectionOptions[];
-        if (this.options.databases.size > 0) {
-            dbOptions = [];
-            this.options.databases.forEach((conn, name) => {
-                lodash.set(conn, "name", name);
-                if (lodash.some(this.options.entities)) {
-                    dbOptions.forEach((option) => {
-                        if (option.entities) {
-                            let arr = option.entities as any[];
-                            arr.push(this.options.entities);
-                        } else {
-                            lodash.set(option, "entities", this.options.entities);
-                        }
-                    });
-                }
-                dbOptions.push(conn);
-            });
-        }
+        let connOptions: ConnectionOptions[] = [];
 
-        this.connections = await createConnections(dbOptions).catch((error) => {
+        this.options.databases.forEach((conn, name) => {
+            lodash.set(conn, "name", name);
+
+            // extends entities
+            if (lodash.some(this.options.entities)) {
+                if (conn.entities) {
+                    let arr = conn.entities as any[];
+                    arr.push(this.options.entities);
+                } else {
+                    lodash.set(conn, "entities", this.options.entities);
+                }
+            }
+
+            connOptions.push(conn);
+        });
+
+
+        this.connections = await createConnections(connOptions).catch((error) => {
             FultonLog.error("initDatabases fails", error);
             throw error;
         });

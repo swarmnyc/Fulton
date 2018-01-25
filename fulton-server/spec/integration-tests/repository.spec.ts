@@ -1,7 +1,7 @@
 import { Column, Entity, MongoRepository, ObjectIdColumn, createConnection } from "typeorm";
 
 import { MongoClient } from "mongodb";
-import { Repository, Inject, FultonApp, FultonAppOptions } from "../../src/index";
+import { Repo, Inject, FultonApp, FultonAppOptions } from "../../src/index";
 
 @Entity("foods")
 class Food {
@@ -13,7 +13,7 @@ class Food {
     category?: String;
 }
 
-@Repository(Food)
+@Repo(Food)
 class FoodRepository extends MongoRepository<Food> {
     constructor( @Inject("injectValue1") public injectValue1: string) {
         super()
@@ -23,7 +23,7 @@ class FoodRepository extends MongoRepository<Food> {
     public injectValue2: number;
 }
 
-@Repository(Food, "conn2")
+@Repo(Food, "conn2")
 class FoodRepository2 extends MongoRepository<Food> {
 }
 

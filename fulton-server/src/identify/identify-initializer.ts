@@ -80,7 +80,6 @@ module.exports = async function identifyInitializer(app: FultonApp) {
             httpMethod.call(app.server, registerOptions.path, registerOptions.handler);
         }
 
-        let strategies = [];
         if (idOptions.bearer.enabled) {
             passport.use(new BearerStrategy({
                 scope: null,
@@ -88,10 +87,10 @@ module.exports = async function identifyInitializer(app: FultonApp) {
                 passReqToCallback: true
             }, idOptions.bearer.verify));
 
-            strategies.push("bearer")
+            idOptions.enabledStrategies.push("bearer")
         }
 
-        if (idOptions.defaultAuthenticate && strategies.length > 0) {
+        if (idOptions.defaultAuthenticate && idOptions.enabledStrategies.length > 0) {
             app.server.use(idOptions.defaultAuthenticate);
         }
     }

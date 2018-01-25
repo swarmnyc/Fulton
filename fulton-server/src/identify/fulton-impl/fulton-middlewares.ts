@@ -41,23 +41,22 @@ export async function fultonDefaultStategySuccessHandler(req: Request, res: Resp
 
 export function fultonDefaultAuthenticateHandler(req: Request, res: Response, next: NextFunction) {
     // authenticate every request to get user info.
-    passport.authenticate(req.app.locals, { session: false },
+    passport.authenticate(req.fultonApp.options.identify.enabledStrategies,
         function (error, user, info) {
             if (error) {
                 next(error);
-                return;
-            }
-
-            if (user) {
-                req.user = user;
+            } else if (user) {
+                req.logIn(user, { session: false }, (err) => {
+                    next(err);
+                });
             } else {
                 if (req.fultonApp.options.identify.defaultAuthenticateErrorIfFailure) {
                     res.sendResult(401);
-                    return;
+                } else {
+                    next();
                 }
             }
 
-            next();
         })(req, res, next);
 };
 

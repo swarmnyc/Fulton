@@ -69,7 +69,7 @@ describe('Identify local and bearer on UserServiceMock', () => {
         expect(result.response.statusCode).toEqual(401);
     });
 
-    it('should access with token', async () => {
+    fit('should access with token', async () => {
         httpTester.setHeaders({
             "Authorization": "bearer test2-accessToken"
         })
@@ -109,7 +109,7 @@ describe('Identify local and bearer on UserServiceMock', () => {
         expect(at.token_type).toEqual("bearer");
     });
 
-    fit('should register success by from', async () => {
+    it('should register failure by empty data', async () => {
         let result = await httpTester.postForm("/auth/register");
 
         expect(result.response.statusCode).toEqual(400);

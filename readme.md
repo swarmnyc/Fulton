@@ -1,12 +1,24 @@
-Fulton Proof of Concept
+# Fulton
 
-I want to copy some idea from Angular, like Dependency Injection, because Angular has its own compiler, so I worries some ideas like type can't works on regular nodejs. So use these projects to test out the language capabilities.
+Fulton is the best practical way to build web apis or websites we have done in our company. Basically, Fulton is integrated many popular libraries or frameworks seamlessly. By use Fulton, developers can build a completed web api or a websites quickly.
+
+## Integration
+
+* [node.js](https://nodejs.org/)
+* [typescript](https://typescriptlang.org/) - For strong type that help developers.
+* [express.js](https://expressjs.com/)
+* [winston](https://github.com/winstonjs/winston) - A good logging library
+* inversify - DI
+* passport
+* typeorm
 
 ## Packages
-- `fulton-core` is the shared code for client and server
 - `fulton-server` is the code for server
-- `fulton-example` is the server side
-- `fulton-model-decorator` typescript decorator for server and client, will delete?
 - `fulton-client` basic class for client
 - `fulton-angular` basic class for angular based on fulton-client
 - `fulton-cli` is like angular generator, to create project, files, routers (or use yo)
+- `examples-server` is a server side example
+- `examples-client` is a client side example
+
+## Online Document
+https://swarmnyc.gitbooks.io/fulton/content/

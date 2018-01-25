@@ -26,10 +26,6 @@ export function fultonLocalStrategyVerify(req: Request, username: string, passwo
  * for TokenStrategyVerify like bearer
  */
 export async function fultonTokenStrategyVerify(req: Request, token: string, done: StrategyVerifyDone) {
-    if (!token) {
-        done(new FultonError({ "token": ["token is required"] }));
-    }
-
     let user = await req.userService.findByAccessToken(token);
 
     if (user) {

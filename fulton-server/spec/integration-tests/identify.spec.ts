@@ -75,7 +75,7 @@ xdescribe('Identify', () => {
         expect(result.body.errors.email).toEqual(["the email is existed"]);
     });
 
-    fit('should login successfully', async () => {
+    it('should login successfully', async () => {
         await prepareUser();
 
         let result = await httpTester.postJson("/auth/login", {
@@ -87,7 +87,19 @@ xdescribe('Identify', () => {
         expect(result.body.access_token).toBeTruthy();
     });
 
-    fit('should login successfully', async () => {
+    it('should login failure', async () => {
+        await prepareUser();
+
+        let result = await httpTester.postJson("/auth/login", {
+            username: "test",
+            password: "test321"
+        });
+
+        expect(result.response.statusCode).toEqual(400);
+        expect(result.body.errors.$).toEqual(["username or password isn't correct"]);
+    });
+
+    it('should login with token', async () => {
         await prepareUser();
 
         let result = await httpTester.postJson("/auth/login", {

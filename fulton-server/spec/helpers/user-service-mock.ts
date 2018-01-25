@@ -46,6 +46,7 @@ export class UserServiceMock implements IUserService<FultonUser> {
             let user = new FultonUser();
             user.id = info[0];
             user.username = info[0];
+            user.roles = [info[0]];
             return Promise.resolve(user);
         } else {
             return Promise.resolve(null);

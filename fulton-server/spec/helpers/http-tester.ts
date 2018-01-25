@@ -68,6 +68,10 @@ export class HttpTester {
                 if (err) {
                     reject(err);
                 } else {
+                    if (typeof body == "string" && /json/i.test(response.headers["content-type"])) {
+                        body = JSON.parse(body);
+                    }
+
                     let result = {
                         response: response,
                         body: body

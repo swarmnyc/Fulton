@@ -17,7 +17,7 @@ import Env from './helpers/env';
 import Helper from './helpers/helper';
 import { ServeStaticOptions } from 'serve-static';
 
-import { IdentifyOptions } from './identify/identify-options';
+import { IdentityOptions } from './identity/identity-options';
 
 export class FultonAppOptions {
     // generate api doc
@@ -29,7 +29,7 @@ export class FultonAppOptions {
     /**
      * User manager and authentication based on passport
      */
-    identify: IdentifyOptions;
+    identity: IdentityOptions;
 
     /**
      * Databases connection options, you can defien connection options on FultonApp.onInt(),  
@@ -541,7 +541,7 @@ export class FultonAppOptions {
             express.urlencoded({ extended: true })
         ];
 
-        this.identify = new IdentifyOptions(this.appName, this.appMode);
+        this.identity = new IdentityOptions(this.appName, this.appMode);
     }
 
     /**
@@ -572,7 +572,7 @@ export class FultonAppOptions {
         this.staticFile.enabled = Env.getBoolean(`${prefix}.staticFile.enabled`, this.staticFile.enabled)
         this.cors.enabled = Env.getBoolean(`${prefix}.cors.enabled`, this.cors.enabled)
 
-        this.identify.loadEnvOptions();
+        this.identity.loadEnvOptions();
         this.loadEnvDatabaseOptions();
     }
 

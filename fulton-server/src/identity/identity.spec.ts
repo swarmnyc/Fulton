@@ -28,14 +28,13 @@ export class TestRouter2 extends FultonRouter {
 
 class MyApp extends FultonApp {
     protected onInit(options: FultonAppOptions): void | Promise<void> {
-        this.options.identify.enabled = true;
-        this.options.identify.userService = new UserServiceMock(this);
+        this.options.identity.enabled = true;
+        this.options.identity.userService = new UserServiceMock(this);
         this.options.routers = [TestRouter, TestRouter2];
-        options.
     }
 
-    initIdentify(): Promise<void> {
-        super.initIdentify()
+    initIdentity(): Promise<void> {
+        super.initIdentity()
 
         this.server.all("/", (req, res) => {
             if (req.isAuthenticated()) {
@@ -54,7 +53,7 @@ class MyApp extends FultonApp {
 }
 
 // launch web server to test
-describe('Identify local and bearer on UserServiceMock', () => {
+describe('Identity local and bearer on UserServiceMock', () => {
     let app: MyApp;
     let httpTester: HttpTester;
 

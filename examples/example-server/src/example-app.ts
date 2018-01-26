@@ -33,13 +33,13 @@ export class ExampleApp extends FultonApp {
 
         options.server.httpPort = 3000;
 
-        options.identify.enabled = true;
-        options.identify.google.enabled = true;
-        options.identify.google.clientId = "291510735539-rbn3kfl94ic9tsa8rhamhcq58sdla70b.apps.googleusercontent.com";
-        options.identify.google.clientSecret = "P5ac34At8dIC9S4ga_cf0ilb";
+        options.identity.enabled = true;
+        options.identity.google.enabled = true;
+        options.identity.google.clientId = "291510735539-rbn3kfl94ic9tsa8rhamhcq58sdla70b.apps.googleusercontent.com";
+        options.identity.google.clientSecret = "P5ac34At8dIC9S4ga_cf0ilb";
         
-        // options.identify.google.scope = "profile email";
-        // options.identify.google.callbackPath = "/api/auth/oauth2callback";
-        // options.identify.google.loadUserProfile = false;
+        // options.identity.google.scope = "profile email";
+        // options.identity.google.callbackPath = "/api/auth/oauth2callback";
+        // options.identity.google.loadUserProfile = false;
     }
 }

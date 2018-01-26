@@ -61,7 +61,7 @@ export async function fultonStategySuccessHandler(req: Request, res: Response) {
  */
 export function fultonDefaultAuthenticateHandler(req: Request, res: Response, next: NextFunction) {
     // authenticate every request to get user info.
-    passport.authenticate(req.fultonApp.options.identify.enabledStrategies,
+    passport.authenticate(req.fultonApp.options.identity.enabledStrategies,
         function (error, user, info) {
             if (error) {
                 next(error);
@@ -70,7 +70,7 @@ export function fultonDefaultAuthenticateHandler(req: Request, res: Response, ne
                     next(err);
                 });
             } else {
-                if (req.fultonApp.options.identify.defaultAuthenticateErrorIfFailure) {
+                if (req.fultonApp.options.identity.defaultAuthenticateErrorIfFailure) {
                     // TODO: web-view
                     res.sendResult(401);
                 } else {
@@ -111,7 +111,7 @@ export function fultonOauthAuthenticateHandler(name: string): Middleware {
  * for register 
  */
 export function fultonRegisterHandler(req: Request, res: Response, next: NextFunction) {
-    let options = req.fultonApp.options.identify.register;
+    let options = req.fultonApp.options.identity.register;
 
     let input = req.body;
     input.username = req.body[options.usernameField];

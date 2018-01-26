@@ -1,6 +1,5 @@
 import { Column, Entity, MongoRepository, ObjectIdColumn, createConnection } from "typeorm";
 
-import { MongoClient } from "mongodb";
 import { Repo, Inject, FultonApp, FultonAppOptions } from "../../src/index";
 
 @Entity("foods")

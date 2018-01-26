@@ -69,8 +69,8 @@ export class UserServiceMock implements IUserService<FultonUser> {
     issueAccessToken(user: FultonUser): Promise<AccessToken> {
         return Promise.resolve({
             access_token: `${user.username}-accessToken`,
-            token_type: this.app.options.identify.accessTokenType,
-            expires_in: this.app.options.identify.accessTokenDuration
+            token_type: this.app.options.identity.accessTokenType,
+            expires_in: this.app.options.identity.accessTokenDuration
         });
     }
 

@@ -12,11 +12,11 @@ import { isFunction } from 'util';
 import { GoogleStrategy } from './strategies/google-strategy';
 import { fultonOauthAuthenticateHandler } from './fulton-impl/fulton-middlewares';
 
-module.exports = async function identifyInitializer(app: FultonApp) {
-    let idOptions = app.options.identify;
+module.exports = async function identityInitializer(app: FultonApp) {
+    let idOptions = app.options.identity;
     if (idOptions.enabled) {
         if (idOptions.userService == null) {
-            throw new Error("identify.userService can't be null when userService.enabled is true.");
+            throw new Error("identity.userService can't be null when userService.enabled is true.");
         }
 
         let userService: IUserService<IUser>;

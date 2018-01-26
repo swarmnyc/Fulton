@@ -5,19 +5,19 @@ import { HttpTester, HttpResult } from "../helpers/http-tester";
 
 class MyApp extends FultonApp {
     protected onInit(options: FultonAppOptions): void {
-        options.identify.enabled = true;
+        options.identity.enabled = true;
         options.databases.set("default", {
             type: "mongodb",
             url: "mongodb://localhost:27017/fulton-test"
         });
     }
 
-    initIdentify(): void {
-        super.initIdentify()
+    initIdentity(): void {
+        super.initIdentity()
     }
 }
 
-xdescribe('Identify', () => {
+xdescribe('Identity', () => {
     let app: MyApp;
     let httpTester: HttpTester;
 

@@ -9,7 +9,7 @@ import { Inject, Injectable } from "../../interfaces";
 import { FultonApp } from "../../fulton-app";
 import { FultonError } from "../../common";
 import { FultonUser } from "./fulton-user";
-import { IdentifyOptions } from '../identify-options';
+import { IdentityOptions } from '../identity-options';
 
 //TODO: multiple database engines supports
 
@@ -49,12 +49,12 @@ class SqlRunner implements IRunner {
 
 @Injectable()
 export class FultonUserService implements IUserService<FultonUser> {
-    private options: IdentifyOptions;
+    private options: IdentityOptions;
     private runner: IRunner;
 
     constructor( @Inject(FultonApp) private app: FultonApp,
         @Inject("UserRepository") private userRepository: Repository<FultonUser>) {
-        this.options = app.options.identify;
+        this.options = app.options.identity;
 
         if (userRepository instanceof MongoRepository) {
             this.runner = new MongoRunner(this.userRepository as MongoRepository<FultonUser>)
@@ -74,7 +74,7 @@ export class FultonUserService implements IUserService<FultonUser> {
 
     async register(input: IUserRegister): Promise<FultonUser> {
         let errors = new FultonError();
-        let registorOptions = this.app.options.identify.register;
+        let registorOptions = this.app.options.identity.register;
 
         // verify username, password, email
         errors.verifyRequireds(input, ["username", "email"])
@@ -225,7 +225,7 @@ export class FultonUserService implements IUserService<FultonUser> {
         let userToken = {
             token: token,
             issuredAt: now,
-            expiredAt: new Date(now.valueOf() + (this.app.options.identify.accessTokenDuration * 1000)),
+            expiredAt: new Date(now.valueOf() + (this.app.options.identity.accessTokenDuration * 1000)),
             revoked: false
         };
 
@@ -233,8 +233,8 @@ export class FultonUserService implements IUserService<FultonUser> {
 
         return {
             access_token: token,
-            token_type: this.app.options.identify.accessTokenType,
-            expires_in: this.app.options.identify.accessTokenDuration
+            token_type: this.app.options.identity.accessTokenType,
+            expires_in: this.app.options.identity.accessTokenDuration
         }
     }
 

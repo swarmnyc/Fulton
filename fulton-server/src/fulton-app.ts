@@ -80,7 +80,7 @@ export abstract class FultonApp {
 
         await this.initRequestParsers();
 
-        await this.initIdentify();
+        await this.initIdentity();
 
         await this.initIndex();
 
@@ -228,9 +228,9 @@ export abstract class FultonApp {
      * init databases, it will be ignored if repository is empty.
      */
     protected async initDatabases(): Promise<void> {
-        if (this.options.identify.useDefaultImplement()) {
-            // add User Entity to typeorm if identify is enabled and use FultonUser and FultonUserService
-            this.options.entities.push(this.options.identify.userType);
+        if (this.options.identity.useDefaultImplement()) {
+            // add User Entity to typeorm if identity is enabled and use FultonUser and FultonUserService
+            this.options.entities.push(this.options.identity.userType);
         } else if (lodash.isEmpty(this.options.repositories) && this.options.loader.repositoryLoaderEnabled == false) {
             return;
         }
@@ -292,10 +292,10 @@ export abstract class FultonApp {
         this.registerTypes(providers);
     }
 
-    protected initIdentify(): void | Promise<void> {
-        if (this.options.identify.enabled) {
+    protected initIdentity(): void | Promise<void> {
+        if (this.options.identity.enabled) {
             // won't load passport-* modules if it is not enabled;
-            return (require("./identify/identify-initializer")(this));
+            return (require("./identity/identity-initializer")(this));
         }
     }
 

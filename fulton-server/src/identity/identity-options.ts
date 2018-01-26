@@ -15,10 +15,10 @@ import Env from "../helpers/env";
 import { Repository } from "typeorm";
 import { Strategy } from "passport";
 
-export class IdentifyOptions {
+export class IdentityOptions {
     /**
      * the default value is false
-     * It can be overrided by procces.env["{appName}.options.identify.enabled"]
+     * It can be overrided by procces.env["{appName}.options.identity.enabled"]
      */
     enabled: boolean;
 
@@ -134,7 +134,7 @@ export class IdentifyOptions {
      *     }
      * 
      *     // if you want to all logics altogether
-     *     // you can set options.identify.login.endabled = false
+     *     // you can set options.identity.login.endabled = false
      *     // and add this action.
      *     @HttpPost("/login", authenticate("local", { failureRedirect: "/auth/login" }))
      *     login(req: Request, res: Response) {
@@ -216,7 +216,7 @@ export class IdentifyOptions {
      *     }
      * 
      *     // if you want to put all logics altogether
-     *     // you can set options.identify.register.endabled = false
+     *     // you can set options.identity.register.endabled = false
      *     // and add this action.
      *     @HttpPost("/register"))
      *     register(req: Request, res: Response) {
@@ -348,19 +348,19 @@ export class IdentifyOptions {
         /**
          * the route path for google auth callback
          * the default value is /auth/google/callback
-         * It can be overrided by procces.env["{appName}.options.identify.google.callbackPath"]
+         * It can be overrided by procces.env["{appName}.options.identity.google.callbackPath"]
          */
         callbackPath?: string;
 
         /**
          * the clientId that google provides to you
-         * It can be overrided by procces.env["{appName}.options.identify.google.clientId"]
+         * It can be overrided by procces.env["{appName}.options.identity.google.clientId"]
          */
         clientId?: string;
 
         /**
          * the clientId that google provides to you
-         * It can be overrided by procces.env["{appName}.options.identify.google.clientSecret"]
+         * It can be overrided by procces.env["{appName}.options.identity.google.clientSecret"]
          */
         clientSecret?: string;
 
@@ -476,8 +476,8 @@ export class IdentifyOptions {
      * load options from environment to override the current options 
      */
     loadEnvOptions() {
-        let prefix = `${this.appName}.options.identify`;
-        // TODO: identify loadEnvOptions
+        let prefix = `${this.appName}.options.identity`;
+        // TODO: identity loadEnvOptions
         this.enabled = Env.getBoolean(`${prefix}.enabled`, this.enabled);
     }
 

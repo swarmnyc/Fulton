@@ -3,7 +3,7 @@ import "reflect-metadata";
 import * as express from "express";
 
 import { injectable, inject, interfaces } from "inversify";
-import { IUserService, IUser } from "./identify";
+import { IUserService, IUser } from "./identity";
 import { FultonApp } from "./fulton-app";
 
 export const Injectable = injectable;
@@ -25,6 +25,11 @@ declare global {
             fultonApp?: FultonApp;
             userService?: IUserService<IUser>;
             container?: FultonDiContainer;
+            queryParams?: any; // TODO: queryParams
+        }
+
+        interface Response {
+            sendResult?: any; // TODO: sendResult
         }
     }
 }
@@ -32,16 +37,12 @@ declare global {
 /**
  * extends express.Request
  */
-export interface Request extends express.Request {
-    queryParams?: any; // TODO: queryParams
-}
+export interface Request extends express.Request {}
 
 /**
  * extends express.Response
  */
-export interface Response extends express.Response {
-    sendResult?: any; // TODO: sendResult
-}
+export interface Response extends express.Response {}
 
 /**
  * alias for express.RequestHandler

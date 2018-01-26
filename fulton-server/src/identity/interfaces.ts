@@ -1,4 +1,5 @@
-import { Request } from "../interfaces";
+import { Request, PathIdentifier, Middleware } from "../interfaces";
+import { Strategy } from "passport-strategy";
 
 export interface IUser {
     [key: string]: any;
@@ -46,7 +47,20 @@ export interface IUserService<T extends IUser> {
     refreshAccessToken(token: string): Promise<AccessToken>;
 }
 
-export interface WebViewResponseOptions {
+export interface AccessToken {
+    access_token?: string;
+    token_type?: string;
+    expires_in?: number;
+    refresh_token?: string;
+    scope?: string;
+    provider?: string;
+    expiry_date?: number;
+    expires_at?: Date;
+    [key: string]: any;
+}
+
+
+export interface StrategyResponseOptions {
     /**
      * default is true
      */
@@ -73,15 +87,88 @@ export interface WebViewResponseOptions {
     failureMessage?: string;
 }
 
-export interface AccessToken {
-    access_token?: string;
-    token_type?: string;
-    expires_in?: number;
-    refresh_token?: string;
-    scope?: string;
-    provider?: string;
-    expiry_date?: number;
-    expires_at?: Date;
+export interface StrategyOptions {
+    /**
+     * the default value is false,
+     * when turn to true, you have to install googleapis package
+     * `npm install googleapis`
+     */
+    enabled?: boolean;
+
+    /**
+     * the route path for google auth
+     * the default value is /auth/google
+     */
+    path?: PathIdentifier;
+
+    /**
+     * the route path for google auth callback
+     * the default value is /auth/google/callback
+     * It can be overrided by procces.env["{appName}.options.identity.google.callbackPath"]
+     */
+    callbackPath?: string;
+
+    /**
+     * the clientId that google provides to you
+     * It can be overrided by procces.env["{appName}.options.identity.google.clientId"]
+     */
+    clientId?: string;
+
+    /**
+     * the clientId that google provides to you
+     * It can be overrided by procces.env["{appName}.options.identity.google.clientSecret"]
+     */
+    clientSecret?: string;
+
+    /**
+     * the callback url google will redirect to, for example `https://www.example.com/auth/google/callback`
+     * if it is empty, fulton will combine req.originUrl + options.callbackPath
+     */
+    callbackUrl?: string;
+
+    /**
+     * the permission scopes to request access to,
+     * default is `profile email`
+     */
+    scope?: string | string[];
+
+    /**
+     * verify the oauth request.
+     */
+    verifier?: OAuthStrategyVerifier;
+
+    /**
+     * either use successCallback or responseOptions for response
+     * the default value is sendAccessToken
+     */
+    successCallback?: Middleware;
+
+    /**
+    * either use successCallback or responseOptions for response
+    * the default value is null
+    */
+    responseOptions?: StrategyResponseOptions;
+}
+
+export interface GoogleStrategyOptions extends StrategyOptions {
+    /**
+     * Can be `online` (default) or `offline` (gets refresh_token)
+     */
+    accessType?: "online" | "offline";
+
+    /**
+    * the permission scopes to request access to,
+    * default is `profile email`
+    */
+    scope?: string | string[];
+}
+
+export interface CustomStrategyOptions extends StrategyOptions {
+    /**
+     * Custom passport-strategy
+     */
+    strategy?: Strategy;
+
     [key: string]: any;
 }
 
@@ -111,14 +198,14 @@ export interface LocalStrategyVerifyDone {
     (error: any, user?: any, options?: LocalStrategyVerifyOptions): void
 }
 
-export interface LocalStrategyVerify {
+export interface LocalStrategyVerifier {
     (req: Request, username: string, password: string, done: LocalStrategyVerifyDone): void;
 }
 
-export interface TokenStrategyVerify {
+export interface TokenStrategyVerifier {
     (req: Request, accessToken: string, done: StrategyVerifyDone): void;
 }
 
-export interface OAuthStrategyVerify {
-    (req: Request, token: AccessToken, profile: any, done: StrategyVerifyDone): void;
+export interface OAuthStrategyVerifier {
+    (req: Request, access_token: string, refresh_token: string, profile: any, done: StrategyVerifyDone): void;
 }

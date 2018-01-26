@@ -84,12 +84,12 @@ export class FultonUserService implements IUserService<FultonUser> {
             errors.verifyRequired(input, "password")
         }
 
-        if (input.password && registorOptions.passwordVerify) {
+        if (input.password && registorOptions.passwordVerifier) {
             let pwResult: boolean;
-            if (registorOptions.passwordVerify instanceof Function) {
-                pwResult = registorOptions.passwordVerify(input.password)
+            if (registorOptions.passwordVerifier instanceof Function) {
+                pwResult = registorOptions.passwordVerifier(input.password)
             } else {
-                pwResult = registorOptions.passwordVerify.test(input.password)
+                pwResult = registorOptions.passwordVerifier.test(input.password)
             }
 
             if (!pwResult) {

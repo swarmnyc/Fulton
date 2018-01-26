@@ -17,8 +17,6 @@ export type PathIdentifier = (string | RegExp | (string | RegExp)[]);
  */
 export type FultonDiContainer = interfaces.Container;
 
-export type NextFunction = express.NextFunction;
-
 declare global {
     namespace Express {
         interface Request {
@@ -33,6 +31,8 @@ declare global {
         }
     }
 }
+
+export interface NextFunction extends express.NextFunction {}
 
 /**
  * extends express.Request

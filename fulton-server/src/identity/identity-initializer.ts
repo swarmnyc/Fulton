@@ -10,7 +10,6 @@ import { FultonApp } from "../fulton-app";
 import { getRepository } from 'typeorm';
 import { isFunction } from 'util';
 import { GoogleStrategy } from './strategies/google-strategy';
-import { fultonOauthAuthenticateHandler } from './fulton-impl/fulton-middlewares';
 
 module.exports = async function identityInitializer(app: FultonApp) {
     let idOptions = app.options.identity;
@@ -55,7 +54,7 @@ module.exports = async function identityInitializer(app: FultonApp) {
                 passwordField: loginOptions.passwordField
             }
 
-            passport.use(new LocalStrategy(localStrategyOptions, loginOptions.verify));
+            passport.use(new LocalStrategy(localStrategyOptions, loginOptions.verifier));
 
             let httpMethod = app.server[loginOptions.httpMethod];
 
@@ -67,13 +66,13 @@ module.exports = async function identityInitializer(app: FultonApp) {
                     passReqToCallback: true
                 };
             } else {
-                authOptions = loginOptions.webViewOptions;
+                authOptions = loginOptions.responseOptions;
             }
 
             httpMethod.apply(app.server,
                 [loginOptions.path,
                 [passport.authenticate("local", authOptions),
-                loginOptions.apiSuccessHandler]]);
+                loginOptions.successCallback]]);
         }
 
         if (idOptions.register.enabled) {
@@ -87,13 +86,13 @@ module.exports = async function identityInitializer(app: FultonApp) {
                 scope: null,
                 realm: null,
                 passReqToCallback: true
-            }, idOptions.bearer.verify));
+            }, idOptions.bearer.verifier));
 
             idOptions.enabledStrategies.push("bearer")
         }
 
         if (idOptions.google.enabled) {
-            passport.use(new GoogleStrategy(idOptions.google, idOptions.google.verify));
+            passport.use(new GoogleStrategy(idOptions.google, idOptions.google.verifier));
 
             let authOptions: AuthenticateOptions;
 
@@ -103,11 +102,11 @@ module.exports = async function identityInitializer(app: FultonApp) {
                     passReqToCallback: true
                 };
             } else {
-                authOptions = idOptions.google.webViewOptions;
+                authOptions = idOptions.google.responseOptions;
             }
 
             app.server.get(idOptions.google.path, passport.authenticate('google'));
-            app.server.get(idOptions.google.callbackPath, fultonOauthAuthenticateHandler("google"));
+            app.server.get(idOptions.google.callbackPath, idOptions.google.successCallback);
         }
 
         if (idOptions.defaultAuthenticate && idOptions.enabledStrategies.length > 0) {

@@ -6,21 +6,10 @@ import * as https from 'https';
 import { AccessToken, IUser, Request } from '../../index';
 
 import { OAuth2Client } from "google-auth-library";
-import { OAuthStrategyVerify } from '../interfaces';
+import { OAuthStrategyVerifier, GoogleStrategyOptions } from '../interfaces';
 import { Strategy } from 'passport-strategy';
 import { fultonDebug } from '../../helpers/debug';
 
-// reference https://github.com/RiptideElements/passport-google-auth
-// but it is not readly I want, so I change it a little
-
-export interface GoogleStrategyOptions {
-    clientId?: string;
-    clientSecret?: string;
-    callbackPath?: string;
-    callbackUrl?: string;
-    accessType?: string;
-    scope?: string | string[];
-}
 
 export class GoogleStrategy extends Strategy {
     // only require google-auth-library when options.google.enabled = true;
@@ -28,7 +17,7 @@ export class GoogleStrategy extends Strategy {
     private jws = require("jws");
 
     name: string = "google";
-    constructor(private options: GoogleStrategyOptions, private verify: OAuthStrategyVerify) {
+    constructor(private options: GoogleStrategyOptions, private verify: OAuthStrategyVerifier) {
         super();
     }
 
@@ -46,12 +35,6 @@ export class GoogleStrategy extends Strategy {
             oauthClient.getToken(req.query.code, (err: any, token: AccessToken) => {
                 if (err) {
                     return this.error(new Error('Failed to obtain access token ' + err.message));
-                }
-
-                token.provider = this.name;
-
-                if (token.expiry_date) {
-                    token.expires_at = new Date(token.expiry_date);
                 }
 
                 fultonDebug("google token: %O", token);
@@ -86,7 +69,7 @@ export class GoogleStrategy extends Strategy {
                 }
 
                 try {
-                    this.verify(req, token, profile, verified)
+                    this.verify(req, token.access_token, token.refresh_token, profile, verified)
                 } catch (error) {
                     this.error(error);
                 }

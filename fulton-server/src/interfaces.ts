@@ -33,6 +33,7 @@ declare global {
  * extends express.Request
  */
 export interface Request extends express.Request {
+    queryParams?: any; // TODO: queryParams
 }
 
 /**

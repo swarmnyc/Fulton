@@ -1,7 +1,7 @@
 import * as lodash from 'lodash';
 import * as passport from 'passport';
 
-import { LocalStrategyVerifyDone, StrategyResponseOptions, StrategyVerifyDone, IUserRegister } from "../interfaces";
+import { LocalStrategyVerifyDone, StrategyResponseOptions, StrategyVerifyDone, IUserRegister, AccessToken } from "../interfaces";
 import { Middleware, NextFunction, Request, Response } from "../../interfaces";
 
 import { FultonApp } from '../../fulton-app';
@@ -19,7 +19,7 @@ export function fultonLocalStrategyVerify(req: Request, username: string, passwo
             done(null, user);
         }).catch((error) => {
             done(error);
-        });;
+        });
 }
 
 /**
@@ -33,6 +33,19 @@ export async function fultonTokenStrategyVerify(req: Request, token: string, don
     } else {
         return done(null, false);
     }
+}
+
+/**
+ * for oauth strategy verify like google
+ */
+export async function fultonOAuthStrategyVerify(req: Request, token: AccessToken, profile: any, done: StrategyVerifyDone) {
+    req.userService
+        .loginByOauth(token, profile)
+        .then((user) => {
+            done(null, user);
+        }).catch((error) => {
+            done(error);
+        });
 }
 
 /**
@@ -58,6 +71,7 @@ export function fultonDefaultAuthenticateHandler(req: Request, res: Response, ne
                 });
             } else {
                 if (req.fultonApp.options.identify.defaultAuthenticateErrorIfFailure) {
+                    // TODO: web-view
                     res.sendResult(401);
                 } else {
                     next();
@@ -66,6 +80,32 @@ export function fultonDefaultAuthenticateHandler(req: Request, res: Response, ne
 
         })(req, res, next);
 };
+
+
+/**
+ * handler OAuth Authenticate
+ * @param name 
+ */
+export function fultonOauthAuthenticateHandler(name: string): Middleware {
+    return (req: Request, res: Response, next: NextFunction) => {
+        passport.authenticate(name,
+            function (error, user, info) {
+                if (error) {
+                    next(error);
+                } else if (user) {
+                    req.logIn(user, { session: false }, (err) => {
+                        // TODO: web-view
+                        fultonStategySuccessHandler(req, res);
+                    });
+                } else {
+                    // TODO: web-view
+                    res.sendResult(401);
+                }
+
+            })(req, res, next);
+    }
+};
+
 
 /**
  * for register 

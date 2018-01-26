@@ -10,7 +10,7 @@ if (moduleExists("debug")) {
     /**
      * shortcut for debug("Fulton")
      */
-    fultonDebug = require("debug")("Fulton");
+    fultonDebug = require("debug")("fulton");
 } else {
     // fake debug
     fultonDebug = function (formatter: any, ...args: any[]): void {

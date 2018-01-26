@@ -1,12 +1,13 @@
 import { AppMode, HttpMethod, PathIdentifier } from "../interfaces";
 import { FultonUser, FultonUserService, IUser, Middleware, Type } from "../index";
-import { IUserService, LocalStrategyVerify, TokenStrategyVerify } from "./interfaces";
+import { IUserService, LocalStrategyVerify, TokenStrategyVerify, OAuthStrategyVerify, WebViewResponseOptions } from "./interfaces";
 import {
     fultonDefaultAuthenticateHandler,
     fultonRegisterHandler,
     fultonStategySuccessHandler,
     fultonLocalStrategyVerify,
-    fultonTokenStrategyVerify
+    fultonTokenStrategyVerify,
+    fultonOAuthStrategyVerify
 } from "./fulton-impl/fulton-middlewares";
 
 import { AuthorizeOptions } from "./authorizes-middlewares";
@@ -197,27 +198,7 @@ export class IdentifyOptions {
         /**
          * the options for web-viwe mode
          */
-        webViewOptions?: {
-            /**
-             * the default value is /
-             */
-            successRedirect?: string;
-
-            /**
-             * the default value is /auth/login
-             */
-            failureRedirect?: string;
-
-            /**
-             * the default value is false
-             */
-            failureFlash?: string | boolean;
-
-            /**
-             * the default value is Login Failed
-             */
-            failureMessage?: string;
-        }
+        webViewOptions?: WebViewResponseOptions
     }
 
     /**
@@ -320,27 +301,7 @@ export class IdentifyOptions {
         /**
          * the options for web-viwe mode
          */
-        webViewOptions?: {
-            /**
-             * the default value is /
-             */
-            successRedirect?: string;
-
-            /**
-             * the default value is /auth/register
-             */
-            failureRedirect?: string;
-
-            /**
-             * the default value is false
-             */
-            failureFlash?: string | boolean;
-
-            /**
-             * the default value is empty
-             */
-            failureMessage?: string;
-        }
+        webViewOptions?: WebViewResponseOptions;
     }
 
     bearer: {
@@ -371,9 +332,64 @@ export class IdentifyOptions {
     }
 
     google: {
-        enabled: boolean;
-        path: PathIdentifier;
-        callbackPath: PathIdentifier;
+        /**
+         * the default value is false,
+         * when turn to true, you have to install googleapis package
+         * `npm install googleapis`
+         */
+        enabled?: boolean;
+
+        /**
+         * the route path for google auth
+         * the default value is /auth/google
+         */
+        path?: PathIdentifier;
+
+        /**
+         * the route path for google auth callback
+         * the default value is /auth/google/callback
+         * It can be overrided by procces.env["{appName}.options.identify.google.callbackPath"]
+         */
+        callbackPath?: string;
+
+        /**
+         * the clientId that google provides to you
+         * It can be overrided by procces.env["{appName}.options.identify.google.clientId"]
+         */
+        clientId?: string;
+
+        /**
+         * the clientId that google provides to you
+         * It can be overrided by procces.env["{appName}.options.identify.google.clientSecret"]
+         */
+        clientSecret?: string;
+
+        /**
+         * the callback url google will redirect to, for example `https://www.example.com/auth/google/callback`
+         * if it is empty, fulton will combine req.originUrl + options.callbackPath
+         */
+        callbackUrl?: string;
+
+        /**
+         * Can be `online` (default) or `offline` (gets refresh_token)
+         */
+        accessType?: "online" | "offline";
+
+        /**
+         * the permission scopes to request access to,
+         * default is `profile email`
+         */
+        scope?: string | string[];
+
+        /**
+         * verify the google user.
+         */
+        verify?: OAuthStrategyVerify;
+
+         /**
+         * the options for web-viwe mode
+         */
+        webViewOptions?: WebViewResponseOptions;
     }
 
     // TODO: other strategies, like facebook, github
@@ -434,6 +450,19 @@ export class IdentifyOptions {
 
         this.bearer = {
             verify: fultonTokenStrategyVerify
+        }
+
+        this.google = {
+            enabled: false,
+            path: "/auth/google",
+            callbackPath: "/auth/google/callback",
+            accessType: "online",
+            scope: "profile email",
+            verify: fultonOAuthStrategyVerify,
+            webViewOptions: {
+                failureRedirect: "/auth/login",
+                successRedirect: "/"
+            }
         }
 
         if (this.appModel == "api") {

@@ -31,6 +31,7 @@ class MyApp extends FultonApp {
         this.options.identify.enabled = true;
         this.options.identify.userService = new UserServiceMock(this);
         this.options.routers = [TestRouter, TestRouter2];
+        options.
     }
 
     initIdentify(): Promise<void> {

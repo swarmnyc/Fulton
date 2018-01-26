@@ -9,6 +9,8 @@ import { Strategy as BearerStrategy } from 'passport-http-bearer';
 import { FultonApp } from "../fulton-app";
 import { getRepository } from 'typeorm';
 import { isFunction } from 'util';
+import { GoogleStrategy } from './strategies/google-strategy';
+import { fultonOauthAuthenticateHandler } from './fulton-impl/fulton-middlewares';
 
 module.exports = async function identifyInitializer(app: FultonApp) {
     let idOptions = app.options.identify;
@@ -88,6 +90,24 @@ module.exports = async function identifyInitializer(app: FultonApp) {
             }, idOptions.bearer.verify));
 
             idOptions.enabledStrategies.push("bearer")
+        }
+
+        if (idOptions.google.enabled) {
+            passport.use(new GoogleStrategy(idOptions.google, idOptions.google.verify));
+
+            let authOptions: AuthenticateOptions;
+
+            if (app.mode == "api") {
+                authOptions = {
+                    session: false,
+                    passReqToCallback: true
+                };
+            } else {
+                authOptions = idOptions.google.webViewOptions;
+            }
+
+            app.server.get(idOptions.google.path, passport.authenticate('google'));
+            app.server.get(idOptions.google.callbackPath, fultonOauthAuthenticateHandler("google"));
         }
 
         if (idOptions.defaultAuthenticate && idOptions.enabledStrategies.length > 0) {

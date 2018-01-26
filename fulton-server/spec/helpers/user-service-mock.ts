@@ -36,7 +36,8 @@ export class UserServiceMock implements IUserService<FultonUser> {
         }
     }
 
-    loginByOauth(soruce: string, profile: any): Promise<FultonUser> {
+    loginByOauth(token: AccessToken, profile: any): Promise<FultonUser> {
+        //TODO: loginByOauth;
         throw new Error("Method not implemented.");
     }
 

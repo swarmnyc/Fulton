@@ -15,6 +15,9 @@ export class FultonUser implements IFultonUser {
     @Column({ length: 256 })
     hashedPassword: string;
 
+    @Column()
+    userImageUrl: string;
+
     @Column({})
     accessTokens: FultonAccessToken[];
 

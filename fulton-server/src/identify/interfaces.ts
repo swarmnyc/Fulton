@@ -8,6 +8,7 @@ export interface IUserRegister extends IUser {
     email?: string;
     username?: string;
     password?: string;
+    oauthToken?: AccessToken;
 }
 
 export interface IFultonUser extends IUser {
@@ -20,7 +21,7 @@ export interface IFultonUser extends IUser {
 }
 
 export interface FultonUserOauth {
-    source?: string;
+    provider?: string;
     userId?: string;
     accessToken?: string;
     refreshToken?: string;
@@ -38,11 +39,38 @@ export interface FultonAccessToken {
 export interface IUserService<T extends IUser> {
     currentUser: IUser;
     login(username: string, password: string): Promise<T>;
-    loginByOauth(soruce: string, profile: any): Promise<T>;
+    loginByOauth(token: AccessToken, profile: any): Promise<T>;
     findByAccessToken(token: string): Promise<T>;
     register(user: IUserRegister): Promise<T>;
     issueAccessToken(user: T): Promise<AccessToken>;
     refreshAccessToken(token: string): Promise<AccessToken>;
+}
+
+export interface WebViewResponseOptions {
+    /**
+     * default is true
+     */
+    session?: boolean,
+
+    /**
+     * the default value is /
+     */
+    successRedirect?: string;
+
+    /**
+     * the default value is /auth/login
+     */
+    failureRedirect?: string;
+
+    /**
+     * the default value is false
+     */
+    failureFlash?: string | boolean;
+
+    /**
+     * the default value is Login Failed
+     */
+    failureMessage?: string;
 }
 
 export interface AccessToken {
@@ -51,6 +79,10 @@ export interface AccessToken {
     expires_in?: number;
     refresh_token?: string;
     scope?: string;
+    provider?: string;
+    expiry_date?: number;
+    expires_at?: Date;
+    [key: string]: any;
 }
 
 export interface StrategyResponseOptions {
@@ -68,7 +100,7 @@ export interface StrategyResponseOptions {
 }
 
 export interface StrategyVerifyDone {
-    (error: any, user?: any): void
+    (error: any, user?: any, info?: any): void
 }
 
 export interface LocalStrategyVerifyOptions {
@@ -85,4 +117,8 @@ export interface LocalStrategyVerify {
 
 export interface TokenStrategyVerify {
     (req: Request, accessToken: string, done: StrategyVerifyDone): void;
+}
+
+export interface OAuthStrategyVerify {
+    (req: Request, token: AccessToken, profile: any, done: StrategyVerifyDone): void;
 }

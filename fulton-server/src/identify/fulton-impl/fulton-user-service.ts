@@ -15,6 +15,7 @@ import { IdentifyOptions } from '../identify-options';
 
 interface IRunner {
     addAccessToken(user: FultonUser, userToken: FultonAccessToken): Promise<any>
+    updateOAuthToken?(user: FultonUser, oauthToken: AccessToken): Promise<any>
 }
 
 class MongoRunner implements IRunner {
@@ -25,6 +26,12 @@ class MongoRunner implements IRunner {
     addAccessToken(user: FultonUser, userToken: FultonAccessToken): Promise<any> {
         return this.userRepository.updateOne({ _id: user.id }, {
             "$push": { "accessTokens": userToken }
+        });
+    }
+
+    updateOAuthToken(user: FultonUser, oauthToken: AccessToken): Promise<any> {
+        return this.userRepository.updateOne({ _id: user.id }, {
+            "$push": { "oauthes": oauthToken }
         });
     }
 }
@@ -70,7 +77,12 @@ export class FultonUserService implements IUserService<FultonUser> {
         let registorOptions = this.app.options.identify.register;
 
         // verify username, password, email
-        errors.verifyRequireds(input, ["username", "password", "email"])
+        errors.verifyRequireds(input, ["username", "email"])
+
+        if (!input.oauthToken) {
+            // if oauth register, no need password.
+            errors.verifyRequired(input, "password")
+        }
 
         if (input.password && registorOptions.passwordVerify) {
             let pwResult: boolean;
@@ -89,11 +101,13 @@ export class FultonUserService implements IUserService<FultonUser> {
             throw errors;
         }
 
-        let fileds = ["username", "email"].concat(registorOptions.otherFileds);
-        let newUser = lodash.pick(input, fileds) as FultonUser;
+        //TODO: verify email
 
-        newUser.email = newUser.email.toLocaleLowerCase();
-        newUser.username = newUser.username.toLocaleLowerCase();
+        input.email = input.email.toLocaleLowerCase();
+        input.username = input.username.toLocaleLowerCase();
+
+        let fileds = ["username", "email", "userImageUrl"].concat(registorOptions.otherFileds);
+        let newUser = lodash.pick(input, fileds) as FultonUser;
 
         // verify existence
         let count = await this.userRepository.count({
@@ -116,7 +130,21 @@ export class FultonUserService implements IUserService<FultonUser> {
             throw errors;
         }
 
-        newUser.hashedPassword = passwordHash.generate(input.password, registorOptions.passwordHashOptons);
+        if (input.oauthToken) {
+            newUser.oauthes = [
+                {
+                    accessToken: input.oauthToken.access_token,
+                    refreshToken: input.oauthToken.refresh_token,
+                    provider: input.oauthToken.provider,
+                    expiredAt: input.oauthToken.expires_at,
+                    issuredAt: new Date()
+                }
+            ]
+        }
+
+        if (input.password) {
+            newUser.hashedPassword = passwordHash.generate(input.password, registorOptions.passwordHashOptons);
+        }
 
         return this.userRepository.save(newUser);
     }
@@ -140,15 +168,49 @@ export class FultonUserService implements IUserService<FultonUser> {
             username: username,
         });
 
-        if (passwordHash.verify(password, user.hashedPassword)) {
+        if (user.hashedPassword && passwordHash.verify(password, user.hashedPassword)) {
             return user;
         } else {
             throw errors.addError("$", "username or password isn't correct");
         }
     }
 
-    loginByOauth(soruce: string, profile: any): Promise<FultonUser> {
-        throw new Error("Method not implemented.");
+    async loginByOauth(token: AccessToken, profile: any): Promise<FultonUser> {
+        let errors = new FultonError();
+
+        // verify username, password, email
+        if (!errors.verifyRequired(profile, "email")) {
+            throw errors;
+        }
+
+        profile.email = profile.email.toLocaleLowerCase();
+
+        // verify existence
+        let user = await this.userRepository.findOne({
+            email: profile.email,
+        });
+
+        if (user) {
+            // email is the same
+            await this.runner.updateOAuthToken(user, {
+                provider: token.provider,                
+                accessToken: token.access_token,
+                refreshToken: token.refresh_token,
+                expiredAt: token.expires_at,
+                issuredAt: new Date()
+            });
+
+            return user;
+        } else {
+            // create a new user
+            let newUser: IUserRegister = {
+                email: profile.email,
+                username: profile.username || profile.email,
+                oauthToken: token
+            }
+
+            return this.register(newUser);
+        }
     }
 
     findByAccessToken(token: string): Promise<FultonUser> {

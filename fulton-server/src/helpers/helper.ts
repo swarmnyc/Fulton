@@ -30,6 +30,26 @@ export default class Helper {
 
         return parseFloat(str) || defaultValue;
     }
+
+    /**
+     * if object or value is null skip,
+     * if object[name] is null then set value and return new value, 
+     * otherwise skip set value and return old value
+     * @param object 
+     * @param name 
+     * @param value 
+     */
+    static setValue<T>(object: T, name: keyof T, value: any): any {
+        if (object == null || value == null)
+            return;
+
+        if (object[name] == null) {
+            object[name] = value;
+            return value;
+        } else {
+            return object[name];
+        }
+    }
 }
 
 

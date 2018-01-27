@@ -5,6 +5,7 @@
     "outDir": "./build"
   },
   "exclude": [
+    "build",
     "spec",
     "**/*.spec.ts"
   ]

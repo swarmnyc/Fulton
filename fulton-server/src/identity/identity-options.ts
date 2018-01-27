@@ -1,6 +1,6 @@
 import { AppMode, HttpMethod, PathIdentifier } from "../interfaces";
 import { FultonUser, FultonUserService, IUser, Middleware, Type, StrategyOptions, CustomStrategySettings } from "../index";
-import { IUserService, LocalStrategyVerifier, TokenStrategyVerifier, OAuthStrategyVerifier, StrategyResponseOptions, GoogleStrategyOptions, OAuthStrategyOptions } from "./interfaces";
+import { IUserService, LocalStrategyVerifier, TokenStrategyVerifier, OAuthStrategyVerifier, GoogleStrategyOptions, OAuthStrategyOptions } from "./interfaces";
 
 import { AuthorizeOptions } from "./authorizes-middlewares";
 import Env from "../helpers/env";
@@ -343,6 +343,10 @@ export class IdentityOptions {
      * path is `/auth/google`
      * callback is `/auth/google/callback`
      * scope is `profile email`
+     * accessType is `online`
+     * 
+     * ## Require "google-auth-library" package ##
+     * run `npm install google-auth-library` to install it
      * 
      * clientId can be overrided by procces.env["{appName}.options.identity.google.clientId"]
      * clientSecret can be overrided by procces.env["{appName}.options.identity.google.clientSecret"]
@@ -416,8 +420,13 @@ export class IdentityOptions {
             callbackPath: "/auth/google/callback",
             accessType: "online",
             scope: "profile email",
-            verifier: FultonImpl.oauthVerifierFn("google", this.google),
-            callbackAuthenticateFn: FultonImpl.callbackAuthenticateFn
+            strategyOptions: {},
+            verifierFn: FultonImpl.oauthVerifierFn,
+            authenticateFn : FultonImpl.oauthAuthenticateFn,
+            authenticateOptions: {
+                failureRedirect: "/auth/login",
+            },
+            callbackAuthenticateFn: FultonImpl.oauthCallbackAuthenticateFn
         }
 
         this.github = {
@@ -425,12 +434,11 @@ export class IdentityOptions {
             path: "/auth/github",
             callbackPath: "/auth/github/callback",
             scope: "profile email",
-            verifier: FultonImpl.oauthVerifierFn("github", this.github),
+            verifierFn: FultonImpl.oauthVerifierFn,
             authenticateOptions: {
                 failureRedirect: "/auth/login",
-                successRedirect: "/"
             },
-            callbackAuthenticateFn: FultonImpl.callbackAuthenticateFn
+            callbackAuthenticateFn: FultonImpl.oauthCallbackAuthenticateFn
         }
 
         if (this.appModel == "api") {

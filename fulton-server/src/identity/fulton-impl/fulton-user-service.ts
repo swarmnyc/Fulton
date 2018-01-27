@@ -106,7 +106,7 @@ export class FultonUserService implements IUserService<FultonUser> {
         input.email = input.email.toLocaleLowerCase();
         input.username = input.username.toLocaleLowerCase();
 
-        let fileds = ["username", "email", "userImageUrl"].concat(registorOptions.otherFileds);
+        let fileds = ["username", "email", "portraitUrl"].concat(registorOptions.otherFileds);
         let newUser = lodash.pick(input, fileds) as FultonUser;
 
         // verify existence
@@ -136,7 +136,6 @@ export class FultonUserService implements IUserService<FultonUser> {
                     accessToken: input.oauthToken.access_token,
                     refreshToken: input.oauthToken.refresh_token,
                     provider: input.oauthToken.provider,
-                    expiredAt: input.oauthToken.expires_at,
                     issuredAt: new Date()
                 }
             ]
@@ -196,7 +195,6 @@ export class FultonUserService implements IUserService<FultonUser> {
                 provider: token.provider,                
                 accessToken: token.access_token,
                 refreshToken: token.refresh_token,
-                expiredAt: token.expires_at,
                 issuredAt: new Date()
             });
 

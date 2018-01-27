@@ -35,29 +35,34 @@ export class HttpTester {
         this.headers = headers;
     }
 
-    get(path: string, queryString?: any): Promise<HttpResult> {
+    get(path: string, queryString?: any, followRedirect?: boolean): Promise<HttpResult> {
         return this.request({
             method: "get",
             url: url.resolve(this.baseUrl, path),
             headers: this.headers,
-            qs: queryString
+            qs: queryString,
+            followRedirect: followRedirect,
+            followAllRedirects: followRedirect
         });
     }
 
-    postJson(path: string, object?: any): Promise<HttpResult> {
+    postJson(path: string, object?: any, followRedirects?: boolean): Promise<HttpResult> {
         return this.request({
             method: "post",
             url: url.resolve(this.baseUrl, path),
             headers: this.headers,
             json: object,
+            followRedirect: followRedirects,
+            followAllRedirects: followRedirects
         });
     }
 
-    postForm(path: string, object?: any): Promise<HttpResult> {
+    postForm(path: string, object?: any, followAllRedirects?: boolean): Promise<HttpResult> {
         return this.request({
             method: "post",
             url: url.resolve(this.baseUrl, path),
             form: object,
+            followAllRedirects: followAllRedirects
         });
     }
 

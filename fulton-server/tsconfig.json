@@ -4,5 +4,8 @@
     "rootDir": "./",
     "sourceRoot": "./src",
     "outDir": "./build"
-  }
+  },
+  "exclude": [
+    "build"
+  ]
 }

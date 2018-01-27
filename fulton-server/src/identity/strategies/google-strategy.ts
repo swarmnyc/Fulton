@@ -24,9 +24,9 @@ export class GoogleStrategy extends Strategy {
     authenticate(req: Request, options: GoogleStrategyOptions) {
         options = lodash.assign({}, this.options, options);
 
-        if (!options.callbackUrl) {
-            options.callbackUrl = url.resolve(`${req.protocol}://${req.get("host")}`, this.options.callbackPath);
-        }
+        if (!options.clientId) return this.error(new Error("clientId is required for GoogleStrategy"))
+        if (!options.clientSecret) return this.error(new Error("clientSecret is required for GoogleStrategy"))
+        if (!options.callbackUrl) return this.error(new Error("clientUrl or clientPath is required for GoogleStrategy"))
 
         let oauthClient: OAuth2Client = new this.googleAuthLibrary.OAuth2Client(options.clientId, options.clientSecret, options.callbackUrl);
 
@@ -61,8 +61,8 @@ export class GoogleStrategy extends Strategy {
                     let payload = JSON.parse(jwt.payload);
                     profile = {
                         email: payload.email,
-                        name: payload.name,
-                        userImageUrl: payload.picture
+                        username: payload.email,
+                        portraitUrl: payload.picture
                     }
                 } else {
                     this.error(new Error("google token don't have id_token"));

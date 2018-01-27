@@ -5,11 +5,11 @@ import { IStrategyOptionsWithRequest, Strategy as LocalStrategy } from 'passport
 import { Strategy } from 'passport';
 import { IUser, IUserService } from './interfaces';
 
-import { AuthenticateOptions } from './authenticate-middlewares';
 import { Strategy as BearerStrategy } from 'passport-http-bearer';
 import { FultonApp } from "../fulton-app";
 import { getRepository } from 'typeorm';
 import { GoogleStrategy } from './strategies/google-strategy';
+import Helper from '../helpers/helper';
 
 module.exports = async function identityInitializer(app: FultonApp) {
     let idOptions = app.options.identity;
@@ -52,7 +52,7 @@ module.exports = async function identityInitializer(app: FultonApp) {
             httpMethod.call(app.server, registerOptions.path, registerOptions.handler);
         }
 
-        // for login
+        // add pre-defined login strategy
         if (idOptions.login.enabled) {
             let opts = idOptions.login;
 
@@ -61,7 +61,7 @@ module.exports = async function identityInitializer(app: FultonApp) {
                 path: opts.path,
                 verifier: opts.verifier,
                 successMiddleware: opts.successMiddleware,
-                strageyOptions: {
+                strategyOptions: {
                     usernameField: opts.usernameField,
                     passwordField: opts.passwordField
                 },
@@ -69,7 +69,7 @@ module.exports = async function identityInitializer(app: FultonApp) {
             }, LocalStrategy);
         }
 
-        // for bearer
+        // add pre-defined bearer strategy
         if (idOptions.bearer.enabled) {
             let opts = idOptions.bearer;
 
@@ -79,33 +79,25 @@ module.exports = async function identityInitializer(app: FultonApp) {
             }, BearerStrategy);
         }
 
+        // add pre-defined google strategy
         if (idOptions.google.enabled) {
-            passport.use(new GoogleStrategy(idOptions.google, idOptions.google.verifier));
+            Helper.setValue(idOptions.google.strategyOptions, "accessType", idOptions.google.accessType);
 
-            let authOptions: AuthenticateOptions;
-
-            if (app.mode == "api") {
-                authOptions = {
-                    session: false,
-                    passReqToCallback: true
-                };
-            } else {
-                authOptions = idOptions.google.authenticateOptions;
-            }
-
-            app.server.get(idOptions.google.path, passport.authenticate('google'));
-            app.server.get(idOptions.google.callbackPath, idOptions.google.successMiddleware);
+            idOptions.addStrategy(
+                idOptions.google,
+                GoogleStrategy
+            )
         }
 
-        if (idOptions.google.enabled) {
-            let opts = idOptions.google;
+        // add pre-defined github strategy
+        if (idOptions.github.enabled) {
+            let opts = idOptions.github;
 
-            opts.strageyOptions = opts.strageyOptions || {
+            opts.strategyOptions = opts.strategyOptions || {
                 clientId: opts.clientId,
                 clientSecret: opts.clientSecret,
                 callbackPath: opts.callbackPath,
                 callbackUrl: opts.callbackUrl,
-                accessType: opts.accessType,
                 scope: opts.scope,
             };
 
@@ -115,14 +107,26 @@ module.exports = async function identityInitializer(app: FultonApp) {
             )
         }
 
+        // register strategies to passport and express
         for (const { options, strategy } of idOptions.strategies) {
             if (!options.enabled) continue;
 
+            // register passport
             let instance: Strategy;
 
             if (strategy instanceof Function) {
-                let opts = options.strategyOptions || {};
+                let opts = Helper.setValue(options, "strategyOptions", {});
+
+                Helper.setValue(opts, "clientId", options.clientId);
+                Helper.setValue(opts, "clientSecret", options.clientSecret);
+                Helper.setValue(opts, "callbackUrl", options.callbackUrl);
+                Helper.setValue(opts, "scope", options.scope);
+
                 opts.passReqToCallback = opts.passReqToCallback == null ? true : opts.passReqToCallback;
+
+                if (options.verifierFn) {
+                    options.verifier = options.verifierFn(options);
+                } 
 
                 instance = new strategy(opts, options.verifier);
             } else {
@@ -133,8 +137,9 @@ module.exports = async function identityInitializer(app: FultonApp) {
 
             passport.use(options.name, instance);
 
-            // for regular strategy
+            // register to express
             if (options.path) {
+                // for regular strategy
                 let args: any[] = [];
 
                 let opts = options.authenticateOptions || {};
@@ -155,8 +160,8 @@ module.exports = async function identityInitializer(app: FultonApp) {
                 httpMethod.apply(app.server, [options.path, args]);
             }
 
-            // for oauth strategy
             if (options.callbackPath) {
+                // for oauth strategy 
                 let args: any[] = [];
 
                 let opts = options.callbackAuthenticateOptions || {};

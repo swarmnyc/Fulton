@@ -1,6 +1,9 @@
+import * as passport from 'passport';
 import { Request, PathIdentifier, Middleware } from "../interfaces";
-import { Strategy, AuthenticateOptions } from "passport";
 import { Type, HttpMethod } from "../index";
+
+export type Strategy = passport.Strategy;
+export type AuthenticateOptions = passport.AuthenticateOptions;
 
 export interface IUser {
     [key: string]: any;
@@ -56,36 +59,7 @@ export interface AccessToken {
     scope?: string;
     provider?: string;
     expiry_date?: number;
-    expires_at?: Date;
     [key: string]: any;
-}
-
-
-export interface StrategyResponseOptions {
-    /**
-     * default is true
-     */
-    session?: boolean,
-
-    /**
-     * the default value is /
-     */
-    successRedirect?: string;
-
-    /**
-     * the default value is /auth/login
-     */
-    failureRedirect?: string;
-
-    /**
-     * the default value is false
-     */
-    failureFlash?: string | boolean;
-
-    /**
-     * the default value is Login Failed
-     */
-    failureMessage?: string;
 }
 
 export interface StrategyOptions {
@@ -114,7 +88,7 @@ export interface StrategyOptions {
     * new LocalStrategy(options.strageyOptions, options.verifier)
     * the default value is null
     */
-    strageyOptions?: any;
+    strategyOptions?: {[key: string]: any};
 
     /**
      * verify the oauth request.
@@ -147,8 +121,6 @@ export interface StrategyOptions {
      * the default value is false.
      */
     addToDefaultAuthenticateList?: boolean;
-
-    [key: string]: any;
 }
 
 export interface OAuthStrategyOptions extends StrategyOptions {
@@ -191,6 +163,11 @@ export interface OAuthStrategyOptions extends StrategyOptions {
     verifier?: OAuthStrategyVerifier;
 
     /**
+     * if provided, call this function to get the verifier
+     */
+    verifierFn?: (options: OAuthStrategyOptions) => OAuthStrategyVerifier;
+
+    /**
      * the middleware next to authenticate
      * the default value is null
      */
@@ -225,20 +202,6 @@ export interface CustomStrategySettings {
      * Custom passport-strategy
      */
     strategy: Strategy | Type<Strategy>;
-}
-
-export interface StrategyResponseOptions {
-    /**
-     * for web-viwe mode
-     * the default value is /
-     */
-    successRedirect?: string;
-
-    /**
-     * for web-viwe mode
-     * the default value is /auth/login
-     */
-    failureRedirect?: string;
 }
 
 export interface StrategyVerifyDone {

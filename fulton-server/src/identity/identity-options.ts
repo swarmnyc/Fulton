@@ -1,12 +1,13 @@
 import { AppMode, HttpMethod, PathIdentifier } from "../interfaces";
-import { FultonUser, FultonUserService, IUser, Middleware, Type, StrategyOptions } from "../index";
-import { IUserService, LocalStrategyVerifier, TokenStrategyVerifier, OAuthStrategyVerifier, StrategyResponseOptions, GoogleStrategyOptions, CustomStrategyOptions } from "./interfaces";
+import { FultonUser, FultonUserService, IUser, Middleware, Type, StrategyOptions, CustomStrategySettings } from "../index";
+import { IUserService, LocalStrategyVerifier, TokenStrategyVerifier, OAuthStrategyVerifier, StrategyResponseOptions, GoogleStrategyOptions, OAuthStrategyOptions } from "./interfaces";
 
 import { AuthorizeOptions } from "./authorizes-middlewares";
 import Env from "../helpers/env";
 import { Repository } from "typeorm";
 import { Strategy } from "passport";
 import { FultonImpl } from "./fulton-impl/fulton-impl";
+import { AuthenticateOptions } from "passport";
 
 export class IdentityOptions {
     /**
@@ -60,7 +61,7 @@ export class IdentityOptions {
      * ```
      * defaultAuthenticate = (req: Request, res: Response, next: NextFunction) => {
      *     // authenticate every request to get user info.
-     *     passport.authenticate(req.fultonApp.options.identity.enabledStrategies,
+     *     passport.authenticate(req.fultonApp.options.identity.supportList,
      *         function (error, user, info) {
      *             if (error) {
      *                 next(error);
@@ -118,88 +119,7 @@ export class IdentityOptions {
      * }
      * ```
      */
-    defaultAuthorizes: Middleware[]
-
-    /**
-     * the local strategy for login, fulton doesn't have html for login, 
-     * 
-     * for render html, you have to add a router
-     * 
-     * ## example for web view
-     * ```
-     * @Router("/auth")
-     * export class AuthRouter extends FultonRouter {
-     *     @HttpGet("/login")
-     *     loginView(req: Request, res: Response) {
-     *         res.render("login");
-     *     }
-     * 
-     *     // if you want to all logics altogether
-     *     // you can set options.identity.login.endabled = false
-     *     // and add this action.
-     *     @HttpPost("/login", authenticate("local", { failureRedirect: "/auth/login" }))
-     *     login(req: Request, res: Response) {
-     *         res.redirect("/");
-     *     }
-     * }
-     * ```
-     */
-    login: {
-        /**
-         * the default value is true
-         */
-        enabled?: boolean;
-
-        /**
-         * the default value is /auth/login
-         */
-        path?: PathIdentifier;
-
-        /**
-         * the default value is `post`
-         */
-        httpMethod?: HttpMethod;
-
-        /**
-         * the default value username
-         */
-        usernameField?: string;
-
-        /**
-         * the default value password
-         */
-        passwordField?: string;
-
-        /**
-         * the function to find the user
-         * 
-         * the default value is FultonImpl.localStrategyVerifier
-         * 
-         * ### customzing example
-         * verifier = (req: Request, username: string, password: string, done: LocalStrategyVerifyDone) => {
-         *     req.userService
-         *         .login(username, password)
-         *         .then((user) => {
-         *             done(null, user);
-         *         }).catch((error) => {
-         *             done(error);
-         *         });
-         * }
-         */
-        verifier?: LocalStrategyVerifier;
-
-        /**
-         * the handler for authenticating successfully for api mode
-         * the default value is FultonImpl.successCallback
-         */
-        successCallback?: Middleware;
-
-        /**
-         * either use successCallback or responseOptions for response
-         * the default value is null
-         */
-        responseOptions?: StrategyResponseOptions
-    }
+    defaultAuthorizes: Middleware[];
 
     /**
      * the setting for register, fulton doesn't have html for register, 
@@ -307,9 +227,88 @@ export class IdentityOptions {
         successCallback?: Middleware;
 
         /**
-         * the options for web-viwe mode
          */
-        responseOptions?: StrategyResponseOptions;
+        responseOptions?: AuthenticateOptions;
+    }
+
+    /**
+     * the local strategy for login, fulton doesn't have html for login, 
+     * 
+     * for render html, you have to add a router
+     * 
+     * ## example for web view
+     * ```
+     * @Router("/auth")
+     * export class AuthRouter extends FultonRouter {
+     *     @HttpGet("/login")
+     *     loginView(req: Request, res: Response) {
+     *         res.render("login");
+     *     }
+     * 
+     *     // if you want to all logics altogether
+     *     // you can set options.identity.login.endabled = false
+     *     // and add this action.
+     *     @HttpPost("/login", authenticate("local", { failureRedirect: "/auth/login" }))
+     *     login(req: Request, res: Response) {
+     *         res.redirect("/");
+     *     }
+     * }
+     * ```
+     */
+    login: {
+        /**
+         * the default value is true
+         */
+        enabled?: boolean;
+
+        /**
+         * the default value is /auth/login
+         */
+        path?: PathIdentifier;
+
+        /**
+         * the default value is `post`
+         */
+        httpMethod?: HttpMethod;
+
+        /**
+         * the default value username
+         */
+        usernameField?: string;
+
+        /**
+         * the default value password
+         */
+        passwordField?: string;
+
+        /**
+         * the function to find the user
+         * 
+         * the default value is FultonImpl.localStrategyVerifier
+         * 
+         * ### customzing example
+         * verifier = (req: Request, username: string, password: string, done: LocalStrategyVerifyDone) => {
+         *     req.userService
+         *         .login(username, password)
+         *         .then((user) => {
+         *             done(null, user);
+         *         }).catch((error) => {
+         *             done(error);
+         *         });
+         * }
+         */
+        verifier?: LocalStrategyVerifier;
+
+        /**
+         * the middleware next to authenticate
+         * the default value is FultonImpl.successMiddleware
+         */
+        successMiddleware?: Middleware;
+
+        /**
+         * 
+         */
+        authenticateOptions?: AuthenticateOptions
     }
 
     bearer: {
@@ -339,19 +338,35 @@ export class IdentityOptions {
         verifier?: TokenStrategyVerifier;
     }
 
+    /**
+     * pre-defined google strategy
+     * path is `/auth/google`
+     * callback is `/auth/google/callback`
+     * scope is `profile email`
+     * 
+     * clientId can be overrided by procces.env["{appName}.options.identity.google.clientId"]
+     * clientSecret can be overrided by procces.env["{appName}.options.identity.google.clientSecret"]
+     */
     google: GoogleStrategyOptions;
 
-    github: StrategyOptions
-
-    // TODO: other strategies, like facebook, github
+    /**
+     * pre-defined github strategy
+     * path is `/auth/github`
+     * callback is `/auth/github/callback`
+     * scope is `profile email`
+     * 
+     * clientId can be overrided by procces.env["{appName}.options.identity.github.clientId"]
+     * clientSecret can be overrided by procces.env["{appName}.options.identity.github.clientSecret"]
+     */
+    github: OAuthStrategyOptions;
 
     /** other passport stratogies */
-    strategies: CustomStrategyOptions[] = [];
+    readonly strategies: CustomStrategySettings[] = [];
 
     /**
-     * the eanbled strategies, the values will be inserted after initilization.
+     * the strategies will be used by defaultAuthenticate. like bearer
      */
-    readonly enabledStrategies: string[] = [];
+    readonly defaultAuthSupportStrategies: string[] = [];
 
     constructor(private appName: string, private appModel: AppMode) {
         this.enabled = false;
@@ -366,20 +381,6 @@ export class IdentityOptions {
         this.defaultAuthenticate = FultonImpl.defaultAuthenticate;
         this.defaultAuthenticateErrorIfFailure = false;
 
-        this.login = {
-            enabled: true,
-            path: "/auth/login",
-            httpMethod: "post",
-            usernameField: "username",
-            passwordField: "password",
-            verifier: FultonImpl.localStrategyVerifier,
-            responseOptions: {
-                failureRedirect: "/auth/login",
-                successRedirect: "/"
-            },
-            successCallback: FultonImpl.successCallback
-        };
-
         this.register = {
             enabled: true,
             path: "/auth/register",
@@ -393,12 +394,16 @@ export class IdentityOptions {
             },
             session: false,
             otherFileds: [],
-            responseOptions: {
-                failureRedirect: "/auth/register",
-                successRedirect: "/"
-            },
             handler: FultonImpl.registerHandler,
-            successCallback: FultonImpl.successCallback
+            successCallback: FultonImpl.successMiddleware
+        };
+
+        this.login = {
+            enabled: true,
+            path: "/auth/login",
+            httpMethod: "post",
+            verifier: FultonImpl.localStrategyVerifier,
+            successMiddleware: FultonImpl.successMiddleware
         };
 
         this.bearer = {
@@ -411,12 +416,8 @@ export class IdentityOptions {
             callbackPath: "/auth/google/callback",
             accessType: "online",
             scope: "profile email",
-            verifier: FultonImpl.oauthVerifierGenerator("google", this.google),
-            responseOptions: {
-                failureRedirect: "/auth/login",
-                successRedirect: "/"
-            },
-            successCallback: FultonImpl.oauthSuccessCallbackGenerator("github", this.github)
+            verifier: FultonImpl.oauthVerifierFn("google", this.google),
+            callbackAuthenticateFn: FultonImpl.callbackAuthenticateFn
         }
 
         this.github = {
@@ -424,18 +425,32 @@ export class IdentityOptions {
             path: "/auth/github",
             callbackPath: "/auth/github/callback",
             scope: "profile email",
-            verifier: FultonImpl.oauthVerifierGenerator("github", this.github),
-            responseOptions: {
+            verifier: FultonImpl.oauthVerifierFn("github", this.github),
+            authenticateOptions: {
                 failureRedirect: "/auth/login",
                 successRedirect: "/"
             },
-            successCallback: FultonImpl.oauthSuccessCallbackGenerator("github", this.github)
+            callbackAuthenticateFn: FultonImpl.callbackAuthenticateFn
         }
 
         if (this.appModel == "api") {
             this.bearer.enabled = true;
-        } else {
+        } else if (this.appModel == "web-view") {
             this.bearer.enabled = false;
+            this.register.responseOptions = {
+                failureRedirect: "/auth/register",
+                successRedirect: "/"
+            };
+
+            this.login.authenticateOptions = {
+                failureRedirect: "/auth/login",
+                successRedirect: "/"
+            };
+
+            this.google.callbackAuthenticateOptions = {
+                failureRedirect: "/auth/login",
+                successRedirect: "/"
+            }
         }
     }
 
@@ -453,5 +468,14 @@ export class IdentityOptions {
             (this.userType == FultonUser) &&
             (this.userRepository == null) &&
             (this.userService == FultonUserService)
+    }
+
+    addStrategy(options: StrategyOptions | OAuthStrategyOptions, strategy: Strategy | Type<Strategy>) {
+        options.enabled = options.enabled == null ? true : options.enabled;
+
+        this.strategies.push({
+            options: options,
+            strategy: strategy
+        });
     }
 }

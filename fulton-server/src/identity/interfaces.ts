@@ -1,5 +1,6 @@
 import { Request, PathIdentifier, Middleware } from "../interfaces";
-import { Strategy } from "passport-strategy";
+import { Strategy, AuthenticateOptions } from "passport";
+import { Type, HttpMethod } from "../index";
 
 export interface IUser {
     [key: string]: any;
@@ -89,17 +90,72 @@ export interface StrategyResponseOptions {
 
 export interface StrategyOptions {
     /**
+     * strategy name, if undefined, use Strategy.Name
+     */
+    name?: string;
+
+    /**
+     * the default value is get
+     */
+    httpMethod?: HttpMethod;
+
+    /**
      * the default value is false,
-     * when turn to true, you have to install googleapis package
-     * `npm install googleapis`
      */
     enabled?: boolean;
 
     /**
-     * the route path for google auth
-     * the default value is /auth/google
+     * the route path for example /auth/google
      */
     path?: PathIdentifier;
+
+    /**
+    * for passport, use it when create new Strategy object, like
+    * new LocalStrategy(options.strageyOptions, options.verifier)
+    * the default value is null
+    */
+    strageyOptions?: any;
+
+    /**
+     * verify the oauth request.
+     */
+    verifier?: StrategyVerifier | LocalStrategyVerifier | any;
+
+    /**
+     * the middleware next to authenticate
+     * the default value is null
+     */
+    successMiddleware?: Middleware;
+
+    /**
+    * for passport
+    * the default value is null
+    */
+    authenticateOptions?: AuthenticateOptions;
+
+    /**
+      * if provided,call this function to get the middleware, like
+     * app.use(options.authenticateFn(options))
+     * 
+     * otherwise use
+     * app.use(passport.authenticate(options.name, options.authenticateOptions))
+     */
+    authenticateFn?: (options: OAuthStrategyOptions) => Middleware
+
+    /**
+     * if true, add to defaultAuthenticate support list. which means this strategy will be called by every incoming requests.
+     * the default value is false.
+     */
+    addToDefaultAuthenticateList?: boolean;
+
+    [key: string]: any;
+}
+
+export interface OAuthStrategyOptions extends StrategyOptions {
+     /**
+     * the default value is get
+     */
+    callbackHttpMethod?: HttpMethod;
 
     /**
      * the route path for google auth callback
@@ -109,26 +165,23 @@ export interface StrategyOptions {
     callbackPath?: string;
 
     /**
-     * the clientId that google provides to you
-     * It can be overrided by procces.env["{appName}.options.identity.google.clientId"]
-     */
-    clientId?: string;
-
-    /**
-     * the clientId that google provides to you
-     * It can be overrided by procces.env["{appName}.options.identity.google.clientSecret"]
-     */
-    clientSecret?: string;
-
-    /**
      * the callback url google will redirect to, for example `https://www.example.com/auth/google/callback`
      * if it is empty, fulton will combine req.originUrl + options.callbackPath
      */
     callbackUrl?: string;
 
     /**
+     * the clientId that google provides to you
+     */
+    clientId?: string;
+
+    /**
+     * the clientId
+     */
+    clientSecret?: string;
+
+    /**
      * the permission scopes to request access to,
-     * default is `profile email`
      */
     scope?: string | string[];
 
@@ -138,38 +191,40 @@ export interface StrategyOptions {
     verifier?: OAuthStrategyVerifier;
 
     /**
-     * either use successCallback or responseOptions for response
-     * the default value is sendAccessToken
+     * the middleware next to authenticate
+     * the default value is null
      */
-    successCallback?: Middleware;
+    callbackSuccessMiddleware?: Middleware;
 
     /**
-    * either use successCallback or responseOptions for response
+    * for passport
     * the default value is null
     */
-    responseOptions?: StrategyResponseOptions;
+    callbackAuthenticateOptions?: AuthenticateOptions;
+
+    /**
+     * if provided, call this function to get the middleware, like
+     * app.use(options.callbackAuthenticateFn(options))
+     * 
+     * otherwise use
+     * app.use(passport.authenticate(options.name, options.callbackAuthenticateOptions))
+     */
+    callbackAuthenticateFn?: (options: OAuthStrategyOptions) => Middleware
 }
 
-export interface GoogleStrategyOptions extends StrategyOptions {
+export interface GoogleStrategyOptions extends OAuthStrategyOptions {
     /**
      * Can be `online` (default) or `offline` (gets refresh_token)
      */
     accessType?: "online" | "offline";
-
-    /**
-    * the permission scopes to request access to,
-    * default is `profile email`
-    */
-    scope?: string | string[];
 }
 
-export interface CustomStrategyOptions extends StrategyOptions {
+export interface CustomStrategySettings {
+    options:  OAuthStrategyOptions;
     /**
      * Custom passport-strategy
      */
-    strategy?: Strategy;
-
-    [key: string]: any;
+    strategy: Strategy | Type<Strategy>;
 }
 
 export interface StrategyResponseOptions {
@@ -190,16 +245,13 @@ export interface StrategyVerifyDone {
     (error: any, user?: any, info?: any): void
 }
 
-export interface LocalStrategyVerifyOptions {
-    message: string;
-}
-
-export interface LocalStrategyVerifyDone {
-    (error: any, user?: any, options?: LocalStrategyVerifyOptions): void
+export interface StrategyVerifier {
+    (req: Request, ...args: any[]): void;
+    (req: Request, done: StrategyVerifyDone): void;
 }
 
 export interface LocalStrategyVerifier {
-    (req: Request, username: string, password: string, done: LocalStrategyVerifyDone): void;
+    (req: Request, username: string, password: string, done: StrategyVerifyDone): void;
 }
 
 export interface TokenStrategyVerifier {

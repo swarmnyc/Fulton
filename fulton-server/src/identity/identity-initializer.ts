@@ -2,13 +2,13 @@ import * as passport from 'passport';
 
 import { FultonUser, Type } from '../index';
 import { IStrategyOptionsWithRequest, Strategy as LocalStrategy } from 'passport-local';
+import { Strategy } from 'passport';
 import { IUser, IUserService } from './interfaces';
 
 import { AuthenticateOptions } from './authenticate-middlewares';
 import { Strategy as BearerStrategy } from 'passport-http-bearer';
 import { FultonApp } from "../fulton-app";
 import { getRepository } from 'typeorm';
-import { isFunction } from 'util';
 import { GoogleStrategy } from './strategies/google-strategy';
 
 module.exports = async function identityInitializer(app: FultonApp) {
@@ -20,11 +20,11 @@ module.exports = async function identityInitializer(app: FultonApp) {
 
         let userService: IUserService<IUser>;
 
-        if (isFunction(idOptions.userService)) {
+        if (idOptions.userService instanceof Function) {
             if (idOptions.userRepository) {
                 // use specical repository
-                if (isFunction(idOptions.userRepository)) {
-                    app.container.bind("UserRepository").to(idOptions.userRepository as Type);
+                if (idOptions.userRepository instanceof Function) {
+                    app.container.bind("UserRepository").to(idOptions.userRepository);
                 } else {
                     app.container.bind("UserRepository").toConstantValue(idOptions.userRepository);
                 }
@@ -45,50 +45,38 @@ module.exports = async function identityInitializer(app: FultonApp) {
 
         app.server.use(passport.initialize());
 
-        // register local        
-        if (idOptions.login.enabled) {
-            let loginOptions = idOptions.login;
-            let localStrategyOptions: IStrategyOptionsWithRequest = {
-                passReqToCallback: true,
-                usernameField: loginOptions.usernameField,
-                passwordField: loginOptions.passwordField
-            }
-
-            passport.use(new LocalStrategy(localStrategyOptions, loginOptions.verifier));
-
-            let httpMethod = app.server[loginOptions.httpMethod];
-
-            let authOptions: AuthenticateOptions;
-
-            if (app.mode == "api") {
-                authOptions = {
-                    session: false,
-                    passReqToCallback: true
-                };
-            } else {
-                authOptions = loginOptions.responseOptions;
-            }
-
-            httpMethod.apply(app.server,
-                [loginOptions.path,
-                [passport.authenticate("local", authOptions),
-                loginOptions.successCallback]]);
-        }
-
+        // for register
         if (idOptions.register.enabled) {
             let registerOptions = idOptions.register;
             let httpMethod = app.server[registerOptions.httpMethod];
             httpMethod.call(app.server, registerOptions.path, registerOptions.handler);
         }
 
-        if (idOptions.bearer.enabled) {
-            passport.use(new BearerStrategy({
-                scope: null,
-                realm: null,
-                passReqToCallback: true
-            }, idOptions.bearer.verifier));
+        // for login
+        if (idOptions.login.enabled) {
+            let opts = idOptions.login;
 
-            idOptions.enabledStrategies.push("bearer")
+            idOptions.addStrategy({
+                httpMethod: opts.httpMethod,
+                path: opts.path,
+                verifier: opts.verifier,
+                successMiddleware: opts.successMiddleware,
+                strageyOptions: {
+                    usernameField: opts.usernameField,
+                    passwordField: opts.passwordField
+                },
+                authenticateOptions: opts.authenticateOptions
+            }, LocalStrategy);
+        }
+
+        // for bearer
+        if (idOptions.bearer.enabled) {
+            let opts = idOptions.bearer;
+
+            idOptions.addStrategy({
+                addToDefaultAuthenticateList: true,
+                verifier: opts.verifier
+            }, BearerStrategy);
         }
 
         if (idOptions.google.enabled) {
@@ -102,14 +90,99 @@ module.exports = async function identityInitializer(app: FultonApp) {
                     passReqToCallback: true
                 };
             } else {
-                authOptions = idOptions.google.responseOptions;
+                authOptions = idOptions.google.authenticateOptions;
             }
 
             app.server.get(idOptions.google.path, passport.authenticate('google'));
-            app.server.get(idOptions.google.callbackPath, idOptions.google.successCallback);
+            app.server.get(idOptions.google.callbackPath, idOptions.google.successMiddleware);
         }
 
-        if (idOptions.defaultAuthenticate && idOptions.enabledStrategies.length > 0) {
+        if (idOptions.google.enabled) {
+            let opts = idOptions.google;
+
+            opts.strageyOptions = opts.strageyOptions || {
+                clientId: opts.clientId,
+                clientSecret: opts.clientSecret,
+                callbackPath: opts.callbackPath,
+                callbackUrl: opts.callbackUrl,
+                accessType: opts.accessType,
+                scope: opts.scope,
+            };
+
+            idOptions.addStrategy(
+                opts,
+                GoogleStrategy
+            )
+        }
+
+        for (const { options, strategy } of idOptions.strategies) {
+            if (!options.enabled) continue;
+
+            let instance: Strategy;
+
+            if (strategy instanceof Function) {
+                let opts = options.strategyOptions || {};
+                opts.passReqToCallback = opts.passReqToCallback == null ? true : opts.passReqToCallback;
+
+                instance = new strategy(opts, options.verifier);
+            } else {
+                instance = strategy
+            }
+
+            options.name = options.name || instance.name;
+
+            passport.use(options.name, instance);
+
+            // for regular strategy
+            if (options.path) {
+                let args: any[] = [];
+
+                let opts = options.authenticateOptions || {};
+                opts.passReqToCallback = opts.passReqToCallback == null ? true : opts.passReqToCallback;
+                opts.session = opts.session == null ? false : opts.session;
+
+                if (options.authenticateFn) {
+                    args.push(options.authenticateFn(options))
+                } else {
+                    args.push(passport.authenticate(options.name, opts))
+                }
+
+                if (options.successMiddleware) {
+                    args.push(options.successMiddleware);
+                }
+
+                let httpMethod = app.server[options.httpMethod || "get"];
+                httpMethod.apply(app.server, [options.path, args]);
+            }
+
+            // for oauth strategy
+            if (options.callbackPath) {
+                let args: any[] = [];
+
+                let opts = options.callbackAuthenticateOptions || {};
+                opts.passReqToCallback = opts.passReqToCallback == null ? true : opts.passReqToCallback;
+                opts.session = opts.session == null ? false : opts.session;
+
+                if (options.callbackAuthenticateFn) {
+                    args.push(options.callbackAuthenticateFn(options))
+                } else {
+                    args.push(passport.authenticate(options.name, opts))
+                }
+
+                if (options.callbackSuccessMiddleware) {
+                    args.push(options.callbackSuccessMiddleware);
+                }
+
+                let httpMethod = app.server[options.callbackHttpMethod || "get"];
+                httpMethod.apply(app.server, [options.callbackPath, args]);
+            }
+
+            if (options.addToDefaultAuthenticateList) {
+                idOptions.defaultAuthSupportStrategies.push(options.name);
+            }
+        }
+
+        if (idOptions.defaultAuthenticate && idOptions.defaultAuthSupportStrategies.length > 0) {
             app.server.use(idOptions.defaultAuthenticate);
         }
     }

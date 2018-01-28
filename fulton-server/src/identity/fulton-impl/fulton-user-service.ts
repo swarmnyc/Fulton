@@ -1,6 +1,7 @@
 import * as crypto from 'crypto';
 import * as lodash from 'lodash';
 import * as passwordHash from 'password-hash';
+import * as validator from 'validator';
 
 import { AccessToken, FultonAccessToken, IFultonUser, IUserRegister, IUserService } from "../interfaces";
 import { EntityRepository, MongoRepository, Repository } from "typeorm";
@@ -82,9 +83,7 @@ export class FultonUserService implements IUserService<FultonUser> {
         if (!input.oauthToken) {
             // if oauth register, no need password.
             errors.verifyRequired(input, "password")
-        }
 
-        if (input.password && registorOptions.passwordVerifier) {
             let pwResult: boolean;
             if (registorOptions.passwordVerifier instanceof Function) {
                 pwResult = registorOptions.passwordVerifier(input.password)
@@ -93,15 +92,29 @@ export class FultonUserService implements IUserService<FultonUser> {
             }
 
             if (!pwResult) {
-                errors.addError("password", "password is invalid.")
+                errors.addError("password", "password is invalid")
             }
+
+            // if oauth register, skip usename verify.            
+            let unResult: boolean;
+            if (registorOptions.usernameVerifier instanceof Function) {
+                unResult = registorOptions.usernameVerifier(input.username)
+            } else {
+                unResult = registorOptions.usernameVerifier.test(input.username)
+            }
+
+            if (!unResult) {
+                errors.addError("username", "username is invalid")
+            }
+        }
+
+        if (!validator.isEmail(input.email)) {
+            errors.addError("email", "email is invalid")
         }
 
         if (errors.hasErrors()) {
             throw errors;
         }
-
-        //TODO: verify email
 
         input.email = input.email.toLocaleLowerCase();
         input.username = input.username.toLocaleLowerCase();

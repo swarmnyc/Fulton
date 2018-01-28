@@ -210,7 +210,13 @@ export class IdentityOptions {
 
         /**
          * verify password is vaild or not
-         * the default value is /\S{6,64}/, any 4 to 64 non-whitespace characters
+         * the default value is /^[a-zA-Z0-9_-]{4,64}$/
+         */
+        usernameVerifier?: RegExp | ((username: string) => boolean);
+
+        /**
+         * verify password is vaild or not
+         * the default value is /^\S{6,64}$/, any 4 to 64 non-whitespace characters
          */
         passwordVerifier?: RegExp | ((pw: string) => boolean);
 
@@ -397,6 +403,7 @@ export class IdentityOptions {
             usernameField: "username",
             passwordField: "password",
             emailField: "email",
+            usernameVerifier: /^[a-zA-Z0-9_-]{4,64}$/,
             passwordVerifier: /\S{6,64}/,
             passwordHashOptons: {
                 algorithm: "sha256"

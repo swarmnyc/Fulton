@@ -1,6 +1,6 @@
 import * as passport from 'passport';
 
-import { FultonUser, Type } from '../index';
+import { FultonUser, Type, IFultonUser } from '../index';
 import { IStrategyOptionsWithRequest, Strategy as LocalStrategy } from 'passport-local';
 import { Strategy } from 'passport';
 import { IUser, IUserService } from './interfaces';
@@ -81,7 +81,10 @@ module.exports = async function identityInitializer(app: FultonApp) {
 
         // add pre-defined google strategy
         if (idOptions.google.enabled) {
-            Helper.setValue(idOptions.google.strategyOptions, "accessType", idOptions.google.accessType);
+            let opts = idOptions.google;
+
+            Helper.setValue(opts, "strategyOptions", {});
+            Helper.setValue(opts.strategyOptions, "accessType", opts.accessType);
 
             idOptions.addStrategy(
                 idOptions.google,
@@ -93,17 +96,31 @@ module.exports = async function identityInitializer(app: FultonApp) {
         if (idOptions.github.enabled) {
             let opts = idOptions.github;
 
-            opts.strategyOptions = opts.strategyOptions || {
-                clientId: opts.clientId,
-                clientSecret: opts.clientSecret,
-                callbackPath: opts.callbackPath,
-                callbackUrl: opts.callbackUrl,
-                scope: opts.scope,
-            };
+            Helper.setValue(opts, "strategyOptions", {});
+            Helper.setValue(opts.strategyOptions, "clientID", opts.clientId);
+            Helper.setValue(opts, "prfoileTransformer", (profile: any) => {
+                let email;
+                if (profile.emails instanceof Array) {
+                    email = profile.emails.find((e: any) => e.primary || e.primary == null).value;
+                } else {
+                    email = profile.email;
+                }
 
+                let user: IFultonUser = {
+                    email: email,
+                    username: email,
+                    displayName: profile.displayName,
+                    portraitUrl: profile._json.avatar_url
+                };
+
+                return user;
+            });
+
+            // require passport-github when github.enabled = true;
+            let githubStrategy = require("passport-github").Strategy;
             idOptions.addStrategy(
                 opts,
-                GoogleStrategy
+                githubStrategy
             )
         }
 
@@ -121,12 +138,11 @@ module.exports = async function identityInitializer(app: FultonApp) {
                 Helper.setValue(opts, "clientSecret", options.clientSecret);
                 Helper.setValue(opts, "callbackUrl", options.callbackUrl);
                 Helper.setValue(opts, "scope", options.scope);
-
-                opts.passReqToCallback = opts.passReqToCallback == null ? true : opts.passReqToCallback;
+                Helper.setValue(opts, "passReqToCallback", true);
 
                 if (options.verifierFn) {
                     options.verifier = options.verifierFn(options);
-                } 
+                }
 
                 instance = new strategy(opts, options.verifier);
             } else {
@@ -142,9 +158,9 @@ module.exports = async function identityInitializer(app: FultonApp) {
                 // for regular strategy
                 let args: any[] = [];
 
-                let opts = options.authenticateOptions || {};
-                opts.passReqToCallback = opts.passReqToCallback == null ? true : opts.passReqToCallback;
-                opts.session = opts.session == null ? false : opts.session;
+                let opts = Helper.setValue(options, "callbackAuthenticateOptions", {});
+                Helper.setValue(opts, "passReqToCallback", true);
+                Helper.setValue(opts, "session", false);
 
                 if (options.authenticateFn) {
                     args.push(options.authenticateFn(options))
@@ -164,9 +180,9 @@ module.exports = async function identityInitializer(app: FultonApp) {
                 // for oauth strategy 
                 let args: any[] = [];
 
-                let opts = options.callbackAuthenticateOptions || {};
-                opts.passReqToCallback = opts.passReqToCallback == null ? true : opts.passReqToCallback;
-                opts.session = opts.session == null ? false : opts.session;
+                let opts = Helper.setValue(options, "callbackAuthenticateOptions", {});
+                Helper.setValue(opts, "passReqToCallback", true);
+                Helper.setValue(opts, "session", false);
 
                 if (options.callbackAuthenticateFn) {
                     args.push(options.callbackAuthenticateFn(options))

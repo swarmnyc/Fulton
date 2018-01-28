@@ -58,10 +58,15 @@ export class GoogleStrategy extends Strategy {
 
                     fultonDebug("google id_token", jwt);
 
-                    let payload = JSON.parse(jwt.payload);
+                    let payload = jwt.payload;
+                    if (typeof payload == "string"){
+                        payload = JSON.parse(payload);
+                    }
+
                     profile = {
                         email: payload.email,
                         username: payload.email,
+                        dispalyName: payload.name,
                         portraitUrl: payload.picture
                     }
                 } else {

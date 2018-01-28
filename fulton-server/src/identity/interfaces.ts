@@ -20,9 +20,11 @@ export interface IFultonUser extends IUser {
     id?: string;
     email?: string;
     username?: string;
+    displayName?: string;
+    portraitUrl?: string;
     hashedPassword?: string;
-    accessTokens: FultonAccessToken[];
-    roles: string[];
+    accessTokens?: FultonAccessToken[];
+    roles?: string[];
 }
 
 export interface FultonUserOauth {
@@ -166,6 +168,11 @@ export interface OAuthStrategyOptions extends StrategyOptions {
      * if provided, call this function to get the verifier
      */
     verifierFn?: (options: OAuthStrategyOptions) => OAuthStrategyVerifier;
+
+    /**
+     * transform the oauth profile to our user format
+     */
+    prfoileTransformer?: (profile: any) => any;
 
     /**
      * the middleware next to authenticate

@@ -258,6 +258,7 @@ export class IdentityOptions {
     login: {
         /**
          * the default value is true
+         * it can be overrided by procces.env["{appName}.options.identity.login.enabled"]
          */
         enabled?: boolean;
 
@@ -314,6 +315,7 @@ export class IdentityOptions {
     bearer: {
         /**
          * default is true
+         * it can be overrided by procces.env["{appName}.options.identity.bearer.enabled"]
          */
         enabled?: boolean;
 
@@ -358,6 +360,9 @@ export class IdentityOptions {
      * path is `/auth/github`
      * callback is `/auth/github/callback`
      * scope is `profile email`
+     * 
+     * ## Require "passport-github" package ##
+     * run `npm install passport-github` to install it
      * 
      * clientId can be overrided by procces.env["{appName}.options.identity.github.clientId"]
      * clientSecret can be overrided by procces.env["{appName}.options.identity.github.clientSecret"]
@@ -423,9 +428,6 @@ export class IdentityOptions {
             strategyOptions: {},
             verifierFn: FultonImpl.oauthVerifierFn,
             authenticateFn : FultonImpl.oauthAuthenticateFn,
-            authenticateOptions: {
-                failureRedirect: "/auth/login",
-            },
             callbackAuthenticateFn: FultonImpl.oauthCallbackAuthenticateFn
         }
 
@@ -433,11 +435,10 @@ export class IdentityOptions {
             enabled: false,
             path: "/auth/github",
             callbackPath: "/auth/github/callback",
-            scope: "profile email",
+            scope: "read:user user:email",
+            strategyOptions: {},            
             verifierFn: FultonImpl.oauthVerifierFn,
-            authenticateOptions: {
-                failureRedirect: "/auth/login",
-            },
+            authenticateFn : FultonImpl.oauthAuthenticateFn,
             callbackAuthenticateFn: FultonImpl.oauthCallbackAuthenticateFn
         }
 
@@ -456,6 +457,11 @@ export class IdentityOptions {
             };
 
             this.google.callbackAuthenticateOptions = {
+                failureRedirect: "/auth/login",
+                successRedirect: "/"
+            }
+
+            this.github.callbackAuthenticateOptions = {
                 failureRedirect: "/auth/login",
                 successRedirect: "/"
             }

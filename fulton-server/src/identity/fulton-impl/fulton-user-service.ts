@@ -177,7 +177,7 @@ export class FultonUserService implements IUserService<FultonUser> {
     async loginByOauth(token: AccessToken, profile: any): Promise<FultonUser> {
         let errors = new FultonError();
 
-        // verify username, password, email
+        // verify email
         if (!errors.verifyRequired(profile, "email")) {
             throw errors;
         }
@@ -190,9 +190,10 @@ export class FultonUserService implements IUserService<FultonUser> {
         });
 
         if (user) {
-            // email is the same
+            // email is the same            
+            // TODO: Clean Old OAuthTokens
             await this.runner.updateOAuthToken(user, {
-                provider: token.provider,                
+                provider: token.provider,
                 accessToken: token.access_token,
                 refreshToken: token.refresh_token,
                 issuredAt: new Date()

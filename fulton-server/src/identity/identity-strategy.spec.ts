@@ -15,12 +15,12 @@ class MyApp extends FultonApp {
         this.options.identity.bearer.enabled = false;
 
         this.options.identity.addStrategy({
-                name: "login",
-                path: "/test/login",
-                httpMethod: "post",
-                verifier: FultonImpl.localStrategyVerifier,
-                successMiddleware: FultonImpl.successMiddleware
-            }, LocalStrategy);
+            name: "login",
+            path: "/test/login",
+            httpMethod: "post",
+            verifier: FultonImpl.localStrategyVerifier,
+            successMiddleware: FultonImpl.successMiddleware
+        }, LocalStrategy);
 
         this.options.identity.addStrategy({
             path: "/test/google",
@@ -30,11 +30,24 @@ class MyApp extends FultonApp {
             clientSecret: "test",
             verifierFn: FultonImpl.oauthVerifierFn,
             authenticateFn: FultonImpl.oauthAuthenticateFn,
-            authenticateOptions: {
-                failureRedirect: "/test/login",
-            },
             callbackAuthenticateFn: FultonImpl.oauthCallbackAuthenticateFn
         }, GoogleStrategy);
+
+        this.options.identity.addStrategy({
+            path: "/test/github",
+            callbackPath: "/test/github/callback",
+            scope: "read:user user:email",
+            strategyOptions: {
+                clientID: "test",
+                clientSecret: "test"
+            },
+            verifierFn: FultonImpl.oauthVerifierFn,
+            authenticateFn: FultonImpl.oauthAuthenticateFn,
+            callbackAuthenticateOptions: {
+                successRedirect: "/"
+            },
+            callbackAuthenticateFn: FultonImpl.oauthCallbackAuthenticateFn
+        }, require("passport-github").Strategy);
     }
 }
 
@@ -78,7 +91,7 @@ describe('Identity Custom Strategies', () => {
         let fakeToken = {
             "access_token": "ya29.GmFPBQC7v1zToRKWCc5XD9qdqdnv090ZT2Grk",
             "token_type": "Bearer",
-            "id_token": "eyJhbGciOiJSUzI1NiIsImtpZCI6IjI2YzAxOGIyMzNmZTJlZWY0N2ZlZGJiZGQ5Mzk4MTcwZmM5YjI5ZDgifQ.eyJhenAiOiIyOTE1MTA3MzU1MzktcmJuM2tmbDk0aWM5dHNhOHJoYW1oY3E1OHNkbGE3MGIuYXBwcy5nb29nbGV1c2VyY29udGVudC5jb20iLCJhdWQiOiIyOTE1MTA3MzU1MzktcmJuM2tmbDk0aWM5dHNhOHJoYW1oY3E1OHNkbGE3MGIuYXBwcy5nb29nbGV1c2VyY29udGVudC5jb20iLCJzdWIiOiIxMDg5MDQ0ODQ2ODA5NDQxMzYyNDIiLCJlbWFpbCI6IndhZGVodWFuZzM2QGdtYWlsLmNvbSIsImVtYWlsX3ZlcmlmaWVkIjp0cnVlLCJhdF9oYXNoIjoiM3pIQ3RydWhLMTI5ZDJzaHNyMEFHUSIsImV4cCI6MTUxNzA4NzQ2NiwiaXNzIjoiaHR0cHM6Ly9hY2NvdW50cy5nb29nbGUuY29tIiwiaWF0IjoxNTE3MDgzODY2LCJuYW1lIjoiV2FkZSBIdWFuZyIsInBpY3R1cmUiOiJodHRwczovL2xoMy5nb29nbGV1c2VyY29udGVudC5jb20vLUhUUGJtSE43RVNBL0FBQUFBQUFBQUFJL0FBQUFBQUFBcWRZL0dvSVVCeFJ0V1MwL3M5Ni1jL3Bob3RvLmpwZyIsImdpdmVuX25hbWUiOiJXYWRlIiwiZmFtaWx5X25hbWUiOiJIdWFuZyIsImxvY2FsZSI6ImVuIn0.PD1ZIp8VxCfx7Cm4u7DT_TSlmG5nWH_tlDfBjDWdtg8UXXMedqQb9v0ouYFX6epySBJIVcc6CL10C16CX3_KWvLVEmv269O8v9fEqewuNyaMjz3nfhCl_GCCsFuPFDDYmA6ETZ_RI3zkBR9pJ5sOUdZaQGqmHSaeJIUAW4B-HUdJH--lxvWqaWIw3R_qJgJ41uJ9l-lz3YNXSYsURi6TEdbz0XBvMFnKpNvofDMQV9IVXUdxf8y_8nEWdX-vvlkUnRoJEHyOohbRdONExIZEKCxZsQjoPu5zIGOAIZYmN2sqQSM1hqzH8FjxnBFjRBZb5s7_lp1Z57OXaq8vLPjvnw",
+            "id_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJuYW1lIjoidGVzdCIsImVtYWlsIjoidGVzdEBnbWFpbC5jb20ifQ.9WpSTovz4JOgt_Sm4U9oNwplBENjIhyJcTLPM3yIk2Y",
             "expiry_date": 1517087460847
         };
 
@@ -86,6 +99,28 @@ describe('Identity Custom Strategies', () => {
         let result2 = await httpTester.get("/test/google/callback?code=test");
 
         let at: AccessToken = result2.body;
-        expect(at.access_token).toEqual("wadehuang36@gmail.com-accessToken");
+        expect(at.access_token).toEqual("test@gmail.com-accessToken");
+    });
+
+    it('should github oauth login', async () => {
+        // should redirect        
+        let result1 = await httpTester.get("/test/github", null, false);
+        expect(result1.response.headers.location).toContain("https://github.com/login/oauth/authorize");
+
+        //should parse the code
+        let oauth2 = require("oauth").OAuth2;
+
+        spyOn(oauth2.prototype, "_request").and.callFake((method: any, url: string, headers: any, post_body: any, access_token: any, callback: any) => {
+            if (url.startsWith("https://github.com/login/oauth/access_token")) {
+                callback(null, "access_token=0a19c6216599daf812a601d78164b17e60b61be4&scope=read%3Auser%2Cuser%3Aemail&token_type=bearer")
+            } else if (url.startsWith("https://api.github.com/user/emails")) {
+                callback(null, `[]`)
+            } else {
+                callback(null, `{"login":"test","name":"test","email":"test@test.com"}`)
+            }
+        });
+
+        let result2 = await httpTester.get("/test/github/callback?code=test", null, false);
+        expect(result2.response.headers.location).toEqual("/");
     });
 });

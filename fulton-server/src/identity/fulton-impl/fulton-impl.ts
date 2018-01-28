@@ -78,7 +78,7 @@ export let FultonImpl = {
      * @param options 
      * @param prfoileTransformer 
      */
-    oauthVerifierFn(options: StrategyOptions, prfoileTransformer?: (profile: any) => any): OAuthStrategyVerifier {
+    oauthVerifierFn(options: OAuthStrategyOptions): OAuthStrategyVerifier {
         return (req: Request, access_token: string, fresh_token: string, profile: any, done: StrategyVerifyDone) => {
             let token: AccessToken = {
                 provider: options.name,
@@ -86,8 +86,8 @@ export let FultonImpl = {
                 refresh_token: fresh_token
             }
 
-            if (prfoileTransformer) {
-                profile = prfoileTransformer(profile);
+            if (options.prfoileTransformer) {
+                profile = options.prfoileTransformer(profile);
             }
 
             req.userService
@@ -128,19 +128,28 @@ export let FultonImpl = {
                 function (error, user, info) {
                     if (error) {
                         next(error);
-                    } else if (user) {
-                        req.logIn(user, { session: false }, (err) => {
-                            if (options.callbackSuccessMiddleware) {
-                                options.callbackSuccessMiddleware(req, res, next);
-                            } else {
-                                FultonImpl.successMiddleware(req, res);
-                            }
-                        });
-                    } else {
-                        // TODO: web-view
-                        res.sendResult(401);
+                        return;
                     }
 
+                    if (user) {
+                        let opts = options.callbackAuthenticateOptions;
+                        req.logIn(user, opts, (err) => {
+                            if (opts && opts.successRedirect) {
+                                res.redirect(opts.successRedirect);
+                            } else {
+                                if (options.callbackSuccessMiddleware) {
+                                    options.callbackSuccessMiddleware(req, res, next);
+                                } else {
+                                    FultonImpl.successMiddleware(req, res);
+                                }
+                            }
+                        });
+
+                        return;
+                    }
+
+                    // TODO: web-view mode
+                    res.sendResult(401);
                 })(req, res, next);
         }
     },

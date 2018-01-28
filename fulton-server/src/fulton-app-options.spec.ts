@@ -6,11 +6,11 @@ class MyFultonApp extends FultonApp {
         options.server.httpPort = 888;
     }
 
-    protected initDatabases() : Promise<void> {
+    protected initDatabases(): Promise<void> {
         return;
     }
 
-    protected initRepositories() : Promise<void> {
+    protected initRepositories(): Promise<void> {
         return;
     }
 }
@@ -111,11 +111,31 @@ describe('Fulton App Options', () => {
         });
 
         process.env[`test.options.databases[test3].url`] = "http://test"
-        
+
         options.loadEnvOptions();
 
         let dbOptions = options.databases.get("test3") as MongoConnectionOptions;
         expect(dbOptions).toBeTruthy();
         expect(dbOptions.port).toEqual(88);
+    });
+
+    it('should load identity options', async () => {
+        let options = new FultonAppOptions("loadTest", "api");
+
+        options.identity.google.clientId = "abc";
+        options.identity.google.clientSecret = "abc";
+
+        options.identity.github.clientSecret = "abc";
+
+        process.env[`loadTest.options.identity.google.clientId`] = "cda"
+        process.env[`loadTest.options.identity.google.clientSecret`] = "cda"
+
+        options.loadEnvOptions();
+
+        expect(options.identity.google.clientId).toEqual("cda");
+        expect(options.identity.google.clientSecret).toEqual("cda");
+
+        expect(options.identity.github.clientSecret).toEqual("abc");
+        
     });
 });

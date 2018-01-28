@@ -11,30 +11,30 @@ export default class Env {
     /**
      * get value and parse to boolean the condition is /(true)|1/i;
      * @param name 
-     * @param defaultValue is false
+     * @param defaultValue is null
      * @param caseless 
      */
-    static getBoolean(name: string, defaultValue: boolean = false): boolean {
+    static getBoolean(name: string, defaultValue?: boolean): boolean {
         return Helper.getBoolean(Env.get(name, null), defaultValue);
     }
 
     /**
      * get value and parse to int; 
      * @param name 
-     * @param defaultValue is 0
+     * @param defaultValue is null
      * @param caseless 
      */
-    static getInt(name: string, defaultValue: number = 0): number {
+    static getInt(name: string, defaultValue?: number): number {
         return Helper.getInt(Env.get(name, null), defaultValue);
     }
 
     /**
      * get value and parse to float; 
      * @param name 
-     * @param defaultValue is 0.0
+     * @param defaultValue is null
      * @param caseless 
      */
-    static getFloat(name: string, defaultValue: number = 0.0): number {
+    static getFloat(name: string, defaultValue?: number): number {
         let value = Env.get(name, null);
         if (value == null)
             return defaultValue;

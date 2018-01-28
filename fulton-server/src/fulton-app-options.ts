@@ -550,27 +550,49 @@ export class FultonAppOptions {
     loadEnvOptions() {
         let prefix = `${this.appName}.options`;
 
-        this.index.enabled = Env.getBoolean(`${prefix}.index.enabled`, this.index.enabled)
+        let envValues = {
+            index: {
+                enabled: Env.getBoolean(`${prefix}.index.enabled`)
+            },
+            logging: {
+                defaultLoggerLevel: Env.get(`${prefix}.logging.defaultLoggerLevel`),
+                defaultLoggerColorized: Env.getBoolean(`${prefix}.logging.defaultLoggerColorized`),
+                httpLoggerEnabled: Env.getBoolean(`${prefix}.logging.httpLoggerEnabled`)
+            },
+            loader: {
+                routerLoaderEnabled: Env.getBoolean(`${prefix}.loader.routerLoaderEnabled`),
+                serviceLoaderEnabled: Env.getBoolean(`${prefix}.loader.serviceLoaderEnabled`),
+                repositoryLoaderEnabled: Env.getBoolean(`${prefix}.loader.repositoryLoaderEnabled`)
+            },
+            server: {
+                httpEnabled: Env.getBoolean(`${prefix}.server.httpEnabled`),
+                httpsEnabled: Env.getBoolean(`${prefix}.server.httpsEnabled`),
+                httpPort: Env.getInt(`${prefix}.server.httpPort`),
+                httpsPort: Env.getInt(`${prefix}.server.httpsPort`),
+                clusterEnabled: Env.getBoolean(`${prefix}.server.clusterEnabled`),
+                clusterWorkerNumber: Env.getInt(`${prefix}.server.clusterWorkerNumber`)
+            },
+            staticFile: {
+                enabled: Env.getBoolean(`${prefix}.staticFile.enabled`)
+            },
+            cors: {
+                enabled: Env.getBoolean(`${prefix}.cors.enabled`)
+            }
+        } as FultonAppOptions;
 
-        this.logging.defaultLoggerLevel = Env.get(`${prefix}.logging.defaultLoggerLevel`, this.logging.defaultLoggerLevel) as FultonLoggerLevel
-        this.logging.defaultLoggerColorized = Env.getBoolean(`${prefix}.logging.defaultLoggerColorized`, this.logging.defaultLoggerColorized)
-        this.logging.httpLoggerEnabled = Env.getBoolean(`${prefix}.logging.httpLoggerEnabled`, this.logging.httpLoggerEnabled)
+        let customer = (a: any, b: any): any => {
+            if (typeof a == "object") {
+                if (a instanceof IdentityOptions) {
+                    return a
+                }
 
-        this.loader.routerLoaderEnabled = Env.getBoolean(`${prefix}.loader.routerLoaderEnabled`, this.loader.routerLoaderEnabled)
-        this.loader.serviceLoaderEnabled = Env.getBoolean(`${prefix}.loader.serviceLoaderEnabled`, this.loader.serviceLoaderEnabled)
-        this.loader.repositoryLoaderEnabled = Env.getBoolean(`${prefix}.loader.repositoryLoaderEnabled`, this.loader.repositoryLoaderEnabled)
+                return lodash.assignWith(a, b, customer);
+            } else {
+                return b == null ? a : b;
+            }
+        }
 
-        this.server.httpEnabled = Env.getBoolean(`${prefix}.server.httpEnabled`, this.server.httpEnabled)
-        this.server.httpsEnabled = Env.getBoolean(`${prefix}.server.httpsEnabled`, this.server.httpsEnabled)
-
-        this.server.httpPort = Env.getInt(`${prefix}.server.httpPort`, this.server.httpPort)
-        this.server.httpsPort = Env.getInt(`${prefix}.server.httpsPort`, this.server.httpsPort)
-
-        this.server.clusterEnabled = Env.getBoolean(`${prefix}.server.clusterEnabled`, this.server.clusterEnabled)
-        this.server.clusterWorkerNumber = Env.getInt(`${prefix}.server.clusterWorkerNumber`, this.server.clusterWorkerNumber)
-
-        this.staticFile.enabled = Env.getBoolean(`${prefix}.staticFile.enabled`, this.staticFile.enabled)
-        this.cors.enabled = Env.getBoolean(`${prefix}.cors.enabled`, this.cors.enabled)
+        lodash.assignWith(this, envValues, customer);
 
         this.identity.loadEnvOptions();
         this.loadEnvDatabaseOptions();

@@ -6,7 +6,7 @@ export default class Helper {
         return booleanReg.test(str);
     }
 
-    static getBoolean(str: string, defaultValue: boolean = false): boolean {
+    static getBoolean(str: string, defaultValue?: boolean): boolean {
         if (str == null)
             return defaultValue;
 
@@ -17,14 +17,14 @@ export default class Helper {
         return !isNaN(parseFloat(str));
     }
 
-    static getInt(str: string, defaultValue: number = 0): number {
+    static getInt(str: string, defaultValue?: number): number {
         if (str == null)
             return defaultValue;
 
         return parseInt(str) || defaultValue;
     }
 
-    static getFloat(str: string, defaultValue: number = 0): number {
+    static getFloat(str: string, defaultValue?: number): number {
         if (str == null)
             return defaultValue;
 

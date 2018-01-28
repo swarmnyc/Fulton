@@ -23,8 +23,7 @@ describe('env', () => {
         env["test.value2-3"] = "0"
         env["test.value2-4"] = "abc"
 
-        expect(Env.getBoolean("test.none")).toBeFalsy();
-        expect(Env.getBoolean("test.none")).not.toBeUndefined();
+        expect(Env.getBoolean("test.none")).toBeUndefined();
 
         expect(Env.getBoolean("test.value2-1")).toBeTruthy();
         expect(Env.getBoolean("test.Value2-1", false)).toBeTruthy();
@@ -42,8 +41,7 @@ describe('env', () => {
         env["test.value3-2"] = "100"
         env["test.value3-3"] = "abc"
 
-        expect(Env.getInt("test.none")).toEqual(0);
-        expect(Env.getInt("test.none")).not.toBeUndefined();
+        expect(Env.getInt("test.none")).toBeUndefined();
         expect(Env.getInt("test.none", 200)).toEqual(200);
 
         expect(Env.getInt("test.value3-1")).toEqual(100);
@@ -51,7 +49,7 @@ describe('env', () => {
 
         expect(Env.getInt("test.value3-2")).toEqual(100);
 
-        expect(Env.getInt("test.value3-3")).toEqual(0);
+        expect(Env.getInt("test.value3-3")).toBeUndefined();
         expect(Env.getInt("test.value3-3", NaN)).toEqual(NaN);
         expect(Env.getInt("test.value3-3", 100)).toEqual(100);
     });
@@ -61,8 +59,7 @@ describe('env', () => {
         env["test.value4-2"] = "100"
         env["test.value4-3"] = "abc"
 
-        expect(Env.getFloat("test.none")).toEqual(0.0);
-        expect(Env.getFloat("test.none")).not.toBeUndefined();
+        expect(Env.getFloat("test.none")).toBeUndefined();
         expect(Env.getFloat("test.none", 200.5)).toEqual(200.5);
 
         expect(Env.getFloat("test.value4-1")).toEqual(100.1);
@@ -70,7 +67,7 @@ describe('env', () => {
 
         expect(Env.getFloat("test.value4-2")).toEqual(100.0);
 
-        expect(Env.getFloat("test.value4-3")).toEqual(0);        
+        expect(Env.getFloat("test.value4-3")).toBeUndefined();        
         expect(Env.getFloat("test.value4-3", NaN)).toEqual(NaN);
         expect(Env.getFloat("test.value4-3", 100)).toEqual(100);
     });

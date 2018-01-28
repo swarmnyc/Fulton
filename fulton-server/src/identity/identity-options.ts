@@ -1,13 +1,15 @@
-import { AppMode, HttpMethod, PathIdentifier } from "../interfaces";
-import { FultonUser, FultonUserService, IUser, Middleware, Type, StrategyOptions, CustomStrategySettings } from "../index";
-import { IUserService, LocalStrategyVerifier, TokenStrategyVerifier, OAuthStrategyVerifier, GoogleStrategyOptions, OAuthStrategyOptions } from "./interfaces";
+import * as lodash from 'lodash';
 
+import { AppMode, HttpMethod, PathIdentifier } from "../interfaces";
+import { CustomStrategySettings, FultonUser, FultonUserService, IUser, Middleware, StrategyOptions, Type } from "../index";
+import { GoogleStrategyOptions, IUserService, LocalStrategyVerifier, OAuthStrategyOptions, OAuthStrategyVerifier, TokenStrategyVerifier } from "./interfaces";
+
+import { AuthenticateOptions } from "passport";
 import { AuthorizeOptions } from "./authorizes-middlewares";
 import Env from "../helpers/env";
+import { FultonImpl } from "./fulton-impl/fulton-impl";
 import { Repository } from "typeorm";
 import { Strategy } from "passport";
-import { FultonImpl } from "./fulton-impl/fulton-impl";
-import { AuthenticateOptions } from "passport";
 
 export class IdentityOptions {
     /**
@@ -434,7 +436,7 @@ export class IdentityOptions {
             scope: "profile email",
             strategyOptions: {},
             verifierFn: FultonImpl.oauthVerifierFn,
-            authenticateFn : FultonImpl.oauthAuthenticateFn,
+            authenticateFn: FultonImpl.oauthAuthenticateFn,
             callbackAuthenticateFn: FultonImpl.oauthCallbackAuthenticateFn
         }
 
@@ -443,9 +445,9 @@ export class IdentityOptions {
             path: "/auth/github",
             callbackPath: "/auth/github/callback",
             scope: "read:user user:email",
-            strategyOptions: {},            
+            strategyOptions: {},
             verifierFn: FultonImpl.oauthVerifierFn,
-            authenticateFn : FultonImpl.oauthAuthenticateFn,
+            authenticateFn: FultonImpl.oauthAuthenticateFn,
             callbackAuthenticateFn: FultonImpl.oauthCallbackAuthenticateFn
         }
 
@@ -480,8 +482,39 @@ export class IdentityOptions {
      */
     loadEnvOptions() {
         let prefix = `${this.appName}.options.identity`;
-        // TODO: identity loadEnvOptions
-        this.enabled = Env.getBoolean(`${prefix}.enabled`, this.enabled);
+
+        let envValues = {
+            enabled: Env.getBoolean(`${prefix}.enabled`),
+            register: {
+                enabled: Env.getBoolean(`${prefix}.register.enabled`)
+            },
+            login: {
+                enabled: Env.getBoolean(`${prefix}.login.enabled`)
+            },
+            bearer: {
+                enabled: Env.getBoolean(`${prefix}.login.enabled`)
+            },
+            google: {
+                enabled: Env.getBoolean(`${prefix}.google.enabled`),
+                clientId: Env.get(`${prefix}.google.clientId`),
+                clientSecret: Env.get(`${prefix}.google.clientSecret`)
+            },
+            github: {
+                enabled: Env.getBoolean(`${prefix}.github.enabled`),
+                clientId: Env.get(`${prefix}.github.clientId`),
+                clientSecret: Env.get(`${prefix}.github.clientSecret`)
+            }
+        } as IdentityOptions;
+
+        let customer = (a: any, b: any): any => {
+            if (typeof a == "object") {
+                return lodash.assignWith(a, b, customer);
+            } else {
+                return b == null ? a : b;
+            }
+        }
+
+        lodash.assignWith(this, envValues, customer);
     }
 
     useDefaultImplement(): boolean {

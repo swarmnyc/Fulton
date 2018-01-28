@@ -1,4 +1,4 @@
-import { FultonApp, FultonAppOptions, authorize, AccessToken } from "../../src/index";
+import { FultonApp, FultonAppOptions, authorize, AccessToken, Request, Response } from "../../src/index";
 import { UserServiceMock } from "../helpers/user-service-mock";
 import { HttpTester, HttpResult } from "../helpers/http-tester";
 
@@ -9,11 +9,19 @@ class MyApp extends FultonApp {
         options.identity.google.enabled = true;
         options.identity.google.clientId = "test"
         options.identity.google.clientSecret = "test";
-        
+
         options.databases.set("default", {
             type: "mongodb",
             url: "mongodb://localhost:27017/fulton-test"
         });
+
+        options.index.handler = (req: Request, res: Response) => {
+            if (req.isAuthenticated()) {
+                res.send("user:" + req.user.username);
+            } else {
+                res.send("no user");
+            }
+        };
     }
 
     initIdentity(): void {
@@ -103,16 +111,30 @@ xdescribe('Identity Integration Test', () => {
         expect(result.body.errors.$).toEqual(["username or password isn't correct"]);
     });
 
-    it('should login with token', async () => {
-        await prepareUser();
+    it('should access with token', async () => {
+        let result1 = await prepareUser();
+        let token = result1.body as AccessToken;
 
-        let result = await httpTester.postJson("/auth/login", {
-            username: "test",
-            password: "test321"
-        });
+        httpTester.setHeaders({
+            "Authorization": `${token.token_type} ${token.access_token}`
+        })
 
-        expect(result.response.statusCode).toEqual(400);
-        expect(result.body.errors.$).toEqual(["username or password isn't correct"]);
+        let result = await httpTester.get("/")
+
+        expect(result.body).toEqual("user:test");
+    });
+
+    it('should not access with wrong token', async () => {
+        let result1 = await prepareUser();
+        let token = result1.body as AccessToken;
+
+        httpTester.setHeaders({
+            "Authorization": `${token.token_type} ${token.access_token}123`
+        })
+
+        let result = await httpTester.get("/")
+
+        expect(result.body).toEqual("no user");
     });
 
     it('should google oauth login', async () => {

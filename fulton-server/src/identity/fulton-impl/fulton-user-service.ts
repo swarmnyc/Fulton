@@ -17,6 +17,7 @@ import { IdentityOptions } from '../identity-options';
 interface IRunner {
     addAccessToken(user: FultonUser, userToken: FultonAccessToken): Promise<any>
     updateOAuthToken?(user: FultonUser, oauthToken: AccessToken): Promise<any>
+    findUserByToken?(token: string): Promise<FultonUser>;
 }
 
 class MongoRunner implements IRunner {
@@ -34,6 +35,20 @@ class MongoRunner implements IRunner {
         return this.userRepository.updateOne({ _id: user.id }, {
             "$push": { "oauthes": oauthToken }
         });
+    }
+
+    findUserByToken(token: string): Promise<FultonUser> {
+        return this.userRepository.findOne({
+            "accessTokens":
+                {
+                    "$elemMatch":
+                        {
+                            "token": token,
+                            "revoked": false,
+                            "expiredAt": { "$gt": new Date() }
+                        }
+                }
+        } as any);
     }
 }
 
@@ -226,7 +241,7 @@ export class FultonUserService implements IUserService<FultonUser> {
     }
 
     findByAccessToken(token: string): Promise<FultonUser> {
-        throw new Error("Method not implemented.");
+        return this.runner.findUserByToken(token);
     }
 
     async issueAccessToken(user: FultonUser): Promise<AccessToken> {

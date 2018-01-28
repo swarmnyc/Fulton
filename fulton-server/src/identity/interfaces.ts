@@ -60,7 +60,6 @@ export interface AccessToken {
     refresh_token?: string;
     scope?: string;
     provider?: string;
-    expiry_date?: number;
     [key: string]: any;
 }
 

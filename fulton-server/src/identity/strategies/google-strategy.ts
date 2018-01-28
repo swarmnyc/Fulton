@@ -22,7 +22,7 @@ export class GoogleStrategy extends Strategy {
     }
 
     authenticate(req: Request, options: GoogleStrategyOptions) {
-        options = lodash.assign({}, this.options, options);
+        options = lodash.defaults(options, this.options);
 
         if (!options.clientId) return this.error(new Error("clientId is required for GoogleStrategy"))
         if (!options.clientSecret) return this.error(new Error("clientSecret is required for GoogleStrategy"))

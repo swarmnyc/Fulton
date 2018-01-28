@@ -1,4 +1,5 @@
 import * as passport from 'passport';
+import * as lodash from 'lodash';
 
 import { FultonUser, Type, IFultonUser } from '../index';
 import { IStrategyOptionsWithRequest, Strategy as LocalStrategy } from 'passport-local';
@@ -83,8 +84,11 @@ module.exports = async function identityInitializer(app: FultonApp) {
         if (idOptions.google.enabled) {
             let opts = idOptions.google;
 
-            Helper.setValue(opts, "strategyOptions", {});
-            Helper.setValue(opts.strategyOptions, "accessType", opts.accessType);
+            lodash.defaultsDeep(opts, {
+                strategyOptions: {
+                    accessType: opts.accessType
+                }
+            });
 
             idOptions.addStrategy(
                 idOptions.google,
@@ -96,24 +100,27 @@ module.exports = async function identityInitializer(app: FultonApp) {
         if (idOptions.github.enabled) {
             let opts = idOptions.github;
 
-            Helper.setValue(opts, "strategyOptions", {});
-            Helper.setValue(opts.strategyOptions, "clientID", opts.clientId);
-            Helper.setValue(opts, "prfoileTransformer", (profile: any) => {
-                let email;
-                if (profile.emails instanceof Array) {
-                    email = profile.emails.find((e: any) => e.primary || e.primary == null).value;
-                } else {
-                    email = profile.email;
+            lodash.defaultsDeep(opts, {
+                strategyOptions: {
+                    clientID: opts.clientId
+                },
+                prfoileTransformer: (profile: any) => {
+                    let email;
+                    if (profile.emails instanceof Array) {
+                        email = profile.emails.find((e: any) => e.primary || e.primary == null).value;
+                    } else {
+                        email = profile.email;
+                    }
+
+                    let user: IFultonUser = {
+                        email: email,
+                        username: email,
+                        displayName: profile.displayName,
+                        portraitUrl: profile._json.avatar_url
+                    };
+
+                    return user;
                 }
-
-                let user: IFultonUser = {
-                    email: email,
-                    username: email,
-                    displayName: profile.displayName,
-                    portraitUrl: profile._json.avatar_url
-                };
-
-                return user;
             });
 
             // require passport-github when github.enabled = true;
@@ -132,19 +139,21 @@ module.exports = async function identityInitializer(app: FultonApp) {
             let instance: Strategy;
 
             if (strategy instanceof Function) {
-                let opts = Helper.setValue(options, "strategyOptions", {});
-
-                Helper.setValue(opts, "clientId", options.clientId);
-                Helper.setValue(opts, "clientSecret", options.clientSecret);
-                Helper.setValue(opts, "callbackUrl", options.callbackUrl);
-                Helper.setValue(opts, "scope", options.scope);
-                Helper.setValue(opts, "passReqToCallback", true);
+                lodash.defaultsDeep(options, {
+                    strategyOptions: {
+                        clientId: options.clientId,
+                        clientSecret: options.clientSecret,
+                        callbackUrl: options.callbackUrl,
+                        scope: options.scope,
+                        passReqToCallback: true
+                    }
+                });
 
                 if (options.verifierFn) {
                     options.verifier = options.verifierFn(options);
                 }
 
-                instance = new strategy(opts, options.verifier);
+                instance = new strategy(options.strategyOptions, options.verifier);
             } else {
                 instance = strategy
             }
@@ -158,14 +167,17 @@ module.exports = async function identityInitializer(app: FultonApp) {
                 // for regular strategy
                 let args: any[] = [];
 
-                let opts = Helper.setValue(options, "callbackAuthenticateOptions", {});
-                Helper.setValue(opts, "passReqToCallback", true);
-                Helper.setValue(opts, "session", false);
+                lodash.defaultsDeep(options, {
+                    authenticateOptions: {
+                        passReqToCallback: true,
+                        session: false
+                    }
+                });
 
                 if (options.authenticateFn) {
                     args.push(options.authenticateFn(options))
                 } else {
-                    args.push(passport.authenticate(options.name, opts))
+                    args.push(passport.authenticate(options.name, options.authenticateOptions))
                 }
 
                 if (options.successMiddleware) {
@@ -180,14 +192,17 @@ module.exports = async function identityInitializer(app: FultonApp) {
                 // for oauth strategy 
                 let args: any[] = [];
 
-                let opts = Helper.setValue(options, "callbackAuthenticateOptions", {});
-                Helper.setValue(opts, "passReqToCallback", true);
-                Helper.setValue(opts, "session", false);
+                lodash.defaultsDeep(options, {
+                    callbackAuthenticateOptions: {
+                        passReqToCallback: true,
+                        session: false
+                    }
+                });
 
                 if (options.callbackAuthenticateFn) {
                     args.push(options.callbackAuthenticateFn(options))
                 } else {
-                    args.push(passport.authenticate(options.name, opts))
+                    args.push(passport.authenticate(options.name, options.callbackAuthenticateOptions))
                 }
 
                 if (options.callbackSuccessMiddleware) {

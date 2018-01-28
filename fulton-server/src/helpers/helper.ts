@@ -39,7 +39,7 @@ export default class Helper {
      * @param name 
      * @param value 
      */
-    static setValue<T>(object: T, name: keyof T, value: any): any {
+    static default<T>(object: T, name: keyof T, value: any): any {
         if (object == null || value == null)
             return;
 

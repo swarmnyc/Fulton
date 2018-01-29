@@ -6,6 +6,11 @@ import { getConnection } from "typeorm";
 import { getRepositoryMetadata } from "./repository-decorator-helper";
 
 
+/**
+ * hack typeorm to create repository, it should only use in FulonApp.initRepository()
+ * @param container 
+ * @param type 
+ */
 export function createRepository(container: FultonDiContainer, type: any): Repository<any> {
     let metadata = getRepositoryMetadata(type);
 
@@ -13,7 +18,7 @@ export function createRepository(container: FultonDiContainer, type: any): Repos
     let entityMetadata = connection.getMetadata(metadata.entity);
 
     let repository = container.resolve(type) as Repository<any>;
-    
+
     Object.assign(repository, {
         manager: connection.manager,
         metadata: entityMetadata,

@@ -1,5 +1,6 @@
-import { FultonDiContainer, Injectable } from "../interfaces";
+import { FultonDiContainer, Inject, Injectable } from "../interfaces";
 
+import { FultonApp } from "../fulton-app";
 import { Type } from "../helpers/type-helpers";
 
 /**
@@ -7,5 +8,7 @@ import { Type } from "../helpers/type-helpers";
  */
 @Injectable()
 export abstract class FultonService {
-    
+    @Inject(FultonApp)
+    protected app: FultonApp;
+
 }

@@ -1,51 +1,54 @@
 import { FultonRouter } from "./fulton-router";
+import { Request, Response, Injectable } from "../index";
+import { getFullEntityRouterMethodMetadata, FullEntityRouterMetadata } from "./route-decorators-helpers";
+import { HttpGet, HttpPost, HttpPatch, HttpDelete } from "./route-decorators";
+import { FultonEntityService } from "../services/fulton-entity-service";
+import { getRepository } from "typeorm";
 
-// import { FultonEntityService } from "../services/fulton-entity-service";
-// import { IFultonContext } from "../cores/IFultonContext";
-// import { FindManyOptions } from "typeorm";
-// import { DeepPartial } from "typeorm/common/DeepPartial";
-
-// export type ListFuncDelegate<TEntity> =  (context:IFultonContext, query?: FindManyOptions<TEntity>) => Promise<TEntity[]>;
-// export type DetailFuncDelegate<TEntity> =  (context:IFultonContext, id: any) => Promise<TEntity>;
-// export type CreateFuncDelegate<TEntity> =  (context: IFultonContext, obj: DeepPartial<TEntity>) => Promise<DeepPartial<TEntity>>;
-// export type UpdateFuncDelegate<TEntity> =  (context:IFultonContext, id: any, obj: DeepPartial<TEntity>) => Promise<void>;
-// export type DeleteFuncDelegate<TEntity> =  (context:IFultonContext, id: any) => Promise<void>;
-
-// // has 5 pre-definied action based to operate Entity
+@Injectable()
 export abstract class FultonEntityRouter<TEntity> extends FultonRouter {
-    // protected listDelegate: ListFuncDelegate<TEntity>; 
-    // protected detailDelegate: DetailFuncDelegate<TEntity>;
-    // protected createDelegate: CreateFuncDelegate<TEntity>;
-    // protected updateDelegate: UpdateFuncDelegate<TEntity>;
-    // protected deleteDelegate: DeleteFuncDelegate<TEntity>;
+    protected metadata: FullEntityRouterMetadata
 
-    // constructor(protected dataService: FultonEntityService<TEntity>) {
-    //     super();
+    constructor(protected entityService?: FultonEntityService<TEntity>) {
+        super();
+    }
 
-    //     this.listDelegate = this.dataService.find;
-    //     this.detailDelegate = this.dataService.findById;
-    //     this.createDelegate = this.dataService.create;
-    //     this.updateDelegate = this.dataService.updateById;
-    //     this.deleteDelegate = this.dataService.deleteById;
-    // }
+    protected loadMetadata() {
+        this.metadata = getFullEntityRouterMethodMetadata(this.constructor);
+    }
 
-    // list(context:IFultonContext){
+    init() {
+        // use default implementation 
+        if (this.entityService == null) {
+            let repo = getRepository(this.metadata.router.entity);
+            this.entityService = new FultonEntityService(repo);
+        }
 
-    // }
+        super.init();
+    }
 
-    // detail(context:IFultonContext){
-        
-    // }
+    @HttpGet("/")
+    list(req: Request, res: Response) {
 
-    // create(context:IFultonContext){
-        
-    // }
+    }
 
-    // update(context:IFultonContext){
-        
-    // }
+    @HttpGet("/:id")
+    detail(req: Request, res: Response) {
 
-    // delete(context:IFultonContext){
-        
-    // }
+    }
+
+    @HttpPost("/")
+    create(req: Request, res: Response) {
+
+    }
+
+    @HttpPatch("/:id")
+    update(req: Request, res: Response) {
+
+    }
+
+    @HttpDelete("/:id")
+    delete(req: Request, res: Response) {
+
+    }
 }

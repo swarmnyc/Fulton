@@ -41,7 +41,8 @@ module.exports = async function identityInitializer(app: FultonApp) {
             userService = idOptions.userService as IUserService<IUser>;
         }
 
-        // register userService
+        // assign userService
+        app.userService = userService;
         app.server.request.constructor.prototype.userService = userService;
 
         app.server.use(passport.initialize());

@@ -1,10 +1,5 @@
-import { FultonService } from "../index";
-
-// import { MongoRepository, Repository } from "typeorm"
-
-// import { DeepPartial } from "typeorm/common/DeepPartial";
-// import { FindManyOptions } from "typeorm/find-options/FindManyOptions";
-// import { IUser } from "../index";
+import { FultonService, Injectable } from "../index";
+import { Repository } from "typeorm";
 
 // // ?
 // export interface IAuditableEntity {
@@ -14,41 +9,29 @@ import { FultonService } from "../index";
 //     updatedAt: Date;
 // }
 
-// // TModel is default Model, this 5 methods match the route actions
-// // if we want to get currect user, we have to pass context on each method
-// // because DataService is created at Router construction which is created at App Start
-// // also it is mess if the currentUser is global for Server Site
-// export interface IFultonEntityService<TEntity> {
-//     find(context: IFultonContext, query?: FindManyOptions<TEntity>): Promise<TEntity[]>;
-//     findById(context: IFultonContext, id: any): Promise<TEntity>;
-//     create(context: IFultonContext, obj: DeepPartial<TEntity>): Promise<DeepPartial<TEntity>>;
-//     updateById(context: IFultonContext, id: any, obj: DeepPartial<TEntity>): Promise<void>;
-//     deleteById(context: IFultonContext, id: any): Promise<void>;
-// }
+@Injectable()
+export class FultonEntityService<TEntity> extends FultonService {
+    constructor(protected repository: Repository<TEntity>) {
+        super();
+    }
 
-export abstract class FultonEntityService<TEntity> extends FultonService {
-//     private readonly defalutRepository: Repository<TEntity>;
-//     constructor(defalutRepository: Repository<TEntity> | MongoRepository<TEntity>) {
-//         this.defalutRepository = defalutRepository;
-//     }
+    find(): Promise<TEntity[]> {
+        throw new Error("not imploment");
+    }
 
-//     find(context: IFultonContext, query?: FindManyOptions<TEntity>): Promise<TEntity[]> {
-//         return this.defalutRepository.find(query);
-//     }
+    findById(): Promise<TEntity> {
+        throw new Error("not imploment");
+    }
 
-//     findById(context: IFultonContext, id: any): Promise<TEntity> {
-//         return this.defalutRepository.findOneById(id);
-//     }
+    create(): Promise<TEntity> {
+        throw new Error("not imploment");
+    }
 
-//     create(context: IFultonContext, obj: DeepPartial<TEntity>): Promise<DeepPartial<TEntity>> {
-//         return this.defalutRepository.save(obj);
-//     }
+    update(): Promise<TEntity> {
+        throw new Error("not imploment");
+    }
 
-//     updateById(context: IFultonContext, id: any, obj: DeepPartial<TEntity>): Promise<void> {
-//         return this.defalutRepository.updateById(id, obj)
-//     }
-
-//     deleteById(context: IFultonContext, id: any): Promise<void> {
-//         return this.defalutRepository.deleteById(id);
-//     }
+    delete(): Promise<TEntity> {
+        throw new Error("not imploment");
+    }
 }

@@ -1,16 +1,15 @@
 import { KEY_ROUTER_ERROR_HANDLER_METADATA, KEY_ROUTER_HTTP_METHOD_LIST_METADATA, KEY_ROUTER_METADATA } from "../constants";
-import { PathIdentifier, Injectable, RouterDocOptions, HttpMethod ,Middleware, RouterActionDocOptions } from "../index";
-import { RouterMetadata, RouterMethodMetadata } from "./route-decorators-helpers";
+import { PathIdentifier, Injectable, RouterDocOptions, HttpMethod, Middleware, RouterActionDocOptions, Type } from "../index";
+import { RouterMetadata, RouterMethodMetadata, EntityRouterMetadata } from "./route-decorators-helpers";
 import { isFunction } from "util";
 
 /**
- * router metadata, this method includes @Injectable()
+ * router decorator, this method includes @Injectable()
  * @param path 
  * @param doc 
  * @param middlewares 
  * @param afterMiddlewares 
  */
-
 export function Router(path: PathIdentifier, doc?: RouterDocOptions, ...middlewares: Middleware[]): any
 export function Router(path: PathIdentifier, ...middlewares: Middleware[]): any
 export function Router(path: PathIdentifier, ...args: any[]): any {
@@ -172,3 +171,39 @@ export function HttpAction(method: HttpMethod, path: PathIdentifier = "/", ...ar
         metadataList.push(metadata);
     };
 }
+
+
+/**
+ * Entity Router decorator, this method includes @Injectable()
+ * @param path 
+ * @param entity 
+ * @param doc 
+ * @param middlewares 
+ */
+export function EntityRouter(path: PathIdentifier, entity: Type, doc?: RouterDocOptions, ...middlewares: Middleware[]): any
+export function EntityRouter(path: PathIdentifier, entity: Type, ...middlewares: Middleware[]): any
+export function EntityRouter(path: PathIdentifier, entity: Type, ...args: any[]): any {
+    return function (target: any) {
+        Injectable()(target);
+        let doc, middlewares;
+
+        if (args && args.length > 0) {
+            if (isFunction(args[0])) {
+                middlewares = args;
+            } else {
+                doc = args[0];
+                middlewares = args.slice(1);
+            }
+        }
+
+        Reflect.defineMetadata(
+            KEY_ROUTER_METADATA,
+            {
+                path,
+                entity,
+                doc,
+                middlewares
+            } as EntityRouterMetadata,
+            target);
+    };
+};

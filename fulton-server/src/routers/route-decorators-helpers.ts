@@ -2,17 +2,16 @@ import { KEY_ROUTER_ERROR_HANDLER_METADATA, KEY_ROUTER_HTTP_METHOD_LIST_METADATA
 
 import { FultonRouter } from "./fulton-router";
 import { PathIdentifier, Middleware, RouterDocOptions, RouterActionDocOptions } from "../interfaces";
-
-export interface FullRouterMetadata {
-    router: RouterMetadata,
-    methods: RouterMethodMetadata[],
-    errorhandler: string;
-}
+import { Type } from "../index";
 
 export interface RouterMetadata {
     path: PathIdentifier,
     doc: RouterDocOptions;
     middlewares: Middleware[]
+}
+
+export interface EntityRouterMetadata extends RouterMetadata {
+    entity: Type;
 }
 
 export interface RouterMethodMetadata {
@@ -23,7 +22,24 @@ export interface RouterMethodMetadata {
     middlewares: Middleware[]
 }
 
+export interface AllRouterMethodMetadata {
+    methods: RouterMethodMetadata[],
+    errorhandler: string;
+}
+
+export interface FullRouterMetadata extends AllRouterMethodMetadata {
+    router: RouterMetadata
+}
+
+export interface FullEntityRouterMetadata extends AllRouterMethodMetadata {
+    router: EntityRouterMetadata,
+}
+
 export function getRouterMetadata(target: any): RouterMetadata {
+    return Reflect.getOwnMetadata(KEY_ROUTER_METADATA, target);
+}
+
+export function getEntityRouterMetadata(target: any): EntityRouterMetadata {
     return Reflect.getOwnMetadata(KEY_ROUTER_METADATA, target);
 }
 
@@ -40,7 +56,20 @@ export function getRouterMethodMetadataList(target: any): RouterMethodMetadata[]
 }
 
 export function getFullRouterMethodMetadata(target: any): FullRouterMetadata {
-    let router = getRouterMetadata(target);
+    let metadata = getAllRouterMethodMetadata(target) as FullRouterMetadata;
+    metadata.router = getRouterMetadata(target);
+
+    return metadata;
+}
+
+export function getFullEntityRouterMethodMetadata(target: any): FullEntityRouterMetadata {
+    let metadata = getAllRouterMethodMetadata(target) as FullEntityRouterMetadata;
+    metadata.router = getEntityRouterMetadata(target);
+
+    return metadata;
+}
+
+function getAllRouterMethodMetadata(target: any): AllRouterMethodMetadata {
     let methods = [];
     let errorhandler;
     let keys = new Map<string, boolean>();
@@ -64,5 +93,5 @@ export function getFullRouterMethodMetadata(target: any): FullRouterMetadata {
         target = target.__proto__;
     }
 
-    return { router, methods, errorhandler };
+    return { methods, errorhandler };
 }

@@ -16,6 +16,7 @@ import { Express } from "express";
 import { FultonAppOptions } from "./fulton-app-options";
 import FultonLog from "./fulton-log";
 import { FultonLoggerLevel } from "./index";
+import { IUserService, IUser } from "./identity";
 import { FultonRouter } from "./routers/fulton-router";
 import { FultonService } from "./services";
 import { createRepository } from "./repositories/repository-helpers";
@@ -26,22 +27,46 @@ import { fultonDebug } from "./helpers/debug";
 
 export abstract class FultonApp {
     private isInitialized: boolean = false;
-    private httpServer: http.Server;
-    private httpsServer: https.Server;
-    private connections: Connection[];
 
     /**
      * app name, use in output, parser. default is class name.
-     * have to set the value before onInit();
      */
     appName: string;
 
     /**
-     * the instance of Express, create after init().
+     * the instance of http server of nodejs, created during start()
+     */
+    httpServer: http.Server;
+
+    /**
+     * the instance of https server of nodejs, created during start()
+     */
+    httpsServer: https.Server;
+
+    /**
+     * database connections, created during init();
+     */
+    connections: Connection[];
+
+    /**
+     * the instance of Express, created during init().
      */
     server: Express;
+
+    /**
+     * Dependency Injection container, created during init()
+     */
     container: FultonDiContainer;
+
+    /**
+     * options for Fulton
+     */
     options: FultonAppOptions;
+
+    /**
+     * user service, created during init() if options.identity.enabled = true.
+     */
+    userService: IUserService<IUser>;
 
     /**
      * @param mode There are some different default values for api and web-view. 
@@ -307,7 +332,7 @@ export abstract class FultonApp {
             prodivers = loadProviders.concat(prodivers);
         }
 
-        let ids = this.registerTypes(prodivers);
+        let ids = this.registerTypes(prodivers, true);
         let routers = ids.map((id) => {
             let router = this.container.get<FultonRouter>(id);
 
@@ -413,7 +438,7 @@ export abstract class FultonApp {
         }
     }
 
-    protected registerTypes(providers: Provider[]): TypeIdentifier[] {
+    protected registerTypes(providers: Provider[], singleton?: boolean): TypeIdentifier[] {
         let ids: TypeIdentifier[] = [];
 
         if (providers == null)
@@ -421,14 +446,18 @@ export abstract class FultonApp {
 
         for (const provider of providers as any[]) {
             if (isFunction(provider)) {
-                this.container.bind(provider as TypeProvider).toSelf();
+                let binding = this.container.bind(provider as TypeProvider).toSelf();
+                if (singleton == true) {
+                    binding.inSingletonScope();
+                }
+
                 ids.push(provider);
             } else if (provider.useValue) {
                 this.container.bind(provider.provide).toConstantValue(provider.useValue);
             } else if (provider.useClass) {
                 let binding = this.container.bind(provider.provide).to(provider.useClass);
 
-                if (provider.useSingleton == true) {
+                if (provider.useSingleton == true || singleton) {
                     binding.inSingletonScope();
                 }
             } else if (provider.useFactory) {
@@ -440,7 +469,7 @@ export abstract class FultonApp {
                     return provider.useFunction(ctx.container);
                 });
 
-                if (provider.useSingleton == true) {
+                if (provider.useSingleton == true || singleton) {
                     binding.inSingletonScope();
                 }
             }

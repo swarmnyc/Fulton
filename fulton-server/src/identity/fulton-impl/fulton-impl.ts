@@ -9,6 +9,7 @@ import { FultonApp } from '../../fulton-app';
 import { FultonUser } from "./fulton-user";
 import { FultonError } from '../../common/fulton-error';
 import FultonLog from '../../fulton-log';
+import { IUser } from '../../index';
 
 
 /**
@@ -21,9 +22,9 @@ export let FultonImpl = {
     localStrategyVerifier(req: Request, username: string, password: string, done: StrategyVerifyDone) {
         req.userService
             .login(username, password)
-            .then((user) => {
+            .then((user: IUser) => {
                 done(null, user);
-            }).catch((error) => {
+            }).catch((error: any) => {
                 done(error);
             });
     },
@@ -92,9 +93,9 @@ export let FultonImpl = {
 
             req.userService
                 .loginByOauth(token, profile)
-                .then((user) => {
+                .then((user: IUser) => {
                     done(null, user);
-                }).catch((error) => {
+                }).catch((error: any) => {
                     done(error);
                 });
         }
@@ -164,7 +165,7 @@ export let FultonImpl = {
 
         req.userService
             .register(input)
-            .then(async (user) => {
+            .then(async (user: IUser) => {
                 req.logIn(user, options, (err) => {
                     if (options.responseOptions && options.responseOptions.successRedirect) {
                         res.redirect(options.responseOptions.successRedirect)
@@ -173,9 +174,8 @@ export let FultonImpl = {
                     }
                 })
             })
-            .catch((error) => {
+            .catch((error: any) => {
                 if (options.responseOptions && options.responseOptions.failureRedirect) {
-                    res.locals.error = error;
                     res.redirect(options.responseOptions.failureRedirect)
                 } else {
                     if (error instanceof FultonError) {

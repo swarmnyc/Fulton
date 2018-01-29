@@ -9,5 +9,5 @@ export * from "./services";
 export * from "./routers";
 export * from "./helpers";
 
-export * from "./middlewares/async-wrap"
+export * from "./middlewares"
 export * from "./repositories/repository-decorator"

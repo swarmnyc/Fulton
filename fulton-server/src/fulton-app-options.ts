@@ -4,20 +4,19 @@ import * as lodash from 'lodash';
 import * as path from 'path';
 import * as winston from 'winston';
 
+import { AppMode, ErrorMiddleware, Middleware, PathIdentifier } from './interfaces';
 import { ConnectionOptions, Repository } from 'typeorm';
-import { ErrorMiddleware, Middleware, PathIdentifier, AppMode } from './interfaces';
 import { FultonClassLoader, defaultClassLoader } from './helpers/module-helpers';
 import { FultonLoggerLevel, FultonLoggerOptions } from './fulton-log';
 import { FultonRouter, FultonService, Type } from './index';
-import { Provider, TypeProvider, } from './helpers/type-helpers';
-import { default404ErrorHandler, defaultErrorHandler } from './middlewares/error-handlers';
+import { Provider, TypeProvider } from './helpers/type-helpers';
+import { default404ErrorHandler, defaultErrorHandler, queryParamsParser } from './middlewares';
 
 import { CorsOptions } from 'cors';
 import Env from './helpers/env';
 import Helper from './helpers/helper';
-import { ServeStaticOptions } from 'serve-static';
-
 import { IdentityOptions } from './identity/identity-options';
+import { ServeStaticOptions } from 'serve-static';
 
 export class FultonAppOptions {
     // generate api doc
@@ -538,7 +537,8 @@ export class FultonAppOptions {
                     return lodash.includes(["application/json", "application/vnd.api+json"], req.headers['content-type'])
                 }
             }),
-            express.urlencoded({ extended: true })
+            express.urlencoded({ extended: true }),
+            queryParamsParser
         ];
 
         this.identity = new IdentityOptions(this.appName, this.appMode);

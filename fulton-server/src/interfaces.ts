@@ -58,6 +58,12 @@ export interface RouterActionDocOptions {
 export interface QueryParams {
     /**
      * filter options
+     * 
+     * ## examples
+     * - ?filter[a]=123&filter[b]=456
+     * - ?filter[name][$regex]=abc&filter[name][$options]=i
+     * - ?filter[name][$like]=abc
+     * - ?filter[$or][0][a]=1&filter[$or][1][b]=2
      */
     filter?: {
         [key: string]: any;
@@ -67,6 +73,11 @@ export interface QueryParams {
      * sort options
      * true is ascending order
      * false is descending order
+     * 
+     * ## examples
+     * two styles: 
+     *  - ?sort=columeA,-columeB 
+     *  - ?sort[columeA]=1|true&sort[columeB]=-1|false
      */
     sort?: {
         [key: string]: boolean;
@@ -75,12 +86,26 @@ export interface QueryParams {
     /**
      * projection options,
      * if undefined, all output all columns excepts @Colume({hide:true})
+     * ## examples
+     * two styles: 
+     *  - ?projection=columeA,columeB 
+     *  - ?projection=columeA&projection=columeB
      */
     projection?: string[];
 
+    /**
+     * pagination options,
+     * ## examples
+     *  - ?includes=columeA,columeB 
+     *  - ?includes=columeA&projection=columeB
+     */
+    includes?: string[];
 
     /**
      * pagination options,
+     * ## examples
+     *  - ?pagination[index]=1
+     *  - ?pagination[size]=100
      */
     pagination?: {
         index?: number,

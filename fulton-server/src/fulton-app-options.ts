@@ -153,10 +153,11 @@ export class FultonAppOptions {
      *   }
      * }
      * 
-     * @Injectable() 
-     * class ApiService {
-     *  constructor( @Inject("api_key") private apiKey: string) 
-     *  }
+     * @Entity()
+     * class Food { }
+     * 
+     * @Repository(Food)
+     * class FoodRepository extends MongoRepository<Food> {
      * }
      * ```
      */
@@ -165,23 +166,24 @@ export class FultonAppOptions {
     /**
      * Define injections for the repositories
      * 
-     * ```
+     * ``` typescript
      * class MyApp extends FultonApp {
      *   onInit(options){
-     *       options.repositories = [
-     *           FoodRepository
+     *       options.providers = [
+     *           { provide: "api_key", useValue: "your key" }
      *       ];
      * 
-     *       // turn on the repository loader if you want app to load repositories automatically 
-     *       options.loader.repositoryLoaderEnabled = true;
+     *       options.services = [
+     *           ApiService
+     *       ];
      *   }
      * }
      * 
-     * @Entity()
-     * class Food { }
-     * 
-     * @Repository(Food)
-     * class FoodRepository extends MongoRepository<Food> {
+     * @Injectable() 
+     * class ApiService {
+     *  // apiKey is injected by container when it is created
+     *  constructor( @Inject("api_key") private apiKey: string) 
+     *  }
      * }
      * ```
      */
@@ -194,11 +196,27 @@ export class FultonAppOptions {
      */
     entities: Type[] = [];
 
-    /**
-     * app level middlewares for parser
-     * default is [express.json(), express.urlencoded({ extended: true })]
-     */
-    requestParsers: Middleware[];
+    formatter: {
+        /**
+         * if true, add express.json() as a middleware
+         * the default value is true
+         */
+        json: boolean;
+        /**
+         * if true, add fultonjsonapiParser() as a middleware
+         * the default value is true
+         */
+        jsonApi: boolean;
+        /**
+         * if true, add express.urlencoded({ extended: true })() as a middleware
+         * the default value is true
+         */
+        form: boolean;
+        /**
+         * other custom middlewares
+         */
+        customs: Middleware[];
+    }
 
     /**
      * app level custom middlewares, they will be placed before routers
@@ -531,15 +549,12 @@ export class FultonAppOptions {
             middlewares: []
         };
 
-        this.requestParsers = [
-            express.json({
-                type: function (req) {
-                    return lodash.includes(["application/json", "application/vnd.api+json"], req.headers['content-type'])
-                }
-            }),
-            express.urlencoded({ extended: true }),
-            queryParamsParser
-        ];
+        this.formatter = {
+            json: true,
+            jsonApi: true,
+            form: true,
+            customs: []
+        };
 
         this.identity = new IdentityOptions(this.appName, this.appMode);
     }

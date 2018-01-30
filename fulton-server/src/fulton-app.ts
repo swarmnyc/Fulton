@@ -24,6 +24,7 @@ import { getRepositoryMetadata } from "./repositories/repository-decorator-helpe
 import { isFunction } from "util";
 import { defaultHttpLoggerHandler } from "./middlewares/http-logger";
 import { fultonDebug } from "./helpers/debug";
+import { jsonapi } from "./middlewares/jsonapi";
 
 export abstract class FultonApp {
     private isInitialized: boolean = false;
@@ -103,7 +104,7 @@ export abstract class FultonApp {
 
         await this.initCors();
 
-        await this.initRequestParsers();
+        await this.initFormatter();
 
         await this.initIdentity();
 
@@ -392,9 +393,27 @@ export abstract class FultonApp {
         }
     }
 
-    protected initRequestParsers(): void | Promise<void> {
-        if (lodash.some(this.options.requestParsers)) {
-            this.server.use(...this.options.requestParsers);
+    protected initFormatter(): void | Promise<void> {
+        if (this.options.formatter.json) {
+            let types = ["application/json"]
+
+            if (this.options.formatter.jsonApi) {
+                types.push("application/vnd.api+json")
+            }
+
+            this.server.use(express.json({ type: types }));
+        }
+
+        if (this.options.formatter.form) {
+            this.server.use(express.urlencoded({ extended: true }));
+        }
+
+        if (this.options.formatter.jsonApi) {
+            this.server.use(jsonapi);
+        }
+
+        if (lodash.some(this.options.formatter.customs)) {
+            this.server.use(...this.options.formatter.customs);
         }
     }
 

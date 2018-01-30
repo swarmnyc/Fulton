@@ -15,10 +15,6 @@ describe('query parser', () => {
     let app: MyApp;
     let httpTester: HttpTester;
 
-    beforeEach(() => {
-        httpTester.setHeaders(null);
-    })
-
     beforeAll(() => {
         app = new MyApp();
         httpTester = new HttpTester(app);

@@ -5,6 +5,7 @@ import { Injectable, NextFunction, Request, Response } from "../index";
 import { FultonRouter } from "./fulton-router";
 import { IEntityService } from "../interfaces";
 import { createEntityService } from "../services/fulton-entity-service-helper";
+import { queryById } from "../middlewares/query-params-parser";
 
 @Injectable()
 export abstract class FultonEntityRouter<TEntity> extends FultonRouter {
@@ -39,7 +40,7 @@ export abstract class FultonEntityRouter<TEntity> extends FultonRouter {
             });
     }
 
-    @HttpGet("/:id")
+    @HttpGet("/:id", queryById())
     detail(req: Request, res: Response) {
 
     }
@@ -49,12 +50,12 @@ export abstract class FultonEntityRouter<TEntity> extends FultonRouter {
 
     }
 
-    @HttpPatch("/:id")
+    @HttpPatch("/:id", queryById())
     update(req: Request, res: Response) {
 
     }
 
-    @HttpDelete("/:id")
+    @HttpDelete("/:id", queryById())
     delete(req: Request, res: Response) {
 
     }

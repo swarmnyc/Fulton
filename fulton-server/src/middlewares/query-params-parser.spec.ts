@@ -1,13 +1,20 @@
 import { FultonApp, FultonAppOptions, Response, Request } from "../index";
-import { queryParamsParser } from "./query-params-parser";
+import { queryParamsParser, queryById } from "./query-params-parser";
 import { HttpTester } from "../../spec/helpers/http-tester";
 
 
 class MyApp extends FultonApp {
     protected onInit(options: FultonAppOptions): void | Promise<void> {
-        this.options.index.handler = (req: Request, res: Response) => {
+    }
+
+    didInitRouters() {
+        this.server.get("/", (req: Request, res: Response) => {
             res.send(req.queryParams);
-        }
+        })
+
+        this.server.get("/test/:id", queryById(), (req: Request, res: Response) => {
+            res.send(req.queryParams);
+        })
     }
 }
 
@@ -142,6 +149,18 @@ describe('query parser', () => {
                 index: 10,
                 size: 100
             }
+        });
+    });
+
+    it('should parse with id', async () => {
+        let result = await httpTester.get("/test/wade?projection=columeA,columeB&&includes=columeA&includes=columeB");
+
+        expect(result.body).toEqual({
+            filter: {
+                id: "wade"
+            },
+            projection: ["columeA", "columeB"],
+            includes: ["columeA", "columeB"]
         });
     });
 });

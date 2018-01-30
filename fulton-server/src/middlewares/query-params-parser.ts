@@ -67,6 +67,27 @@ function parseArray(arr: string[]): string[] {
     return result;
 }
 
+/**
+ * put id into QueryParams
+ * @param name rotuer params like /users/:userId, the value should be userId
+ */
+export function queryById(name: string = "id") {
+    return (req: Request, res: Response, next: NextFunction) => {
+        if (req.params[name]) {
+            if (req.queryParams.filter == null) {
+                req.queryParams.filter = {
+                    id: req.params[name]
+                }
+            } else {
+                req.queryParams.filter["id"] = req.params[name];
+
+            }
+        }
+
+        next();
+    }
+}
+
 export function queryParamsParser(req: Request, res: Response, next: NextFunction) {
     let params: QueryParams;
     if (req.query) {

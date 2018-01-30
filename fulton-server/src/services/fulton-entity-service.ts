@@ -1,21 +1,22 @@
-import { FultonService, Injectable } from "../index";
+import { Injectable, IUser } from "../index";
 import { Repository } from "typeorm";
-
-// // ?
-// export interface IAuditableEntity {
-//     createdBy: IUser;
-//     createdAt: Date;
-//     updatedBy: IUser;
-//     updatedAt: Date;
-// }
+import { IEntityService, Inject, QueryParams, QueryResult } from "../interfaces";
+import { FultonApp } from "../fulton-app";
 
 @Injectable()
-export class FultonEntityService<TEntity> extends FultonService {
+export class EntityService<TEntity> implements IEntityService<TEntity> {
+    @Inject(FultonApp)
+    protected app: FultonApp;
+    
     constructor(protected repository: Repository<TEntity>) {
-        super();
+        
     }
 
-    find(): Promise<TEntity[]> {
+    get currentUser(): IUser {
+        return this.app.userService.currentUser;
+    }
+
+    find(queryParams: QueryParams): Promise<QueryResult> {
         throw new Error("not imploment");
     }
 

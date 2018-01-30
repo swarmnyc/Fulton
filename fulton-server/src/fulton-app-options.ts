@@ -4,13 +4,13 @@ import * as lodash from 'lodash';
 import * as path from 'path';
 import * as winston from 'winston';
 
-import { AppMode, ErrorMiddleware, Middleware, PathIdentifier } from './interfaces';
+import { AppMode, ErrorMiddleware, Middleware, PathIdentifier, JsonApiOptions } from './interfaces';
 import { ConnectionOptions, Repository } from 'typeorm';
 import { FultonClassLoader, defaultClassLoader } from './helpers/module-helpers';
 import { FultonLoggerLevel, FultonLoggerOptions } from './fulton-log';
 import { FultonRouter, FultonService, Type } from './index';
 import { Provider, TypeProvider } from './helpers/type-helpers';
-import { default404ErrorHandler, defaultErrorHandler, queryParamsParser } from './middlewares';
+import { default404ErrorHandler, defaultErrorHandler } from './middlewares';
 
 import { CorsOptions } from 'cors';
 import Env from './helpers/env';
@@ -201,21 +201,33 @@ export class FultonAppOptions {
          * if true, add express.json() as a middleware
          * the default value is true
          */
-        json: boolean;
+        json?: boolean;
         /**
-         * if true, add fultonjsonapiParser() as a middleware
-         * the default value is true
+         * if true, add fultonJsonapi() as a middleware
+         * if true, have to run `npm install jsonapi-serializer`
+         * the default value is false
          */
-        jsonApi: boolean;
+        jsonApi?: boolean;
+
+        /**
+         * options for json api
+         */
+        jsonApiOptions?: JsonApiOptions;
+
         /**
          * if true, add express.urlencoded({ extended: true })() as a middleware
          * the default value is true
          */
-        form: boolean;
+        form?: boolean;
+
+        /**
+         * it true, add queryParamsParser as a middleware
+         */
+        queryParams?: boolean;
         /**
          * other custom middlewares
          */
-        customs: Middleware[];
+        customs?: Middleware[];
     }
 
     /**
@@ -488,6 +500,10 @@ export class FultonAppOptions {
         //TODO: implement compression
     }
 
+    settings: {
+        paginationSize: number
+    }
+
     constructor(private appName: string, private appMode: AppMode) {
         this.index = {
             enabled: true
@@ -551,10 +567,15 @@ export class FultonAppOptions {
 
         this.formatter = {
             json: true,
-            jsonApi: true,
+            jsonApi: false,
             form: true,
+            queryParams: true,
             customs: []
         };
+
+        this.settings = {
+            paginationSize: 20
+        }
 
         this.identity = new IdentityOptions(this.appName, this.appMode);
     }

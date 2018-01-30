@@ -1,15 +1,16 @@
+import { FullEntityRouterMetadata, getFullEntityRouterMethodMetadata } from "./route-decorators-helpers";
+import { HttpDelete, HttpGet, HttpPatch, HttpPost } from "./route-decorators";
+import { Injectable, NextFunction, Request, Response } from "../index";
+
 import { FultonRouter } from "./fulton-router";
-import { Request, Response, Injectable } from "../index";
-import { getFullEntityRouterMethodMetadata, FullEntityRouterMetadata } from "./route-decorators-helpers";
-import { HttpGet, HttpPost, HttpPatch, HttpDelete } from "./route-decorators";
-import { FultonEntityService } from "../services/fulton-entity-service";
-import { getRepository } from "typeorm";
+import { IEntityService } from "../interfaces";
+import { createEntityService } from "../services/fulton-entity-service-helper";
 
 @Injectable()
 export abstract class FultonEntityRouter<TEntity> extends FultonRouter {
     protected metadata: FullEntityRouterMetadata
 
-    constructor(protected entityService?: FultonEntityService<TEntity>) {
+    constructor(protected entityService?: IEntityService<TEntity>) {
         super();
     }
 
@@ -18,18 +19,24 @@ export abstract class FultonEntityRouter<TEntity> extends FultonRouter {
     }
 
     init() {
-        // use default implementation 
         if (this.entityService == null) {
-            let repo = getRepository(this.metadata.router.entity);
-            this.entityService = new FultonEntityService(repo);
+            // use default implementation
+            this.entityService = createEntityService(this.metadata.router.entity, this.app);
         }
 
         super.init();
     }
 
     @HttpGet("/")
-    list(req: Request, res: Response) {
-
+    list(req: Request, res: Response, next: NextFunction) {
+        this.entityService
+            .find(req.queryParams)
+            .then((result) => {
+                res.send(result);
+            })
+            .catch((err: any) => {
+                next(err);
+            });
     }
 
     @HttpGet("/:id")

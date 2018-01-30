@@ -55,6 +55,32 @@ export interface RouterActionDocOptions {
     description?: string;
 }
 
+export interface IEntityService<TEntity> {
+    find(queryParams: QueryParams): Promise<QueryResult>;
+
+    findById(): Promise<TEntity>;
+
+    create(): Promise<TEntity>;
+
+    update(): Promise<TEntity>;
+
+    delete(): Promise<TEntity>;
+}
+
+export interface QueryResult {
+    data?: Object[];
+
+    pagination?: {
+        total?: number;
+        index?: number;
+        size?: number;
+    }
+}
+
+export interface JsonApiOptions {
+    // TODO: JsonApiOptions
+}
+
 export interface QueryParams {
     /**
      * filter options

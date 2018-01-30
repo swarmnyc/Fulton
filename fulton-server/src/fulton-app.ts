@@ -15,7 +15,7 @@ import Env from "./helpers/env";
 import { Express } from "express";
 import { FultonAppOptions } from "./fulton-app-options";
 import FultonLog from "./fulton-log";
-import { FultonLoggerLevel } from "./index";
+import { FultonLoggerLevel, queryParamsParser } from "./index";
 import { IUserService, IUser } from "./identity";
 import { FultonRouter } from "./routers/fulton-router";
 import { FultonService } from "./services";
@@ -24,7 +24,6 @@ import { getRepositoryMetadata } from "./repositories/repository-decorator-helpe
 import { isFunction } from "util";
 import { defaultHttpLoggerHandler } from "./middlewares/http-logger";
 import { fultonDebug } from "./helpers/debug";
-import { jsonapi } from "./middlewares/jsonapi";
 
 export abstract class FultonApp {
     private isInitialized: boolean = false;
@@ -257,8 +256,10 @@ export abstract class FultonApp {
         if (this.options.identity.useDefaultImplement()) {
             // add User Entity to typeorm if identity is enabled and use FultonUser and FultonUserService
             this.options.entities.push(this.options.identity.userType);
-        } else if (lodash.isEmpty(this.options.repositories) && this.options.loader.repositoryLoaderEnabled == false) {
-            return;
+        } else if (this.options.databases.size == 0) {
+            // if databases = 0 and repositories = 0, skip initDatabases
+            if (lodash.isEmpty(this.options.repositories) && this.options.loader.repositoryLoaderEnabled == false)
+                return;
         }
 
         let connOptions: ConnectionOptions[] = [];
@@ -409,7 +410,11 @@ export abstract class FultonApp {
         }
 
         if (this.options.formatter.jsonApi) {
-            this.server.use(jsonapi);
+            this.server.use(require("./middlewares/jsonapi")(this.options.formatter.jsonApiOptions));
+        }
+
+        if (this.options.formatter.queryParams) {
+            this.server.use(queryParamsParser);
         }
 
         if (lodash.some(this.options.formatter.customs)) {

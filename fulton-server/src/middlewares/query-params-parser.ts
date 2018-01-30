@@ -103,7 +103,7 @@ export function queryParamsParser(req: Request, res: Response, next: NextFunctio
                     }
                     continue;
                 case "pagination":
-                    if (typeof value == "object" && value.index) {
+                    if (typeof value == "object") {
                         params.pagination = {
                             index: Helper.getInt(value.index, 0),
                             size: Helper.getInt(value.size)

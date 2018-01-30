@@ -1,7 +1,7 @@
 import { Entity, ObjectIdColumn, Column } from "typeorm";
 import { Router, HttpGet, EntityRouter } from "./route-decorators";
 import { FultonEntityRouter } from "./fulton-entity-router";
-import { FultonEntityService } from "../services/fulton-entity-service";
+import { EntityService } from "../services/fulton-entity-service";
 import { Injectable } from "../index";
 import { FultonApp } from "../fulton-app";
 import { FultonAppOptions } from "../fulton-app-options";
@@ -22,7 +22,7 @@ class FoodRepository extends Repository<Food>{
 }
 
 @Injectable()
-class FoodEntityService extends FultonEntityService<Food> {
+class FoodEntityService extends EntityService<Food> {
     constructor() {
         super(new FoodRepository());
     }
@@ -63,7 +63,7 @@ describe('Fulton Entity Router', () => {
         let app = new MyApp();
         await app.init();
 
-        let router: FultonEntityRouter<any> = app.container.get(EntityRouterA);
+        let router = app.container.get(EntityRouterA);
 
         expect(router).toBeTruthy();
         expect(router["entityService"]).toBeTruthy();

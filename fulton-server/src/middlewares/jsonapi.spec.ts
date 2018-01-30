@@ -5,6 +5,7 @@ import { HttpTester } from "../../spec/helpers/http-tester";
 
 class MyApp extends FultonApp {
     protected onInit(options: FultonAppOptions): void | Promise<void> {
+        this.options.formatter.jsonApi = true;
         this.options.index.handler = (req: Request, res: Response) => {
             res.send(req.body);
         }
@@ -30,7 +31,7 @@ describe('query parser', () => {
         return httpTester.stop();
     });
 
-    fit('should parse json-api', async () => {
+    it('should parse json-api', async () => {
         let result = await httpTester.postJson("/", jsonapiData);
 
         expect(result.body).toEqual(jsonData);

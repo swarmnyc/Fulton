@@ -70,7 +70,8 @@ export abstract class FultonRouter {
                 middlewares.push(...methodMetadata.middlewares);
             }
 
-            let method = lodash.get(this, methodMetadata.property);
+            let method: Middleware = lodash.get(this, methodMetadata.property);
+            method = method.bind(this);
             middlewares.push(asyncWrap(method));
 
             routeMethod.call(router, methodMetadata.path, middlewares)

@@ -17,13 +17,26 @@ export class FultonError {
         this.errors = errors || {};
     }
 
-    addError(propertyName: string, errorMessage: string) : FultonError {
+
+    addError(errorMessage: string): FultonError;
+    addError(propertyName: string, errorMessage: string): FultonError;
+    addError(...args: string[]): FultonError {
+        let propertyName: string;
+        let errorMessage: string;
+        if (args.length == 2) {
+            propertyName = args[0];
+            errorMessage = args[1];
+        } else {
+            propertyName = "";
+            errorMessage = args[0];            
+        }
+
         if (this.errors[propertyName]) {
             this.errors[propertyName].push(errorMessage);
         } else {
             this.errors[propertyName] = [errorMessage];
         }
-
+        
         return this;
     }
 

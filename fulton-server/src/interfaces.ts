@@ -63,7 +63,7 @@ export interface FultonErrorObject {
 export interface IEntityService<TEntity> {
     find(queryParams: QueryParams): Promise<OperationReault<TEntity>>;
 
-    findById(): Promise<TEntity>;
+    findOne(queryParams: QueryParams): Promise<OperationOneReault<TEntity>>;
 
     create(): Promise<TEntity>;
 
@@ -81,6 +81,16 @@ export interface QueryColumnStates {
 
 export interface OperationReault<T=any> {
     data?: T[];
+    errors?: FultonErrorObject;
+    pagination?: {
+        total?: number;
+        index?: number;
+        size?: number;
+    }
+}
+
+export interface OperationOneReault<T=any> {
+    data?: T;
     errors?: FultonErrorObject;
     pagination?: {
         total?: number;

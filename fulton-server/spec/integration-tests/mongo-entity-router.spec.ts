@@ -1,4 +1,4 @@
-import { FultonApp, FultonAppOptions, authorize, AccessToken, Request, Response, FultonEntityRouter, EntityRouter, OperationReault, QueryParams } from "../../src/index";
+import { FultonApp, FultonAppOptions, authorize, AccessToken, Request, Response, FultonEntityRouter, EntityRouter, OperationReault, QueryParams, OperationOneReault } from "../../src/index";
 import { UserServiceMock } from "../helpers/user-service-mock";
 import { HttpTester, HttpResult } from "../helpers/http-tester";
 import { Hotdog } from "../helpers/entities/hot-dog";
@@ -86,7 +86,7 @@ xdescribe('MongoEntityRouter Integration Test', () => {
     it('should return hotdogs with sorting', async () => {
         let params: QueryParams = {
             sort: {
-                _id: -1
+                id: -1
             },
             pagination: {
                 size: 5
@@ -103,7 +103,48 @@ xdescribe('MongoEntityRouter Integration Test', () => {
         expect(queryResult.data[2].id).toEqual("9");
     });
 
-    it('should return hotdogs and not return hide columns', async () => {
+    it('should return hotdogs with filter', async () => {
+        let params: QueryParams = {
+            filter: {
+                name: {
+                    "$regex": "bo",
+                    "$options": "i"
+                }
+            }
+        }
 
+        let result = await httpTester.get("/hotdogs", params)
+
+        expect(result.response.statusCode).toEqual(200);
+
+        let queryResult: OperationReault<Hotdog> = result.body;
+        expect(queryResult.data.length).toEqual(2);
+    });
+
+    it('should return hotdogs with filter $or', async () => {
+        let params: QueryParams = {
+            filter: {
+                $or: [
+                    { id: "2" },
+                    { name: { $like: "bo" } }
+                ]
+            }
+        }
+
+        let result = await httpTester.get("/hotdogs", params)
+
+        expect(result.response.statusCode).toEqual(200);
+
+        let queryResult: OperationReault<Hotdog> = result.body;
+        expect(queryResult.data.length).toEqual(3);
+    });
+
+    it('should return one hotdog with :id', async () => {
+        let result = await httpTester.get("/hotdogs/5")
+
+        expect(result.response.statusCode).toEqual(200);
+
+        let queryResult: OperationOneReault<Hotdog> = result.body;
+        expect(queryResult.data.id).toEqual("5");
     });
 });

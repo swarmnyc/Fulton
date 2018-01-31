@@ -33,16 +33,25 @@ export abstract class FultonEntityRouter<TEntity> extends FultonRouter {
         this.entityService
             .find(req.queryParams)
             .then((result) => {
-                res.send(result);
+                if (result.errors) {
+                    res.status(400).send(result);
+                } else {
+                    res.send(result);
+                }
             })
-            .catch((err: any) => {
-                next(err);
-            });
     }
 
     @HttpGet("/:id", queryById())
     detail(req: Request, res: Response) {
-
+        this.entityService
+        .findOne(req.queryParams)
+        .then((result) => {
+            if (result.errors) {
+                res.status(400).send(result);
+            } else {
+                res.send(result);
+            }
+        })
     }
 
     @HttpPost("/")

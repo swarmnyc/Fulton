@@ -26,7 +26,7 @@ export class UserServiceMock implements IUserService<FultonUser> {
         }
 
         if (/fail/i.test(password)) {
-            errors.addError("$", "username or password isn't correct");
+            errors.addError("username or password isn't correct");
             return Promise.reject(errors);
         } else {
             let user = new FultonUser();

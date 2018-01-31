@@ -1,32 +1,34 @@
+import * as cors from 'cors';
 import * as express from "express";
 import * as http from 'http';
 import * as https from 'https';
 import * as lodash from 'lodash';
 import * as path from 'path';
 import * as winston from 'winston';
-import * as cors from 'cors';
 
-import { ConnectionOptions, createConnections, Connection } from "typeorm";
+import { AppMode, ErrorMiddleware, FultonDiContainer, Middleware, Request, Response } from "./interfaces";
+import { Connection, ConnectionOptions, createConnections } from "typeorm";
 import { Container, interfaces } from "inversify";
-import { ErrorMiddleware, FultonDiContainer, Middleware, Request, Response, AppMode } from "./interfaces";
-import { TypeIdentifier, Provider, Type, TypeProvider, ValueProvider } from "./helpers/type-helpers";
+import { FultonLoggerLevel, queryParamsParser } from "./index";
+import { IUser, IUserService } from "./identity";
+import { Provider, Type, TypeIdentifier, TypeProvider, ValueProvider } from "./helpers/type-helpers";
 
+import { EntityMetadataHelper } from "./helpers/entity-metadata-helper";
 import Env from "./helpers/env";
 import { Express } from "express";
 import { FultonAppOptions } from "./fulton-app-options";
 import FultonLog from "./fulton-log";
-import { FultonLoggerLevel, queryParamsParser } from "./index";
-import { IUserService, IUser } from "./identity";
 import { FultonRouter } from "./routers/fulton-router";
 import { FultonService } from "./services";
 import { createRepository } from "./repositories/repository-helpers";
-import { getRepositoryMetadata } from "./repositories/repository-decorator-helper";
-import { isFunction } from "util";
 import { defaultHttpLoggerHandler } from "./middlewares/http-logger";
 import { fultonDebug } from "./helpers/debug";
+import { getRepositoryMetadata } from "./repositories/repository-decorator-helper";
+import { isFunction } from "util";
 
 export abstract class FultonApp {
     private isInitialized: boolean = false;
+    private entityMetadataHelper: EntityMetadataHelper;
 
     /**
      * app name, use in output, parser. default is class name.
@@ -285,6 +287,8 @@ export abstract class FultonApp {
             FultonLog.error("initDatabases fails", error);
             throw error;
         });
+
+        this.entityMetadataHelper = new EntityMetadataHelper(this.connections);
 
         await this.didInitDatabases(this.connections);
     }

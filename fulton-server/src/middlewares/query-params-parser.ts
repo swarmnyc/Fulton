@@ -1,13 +1,9 @@
-import { Request, Response, NextFunction, QueryParams } from "../interfaces";
+import { Request, Response, NextFunction, QueryParams, QueryColumnStates } from "../interfaces";
 import Helper from "../helpers/helper";
 
-interface Sort {
-    [key: string]: boolean;
-}
-
 let sortReg = /^([+-]?)(.+?)([+-]?)$/;
-function parseSortString(arrStr: string): Sort {
-    let sort: Sort;
+function parseSortString(arrStr: string): QueryColumnStates {
+    let sort: QueryColumnStates;
 
     let arr = arrStr.split(",");
     if (arr.length > 0) {
@@ -20,7 +16,7 @@ function parseSortString(arrStr: string): Sort {
             if (match == null) continue;
 
             let name = match[2];
-            let way = (match[1] == "-" || match[3] == "-") ? false : true;
+            let way = (match[1] == "-" || match[3] == "-") ? -1 : 1;
             sort[name] = way;
         }
     }
@@ -28,13 +24,17 @@ function parseSortString(arrStr: string): Sort {
     return sort;
 }
 
-function parseSortObject(input: any): Sort {
-    let sort: Sort = {};
+function parseSortObject(input: any): QueryColumnStates {
+    let sort: QueryColumnStates = {};
     for (const name of Object.getOwnPropertyNames(input)) {
         let value = input[name];
 
         if (typeof value == "string") {
-            sort[name] = Helper.getBoolean(value, false);
+            let direction = Helper.getInt(value);
+            if (direction != null) {
+                sort[name] = direction;
+            }
+
         }
     }
 
@@ -109,11 +109,11 @@ export function queryParamsParser(req: Request, res: Response, next: NextFunctio
                         params.sort = parseSortObject(value);
                     }
                     continue;
-                case "projection":
+                case "select":
                     if (typeof value == "string") {
-                        params.projection = parseString(value);
+                        params.select = parseString(value);
                     } else if (value instanceof Array) {
-                        params.projection = parseArray(value);
+                        params.select = parseArray(value);
                     }
                     continue;
                 case "includes":
@@ -141,7 +141,7 @@ export function queryParamsParser(req: Request, res: Response, next: NextFunctio
         params = {
             filter: req.body.query.filter,
             sort: req.body.query.sort,
-            projection: req.body.query.projection,
+            select: req.body.query.select,
             pagination: req.body.query.pagination
         }
     }

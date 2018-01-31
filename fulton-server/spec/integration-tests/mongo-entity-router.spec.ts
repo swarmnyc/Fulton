@@ -1,4 +1,4 @@
-import { FultonApp, FultonAppOptions, authorize, AccessToken, Request, Response, FultonEntityRouter, EntityRouter, QueryResult, QueryParams } from "../../src/index";
+import { FultonApp, FultonAppOptions, authorize, AccessToken, Request, Response, FultonEntityRouter, EntityRouter, OperationReault, QueryParams } from "../../src/index";
 import { UserServiceMock } from "../helpers/user-service-mock";
 import { HttpTester, HttpResult } from "../helpers/http-tester";
 import { Hotdog } from "../helpers/entities/hot-dog";
@@ -45,7 +45,7 @@ xdescribe('MongoEntityRouter Integration Test', () => {
 
         expect(result.response.statusCode).toEqual(200);
 
-        let queryResult: QueryResult = result.body;
+        let queryResult: OperationReault = result.body;
         expect(queryResult.data.length).toEqual(13);
         expect(queryResult.pagination.total).toEqual(13);
     });
@@ -61,7 +61,7 @@ xdescribe('MongoEntityRouter Integration Test', () => {
 
         expect(result.response.statusCode).toEqual(200);
 
-        let queryResult: QueryResult = result.body;
+        let queryResult: OperationReault = result.body;
         expect(queryResult.data.length).toEqual(5);
         expect(queryResult.pagination.total).toEqual(13);
     });
@@ -78,13 +78,16 @@ xdescribe('MongoEntityRouter Integration Test', () => {
 
         expect(result.response.statusCode).toEqual(200);
 
-        let queryResult: QueryResult = result.body;
+        let queryResult: OperationReault = result.body;
         expect(queryResult.data.length).toEqual(3);
         expect(queryResult.pagination.total).toEqual(13);
     });
 
-    it('should return hotdogs and not return hide columns', async () => {
+    it('should return hotdogs with sorting', async () => {
         let params: QueryParams = {
+            sort: {
+                _id: -1
+            },
             pagination: {
                 size: 5
             }
@@ -94,8 +97,13 @@ xdescribe('MongoEntityRouter Integration Test', () => {
 
         expect(result.response.statusCode).toEqual(200);
 
-        let queryResult: QueryResult = result.body;
-        expect(queryResult.data.length).toEqual(3);
-        expect(queryResult.pagination.total).toEqual(13);
+        let queryResult: OperationReault<Hotdog> = result.body;
+        expect(queryResult.data[0].id).toEqual("not-hotdog-2");
+        expect(queryResult.data[1].id).toEqual("not-hotdog-1");
+        expect(queryResult.data[2].id).toEqual("9");
+    });
+
+    it('should return hotdogs and not return hide columns', async () => {
+
     });
 });

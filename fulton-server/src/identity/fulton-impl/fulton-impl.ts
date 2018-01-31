@@ -64,7 +64,7 @@ export let FultonImpl = {
                 } else {
                     if (req.fultonApp.options.identity.defaultAuthenticateErrorIfFailure) {
                         // TODO: web-view
-                        res.sendResult(401);
+                        res.sendStatus(401);
                     } else {
                         next();
                     }
@@ -150,7 +150,7 @@ export let FultonImpl = {
                     }
 
                     // TODO: web-view mode
-                    res.sendResult(401);
+                    res.sendStatus(401);
                 })(req, res, next);
         }
     },

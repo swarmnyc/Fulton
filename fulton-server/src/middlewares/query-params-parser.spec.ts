@@ -64,8 +64,8 @@ describe('query parser', () => {
 
         expect(result.body).toEqual({
             sort: {
-                a: true,
-                b: false
+                a: 1,
+                b: -1
             }
         });
     });
@@ -75,26 +75,26 @@ describe('query parser', () => {
 
         expect(result.body).toEqual({
             sort: {
-                a: true,
-                b: false,
-                c: true
+                a: 1,
+                b: -1,
+                c: 1
             }
         });
     });
 
-    it('should parse projection with style 1', async () => {
-        let result = await httpTester.get("/?projection=columeA,columeB ");
+    it('should parse select with style 1', async () => {
+        let result = await httpTester.get("/?select=columeA,columeB ");
 
         expect(result.body).toEqual({
-            projection: ["columeA", "columeB"]
+            select: ["columeA", "columeB"]
         });
     });
 
-    it('should parse projection with style 2', async () => {
-        let result = await httpTester.get("/?projection=columeA&projection=columeB");
+    it('should parse select with style 2', async () => {
+        let result = await httpTester.get("/?select=columeA&select=columeB");
 
         expect(result.body).toEqual({
-            projection: ["columeA", "columeB"]
+            select: ["columeA", "columeB"]
         });
     });
 
@@ -126,7 +126,7 @@ describe('query parser', () => {
     });
 
     it('should parse mixed', async () => {
-        let result = await httpTester.get("/?a=1&b=2&filter[name][$regex]=wade&filter[name][$options]=i&filter[$or][0][a]=1&filter[$or][1][b]=2&sort=a,-b,+c&projection=columeA,columeB&includes=columeA&includes=columeB&pagination[index]=10&pagination[size]=100");
+        let result = await httpTester.get("/?a=1&b=2&filter[name][$regex]=wade&filter[name][$options]=i&filter[$or][0][a]=1&filter[$or][1][b]=2&sort=a,-b,+c&select=columeA,columeB&includes=columeA&includes=columeB&pagination[index]=10&pagination[size]=100");
 
         expect(result.body).toEqual({
             filter: {
@@ -138,12 +138,12 @@ describe('query parser', () => {
                 a: "1",
                 b: "2"
             },
-            projection: ["columeA", "columeB"],
+            select: ["columeA", "columeB"],
             includes: ["columeA", "columeB"],
             sort: {
-                a: true,
-                b: false,
-                c: true
+                a: 1,
+                b: -1,
+                c: 1
             },
             pagination: {
                 index: 10,
@@ -153,13 +153,13 @@ describe('query parser', () => {
     });
 
     it('should parse with id', async () => {
-        let result = await httpTester.get("/test/wade?projection=columeA,columeB&&includes=columeA&includes=columeB");
+        let result = await httpTester.get("/test/wade?select=columeA,columeB&&includes=columeA&includes=columeB");
 
         expect(result.body).toEqual({
             filter: {
                 id: "wade"
             },
-            projection: ["columeA", "columeB"],
+            select: ["columeA", "columeB"],
             includes: ["columeA", "columeB"]
         });
     });

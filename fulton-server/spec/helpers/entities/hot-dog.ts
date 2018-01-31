@@ -1,14 +1,14 @@
 import { Entity, ObjectIdColumn, Column } from "typeorm";
 
 @Entity("hotdogs")
-export class Hotdog  {
+export class Hotdog {
     @ObjectIdColumn()
     id: string;
 
     @Column()
     name: string;
 
-    @Column()
+    @Column({ select: false })
     location: number[];
 
     @Column()
@@ -17,7 +17,7 @@ export class Hotdog  {
     @Column()
     review: string;
 
-    @Column()
+    @Column({ select: false })
     picture: string;
 
     @Column()

@@ -55,8 +55,13 @@ export interface RouterActionDocOptions {
     description?: string;
 }
 
+
+export interface FultonErrorObject {
+    [key: string]: string[];
+}
+
 export interface IEntityService<TEntity> {
-    find(queryParams: QueryParams): Promise<QueryResult>;
+    find(queryParams: QueryParams): Promise<OperationReault<TEntity>>;
 
     findById(): Promise<TEntity>;
 
@@ -67,9 +72,16 @@ export interface IEntityService<TEntity> {
     delete(): Promise<TEntity>;
 }
 
-export interface QueryResult {
-    data?: Object[];
+/**
+ * for sorting and select, for example sort = {column1:1 , column2:-1 }
+ */
+export interface QueryColumnStates {
+    [key: string]: number;
+}
 
+export interface OperationReault<T=any> {
+    data?: T[];
+    errors?: FultonErrorObject;
     pagination?: {
         total?: number;
         index?: number;
@@ -105,25 +117,23 @@ export interface QueryParams {
      *  - ?sort=columeA,-columeB 
      *  - ?sort[columeA]=1|true&sort[columeB]=-1|false
      */
-    sort?: {
-        [key: string]: boolean;
-    },
+    sort?: QueryColumnStates,
 
     /**
-     * projection options,
+     * select options,
      * if undefined, all output all columns excepts @Colume({hide:true})
      * ## examples
      * two styles: 
-     *  - ?projection=columeA,columeB 
-     *  - ?projection=columeA&projection=columeB
+     *  - ?select=columeA,columeB 
+     *  - ?select=columeA&select=columeB
      */
-    projection?: string[];
+    select?: string[];
 
     /**
      * pagination options,
      * ## examples
      *  - ?includes=columeA,columeB 
-     *  - ?includes=columeA&projection=columeB
+     *  - ?includes=columeA&includes=columeB
      */
     includes?: string[];
 
@@ -155,26 +165,25 @@ declare global {
         }
 
         interface Response {
-            sendResult?: any; // TODO: sendResult
         }
     }
 
 }
 
-declare module "typeorm/decorator/options/ColumnOptions" {
-    interface ColumnOptions {
-        /**
-         * only EntityService.find() supports, don't not output this colume to client
-         */
-        hide?: boolean;
-    }
-}
+// declare module "typeorm/decorator/options/ColumnOptions" {
+//     interface ColumnOptions {
+//         /**
+//          * only EntityService.find() supports, don't not output this colume to client
+//          */
+//         hide?: boolean;
+//     }
+// }
 
-declare module "typeorm/decorator/options/ColumnCommonOptions" {
-    interface ColumnCommonOptions {
-        /**
-         * only EntityService.find() supports, don't not output this colume to client
-         */
-        hide?: boolean;
-    }
-}
+// declare module "typeorm/decorator/options/ColumnCommonOptions" {
+//     interface ColumnCommonOptions {
+//         /**
+//          * only EntityService.find() supports, don't not output this colume to client
+//          */
+//         hide?: boolean;
+//     }
+// }

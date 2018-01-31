@@ -1,4 +1,6 @@
 import * as lodash from 'lodash';
+import { FultonErrorObject } from '../interfaces';
+
 /**
  * The error that returns to client
  * 
@@ -46,8 +48,4 @@ export class FultonError {
     hasErrors(): boolean {
         return Object.getOwnPropertyNames(this.errors).length > 0;
     }
-}
-
-export interface FultonErrorObject {
-    [key: string]: string[];
 }

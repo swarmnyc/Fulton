@@ -12,7 +12,7 @@ export class FultonUser implements IFultonUser {
     @Column({ unique: true, nullable: false, length: 256 })
     username: string;
 
-    @Column({ length: 256, hide: true })
+    @Column({ length: 256, select: false })
     hashedPassword: string;
 
     @Column({ length: 256 })

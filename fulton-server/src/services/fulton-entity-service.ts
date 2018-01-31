@@ -1,6 +1,6 @@
 import { Injectable, IUser } from "../index";
 import { Repository } from "typeorm";
-import { IEntityService, Inject, QueryParams, QueryResult } from "../interfaces";
+import { IEntityService, Inject, QueryParams, OperationReault } from "../interfaces";
 import { FultonApp } from "../fulton-app";
 
 @Injectable()
@@ -16,7 +16,7 @@ export class EntityService<TEntity> implements IEntityService<TEntity> {
         return this.app.userService.currentUser;
     }
 
-    find(queryParams: QueryParams): Promise<QueryResult> {
+    find(queryParams: QueryParams): Promise<OperationReault> {
         throw new Error("not imploment");
     }
 

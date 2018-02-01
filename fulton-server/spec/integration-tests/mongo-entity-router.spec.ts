@@ -1,4 +1,4 @@
-import { FultonApp, FultonAppOptions, authorize, AccessToken, Request, Response, FultonEntityRouter, EntityRouter, OperationReault, QueryParams, OperationOneReault, OperationStatus } from "../../src/index";
+import { FultonApp, FultonAppOptions, authorize, AccessToken, Request, Response, FultonEntityRouter, EntityRouter, OperationResult, QueryParams, OperationOneResult, OperationStatus } from "../../src/index";
 import { UserServiceMock } from "../helpers/user-service-mock";
 import { HttpTester, HttpResult } from "../helpers/http-tester";
 import { Hotdog } from "../helpers/entities/hot-dog";
@@ -24,7 +24,7 @@ class MyApp extends FultonApp {
     }
 }
 
-fdescribe('MongoEntityRouter Integration Test', () => {
+xdescribe('MongoEntityRouter Integration Test', () => {
     let app: MyApp;
     let httpTester: HttpTester;
 
@@ -46,7 +46,7 @@ fdescribe('MongoEntityRouter Integration Test', () => {
 
         expect(result.response.statusCode).toEqual(200);
 
-        let queryResult: OperationReault = result.body;
+        let queryResult: OperationResult = result.body;
         expect(queryResult.data.length).toEqual(13);
         expect(queryResult.pagination.total).toEqual(13);
     });
@@ -62,7 +62,7 @@ fdescribe('MongoEntityRouter Integration Test', () => {
 
         expect(result.response.statusCode).toEqual(200);
 
-        let queryResult: OperationReault = result.body;
+        let queryResult: OperationResult = result.body;
         expect(queryResult.data.length).toEqual(5);
         expect(queryResult.pagination.total).toEqual(13);
     });
@@ -79,7 +79,7 @@ fdescribe('MongoEntityRouter Integration Test', () => {
 
         expect(result.response.statusCode).toEqual(200);
 
-        let queryResult: OperationReault = result.body;
+        let queryResult: OperationResult = result.body;
         expect(queryResult.data.length).toEqual(3);
         expect(queryResult.pagination.total).toEqual(13);
     });
@@ -98,7 +98,7 @@ fdescribe('MongoEntityRouter Integration Test', () => {
 
         expect(result.response.statusCode).toEqual(200);
 
-        let queryResult: OperationReault<Hotdog> = result.body;
+        let queryResult: OperationResult<Hotdog> = result.body;
         expect(queryResult.data[0].hotdogId).toEqual("not-hotdog-2");
         expect(queryResult.data[1].hotdogId).toEqual("not-hotdog-1");
         expect(queryResult.data[2].hotdogId).toEqual("9");
@@ -118,7 +118,7 @@ fdescribe('MongoEntityRouter Integration Test', () => {
 
         expect(result.response.statusCode).toEqual(200);
 
-        let queryResult: OperationReault<Hotdog> = result.body;
+        let queryResult: OperationResult<Hotdog> = result.body;
         expect(queryResult.data.length).toEqual(2);
     });
 
@@ -136,7 +136,7 @@ fdescribe('MongoEntityRouter Integration Test', () => {
 
         expect(result.response.statusCode).toEqual(200);
 
-        let queryResult: OperationReault<Hotdog> = result.body;
+        let queryResult: OperationResult<Hotdog> = result.body;
         expect(queryResult.data.length).toEqual(3);
     });
 
@@ -145,7 +145,7 @@ fdescribe('MongoEntityRouter Integration Test', () => {
 
         expect(result.response.statusCode).toEqual(200);
 
-        let queryResult: OperationOneReault<Hotdog> = result.body;
+        let queryResult: OperationOneResult<Hotdog> = result.body;
         expect(queryResult.data.hotdogId).toEqual("5");
     });
 
@@ -158,7 +158,7 @@ fdescribe('MongoEntityRouter Integration Test', () => {
             ],
             "address": "earth",
             "review": "great",
-            "author": "624",
+            "authorId": "624",
             "picture": "no"
         } as Hotdog;
 
@@ -168,7 +168,7 @@ fdescribe('MongoEntityRouter Integration Test', () => {
 
         expect(result.response.statusCode).toEqual(200);
 
-        let queryResult: OperationOneReault<Hotdog> = result.body;
+        let queryResult: OperationOneResult<Hotdog> = result.body;
         expect(queryResult.data.hotdogId).toBeTruthy();
 
         delete queryResult.data.hotdogId;
@@ -181,11 +181,11 @@ fdescribe('MongoEntityRouter Integration Test', () => {
             "name": "Test",
             "address": "earth",
             "review": "great",
-            "author": "123",
+            "authorId": "123",
             "picture": "no"
         } as Hotdog;
 
-        let result = await httpTester.patch("/hotdogs/1", {
+        let result = await httpTester.patch("/hotdogs/3", {
             data: data
         })
 
@@ -202,5 +202,33 @@ fdescribe('MongoEntityRouter Integration Test', () => {
 
         let queryResult: OperationStatus = result.body;
         expect(queryResult.status).toEqual("ok");
+    });
+
+
+    it('should load a hotdog with author', async () => {
+        let result = await httpTester.get("/hotdogs/1", {
+            includes: ["author"]
+        })
+
+        expect(result.response.statusCode).toEqual(200);
+
+        let queryResult: OperationOneResult<Hotdog> = result.body;
+        let author = queryResult.data.author as Author;
+        expect(author.id).toEqual("965");
+        expect(author.name).toEqual("Miyah Myles");
+    });
+
+    it('should load a hotdog with author.tags', async () => {
+        let result = await httpTester.get("/hotdogs/1", {
+            includes: ["author.tags"]
+        })
+
+        expect(result.response.statusCode).toEqual(200);
+
+        let queryResult: OperationOneResult<Hotdog> = result.body;
+        let author = queryResult.data.author as Author;
+        expect(author.id).toEqual("965");
+        expect(author.name).toEqual("Miyah Myles");
+        expect(author.tags.length).toEqual(2);
     });
 });

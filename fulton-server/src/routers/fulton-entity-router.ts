@@ -31,8 +31,17 @@ export abstract class FultonEntityRouter<TEntity> extends FultonRouter {
     @HttpGet("/")
     list(req: Request, res: Response, next: NextFunction) {
         // by default don't return all entities
-        if (req.queryParams.pagination && !req.queryParams.pagination.size) {
-            req.queryParams.pagination.size = this.app.options.settings.paginationSize;
+        if (req.queryParams.pagination) {
+            if (req.queryParams.pagination.index == null)
+                req.queryParams.pagination.index = 0;
+
+            if (req.queryParams.pagination.size == null)
+                req.queryParams.pagination.size = this.app.options.settings.paginationSize;
+        } else {
+            req.queryParams.pagination = {
+                index: 0,
+                size: this.app.options.settings.paginationSize
+            }
         }
 
         this.entityService

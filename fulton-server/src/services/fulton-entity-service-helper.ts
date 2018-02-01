@@ -1,6 +1,6 @@
 import { Type } from "../index";
 import { getRepository } from "typeorm";
-import { MongoEntityService } from "./fulton-mongo-entity-service";
+import { FultonMongoEntityService } from "./fulton-mongo-entity-service";
 import { EntityService } from "./fulton-entity-service";
 import { IEntityService } from "../interfaces";
 import { MongoRepository } from "typeorm/repository/MongoRepository";
@@ -16,7 +16,7 @@ export function createEntityService<T>(entity: Type<T>, app: FultonApp): IEntity
         let service;
         if (repo instanceof MongoRepository) {
             // for mongo
-            service = new MongoEntityService(repo);
+            service = new FultonMongoEntityService(repo);
             service["app"] = app;
         } else {
             // for sql

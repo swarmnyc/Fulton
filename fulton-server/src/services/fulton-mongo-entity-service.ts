@@ -1,12 +1,16 @@
-import { FultonService, Injectable, IUser, OperationReault, QueryColumnStates, Type } from "../index";
+import { FultonService, Injectable, IUser, OperationResult, QueryColumnStates, Type } from "../index";
 import { MongoRepository, getMongoRepository } from "typeorm";
-import { IEntityService, Inject, QueryParams, OperationOneReault, OperationStatus } from "../interfaces";
+import { IEntityService, Inject, QueryParams, OperationOneResult, OperationStatus } from "../interfaces";
 import { FultonApp } from "../fulton-app";
 import { EntityMetadataHelper } from "../helpers/entity-metadata-helper";
 import FultonLog from "../fulton-log";
 
+interface IncludeOptions {
+    [key: string]: IncludeOptions | false
+}
+
 @Injectable()
-export class MongoEntityService<TEntity> implements IEntityService<TEntity> {
+export class FultonMongoEntityService<TEntity> implements IEntityService<TEntity> {
     @Inject(FultonApp)
     protected app: FultonApp;
 
@@ -25,15 +29,32 @@ export class MongoEntityService<TEntity> implements IEntityService<TEntity> {
         return getMongoRepository(entity, connectionName)
     }
 
-    find(queryParams: QueryParams): Promise<OperationReault<TEntity>> {
-        return this.findInternal(this.repository, queryParams);
+    find(queryParams: QueryParams): Promise<OperationResult<TEntity>> {
+        return this.findInternal(this.repository, queryParams)
+            .then((data) => {
+                return {
+                    data: data[0],
+                    pagination: {
+                        total: data[1],
+                        index: queryParams.pagination.index,
+                        size: queryParams.pagination.size
+                    }
+                }
+            }).catch(this.errorHandler);
     }
 
-    findOne(queryParams: QueryParams): Promise<OperationOneReault<TEntity>> {
-        return this.findOneInternal(this.repository, queryParams);
+    findOne(queryParams: QueryParams): Promise<OperationOneResult<TEntity>> {
+        return this.findOneInternal(this.repository, queryParams)
+            .then((data) => {
+                return {
+                    status: "ok",
+                    data: data
+                }
+            }).catch(this.errorHandler);
     }
 
-    create(entity: TEntity): Promise<OperationOneReault<TEntity>> {
+    create(entity: TEntity): Promise<OperationOneResult<TEntity>> {
+        //TODO: valid and remove extra data
         return this.repository
             .insertOne(entity)
             .then((result) => {
@@ -51,6 +72,7 @@ export class MongoEntityService<TEntity> implements IEntityService<TEntity> {
     }
 
     update(id: string, entity: TEntity, replace?: boolean): Promise<OperationStatus> {
+        //TODO: valid and remove extra data
         return this.repository
             .updateOne({ _id: id }, replace ? entity : { $set: entity })
             .then((result) => {
@@ -77,45 +99,31 @@ export class MongoEntityService<TEntity> implements IEntityService<TEntity> {
      * @param repository 
      * @param queryParams 
      */
-    protected async findInternal<T>(repository: MongoRepository<T>, queryParams: QueryParams): Promise<OperationReault<T>> {
-        try {
-            this.transformQueryParams(repository, queryParams);
+    protected async findInternal<T>(repository: MongoRepository<T>, queryParams: QueryParams): Promise<[T[], number]> {
+        this.transformQueryParams(repository, queryParams);
 
-            let skip, take, index;
+        let skip;
 
-            if (queryParams.pagination) {
-                index = queryParams.pagination.index || 0;
-                take = queryParams.pagination.size;
-
-                if (index && take) {
-                    skip = index * take;
-                }
+        if (queryParams.pagination) {
+            if (queryParams.pagination.index && queryParams.pagination.size) {
+                skip = queryParams.pagination.index * queryParams.pagination.size;
             }
-
-            // let select = this.transformSelect(queryParams);
-
-            let data = await repository.findAndCount({
-                where: queryParams.filter,
-                skip: skip,
-                take: take,
-                order: queryParams.sort as any
-            });
-
-            if (queryParams.includes) {
-                await this.processIncludes(data[0], queryParams.includes);
-            }
-
-            return {
-                data: data[0],
-                pagination: {
-                    total: data[1],
-                    index: index,
-                    size: take
-                }
-            }
-        } catch (error) {
-            return this.errorHandler(error);
         }
+
+        // let select = this.transformSelect(queryParams);
+
+        let data = await repository.findAndCount({
+            where: queryParams.filter,
+            skip: skip,
+            take: queryParams.pagination.size,
+            order: queryParams.sort as any
+        });
+
+        if (data[0].length > 0 && queryParams.includes) {
+            await this.processIncludes(repository, data[0], queryParams.includes);
+        }
+
+        return data;
     }
 
     /**
@@ -123,32 +131,35 @@ export class MongoEntityService<TEntity> implements IEntityService<TEntity> {
      * @param repository 
      * @param queryParams 
      */
-    protected async findOneInternal<T>(repository: MongoRepository<T>, queryParams: QueryParams): Promise<OperationOneReault<T>> {
-        try {
-            this.transformQueryParams(repository, queryParams);
+    protected async findOneInternal<T>(repository: MongoRepository<T>, queryParams: QueryParams): Promise<T> {
+        this.transformQueryParams(repository, queryParams);
 
-            //let select = this.transformSelect(queryParams);
+        //let select = this.transformSelect(queryParams);
 
-            let data = await repository.findOne({
-                where: queryParams.filter,
-                order: queryParams.sort as any
-            });
+        let data = await repository.findOne({
+            where: queryParams.filter,
+            order: queryParams.sort as any
+        });
 
-            if (queryParams.includes) {
-                await this.processIncludes(data, queryParams.includes);
-            }
-
-            return {
-                data: data
-            }
-        } catch (error) {
-            return this.errorHandler(error);
+        if (data && queryParams.includes) {
+            await this.processIncludes(repository, data, queryParams.includes);
         }
+
+        return data
     }
 
-    protected processIncludes<T>(data: T | T[], columns: string[]): Promise<any> {
-        // TODO: includes
-        return;
+    protected processIncludes<T>(repository: MongoRepository<T>, data: T | T[], includes: string[]): Promise<any> {
+        let includeOptions = this.transformIncludes(includes);
+
+        if (data instanceof Array) {
+            let tasks = data.map((d) => {
+                return this.processIncludeInternal(repository, d, includeOptions);
+            })
+
+            return Promise.all(tasks);
+        } else {
+            return this.processIncludeInternal(repository, data, includeOptions);
+        }
     }
 
     /**
@@ -221,5 +232,76 @@ export class MongoEntityService<TEntity> implements IEntityService<TEntity> {
                 this.transformFilter(repository, value);
             }
         }
+    }
+
+    /**
+     * transform ["author", "author.tag"] to { author: { tag: false }}
+     * @param includes 
+     */
+    private transformIncludes(includes: string[]): IncludeOptions {
+        let options: IncludeOptions = {};
+
+        for (const include of includes) {
+            let columns = include.split(".");
+            let target = options;
+
+            for (let i = 1; i <= columns.length; i++) {
+                let column = columns[i - 1];
+                if (i == columns.length) {
+                    target[column] = false;
+                } else {
+                    if (target[column]) {
+                        target = target[column] as IncludeOptions;
+                    } else {
+                        target = target[column] = {} as IncludeOptions;
+                    }
+                }
+            }
+
+        }
+
+        return options;
+    }
+
+    private processIncludeInternal(repository: MongoRepository<any>, target: any, options: IncludeOptions): Promise<any> {
+        //TODO: should cover more situations and better proformance
+        let tasks = Object.getOwnPropertyNames(options).map((columnName): Promise<any> => {
+            let columnMetadata = repository.metadata.findRelationWithPropertyPath(columnName);
+
+            if (columnMetadata == null) {
+                return;
+            }
+
+            let refId = target[columnMetadata.inverseSidePropertyPath];
+            if (refId == null) {
+                return;
+            }
+
+            let columnRepo = this.getRepository(columnMetadata.type as Type);
+
+            let exec = async (id: string): Promise<any> => {
+                let ref = await this.findOneInternal(columnRepo, { filter: { "_id": refId } });
+
+                // includes sub-columns
+                if (options[columnName]) {
+                    await this.processIncludeInternal(columnRepo, ref, options[columnName] as IncludeOptions);
+                }
+
+                return ref;
+            }
+
+            let execP;
+            if (refId instanceof Array) {
+                execP = Promise.all(refId.map(exec));                
+            } else {
+                execP = exec(refId);  
+            } 
+
+            return execP.then(data => {
+                target[columnName] = data;
+            });
+        });
+
+        return Promise.all(tasks);
     }
 }

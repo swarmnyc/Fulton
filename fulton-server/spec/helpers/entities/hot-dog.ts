@@ -1,4 +1,4 @@
-import { Entity, ObjectIdColumn, Column } from "typeorm";
+import { Entity, ObjectIdColumn, Column, OneToMany, OneToOne, ManyToOne } from "typeorm";
 import { Author } from "./author";
 
 @Entity("hotdogs")
@@ -22,5 +22,8 @@ export class Hotdog {
     picture: string;
 
     @Column()
-    author: Author | string;
+    authorId: string;
+
+    @ManyToOne(type => Author, key => "authorId")
+    author: Author;
 }

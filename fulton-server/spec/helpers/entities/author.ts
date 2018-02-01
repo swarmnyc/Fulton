@@ -1,10 +1,10 @@
-import { Entity, ObjectIdColumn, Column } from "typeorm";
+import { Entity, ObjectIdColumn, Column, ManyToMany } from "typeorm";
 import { Tag } from "./tag";
 
 @Entity("authors")
 export class Author {
     @ObjectIdColumn()
-    hotdogId: string;
+    id: string;
 
     @Column()
     name: string;
@@ -13,5 +13,8 @@ export class Author {
     imageUrl: string;
 
     @Column()
+    tagIds: string[];
+
+    @ManyToMany(type => Tag, keys => "tagIds")
     tags: Tag[];
 }

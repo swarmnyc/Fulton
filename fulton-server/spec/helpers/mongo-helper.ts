@@ -1,19 +1,22 @@
 import { getConnection, getMongoManager } from 'typeorm';
 import { Hotdog } from './entities/hot-dog';
-
-let models = {
-    "hotdogs": Hotdog
-};
+import { Author } from './entities/author';
+import { Tag } from './entities/tag';
 
 
 export class MongoHelper {
-    static insertData(data: any): Promise<any> {
+    static async insertData(collections: any, reset?: boolean): Promise<any> {
         let manager = getMongoManager();
-        
-        let tasks = Object.getOwnPropertyNames(data).map(name => {
-            return manager.insertMany(Hotdog, data[name]);
+
+        if (reset) {
+            await manager.connection.dropDatabase();
+        }
+
+        let tasks = Object.getOwnPropertyNames(collections).map(name => {
+            let collection = collections[name];
+            return manager.insertMany(collection.entity, collection.data);
         });
 
-        return Promise.all(tasks);
+        await Promise.all(tasks);
     };
 }

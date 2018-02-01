@@ -1,6 +1,6 @@
 import { Injectable, IUser } from "../index";
 import { Repository } from "typeorm";
-import { IEntityService, Inject, QueryParams, OperationReault, OperationOneReault } from "../interfaces";
+import { IEntityService, Inject, QueryParams, OperationReault, OperationOneReault, OperationStatus } from "../interfaces";
 import { FultonApp } from "../fulton-app";
 
 @Injectable()
@@ -24,15 +24,15 @@ export class EntityService<TEntity> implements IEntityService<TEntity> {
         throw new Error("not imploment");
     }
 
-    create(): Promise<TEntity> {
+    create(entity: TEntity): Promise<OperationOneReault<TEntity>> {
         throw new Error("not imploment");
     }
 
-    update(): Promise<TEntity> {
+    update(id: string, entity: TEntity): Promise<OperationStatus>  {
         throw new Error("not imploment");
     }
 
-    delete(): Promise<TEntity> {
+    delete(id: string): Promise<OperationStatus> {
         throw new Error("not imploment");
     }
 }

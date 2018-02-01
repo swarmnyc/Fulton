@@ -71,7 +71,7 @@ describe('Identity Custom Strategies', () => {
     });
 
     it('should custom login strategy work', async () => {
-        let result = await httpTester.postJson("/test/login", {
+        let result = await httpTester.post("/test/login", {
             username: "test",
             password: "test"
         })

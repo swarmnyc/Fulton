@@ -30,6 +30,11 @@ export abstract class FultonEntityRouter<TEntity> extends FultonRouter {
 
     @HttpGet("/")
     list(req: Request, res: Response, next: NextFunction) {
+        // by default don't return all entities
+        if (req.queryParams.pagination && !req.queryParams.pagination.size) {
+            req.queryParams.pagination.size = this.app.options.settings.paginationSize;
+        }
+
         this.entityService
             .find(req.queryParams)
             .then((result) => {
@@ -44,28 +49,75 @@ export abstract class FultonEntityRouter<TEntity> extends FultonRouter {
     @HttpGet("/:id", queryById())
     detail(req: Request, res: Response) {
         this.entityService
-        .findOne(req.queryParams)
-        .then((result) => {
-            if (result.errors) {
-                res.status(400).send(result);
-            } else {
-                res.send(result);
-            }
-        })
+            .findOne(req.queryParams)
+            .then((result) => {
+                if (result.errors) {
+                    res.status(400).send(result);
+                } else {
+                    res.send(result);
+                }
+            })
     }
 
     @HttpPost("/")
     create(req: Request, res: Response) {
-
+        if (req.body.data) {
+            this.entityService
+                .create(req.body.data)
+                .then((result) => {
+                    if (result.errors) {
+                        res.status(400).send(result);
+                    } else {
+                        res.send(result);
+                    }
+                });
+        } else {
+            res.status(400).send({
+                status: "error",
+                errors: { "message": "no data" }
+            });
+        }
     }
 
-    @HttpPatch("/:id", queryById())
+    @HttpPatch("/:id")
     update(req: Request, res: Response) {
-
+        // TODO: determine who can update
+        if (req.params.id && req.body.data) {
+            this.entityService
+                .update(req.params.id, req.body.data)
+                .then((result) => {
+                    if (result.errors) {
+                        res.status(400).send(result);
+                    } else {
+                        res.send(result);
+                    }
+                });
+        } else {
+            res.status(400).send({
+                status: "error",
+                errors: { "message": "no data or id" }
+            });
+        }
     }
 
-    @HttpDelete("/:id", queryById())
+    @HttpDelete("/:id")
     delete(req: Request, res: Response) {
-
+        // TODO: determine who can delete
+        if (req.params.id) {
+            this.entityService
+                .delete(req.params.id)
+                .then((result) => {
+                    if (result.errors) {
+                        res.status(400).send(result);
+                    } else {
+                        res.send(result);
+                    }
+                });
+        } else {
+            res.status(400).send({
+                status: "error",
+                errors: { "message": "no id" }
+            });
+        }
     }
 }

@@ -65,11 +65,11 @@ export interface IEntityService<TEntity> {
 
     findOne(queryParams: QueryParams): Promise<OperationOneReault<TEntity>>;
 
-    create(): Promise<TEntity>;
+    create(entity: TEntity): Promise<OperationOneReault<TEntity>>;
 
-    update(): Promise<TEntity>;
+    update(id: string, entity: TEntity): Promise<OperationStatus>;
 
-    delete(): Promise<TEntity>;
+    delete(id: string): Promise<OperationStatus>;
 }
 
 /**
@@ -79,8 +79,14 @@ export interface QueryColumnStates {
     [key: string]: number;
 }
 
+export interface OperationStatus {
+    status?: string;
+    errors?: FultonErrorObject;
+}
+
 export interface OperationReault<T=any> {
     data?: T[];
+    status?: string;
     errors?: FultonErrorObject;
     pagination?: {
         total?: number;
@@ -91,6 +97,7 @@ export interface OperationReault<T=any> {
 
 export interface OperationOneReault<T=any> {
     data?: T;
+    status?: string;
     errors?: FultonErrorObject;
     pagination?: {
         total?: number;

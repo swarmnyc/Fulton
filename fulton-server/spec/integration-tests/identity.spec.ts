@@ -49,7 +49,7 @@ xdescribe('Identity Integration Test', () => {
     });
 
     function prepareUser(): Promise<HttpResult> {
-        return httpTester.postJson("/auth/register", {
+        return httpTester.post("/auth/register", {
             email: "test@test.com",
             username: "test",
             password: "test123"
@@ -57,7 +57,7 @@ xdescribe('Identity Integration Test', () => {
     }
 
     it('should register', async () => {
-        let result = await httpTester.postJson("/auth/register", {
+        let result = await httpTester.post("/auth/register", {
             email: "test@test.com",
             username: "test",
             password: "test123"
@@ -76,7 +76,7 @@ xdescribe('Identity Integration Test', () => {
     it('should register failure register wiht the same name and email', async () => {
         await prepareUser()
 
-        let result = await httpTester.postJson("/auth/register", {
+        let result = await httpTester.post("/auth/register", {
             email: "test@test.com",
             username: "test",
             password: "test123"
@@ -90,7 +90,7 @@ xdescribe('Identity Integration Test', () => {
     it('should login successfully', async () => {
         await prepareUser();
 
-        let result = await httpTester.postJson("/auth/login", {
+        let result = await httpTester.post("/auth/login", {
             username: "test",
             password: "test123"
         });
@@ -102,7 +102,7 @@ xdescribe('Identity Integration Test', () => {
     it('should login failure', async () => {
         await prepareUser();
 
-        let result = await httpTester.postJson("/auth/login", {
+        let result = await httpTester.post("/auth/login", {
             username: "test",
             password: "test321"
         });

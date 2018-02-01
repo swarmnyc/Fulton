@@ -46,12 +46,33 @@ export class HttpTester {
         });
     }
 
-    postJson(path: string, object?: any, followRedirects?: boolean): Promise<HttpResult> {
+    post(path: string, object?: any, followRedirects?: boolean): Promise<HttpResult> {
         return this.request({
             method: "post",
             url: url.resolve(this.baseUrl, path),
             headers: this.headers,
             json: object,
+            followRedirect: followRedirects,
+            followAllRedirects: followRedirects
+        });
+    }
+
+    patch(path: string, object?: any, followRedirects?: boolean): Promise<HttpResult> {
+        return this.request({
+            method: "patch",
+            url: url.resolve(this.baseUrl, path),
+            headers: this.headers,
+            json: object,
+            followRedirect: followRedirects,
+            followAllRedirects: followRedirects
+        });
+    }
+
+    delete(path: string, followRedirects?: boolean): Promise<HttpResult> {
+        return this.request({
+            method: "delete",
+            url: url.resolve(this.baseUrl, path),
+            headers: this.headers,
             followRedirect: followRedirects,
             followAllRedirects: followRedirects
         });

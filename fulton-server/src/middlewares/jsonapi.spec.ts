@@ -32,7 +32,7 @@ describe('query parser', () => {
     });
 
     it('should parse json-api', async () => {
-        let result = await httpTester.postJson("/", jsonapiData);
+        let result = await httpTester.post("/", jsonapiData);
 
         expect(result.body).toEqual(jsonData);
 

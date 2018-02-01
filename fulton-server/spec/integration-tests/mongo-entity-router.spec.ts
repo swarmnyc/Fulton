@@ -1,9 +1,11 @@
-import { FultonApp, FultonAppOptions, authorize, AccessToken, Request, Response, FultonEntityRouter, EntityRouter, OperationReault, QueryParams, OperationOneReault } from "../../src/index";
+import { FultonApp, FultonAppOptions, authorize, AccessToken, Request, Response, FultonEntityRouter, EntityRouter, OperationReault, QueryParams, OperationOneReault, OperationStatus } from "../../src/index";
 import { UserServiceMock } from "../helpers/user-service-mock";
 import { HttpTester, HttpResult } from "../helpers/http-tester";
 import { Hotdog } from "../helpers/entities/hot-dog";
 import { MongoHelper } from "../helpers/mongo-helper";
 import { sampleData } from "../support/sample-data";
+import { Author } from "../helpers/entities/author";
+import { Tag } from "../helpers/entities/tag";
 
 
 @EntityRouter("/hotdogs", Hotdog)
@@ -12,7 +14,7 @@ class HotdogEntityRouter extends FultonEntityRouter<Hotdog>{
 
 class MyApp extends FultonApp {
     protected onInit(options: FultonAppOptions): void {
-        options.entities = [Hotdog];
+        options.entities = [Hotdog, Author, Tag];
         options.routers = [HotdogEntityRouter];
 
         options.databases.set("default", {
@@ -22,7 +24,7 @@ class MyApp extends FultonApp {
     }
 }
 
-xdescribe('MongoEntityRouter Integration Test', () => {
+fdescribe('MongoEntityRouter Integration Test', () => {
     let app: MyApp;
     let httpTester: HttpTester;
 
@@ -31,8 +33,7 @@ xdescribe('MongoEntityRouter Integration Test', () => {
         httpTester = new HttpTester(app);
         await httpTester.start();
 
-        // TODO: make init simple data better
-        // await MongoHelper.insertData({ hotdogs: sampleData.hotdogs })
+        await MongoHelper.insertData(sampleData, true);
     });
 
     afterAll(async () => {
@@ -86,7 +87,7 @@ xdescribe('MongoEntityRouter Integration Test', () => {
     it('should return hotdogs with sorting', async () => {
         let params: QueryParams = {
             sort: {
-                id: -1
+                hotdogId: -1
             },
             pagination: {
                 size: 5
@@ -98,9 +99,9 @@ xdescribe('MongoEntityRouter Integration Test', () => {
         expect(result.response.statusCode).toEqual(200);
 
         let queryResult: OperationReault<Hotdog> = result.body;
-        expect(queryResult.data[0].id).toEqual("not-hotdog-2");
-        expect(queryResult.data[1].id).toEqual("not-hotdog-1");
-        expect(queryResult.data[2].id).toEqual("9");
+        expect(queryResult.data[0].hotdogId).toEqual("not-hotdog-2");
+        expect(queryResult.data[1].hotdogId).toEqual("not-hotdog-1");
+        expect(queryResult.data[2].hotdogId).toEqual("9");
     });
 
     it('should return hotdogs with filter', async () => {
@@ -125,7 +126,7 @@ xdescribe('MongoEntityRouter Integration Test', () => {
         let params: QueryParams = {
             filter: {
                 $or: [
-                    { id: "2" },
+                    { hotdogId: "2" },
                     { name: { $like: "bo" } }
                 ]
             }
@@ -145,6 +146,61 @@ xdescribe('MongoEntityRouter Integration Test', () => {
         expect(result.response.statusCode).toEqual(200);
 
         let queryResult: OperationOneReault<Hotdog> = result.body;
-        expect(queryResult.data.id).toEqual("5");
+        expect(queryResult.data.hotdogId).toEqual("5");
+    });
+
+    it('should insert a hotdog', async () => {
+        let data = {
+            "name": "Test",
+            "location": [
+                100,
+                -100
+            ],
+            "address": "earth",
+            "review": "great",
+            "author": "624",
+            "picture": "no"
+        } as Hotdog;
+
+        let result = await httpTester.post("/hotdogs", {
+            data: data
+        })
+
+        expect(result.response.statusCode).toEqual(200);
+
+        let queryResult: OperationOneReault<Hotdog> = result.body;
+        expect(queryResult.data.hotdogId).toBeTruthy();
+
+        delete queryResult.data.hotdogId;
+
+        expect(queryResult.data).toEqual(data);
+    });
+
+    it('should update a hotdog', async () => {
+        let data = {
+            "name": "Test",
+            "address": "earth",
+            "review": "great",
+            "author": "123",
+            "picture": "no"
+        } as Hotdog;
+
+        let result = await httpTester.patch("/hotdogs/1", {
+            data: data
+        })
+
+        expect(result.response.statusCode).toEqual(200);
+
+        let queryResult: OperationStatus = result.body;
+        expect(queryResult.status).toEqual("ok");
+    });
+
+    it('should delete a hotdog', async () => {
+        let result = await httpTester.delete("/hotdogs/2")
+
+        expect(result.response.statusCode).toEqual(200);
+
+        let queryResult: OperationStatus = result.body;
+        expect(queryResult.status).toEqual("ok");
     });
 });

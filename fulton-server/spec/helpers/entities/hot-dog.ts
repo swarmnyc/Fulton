@@ -1,9 +1,10 @@
 import { Entity, ObjectIdColumn, Column } from "typeorm";
+import { Author } from "./author";
 
 @Entity("hotdogs")
 export class Hotdog {
     @ObjectIdColumn()
-    id: string;
+    hotdogId: string;
 
     @Column()
     name: string;
@@ -21,5 +22,5 @@ export class Hotdog {
     picture: string;
 
     @Column()
-    author: string;
+    author: Author | string;
 }

@@ -82,7 +82,7 @@ describe('Identity local and bearer on UserServiceMock', () => {
     });
 
     it('should login and return access token', async () => {
-        let result = await httpTester.postJson("/auth/login", {
+        let result = await httpTester.post("/auth/login", {
             username: "test",
             password: "test"
         })
@@ -93,7 +93,7 @@ describe('Identity local and bearer on UserServiceMock', () => {
     });
 
     it('should login fails', async () => {
-        let result = await httpTester.postJson("/auth/login", {
+        let result = await httpTester.post("/auth/login", {
             username: "test",
             password: "fail"
         })
@@ -149,7 +149,7 @@ describe('Identity local and bearer on UserServiceMock', () => {
     });
 
     it('should register success by json', async () => {
-        let result = await httpTester.postJson("/auth/register", {
+        let result = await httpTester.post("/auth/register", {
             email: "test@test.com",
             username: "test3",
             password: "test3"
@@ -173,7 +173,7 @@ describe('Identity local and bearer on UserServiceMock', () => {
     });
 
     it('should register failure by empty data', async () => {
-        let result = await httpTester.postJson("/auth/register");
+        let result = await httpTester.post("/auth/register");
 
         let errors = result.body.errors;
         expect(result.response.statusCode).toEqual(400);

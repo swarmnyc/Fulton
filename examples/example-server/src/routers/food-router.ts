@@ -1,7 +1,7 @@
-import { FultonEntityRouter, FultonRouter, Middleware, Request, Response, injectable, httpGet, router, inject, authorize, authorizeByRole } from "fulton-server"
+import { EntityRouter, Router, Middleware, Request, Response, injectable, httpGet, router, inject, authorize, authorizeByRole } from "fulton-server"
 
 @router("/food", authorize(), authorizeByRole("admin"))
-export class FoodRouter extends FultonRouter {
+export class FoodRouter extends Router {
     // constructor(private foodDataService: FoodEntityService) {
     //     super(foodDataService)
 
@@ -14,7 +14,7 @@ export class FoodRouter extends FultonRouter {
     }
 
     // @Get("other/:id")
-    // other2(context: IFultonRouterContext) {
+    // other2(context: IRouterContext) {
     //     context.body = "other2"
     // }
 }

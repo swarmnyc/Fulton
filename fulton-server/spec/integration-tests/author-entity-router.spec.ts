@@ -1,4 +1,4 @@
-import { FultonApp, FultonAppOptions, authorize, AccessToken, Request, Response, FultonEntityRouter, entityRouter, OperationResult, QueryParams, OperationOneResult, OperationStatus, router, MongoEntityService, injectable, httpGet } from "../../src/index";
+import { FultonApp, FultonAppOptions, authorize, AccessToken, Request, Response, EntityRouter, entityRouter, OperationResult, QueryParams, OperationOneResult, OperationStatus, router, MongoEntityService, injectable, httpGet } from "../../src/index";
 import { UserServiceMock } from "../helpers/user-service-mock";
 import { HttpTester, HttpResult } from "../helpers/http-tester";
 import { Hotdog } from "../helpers/entities/hot-dog";
@@ -40,7 +40,7 @@ class AuthorEntityService extends MongoEntityService<Author>{
 }
 
 @router(/\/authors?/)
-class AuthorEntityRouter extends FultonEntityRouter<Author>{
+class AuthorEntityRouter extends EntityRouter<Author>{
     constructor(protected entityService: AuthorEntityService) {
         super(entityService)
     }

@@ -98,25 +98,25 @@ export class IdentityOptions {
      * ### example for router level
      * ```
      * // router level authorization
-     * @Router("/Food", authorize())
-     * export class FoodRouter extends FultonRouter {
+     * @router("/Food", authorize())
+     * export class FoodRouter extends Router {
      *     // all actions needs to be authorized
-     *     @HttpGet()
+     *     @httpGet()
      *     list(req: Request, res: Response) { }  
      *    
-     *     @HttpGet("/:id")
+     *     @httpGet("/:id")
      *     detail(req: Request, res: Response) { }
      * } 
      * 
-     * @Router("/Food")
-     * export class FoodRouter extends FultonRouter {
+     * @router("/Food")
+     * export class FoodRouter extends Router {
      *     // no authorize
-     *     @HttpGet() 
+     *     @httpGet() 
      *     list(req: Request, res: Response) { }     
      * 
      *     // action level authorization
      *     // authorize by admin role and loggined
-     *     @HttpDelete("/:id", authorizeByRole("admin")) 
+     *     @httpDelete("/:id", authorizeByRole("admin")) 
      *     delete(req: Request, res: Response) { }
      * }
      * ```
@@ -130,9 +130,9 @@ export class IdentityOptions {
      * 
      * ## example for web view
      * ```
-     * @Router("/auth")
-     * export class AuthRouter extends FultonRouter {
-     *     @HttpGet("/register")
+     * @router("/auth")
+     * export class AuthRouter extends Router {
+     *     @httpGet("/register")
      *     registerView(req: Request, res: Response) {
      *         res.render("register");
      *     }
@@ -140,7 +140,7 @@ export class IdentityOptions {
      *     // if you want to put all logics altogether
      *     // you can set options.identity.register.endabled = false
      *     // and add this action.
-     *     @HttpPost("/register"))
+     *     @httpPost("/register"))
      *     register(req: Request, res: Response) {
      *         req.userService
      *            .register(req.body)
@@ -246,9 +246,9 @@ export class IdentityOptions {
      * 
      * ## example for web view
      * ```
-     * @Router("/auth")
-     * export class AuthRouter extends FultonRouter {
-     *     @HttpGet("/login")
+     * @router("/auth")
+     * export class AuthRouter extends Router {
+     *     @httpGet("/login")
      *     loginView(req: Request, res: Response) {
      *         res.render("login");
      *     }
@@ -256,7 +256,7 @@ export class IdentityOptions {
      *     // if you want to all logics altogether
      *     // you can set options.identity.login.endabled = false
      *     // and add this action.
-     *     @HttpPost("/login", authenticate("local", { failureRedirect: "/auth/login" }))
+     *     @httpPost("/login", authenticate("local", { failureRedirect: "/auth/login" }))
      *     login(req: Request, res: Response) {
      *         res.redirect("/");
      *     }

@@ -26,7 +26,7 @@ interface IncludeOptions {
  * 
  * ## example 2: use your HotdogRepository 
  * 
- * @Repo(Hotdog)
+ * @repository(Hotdog)
  * class HotdogRepository extends MongoRepository<Hotdog> {
  * }
  * 

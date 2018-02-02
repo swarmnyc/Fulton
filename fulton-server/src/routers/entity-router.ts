@@ -3,11 +3,11 @@ import { httpDelete, httpGet, httpPatch, httpPost } from "./route-decorators";
 import { IEntityService, injectable, NextFunction, OperationOneResult, OperationResult, OperationStatus, Request, Response, EntityServiceFactory } from "../interfaces";
 
 import { EntityService } from "../services";
-import { FultonRouter } from "./fulton-router";
+import { Router } from "./router";
 import { queryById } from "../middlewares";
 
 @injectable()
-export abstract class FultonEntityRouter<TEntity> extends FultonRouter {
+export abstract class EntityRouter<TEntity> extends Router {
     protected metadata: FullEntityRouterMetadata
 
     constructor(protected entityService?: IEntityService<TEntity>) {

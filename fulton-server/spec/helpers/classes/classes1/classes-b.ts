@@ -1,9 +1,9 @@
-import { FultonRouter } from "../../../../src/index";
+import { Router } from "../../../../src/index";
 
-export class RouterB extends FultonRouter {
+export class RouterB extends Router {
 
 }
 
-export class RouterC extends FultonRouter {
+export class RouterC extends Router {
 
 }

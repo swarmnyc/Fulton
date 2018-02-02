@@ -1,6 +1,6 @@
 import { Entity, ObjectIdColumn, Column } from "typeorm";
 import { router, httpGet, entityRouter } from "./route-decorators";
-import { FultonEntityRouter } from "./fulton-entity-router";
+import { EntityRouter } from "./entity-router";
 import { EntityService } from "../services/entity-service";
 import { injectable } from "../index";
 import { FultonApp } from "../fulton-app";
@@ -29,12 +29,12 @@ class FoodEntityService extends EntityService<Food> {
 }
 
 @entityRouter("/A", Food)
-class EntityRouterA extends FultonEntityRouter<Food> {
+class EntityRouterA extends EntityRouter<Food> {
 
 }
 
 @router("/B")
-class EntityRouterB extends FultonEntityRouter<Food> {
+class EntityRouterB extends EntityRouter<Food> {
     constructor(protected entityService: FoodEntityService) {
         super(entityService);
     }

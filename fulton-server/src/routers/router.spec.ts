@@ -4,7 +4,7 @@ import { Middleware, errorHandler, authenticate, authorize, authorizeByRole } fr
 import { Request, Response } from "../interfaces";
 import { getFullRouterMethodMetadata, getRouterMethodMetadataList } from "./route-decorators-helpers";
 
-import { FultonRouter } from "./fulton-router";
+import { Router } from "./router";
 import { router, httpPost, httpDelete, httpGet, httpPut } from "./route-decorators";
 
 let middleware: Middleware = function () {
@@ -16,7 +16,7 @@ let middlewares: Middleware[] = [
 ]
 
 @router("/A", { title: "RouterA" })
-export class RouterA extends FultonRouter {
+export class RouterA extends Router {
     @httpGet()
     list() { }
 
@@ -28,7 +28,7 @@ export class RouterA extends FultonRouter {
 }
 
 @router("/B", { title: "RouterB" }, ...middlewares)
-export class RouterB extends FultonRouter {
+export class RouterB extends Router {
 
 }
 
@@ -52,7 +52,7 @@ export class RouterD extends RouterA {
 
 // router level authorization
 @router("/Food")
-export class FoodRouter extends FultonRouter {
+export class FoodRouter extends Router {
     // all actions needs to be authorized
     @httpGet()
     list(req: Request, res: Response) { }
@@ -62,7 +62,7 @@ export class FoodRouter extends FultonRouter {
 }
 
 @router("/auth")
-export class AuthRouter extends FultonRouter {
+export class AuthRouter extends Router {
     @httpGet("/login")
     loginView(req: Request, res: Response) {
         res.render("login");

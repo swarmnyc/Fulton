@@ -1,4 +1,4 @@
-import { FultonApp, FultonAppOptions, authorize, AccessToken, Request, Response, FultonEntityRouter, entityRouter, OperationResult, QueryParams, OperationOneResult, OperationStatus } from "../../src/index";
+import { FultonApp, FultonAppOptions, authorize, AccessToken, Request, Response, EntityRouter, entityRouter, OperationResult, QueryParams, OperationOneResult, OperationStatus } from "../../src/index";
 import { UserServiceMock } from "../helpers/user-service-mock";
 import { HttpTester, HttpResult } from "../helpers/http-tester";
 import { Hotdog } from "../helpers/entities/hot-dog";
@@ -9,7 +9,7 @@ import { Tag } from "../helpers/entities/tag";
 
 
 @entityRouter("/hotdogs", Hotdog)
-class HotdogEntityRouter extends FultonEntityRouter<Hotdog>{
+class HotdogEntityRouter extends EntityRouter<Hotdog>{
 }
 
 class MyApp extends FultonApp {

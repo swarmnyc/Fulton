@@ -4,7 +4,7 @@ import * as lodash from "lodash";
 import { ErrorMiddleware, FultonApp, Request, Response, Middleware, asyncWrap } from "../index";
 import { FullRouterMetadata, RouterMetadata, getFullRouterMethodMetadata, getRouterMetadata } from "./route-decorators-helpers";
 import { DiContainer, PathIdentifier, inject, injectable } from "../interfaces";
-import { IRouterMatcher, Router } from "express";
+import { IRouterMatcher, Router as ExpressRouter } from "express";
 
 import { TypeIdentifier } from "../helpers/type-helpers";
 
@@ -14,19 +14,19 @@ import { TypeIdentifier } from "../helpers/type-helpers";
  * ## example
  * 
  * ```
- * @Router("/Food")
- * export class FoodRouter extends FultonRouter {
- *    @HttpGet()
+ * @router("/Food")
+ * export class FoodRouter extends Router {
+ *    @httpGet()
  *    async list(req: Request, res: Response) { 
  *      return true; //if return true, asyncHandler will all next();
  *    }
  * 
- *    @HttpGet("/:id")
+ *    @httpGet("/:id")
  *    async detail(req: Request, res: Response, next: NextFunction) { 
  *       next(); // call next() yourself;
  *    }
  * 
- *    @HttpPost()
+ *    @httpPost()
  *    async create(req: Request, res: Response) { 
  *       // if retrun not true,  asyncHandler won't call next();
  *    }
@@ -35,7 +35,7 @@ import { TypeIdentifier } from "../helpers/type-helpers";
  * 
  */
 @injectable()
-export abstract class FultonRouter {
+export abstract class Router {
     protected metadata: FullRouterMetadata
     protected router: Router;
     @inject(FultonApp)
@@ -56,7 +56,7 @@ export abstract class FultonRouter {
         assert(this.metadata.router, `${this.constructor.name} don't have @router(path) decorator`)
         if (this.metadata.router)
 
-            var router = Router();
+            var router = ExpressRouter();
 
         if (lodash.some(this.metadata.router.middlewares)) {
             router.use(...this.metadata.router.middlewares);

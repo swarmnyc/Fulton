@@ -8,7 +8,7 @@ import { AppMode, ErrorMiddleware, Middleware, PathIdentifier, JsonApiOptions } 
 import { ConnectionOptions, Repository } from 'typeorm';
 import { FultonClassLoader, defaultClassLoader } from './helpers/module-helpers';
 import { FultonLoggerLevel, FultonLoggerOptions } from './fulton-log';
-import { FultonRouter, Service, Type } from './index';
+import { Router, Service, Type } from './index';
 import { Provider, TypeProvider } from './helpers/type-helpers';
 import { default404ErrorHandler, defaultErrorHandler } from './middlewares';
 
@@ -132,7 +132,7 @@ export class FultonAppOptions {
      * }
      * 
      * @router("/food")
-     * class FoodRouter extends FultonRouter {
+     * class FoodRouter extends Router {
      * }
      * ```
      */
@@ -263,7 +263,7 @@ export class FultonAppOptions {
          * the router loader (a function), loads all routers under the folders of routerDirs
          * default is FultonClassLoader
          */
-        routerLoader: FultonClassLoader<FultonRouter>;
+        routerLoader: FultonClassLoader<Router>;
 
         /**
          * if true, Fulton will load services based on serviceDirs automatically 
@@ -533,7 +533,7 @@ export class FultonAppOptions {
 
             routerLoaderEnabled: false,
             routerDirs: ["routers"],
-            routerLoader: defaultClassLoader(FultonRouter),
+            routerLoader: defaultClassLoader(Router),
 
             serviceLoaderEnabled: false,
             serviceDirs: ["services"],

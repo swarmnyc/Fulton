@@ -1,6 +1,6 @@
 import { KEY_ROUTER_ERROR_HANDLER_METADATA, KEY_ROUTER_HTTP_METHOD_LIST_METADATA, KEY_ROUTER_METADATA } from "../constants";
 
-import { FultonRouter } from "./fulton-router";
+import { Router } from "./router";
 import { PathIdentifier, Middleware, RouterDocOptions, RouterActionDocOptions } from "../interfaces";
 import { Type } from "../index";
 
@@ -75,7 +75,7 @@ function getAllRouterMethodMetadata(target: any): AllRouterMethodMetadata {
     let keys = new Map<string, boolean>();
 
     // get metadata from parent class recurrsively
-    while (target.prototype instanceof FultonRouter) {
+    while (target.prototype instanceof Router) {
         let metadata = getRouterMethodMetadataList(target);
         for (const method of metadata) {
             // skip if exists

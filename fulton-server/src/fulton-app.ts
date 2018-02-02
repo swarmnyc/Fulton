@@ -17,7 +17,7 @@ import Env from "./helpers/env";
 import { Express } from "express";
 import { FultonAppOptions } from "./fulton-app-options";
 import FultonLog from "./fulton-log";
-import { FultonRouter } from "./routers/fulton-router";
+import { Router } from "./routers/router";
 import { Service } from "./services";
 import { defaultHttpLoggerHandler } from "./middlewares/http-logger";
 import { fultonDebug } from "./helpers/debug";
@@ -337,7 +337,7 @@ export abstract class FultonApp {
 
         let ids = this.registerTypes(prodivers, true);
         let routers = ids.map((id) => {
-            let router = this.container.get<FultonRouter>(id);
+            let router = this.container.get<Router>(id);
 
             router.init(); //register router to express
 
@@ -527,7 +527,7 @@ export abstract class FultonApp {
 
     protected didInit(): void | Promise<void> { }
 
-    protected didInitRouters(routers: FultonRouter[]): void | Promise<void> { }
+    protected didInitRouters(routers: Router[]): void | Promise<void> { }
 
     protected didInitDatabases(connections: Connection[]): void | Promise<void> { }
 }

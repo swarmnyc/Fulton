@@ -189,19 +189,13 @@ describe('MongoEntityRouter Integration Test', () => {
             data: data
         })
 
-        expect(result.response.statusCode).toEqual(200);
-
-        let queryResult: OperationStatus = result.body;
-        expect(queryResult.status).toEqual("ok");
+        expect(result.response.statusCode).toEqual(202);
     });
 
     it('should delete a hotdog', async () => {
         let result = await httpTester.delete("/hotdogs/2")
 
-        expect(result.response.statusCode).toEqual(200);
-
-        let queryResult: OperationStatus = result.body;
-        expect(queryResult.status).toEqual("ok");
+        expect(result.response.statusCode).toEqual(202);
     });
 
 

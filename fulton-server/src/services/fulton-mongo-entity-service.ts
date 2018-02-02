@@ -9,12 +9,51 @@ interface IncludeOptions {
     [key: string]: IncludeOptions | false
 }
 
+/**
+ * A mongo implement for high level CURD, it contains many features that a pure MongoRepository doesn't have, like support Fulton.QueryParams, error handler, includes etc. 
+ * 
+ * two ways of extends
+ * ## example 1: use default repository 
+ * 
+ * ```
+ * @Injectable()
+ * class HotdogEntityService extends FultonMongoEntityService<Hotdog>{
+ *    constructor(){
+ *        super(Hotdog) // just give a type, so it can find the repository.
+ *    }
+ * }
+ * ```
+ * 
+ * ## example 2: use your HotdogRepository 
+ * 
+ * @Repo(Hotdog)
+ * class HotdogRepository extends MongoRepository<Hotdog> {
+ * }
+ * 
+ * // remember add HotdogRepository to options.repositories, so it can be injectable.
+ * 
+ * @Injectable()
+ * class HotdogEntityService extends FultonMongoEntityService<Hotdog>{
+ *    constructor(repository HotdogRepository) { 
+ *        super(repository)
+ *    }
+ * }
+ * 
+ */
 @Injectable()
 export class FultonMongoEntityService<TEntity> implements IEntityService<TEntity> {
     @Inject(FultonApp)
     protected app: FultonApp;
+    protected mainRepository: MongoRepository<TEntity>
 
-    constructor(protected repository: MongoRepository<TEntity>) {
+    constructor(entity: Type<TEntity>)
+    constructor(mainRepository: MongoRepository<TEntity>)
+    constructor(input: MongoRepository<TEntity> | Type<TEntity>) {
+        if (input instanceof MongoRepository) {
+            this.mainRepository = input
+        } else {
+            this.mainRepository = this.getRepository(input);
+        }
     }
 
     private get metadataHelper(): EntityMetadataHelper {
@@ -30,7 +69,7 @@ export class FultonMongoEntityService<TEntity> implements IEntityService<TEntity
     }
 
     find(queryParams: QueryParams): Promise<OperationResult<TEntity>> {
-        return this.findInternal(this.repository, queryParams)
+        return this.findInternal(this.mainRepository, queryParams)
             .then((data) => {
                 return {
                     data: data[0],
@@ -44,10 +83,9 @@ export class FultonMongoEntityService<TEntity> implements IEntityService<TEntity
     }
 
     findOne(queryParams: QueryParams): Promise<OperationOneResult<TEntity>> {
-        return this.findOneInternal(this.repository, queryParams)
+        return this.findOneInternal(this.mainRepository, queryParams)
             .then((data) => {
                 return {
-                    status: "ok",
                     data: data
                 }
             }).catch(this.errorHandler);
@@ -55,16 +93,15 @@ export class FultonMongoEntityService<TEntity> implements IEntityService<TEntity
 
     create(entity: TEntity): Promise<OperationOneResult<TEntity>> {
         //TODO: valid and remove extra data
-        return this.repository
+        return this.mainRepository
             .insertOne(entity)
             .then((result) => {
                 // TODO: should move this code to typeorm
                 let e: any = entity;
-                e[this.repository.metadata.objectIdColumn.propertyName] = e[this.repository.metadata.objectIdColumn.databaseName];
-                delete e[this.repository.metadata.objectIdColumn.databaseName];
+                e[this.mainRepository.metadata.objectIdColumn.propertyName] = e[this.mainRepository.metadata.objectIdColumn.databaseName];
+                delete e[this.mainRepository.metadata.objectIdColumn.databaseName];
 
                 return {
-                    status: "ok",
                     data: entity
                 }
             })
@@ -73,22 +110,22 @@ export class FultonMongoEntityService<TEntity> implements IEntityService<TEntity
 
     update(id: string, entity: TEntity, replace?: boolean): Promise<OperationStatus> {
         //TODO: valid and remove extra data
-        return this.repository
+        return this.mainRepository
             .updateOne({ _id: id }, replace ? entity : { $set: entity })
             .then((result) => {
                 return {
-                    status: "ok"
+                    status: 202
                 }
             })
             .catch(this.errorHandler);
     }
 
     delete(id: string): Promise<OperationStatus> {
-        return this.repository
+        return this.mainRepository
             .deleteOne({ _id: id })
             .then((result) => {
                 return {
-                    status: "ok"
+                    status: 202
                 }
             })
             .catch(this.errorHandler);
@@ -198,12 +235,11 @@ export class FultonMongoEntityService<TEntity> implements IEntityService<TEntity
      * @param error 
      */
     protected errorHandler(error: any) {
-        FultonLog.error("MongoEntityService operation failed", error);
+        FultonLog.error("MongoEntityService operation failed with error:\n%O", error);
 
         return {
-            status: "error",
             errors: {
-                "message": error.message
+                "message": [error.message as string]
             }
         }
     }
@@ -292,10 +328,10 @@ export class FultonMongoEntityService<TEntity> implements IEntityService<TEntity
 
             let execP;
             if (refId instanceof Array) {
-                execP = Promise.all(refId.map(exec));                
+                execP = Promise.all(refId.map(exec));
             } else {
-                execP = exec(refId);  
-            } 
+                execP = exec(refId);
+            }
 
             return execP.then(data => {
                 target[columnName] = data;

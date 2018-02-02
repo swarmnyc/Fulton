@@ -57,7 +57,8 @@ export interface RouterActionDocOptions {
 
 
 export interface FultonErrorObject {
-    [key: string]: string[];
+    message?: string | string[];
+    [key: string]: string | string[];
 }
 
 export interface IEntityService<TEntity> {
@@ -80,13 +81,12 @@ export interface QueryColumnStates {
 }
 
 export interface OperationStatus {
-    status?: string;
+    status?: number;
     errors?: FultonErrorObject;
 }
 
 export interface OperationResult<T=any> {
     data?: T[];
-    status?: string;
     errors?: FultonErrorObject;
     pagination?: {
         total?: number;
@@ -97,7 +97,6 @@ export interface OperationResult<T=any> {
 
 export interface OperationOneResult<T=any> {
     data?: T;
-    status?: string;
     errors?: FultonErrorObject;
     pagination?: {
         total?: number;

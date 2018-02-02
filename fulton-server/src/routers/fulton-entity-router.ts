@@ -1,11 +1,11 @@
 import { FullEntityRouterMetadata, getFullEntityRouterMethodMetadata } from "./route-decorators-helpers";
 import { HttpDelete, HttpGet, HttpPatch, HttpPost } from "./route-decorators";
-import { Injectable, NextFunction, Request, Response } from "../index";
 
 import { FultonRouter } from "./fulton-router";
-import { IEntityService } from "../interfaces";
+import { IEntityService, Injectable, NextFunction, Request, Response, OperationResult, OperationOneResult } from "../interfaces";
 import { createEntityService } from "../services/fulton-entity-service-helper";
 import { queryById } from "../middlewares/query-params-parser";
+import { OperationStatus } from "../index";
 
 @Injectable()
 export abstract class FultonEntityRouter<TEntity> extends FultonRouter {
@@ -46,26 +46,14 @@ export abstract class FultonEntityRouter<TEntity> extends FultonRouter {
 
         this.entityService
             .find(req.queryParams)
-            .then((result) => {
-                if (result.errors) {
-                    res.status(400).send(result);
-                } else {
-                    res.send(result);
-                }
-            })
+            .then(this.sendResult(res));
     }
 
     @HttpGet("/:id", queryById())
     detail(req: Request, res: Response) {
         this.entityService
             .findOne(req.queryParams)
-            .then((result) => {
-                if (result.errors) {
-                    res.status(400).send(result);
-                } else {
-                    res.send(result);
-                }
-            })
+            .then(this.sendResult(res));
     }
 
     @HttpPost("/")
@@ -73,16 +61,9 @@ export abstract class FultonEntityRouter<TEntity> extends FultonRouter {
         if (req.body.data) {
             this.entityService
                 .create(req.body.data)
-                .then((result) => {
-                    if (result.errors) {
-                        res.status(400).send(result);
-                    } else {
-                        res.send(result);
-                    }
-                });
+                .then(this.sendResult(res));
         } else {
             res.status(400).send({
-                status: "error",
                 errors: { "message": "no data" }
             });
         }
@@ -94,16 +75,9 @@ export abstract class FultonEntityRouter<TEntity> extends FultonRouter {
         if (req.params.id && req.body.data) {
             this.entityService
                 .update(req.params.id, req.body.data)
-                .then((result) => {
-                    if (result.errors) {
-                        res.status(400).send(result);
-                    } else {
-                        res.send(result);
-                    }
-                });
+                .then(this.sendResult(res));
         } else {
             res.status(400).send({
-                status: "error",
                 errors: { "message": "no data or id" }
             });
         }
@@ -115,18 +89,26 @@ export abstract class FultonEntityRouter<TEntity> extends FultonRouter {
         if (req.params.id) {
             this.entityService
                 .delete(req.params.id)
-                .then((result) => {
-                    if (result.errors) {
-                        res.status(400).send(result);
-                    } else {
-                        res.send(result);
-                    }
-                });
+                .then(this.sendResult(res));
         } else {
             res.status(400).send({
-                status: "error",
                 errors: { "message": "no id" }
             });
+        }
+    }
+
+    protected sendResult(res: Response): ((result: OperationResult | OperationOneResult | OperationStatus) => void) {
+        return (result) => {
+            if (result.errors) {
+                res.status(400).send(result);
+            } else {
+                let status = (result as OperationStatus).status;
+                if (status) {
+                    res.status(status).end();
+                } else {
+                    res.send(result);
+                }
+            }
         }
     }
 }

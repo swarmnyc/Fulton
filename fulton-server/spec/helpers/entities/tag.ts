@@ -1,13 +1,13 @@
-import { Entity, ObjectIdColumn, Column } from "typeorm";
+import { entity, objectIdColumn, column } from "../../../src/interfaces";
 
-@Entity("tags")
+@entity("tags")
 export class Tag {
-    @ObjectIdColumn()
+    @objectIdColumn()
     id: string;
 
-    @Column()
+    @column()
     name: string;
 
-    @Column()
+    @column()
     type: string;
 }

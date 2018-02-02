@@ -1,29 +1,29 @@
-import { Entity, ObjectIdColumn, Column, OneToMany, OneToOne, ManyToOne } from "typeorm";
 import { Author } from "./author";
+import { entity, column, objectIdColumn, manyToOne } from "../../../src/interfaces";
 
-@Entity("hotdogs")
+@entity("hotdogs")
 export class Hotdog {
-    @ObjectIdColumn()
+    @objectIdColumn()
     hotdogId: string;
 
-    @Column()
+    @column()
     name: string;
 
-    @Column({ select: false })
+    @column({ select: false })
     location: number[];
 
-    @Column()
+    @column()
     address: string;
 
-    @Column()
+    @column()
     review: string;
 
-    @Column({ select: false })
+    @column({ select: false })
     picture: string;
 
-    @Column()
+    @column()
     authorId: string;
 
-    @ManyToOne(type => Author, key => "authorId")
+    @manyToOne(type => Author, key => "authorId")
     author: Author;
 }

@@ -1,20 +1,20 @@
-import { Entity, ObjectIdColumn, Column, ManyToMany } from "typeorm";
 import { Tag } from "./tag";
+import { entity, objectIdColumn, column, manyToMany } from "../../../src/interfaces";
 
-@Entity("authors")
+@entity("authors")
 export class Author {
-    @ObjectIdColumn()
+    @objectIdColumn()
     id: string;
 
-    @Column()
+    @column()
     name: string;
 
-    @Column({ select: false })
+    @column({ select: false })
     imageUrl: string;
 
-    @Column()
+    @column()
     tagIds: string[];
 
-    @ManyToMany(type => Tag, keys => "tagIds")
+    @manyToMany(type => Tag, keys => "tagIds")
     tags: Tag[];
 }

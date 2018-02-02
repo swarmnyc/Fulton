@@ -1,7 +1,7 @@
 import * as assert from "assert";
 import * as lodash from "lodash";
 
-import { ErrorMiddleware, FultonApp, Request, Response, Middleware, asyncWrap } from "../index";
+import { ErrorMiddleware, FultonApp, Request, Response, Middleware } from "../index";
 import { FullRouterMetadata, RouterMetadata, getFullRouterMethodMetadata, getRouterMetadata } from "./route-decorators-helpers";
 import { DiContainer, PathIdentifier, inject, injectable } from "../interfaces";
 import { IRouterMatcher, Router as ExpressRouter } from "express";
@@ -9,7 +9,7 @@ import { IRouterMatcher, Router as ExpressRouter } from "express";
 import { TypeIdentifier } from "../helpers/type-helpers";
 
 /**
- * Express Router Wrap, it uses asyncHandler to support async await
+ * Express Router Wrap
  * 
  * ## example
  * 
@@ -17,18 +17,15 @@ import { TypeIdentifier } from "../helpers/type-helpers";
  * @router("/Food")
  * export class FoodRouter extends Router {
  *    @httpGet()
- *    async list(req: Request, res: Response) { 
- *      return true; //if return true, asyncHandler will all next();
+ *    list(req: Request, res: Response) { 
  *    }
  * 
  *    @httpGet("/:id")
- *    async detail(req: Request, res: Response, next: NextFunction) { 
- *       next(); // call next() yourself;
+ *    detail(req: Request, res: Response, next: NextFunction) { 
  *    }
  * 
- *    @httpPost()
- *    async create(req: Request, res: Response) { 
- *       // if retrun not true,  asyncHandler won't call next();
+ *    @httpPost("/")
+ *    create(req: Request, res: Response) { 
  *    }
  * }
  * ```
@@ -72,7 +69,7 @@ export abstract class Router {
 
             let method: Middleware = lodash.get(this, methodMetadata.property);
             method = method.bind(this);
-            middlewares.push(asyncWrap(method));
+            middlewares.push(method);
 
             routeMethod.call(router, methodMetadata.path, middlewares)
         }

@@ -43,15 +43,15 @@ module.exports = async function identityInitializer(app: FultonApp) {
 
         // assign userService
         app.userService = userService;
-        app.server.request.constructor.prototype.userService = userService;
+        app.express.request.constructor.prototype.userService = userService;
 
-        app.server.use(passport.initialize());
+        app.express.use(passport.initialize());
 
         // for register
         if (idOptions.register.enabled) {
             let registerOptions = idOptions.register;
-            let httpMethod = app.server[registerOptions.httpMethod];
-            httpMethod.call(app.server, registerOptions.path, registerOptions.handler);
+            let httpMethod = app.express[registerOptions.httpMethod];
+            httpMethod.call(app.express, registerOptions.path, registerOptions.handler);
         }
 
         // add pre-defined login strategy
@@ -185,8 +185,8 @@ module.exports = async function identityInitializer(app: FultonApp) {
                     args.push(options.successMiddleware);
                 }
 
-                let httpMethod = app.server[options.httpMethod || "get"];
-                httpMethod.apply(app.server, [options.path, args]);
+                let httpMethod = app.express[options.httpMethod || "get"];
+                httpMethod.apply(app.express, [options.path, args]);
             }
 
             if (options.callbackPath) {
@@ -210,8 +210,8 @@ module.exports = async function identityInitializer(app: FultonApp) {
                     args.push(options.callbackSuccessMiddleware);
                 }
 
-                let httpMethod = app.server[options.callbackHttpMethod || "get"];
-                httpMethod.apply(app.server, [options.callbackPath, args]);
+                let httpMethod = app.express[options.callbackHttpMethod || "get"];
+                httpMethod.apply(app.express, [options.callbackPath, args]);
             }
 
             if (options.addToDefaultAuthenticateList) {
@@ -220,7 +220,7 @@ module.exports = async function identityInitializer(app: FultonApp) {
         }
 
         if (idOptions.defaultAuthenticate && idOptions.defaultAuthSupportStrategies.length > 0) {
-            app.server.use(idOptions.defaultAuthenticate);
+            app.express.use(idOptions.defaultAuthenticate);
         }
     }
 }

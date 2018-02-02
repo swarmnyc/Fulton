@@ -3,7 +3,7 @@ import * as lodash from "lodash";
 
 import { ErrorMiddleware, FultonApp, Request, Response, Middleware, asyncWrap } from "../index";
 import { FullRouterMetadata, RouterMetadata, getFullRouterMethodMetadata, getRouterMetadata } from "./route-decorators-helpers";
-import { FultonDiContainer, PathIdentifier, Inject, Injectable } from "../interfaces";
+import { DiContainer, PathIdentifier, Inject, Injectable } from "../interfaces";
 import { IRouterMatcher, Router } from "express";
 
 import { TypeIdentifier } from "../helpers/type-helpers";
@@ -81,7 +81,7 @@ export abstract class FultonRouter {
             router.use(lodash.get(router, this.metadata.errorhandler));
         }
 
-        this.app.server.use(this.metadata.router.path, router);
+        this.app.express.use(this.metadata.router.path, router);
     }
 
     protected onInit() { }

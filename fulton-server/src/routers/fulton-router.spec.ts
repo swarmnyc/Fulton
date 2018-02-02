@@ -139,7 +139,7 @@ describe('Fulton Router', () => {
         let app = express();
 
         let spy = spyOn(app, "use");
-        router["app"] = { server: app } as any;
+        router["app"] = { express: app } as any;
 
         router.init();
 

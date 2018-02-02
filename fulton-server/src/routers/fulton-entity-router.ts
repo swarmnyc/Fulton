@@ -102,7 +102,7 @@ export abstract class FultonEntityRouter<TEntity> extends FultonRouter {
             if (result.errors) {
                 res.status(400).send(result);
             } else {
-                let status = (result as OperationStatus).status;
+                let status = (<OperationStatus>result).status;
                 if (status) {
                     res.status(status).end();
                 } else {

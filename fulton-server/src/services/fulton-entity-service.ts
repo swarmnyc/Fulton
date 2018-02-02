@@ -1,5 +1,5 @@
-import { Injectable, IUser } from "../index";
-import { Repository } from "typeorm";
+import { Injectable, IUser, Type } from "../index";
+import { Repository, getRepository } from "typeorm";
 import { IEntityService, Inject, QueryParams, OperationResult, OperationOneResult, OperationStatus } from "../interfaces";
 import { FultonApp } from "../fulton-app";
 
@@ -7,13 +7,24 @@ import { FultonApp } from "../fulton-app";
 export class EntityService<TEntity> implements IEntityService<TEntity> {
     @Inject(FultonApp)
     protected app: FultonApp;
-    
-    constructor(protected repository: Repository<TEntity>) {
-        
+    protected mainRepository: Repository<TEntity>
+
+    constructor(entity: Type<TEntity>)
+    constructor(mainRepository: Repository<TEntity>)
+    constructor(input: Repository<TEntity> | Type<TEntity>) {
+        if (input instanceof Repository) {
+            this.mainRepository = input
+        } else {
+            this.mainRepository = this.getRepository(input);
+        }
     }
 
     get currentUser(): IUser {
         return this.app.userService.currentUser;
+    }
+
+    protected getRepository<T>(entity: Type<T>, connectionName?: string): Repository<T> {
+        return getRepository(entity, connectionName)
     }
 
     find(queryParams: QueryParams): Promise<OperationResult<TEntity>> {
@@ -28,7 +39,7 @@ export class EntityService<TEntity> implements IEntityService<TEntity> {
         throw new Error("not imploment");
     }
 
-    update(id: string, entity: TEntity): Promise<OperationStatus>  {
+    update(id: string, entity: TEntity): Promise<OperationStatus> {
         throw new Error("not imploment");
     }
 

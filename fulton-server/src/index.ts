@@ -13,3 +13,5 @@ export * from "./helpers";
 
 export * from "./middlewares"
 export * from "./repositories/repository-decorator"
+
+export * from "./extensions"

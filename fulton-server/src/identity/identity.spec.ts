@@ -46,7 +46,7 @@ class MyApp extends FultonApp {
     initIdentity(): Promise<void> {
         super.initIdentity()
 
-        this.server.all("/", (req, res) => {
+        this.express.all("/", (req, res) => {
             if (req.isAuthenticated()) {
                 res.send("with user:" + req.user.username);
             } else {
@@ -54,7 +54,7 @@ class MyApp extends FultonApp {
             }
         });
 
-        this.server.get("/profile", authorize(), (req, res) => {
+        this.express.get("/profile", authorize(), (req, res) => {
             res.send(req.user);
         });
 

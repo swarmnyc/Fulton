@@ -1,4 +1,4 @@
-import { FultonDiContainer } from "../index";
+import { DiContainer } from "../interfaces";
 import { isFunction } from "util";
 
 export type TypeIdentifier<T = any> = (string | symbol | Type<T>);
@@ -48,12 +48,12 @@ export interface FactoryProvider {
      * let factory = app.container.get<Factory<ServiceB>>(ServiceB);
      * let instance = factory("arg");
      */
-    useFactory: (container: FultonDiContainer) => Factory;
+    useFactory: (container: DiContainer) => Factory;
 }
 
 export interface FunctionProvider {
     provide: TypeIdentifier;
-    useFunction: (container: FultonDiContainer) => any;
+    useFunction: (container: DiContainer) => any;
 
     /**
      * use Singleton pattern if true, default is false;

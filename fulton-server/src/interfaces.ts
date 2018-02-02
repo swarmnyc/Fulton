@@ -5,45 +5,15 @@ import { inject, injectable, interfaces } from "inversify";
 
 import { FultonApp } from "./fulton-app";
 import { Type } from "./helpers";
+import { Repository } from "typeorm";
 
-export const Injectable = injectable;
-
-export const Inject = inject;
+export * from "./re-export"
 
 export type PathIdentifier = (string | RegExp | (string | RegExp)[]);
 
-/**
- * alias for inversify.interfaces.Container
- */
-export type FultonDiContainer = interfaces.Container;
+export type RepositoryFactory<TEntity = any> = ((entity: Type<TEntity>) => Repository<TEntity>);
 
-export interface NextFunction extends express.NextFunction { }
-
-/**
- * extends express.Request
- */
-export interface Request extends express.Request { }
-
-/**
- * extends express.Response
- */
-export interface Response extends express.Response { }
-
-/**
- * alias for express.RequestHandler
- */
-export interface Middleware extends express.RequestHandler {
-    (req: Request, res: Response, next: NextFunction): any;
-}
-
-/**
- * alias for express.ErrorRequestHandler
- */
-export interface ErrorMiddleware extends express.ErrorRequestHandler {
-    (err: any, req: Request, res: Response, next: NextFunction): any;
-}
-
-export type EntityServiceFactory<TEntity> = ((entity: Type<TEntity>) => IEntityService<TEntity>);
+export type EntityServiceFactory<TEntity = any> = ((entity: Type<TEntity>) => IEntityService<TEntity>);
 
 export interface RouterDocOptions {
     title?: string;
@@ -55,7 +25,6 @@ export interface RouterActionDocOptions {
     title?: string;
     description?: string;
 }
-
 
 export interface FultonErrorObject {
     message?: string[];
@@ -169,20 +138,3 @@ export interface QueryParams {
 export type HttpMethod = "all" | "get" | "post" | "patch" | "delete" | "head" | "put";
 
 export type AppMode = "api" | "web-view" | "mixed";
-
-
-// custom types for helping development;
-declare global {
-    namespace Express {
-        interface Request {
-            fultonApp?: FultonApp;
-            userService?: IUserService<IUser>;
-            container?: FultonDiContainer;
-            queryParams?: QueryParams;
-        }
-
-        interface Response {
-        }
-    }
-
-}

@@ -1,4 +1,4 @@
-import { Factory, FultonApp, FultonAppOptions, FultonDiContainer, FultonRouter, FultonService, Inject, Injectable, Router } from "./index";
+import { Factory, FultonApp, FultonAppOptions, DiContainer, FultonRouter, FultonService, Inject, Injectable, Router, EntityService } from "./index";
 
 @Injectable()
 class ServiceA extends FultonService {
@@ -63,7 +63,8 @@ class RouterB extends FultonRouter {
 class MyFultonApp extends FultonApp {
     protected onInit(options: FultonAppOptions): void | Promise<void> {
         options.providers = [
-            { provide: "api_key", useValue: "abcd" }
+            { provide: "api_key", useValue: "abcd" },
+            { provide: EntityService, useValue: "abcd" }
         ];
 
         options.services = [
@@ -89,7 +90,7 @@ class MyFultonApp extends FultonApp {
             { provide: ServiceD, useValue: new ServiceE(new ServiceB(null), "e") },
             {
                 provide: "Service",
-                useFactory: (container: FultonDiContainer) => {
+                useFactory: (container: DiContainer) => {
                     return (type: string) => {
                         if (type == "a") return container.get(ServiceA);
                         if (type == "b") return container.get(ServiceB);
@@ -215,5 +216,9 @@ describe('Fulton App', () => {
         expect(app.routers[0]["app"]).toBeTruthy();
         expect(app.routers[0]["metadata"].router.path).toEqual("/A");
         expect((app.routers[1] as RouterB).serviceB.value).toEqual("b");
+    });
+
+    it('should override EntityServiceFactory', async () => {
+        expect(app.container.get<any>(EntityService)).toEqual("abcd");
     });
 });

@@ -1,4 +1,4 @@
-import { FultonApp, FultonAppOptions, FultonDiContainer, NextFunction, Request, Response } from "fulton-server"
+import { FultonApp, FultonAppOptions, DiContainer, NextFunction, Request, Response } from "fulton-server"
 
 import { FoodRouter } from "./routers/food-router";
 
@@ -20,7 +20,7 @@ export class ExampleApp extends FultonApp {
             { folder: "./assets/" }
         ]
 
-        this.server.all("/error", (req, res) => {
+        this.express.all("/error", (req, res) => {
             throw new Error("test error handler");
         });
 

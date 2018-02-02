@@ -1,4 +1,4 @@
-import { FultonDiContainer, Inject, Injectable } from "../interfaces";
+import { DiContainer, Inject, Injectable } from "../interfaces";
 
 import { FultonApp } from "../fulton-app";
 import { Type } from "../helpers/type-helpers";

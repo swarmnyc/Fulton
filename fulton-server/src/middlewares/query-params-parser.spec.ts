@@ -8,11 +8,11 @@ class MyApp extends FultonApp {
     }
 
     didInitRouters() {
-        this.server.get("/", (req: Request, res: Response) => {
+        this.express.get("/", (req: Request, res: Response) => {
             res.send(req.queryParams);
         })
 
-        this.server.get("/test/:id", queryById(), (req: Request, res: Response) => {
+        this.express.get("/test/:id", queryById(), (req: Request, res: Response) => {
             res.send(req.queryParams);
         })
     }

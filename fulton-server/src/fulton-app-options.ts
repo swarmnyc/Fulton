@@ -106,10 +106,10 @@ export class FultonAppOptions {
      *   }
      * }
      * 
-     * @Injectable() 
+     * @injectable() 
      * class ApiService {
      *  // apiKey is injected by container when it is created
-     *  constructor( @Inject("api_key") private apiKey: string) 
+     *  constructor( @inject("api_key") private apiKey: string) 
      *  }
      * }
      * ```
@@ -179,10 +179,10 @@ export class FultonAppOptions {
      *   }
      * }
      * 
-     * @Injectable() 
+     * @injectable() 
      * class ApiService {
      *  // apiKey is injected by container when it is created
-     *  constructor( @Inject("api_key") private apiKey: string) 
+     *  constructor( @inject("api_key") private apiKey: string) 
      *  }
      * }
      * ```

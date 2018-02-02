@@ -1,6 +1,6 @@
-import { Service, Injectable, IUser, OperationResult, QueryColumnStates, Type } from "../index";
+import { Service, injectable, IUser, OperationResult, QueryColumnStates, Type } from "../index";
 import { MongoRepository, getMongoRepository } from "typeorm";
-import { IEntityService, Inject, QueryParams, OperationOneResult, OperationStatus } from "../interfaces";
+import { IEntityService, inject, QueryParams, OperationOneResult, OperationStatus } from "../interfaces";
 import { FultonApp } from "../fulton-app";
 import { EntityMetadataHelper } from "../helpers/entity-metadata-helper";
 import FultonLog from "../fulton-log";
@@ -16,7 +16,7 @@ interface IncludeOptions {
  * ## example 1: use default repository 
  * 
  * ```
- * @Injectable()
+ * @injectable()
  * class HotdogEntityService extends MongoEntityService<Hotdog>{
  *    constructor(){
  *        super(Hotdog) // just give a type, so it can find the repository.
@@ -32,7 +32,7 @@ interface IncludeOptions {
  * 
  * // remember add HotdogRepository to options.repositories, so it can be injectable.
  * 
- * @Injectable()
+ * @injectable()
  * class HotdogEntityService extends MongoEntityService<Hotdog>{
  *    constructor(repository HotdogRepository) { 
  *        super(repository)
@@ -40,9 +40,9 @@ interface IncludeOptions {
  * }
  * 
  */
-@Injectable()
+@injectable()
 export class MongoEntityService<TEntity> implements IEntityService<TEntity> {
-    @Inject(FultonApp)
+    @inject(FultonApp)
     protected app: FultonApp;
     protected mainRepository: MongoRepository<TEntity>
 

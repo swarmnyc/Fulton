@@ -1,9 +1,3 @@
-import * as express from "express";
-
-import { IUser, IUserService } from "./identity";
-import { inject, injectable, interfaces } from "inversify";
-
-import { FultonApp } from "./fulton-app";
 import { Type } from "./helpers";
 import { Repository } from "typeorm";
 

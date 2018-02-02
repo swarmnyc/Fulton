@@ -1,4 +1,4 @@
-import { Factory, FultonApp, FultonAppOptions, DiContainer, FultonRouter, Service, Inject, Injectable, Router } from "./index";
+import { Factory, FultonApp, FultonAppOptions, DiContainer, FultonRouter, Service, inject, injectable, Router } from "./index";
 import { MongoConnectionOptions } from "typeorm/driver/mongodb/MongoConnectionOptions";
 
 class MyFultonApp extends FultonApp {

@@ -2,7 +2,7 @@ import { Entity, ObjectIdColumn, Column } from "typeorm";
 import { Router, HttpGet, EntityRouter } from "./route-decorators";
 import { FultonEntityRouter } from "./fulton-entity-router";
 import { EntityService } from "../services/entity-service";
-import { Injectable } from "../index";
+import { injectable } from "../index";
 import { FultonApp } from "../fulton-app";
 import { FultonAppOptions } from "../fulton-app-options";
 import * as typeorm from 'typeorm';
@@ -21,7 +21,7 @@ class Food {
 class FoodRepository extends Repository<Food>{
 }
 
-@Injectable()
+@injectable()
 class FoodEntityService extends EntityService<Food> {
     constructor() {
         super(new FoodRepository());

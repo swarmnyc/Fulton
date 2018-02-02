@@ -1,4 +1,4 @@
-import { FultonEntityRouter, FultonRouter, Middleware, Request, Response, Injectable, HttpGet, Router, Inject, authorize, authorizeByRole } from "fulton-server"
+import { FultonEntityRouter, FultonRouter, Middleware, Request, Response, injectable, HttpGet, Router, inject, authorize, authorizeByRole } from "fulton-server"
 
 @Router("/food", authorize(), authorizeByRole("admin"))
 export class FoodRouter extends FultonRouter {

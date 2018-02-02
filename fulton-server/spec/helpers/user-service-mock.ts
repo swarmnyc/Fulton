@@ -1,6 +1,6 @@
 import * as lodash from 'lodash';
 
-import { AccessToken, FultonError, FultonUser, IUserService, Inject, Injectable, IUserRegister } from "../../src/index";
+import { AccessToken, FultonError, FultonUser, IUserService, inject, injectable, IUserRegister } from "../../src/index";
 
 import { FultonApp } from "../../src/fulton-app";
 

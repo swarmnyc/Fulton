@@ -1,11 +1,17 @@
 import * as express from "express";
 
 import { IUser, IUserService } from "./identity";
-import { inject, injectable, interfaces } from "inversify";
+import { inject as inversifyInject, injectable as inversifyInjectable, interfaces } from "inversify";
 
-export const Injectable = injectable;
+/**
+ * alias for inversify.injectable
+ */
+export const injectable = inversifyInjectable;
 
-export const Inject = inject;
+/**
+ * alias for inversify.inject
+ */
+export const inject = inversifyInject;
 
 /**
  * alias for inversify.interfaces.Container

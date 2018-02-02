@@ -5,7 +5,7 @@ import * as validator from 'validator';
 
 import { AccessToken, FultonAccessToken, IFultonUser, IUserRegister, IUserService } from "../interfaces";
 import { EntityRepository, MongoRepository, Repository } from "typeorm";
-import { Inject, Injectable } from "../../interfaces";
+import { inject, injectable } from "../../interfaces";
 
 import { FultonApp } from "../../fulton-app";
 import { FultonError } from "../../common";
@@ -63,13 +63,13 @@ class SqlRunner implements IRunner {
 }
 
 
-@Injectable()
+@injectable()
 export class FultonUserService implements IUserService<FultonUser> {
     private options: IdentityOptions;
     private runner: IRunner;
 
-    constructor( @Inject(FultonApp) private app: FultonApp,
-        @Inject("UserRepository") private userRepository: Repository<FultonUser>) {
+    constructor( @inject(FultonApp) private app: FultonApp,
+        @inject("UserRepository") private userRepository: Repository<FultonUser>) {
         this.options = app.options.identity;
 
         if (userRepository instanceof MongoRepository) {

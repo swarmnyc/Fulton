@@ -1,11 +1,11 @@
-import { Injectable, IUser, Type } from "../index";
+import { injectable, IUser, Type } from "../index";
 import { Repository, getRepository } from "typeorm";
-import { IEntityService, Inject, QueryParams, OperationResult, OperationOneResult, OperationStatus } from "../interfaces";
+import { IEntityService, inject, QueryParams, OperationResult, OperationOneResult, OperationStatus } from "../interfaces";
 import { FultonApp } from "../fulton-app";
 
-@Injectable()
+@injectable()
 export class EntityService<TEntity> implements IEntityService<TEntity> {
-    @Inject(FultonApp)
+    @inject(FultonApp)
     protected app: FultonApp;
     protected mainRepository: Repository<TEntity>
 

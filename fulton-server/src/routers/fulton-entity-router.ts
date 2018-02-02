@@ -1,12 +1,12 @@
 import { FullEntityRouterMetadata, getFullEntityRouterMethodMetadata } from "./route-decorators-helpers";
 import { HttpDelete, HttpGet, HttpPatch, HttpPost } from "./route-decorators";
-import { IEntityService, Injectable, NextFunction, OperationOneResult, OperationResult, OperationStatus, Request, Response, EntityServiceFactory } from "../interfaces";
+import { IEntityService, injectable, NextFunction, OperationOneResult, OperationResult, OperationStatus, Request, Response, EntityServiceFactory } from "../interfaces";
 
 import { EntityService } from "../services";
 import { FultonRouter } from "./fulton-router";
 import { queryById } from "../middlewares";
 
-@Injectable()
+@injectable()
 export abstract class FultonEntityRouter<TEntity> extends FultonRouter {
     protected metadata: FullEntityRouterMetadata
 

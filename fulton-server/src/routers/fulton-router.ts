@@ -3,7 +3,7 @@ import * as lodash from "lodash";
 
 import { ErrorMiddleware, FultonApp, Request, Response, Middleware, asyncWrap } from "../index";
 import { FullRouterMetadata, RouterMetadata, getFullRouterMethodMetadata, getRouterMetadata } from "./route-decorators-helpers";
-import { DiContainer, PathIdentifier, Inject, Injectable } from "../interfaces";
+import { DiContainer, PathIdentifier, inject, injectable } from "../interfaces";
 import { IRouterMatcher, Router } from "express";
 
 import { TypeIdentifier } from "../helpers/type-helpers";
@@ -34,11 +34,11 @@ import { TypeIdentifier } from "../helpers/type-helpers";
  * ```
  * 
  */
-@Injectable()
+@injectable()
 export abstract class FultonRouter {
     protected metadata: FullRouterMetadata
     protected router: Router;
-    @Inject(FultonApp)
+    @inject(FultonApp)
     protected app: FultonApp;
 
     constructor() {

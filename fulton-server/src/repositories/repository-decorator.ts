@@ -10,7 +10,7 @@ injectable()(typeorm.Repository)
 injectable()(typeorm.MongoRepository)
 injectable()(typeorm.TreeRepository)
 
-export function Repo(entity: Type, connectionName: string = "default"): any {
+export function repository(entity: Type, connectionName: string = "default"): any {
     return function (target: any) {
         injectable()(target);
 

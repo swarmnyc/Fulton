@@ -1,5 +1,5 @@
 import { FullEntityRouterMetadata, getFullEntityRouterMethodMetadata } from "./route-decorators-helpers";
-import { HttpDelete, HttpGet, HttpPatch, HttpPost } from "./route-decorators";
+import { httpDelete, httpGet, httpPatch, httpPost } from "./route-decorators";
 import { IEntityService, injectable, NextFunction, OperationOneResult, OperationResult, OperationStatus, Request, Response, EntityServiceFactory } from "../interfaces";
 
 import { EntityService } from "../services";
@@ -28,7 +28,7 @@ export abstract class FultonEntityRouter<TEntity> extends FultonRouter {
         super.init();
     }
 
-    @HttpGet("/")
+    @httpGet("/")
     list(req: Request, res: Response, next: NextFunction) {
         // by default don't return all entities
         if (req.queryParams.pagination) {
@@ -49,14 +49,14 @@ export abstract class FultonEntityRouter<TEntity> extends FultonRouter {
             .then(this.sendResult(res));
     }
 
-    @HttpGet("/:id", queryById())
+    @httpGet("/:id", queryById())
     detail(req: Request, res: Response) {
         this.entityService
             .findOne(req.queryParams)
             .then(this.sendResult(res));
     }
 
-    @HttpPost("/")
+    @httpPost("/")
     create(req: Request, res: Response) {
         if (req.body.data) {
             this.entityService
@@ -69,7 +69,7 @@ export abstract class FultonEntityRouter<TEntity> extends FultonRouter {
         }
     }
 
-    @HttpPatch("/:id")
+    @httpPatch("/:id")
     update(req: Request, res: Response) {
         // TODO: determine who can update
         if (req.params.id && req.body.data) {
@@ -83,7 +83,7 @@ export abstract class FultonEntityRouter<TEntity> extends FultonRouter {
         }
     }
 
-    @HttpDelete("/:id")
+    @httpDelete("/:id")
     delete(req: Request, res: Response) {
         // TODO: determine who can delete
         if (req.params.id) {

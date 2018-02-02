@@ -1,6 +1,6 @@
-import { FultonEntityRouter, FultonRouter, Middleware, Request, Response, injectable, HttpGet, Router, inject, authorize, authorizeByRole } from "fulton-server"
+import { FultonEntityRouter, FultonRouter, Middleware, Request, Response, injectable, httpGet, router, inject, authorize, authorizeByRole } from "fulton-server"
 
-@Router("/food", authorize(), authorizeByRole("admin"))
+@router("/food", authorize(), authorizeByRole("admin"))
 export class FoodRouter extends FultonRouter {
     // constructor(private foodDataService: FoodEntityService) {
     //     super(foodDataService)
@@ -8,7 +8,7 @@ export class FoodRouter extends FultonRouter {
     //     this.detailDelegate = this.foodDataService.findByName;
     // }
 
-    @HttpGet()
+    @httpGet()
     get(req: Request, res: Response) {
         res.send("works");
     }

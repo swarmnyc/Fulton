@@ -5,7 +5,7 @@ import { Request, Response } from "../interfaces";
 import { getFullRouterMethodMetadata, getRouterMethodMetadataList } from "./route-decorators-helpers";
 
 import { FultonRouter } from "./fulton-router";
-import { Router, HttpPost, HttpDelete, HttpGet, HttpPut } from "./route-decorators";
+import { router, httpPost, httpDelete, httpGet, httpPut } from "./route-decorators";
 
 let middleware: Middleware = function () {
 
@@ -15,60 +15,60 @@ let middlewares: Middleware[] = [
     middleware, middleware, middleware
 ]
 
-@Router("/A", { title: "RouterA" })
+@router("/A", { title: "RouterA" })
 export class RouterA extends FultonRouter {
-    @HttpGet()
+    @httpGet()
     list() { }
 
-    @HttpGet("/:id", { title: "Get" })
+    @httpGet("/:id", { title: "Get" })
     get() { }
 
     @errorHandler()
     error() { }
 }
 
-@Router("/B", { title: "RouterB" }, ...middlewares)
+@router("/B", { title: "RouterB" }, ...middlewares)
 export class RouterB extends FultonRouter {
 
 }
 
-@Router("/C", middleware)
+@router("/C", middleware)
 export class RouterC extends RouterA {
-    @HttpGet("/list", middleware, middleware)
+    @httpGet("/list", middleware, middleware)
     list() { }
 
-    @HttpGet("/:key", { title: "get" }, ...middlewares)
+    @httpGet("/:key", { title: "get" }, ...middlewares)
     get() { }
 }
 
-@Router("/D", middleware, middleware)
+@router("/D", middleware, middleware)
 export class RouterD extends RouterA {
-    @HttpPut("/", ...middlewares)
+    @httpPut("/", ...middlewares)
     update() { }
 
-    @HttpDelete()
+    @httpDelete()
     delete() { }
 }
 
 // router level authorization
-@Router("/Food")
+@router("/Food")
 export class FoodRouter extends FultonRouter {
     // all actions needs to be authorized
-    @HttpGet()
+    @httpGet()
     list(req: Request, res: Response) { }
 
-    @HttpGet("/:id")
+    @httpGet("/:id")
     detail(req: Request, res: Response) { }
 }
 
-@Router("/auth")
+@router("/auth")
 export class AuthRouter extends FultonRouter {
-    @HttpGet("/login")
+    @httpGet("/login")
     loginView(req: Request, res: Response) {
         res.render("login");
     }
 
-    @HttpPost("/login", authenticate("local", { failureRedirect: "/auth/login" }))
+    @httpPost("/login", authenticate("local", { failureRedirect: "/auth/login" }))
     login(req: Request, res: Response) {
         res.redirect("/");
     }

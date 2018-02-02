@@ -2,26 +2,26 @@ import * as passport from 'passport';
 import { FultonApp } from "../fulton-app";
 import { FultonAppOptions } from "../fulton-app-options";
 import { HttpTester } from "../../spec/helpers/http-tester";
-import { AccessToken, authorize, authorizeByRole, authorizeByRoles, Router, HttpGet, Request, Response, FultonRouter } from "../index";
+import { AccessToken, authorize, authorizeByRole, authorizeByRoles, router, httpGet, Request, Response, FultonRouter } from "../index";
 import { UserServiceMock } from "../../spec/helpers/user-service-mock";
 
 
-@Router("/test")
+@router("/test")
 export class TestRouter extends FultonRouter {
-    @HttpGet("/role", authorizeByRole("admin"))
+    @httpGet("/role", authorizeByRole("admin"))
     role(req: Request, res: Response) {
         res.send("works");
     }
 
-    @HttpGet("/roles", authorizeByRoles(["admin", "rd"]))
+    @httpGet("/roles", authorizeByRoles(["admin", "rd"]))
     roles(req: Request, res: Response) {
         res.send("works");
     }
 }
 
-@Router("/test2", authorizeByRole("admin"))
+@router("/test2", authorizeByRole("admin"))
 export class TestRouter2 extends FultonRouter {
-    @HttpGet()
+    @httpGet()
     index(req: Request, res: Response) {
         res.send("works");
     }

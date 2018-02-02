@@ -1,4 +1,4 @@
-import { Factory, FultonApp, FultonAppOptions, DiContainer, FultonRouter, Service, inject, injectable, Router, EntityService } from "./index";
+import { Factory, FultonApp, FultonAppOptions, DiContainer, FultonRouter, Service, inject, injectable, router, EntityService } from "./index";
 
 @injectable()
 class ServiceA extends Service {
@@ -46,14 +46,14 @@ class ApiService {
     }
 }
 
-@Router("/A")
+@router("/A")
 class RouterA extends FultonRouter {
     constructor(public serviceA: ServiceA) {
         super();
     }
 }
 
-@Router("/B")
+@router("/B")
 class RouterB extends FultonRouter {
     constructor(public serviceB: ServiceB) {
         super();

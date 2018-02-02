@@ -10,9 +10,9 @@ import { isFunction } from "util";
  * @param middlewares 
  * @param afterMiddlewares 
  */
-export function Router(path: PathIdentifier, doc?: RouterDocOptions, ...middlewares: Middleware[]): any
-export function Router(path: PathIdentifier, ...middlewares: Middleware[]): any
-export function Router(path: PathIdentifier, ...args: any[]): any {
+export function router(path: PathIdentifier, doc?: RouterDocOptions, ...middlewares: Middleware[]): any
+export function router(path: PathIdentifier, ...middlewares: Middleware[]): any
+export function router(path: PathIdentifier, ...args: any[]): any {
     return function (target: any) {
         injectable()(target);
         let doc, middlewares;
@@ -51,10 +51,10 @@ export function errorHandler() {
  * @param doc 
  * @param middlewares 
  */
-export function HttpAll(path?: PathIdentifier, doc?: RouterActionDocOptions, ...middlewares: Middleware[]): any
-export function HttpAll(path?: PathIdentifier, ...middlewares: Middleware[]): any
-export function HttpAll(path?: PathIdentifier, ...args: any[]): any {
-    return HttpAction("all", path, ...args);
+export function httpAll(path?: PathIdentifier, doc?: RouterActionDocOptions, ...middlewares: Middleware[]): any
+export function httpAll(path?: PathIdentifier, ...middlewares: Middleware[]): any
+export function httpAll(path?: PathIdentifier, ...args: any[]): any {
+    return httpAction("all", path, ...args);
 }
 
 /**
@@ -63,10 +63,10 @@ export function HttpAll(path?: PathIdentifier, ...args: any[]): any {
  * @param doc 
  * @param middlewares 
  */
-export function HttpGet(path?: PathIdentifier, doc?: RouterActionDocOptions, ...middlewares: Middleware[]): any
-export function HttpGet(path?: PathIdentifier, ...middlewares: Middleware[]): any
-export function HttpGet(path?: PathIdentifier, ...args: any[]): any {
-    return HttpAction("get", path, ...args);
+export function httpGet(path?: PathIdentifier, doc?: RouterActionDocOptions, ...middlewares: Middleware[]): any
+export function httpGet(path?: PathIdentifier, ...middlewares: Middleware[]): any
+export function httpGet(path?: PathIdentifier, ...args: any[]): any {
+    return httpAction("get", path, ...args);
 }
 
 /**
@@ -75,10 +75,10 @@ export function HttpGet(path?: PathIdentifier, ...args: any[]): any {
  * @param doc 
  * @param middlewares 
  */
-export function HttpPost(path?: PathIdentifier, doc?: RouterActionDocOptions, ...middlewares: Middleware[]): any
-export function HttpPost(path?: PathIdentifier, ...middlewares: Middleware[]): any
-export function HttpPost(path?: PathIdentifier, ...args: any[]): any {
-    return HttpAction("post", path, ...args);
+export function httpPost(path?: PathIdentifier, doc?: RouterActionDocOptions, ...middlewares: Middleware[]): any
+export function httpPost(path?: PathIdentifier, ...middlewares: Middleware[]): any
+export function httpPost(path?: PathIdentifier, ...args: any[]): any {
+    return httpAction("post", path, ...args);
 }
 
 /**
@@ -87,10 +87,10 @@ export function HttpPost(path?: PathIdentifier, ...args: any[]): any {
  * @param doc 
  * @param middlewares 
  */
-export function HttpPut(path?: PathIdentifier, doc?: RouterActionDocOptions, ...middlewares: Middleware[]): any
-export function HttpPut(path?: PathIdentifier, ...middlewares: Middleware[]): any
-export function HttpPut(path?: PathIdentifier, ...args: any[]): any {
-    return HttpAction("put", path, ...args);
+export function httpPut(path?: PathIdentifier, doc?: RouterActionDocOptions, ...middlewares: Middleware[]): any
+export function httpPut(path?: PathIdentifier, ...middlewares: Middleware[]): any
+export function httpPut(path?: PathIdentifier, ...args: any[]): any {
+    return httpAction("put", path, ...args);
 }
 
 /**
@@ -99,10 +99,10 @@ export function HttpPut(path?: PathIdentifier, ...args: any[]): any {
  * @param doc 
  * @param middlewares 
  */
-export function HttpPatch(path?: PathIdentifier, doc?: RouterActionDocOptions, ...middlewares: Middleware[]): any
-export function HttpPatch(path?: PathIdentifier, ...middlewares: Middleware[]): any
-export function HttpPatch(path?: PathIdentifier, ...args: any[]): any {
-    return HttpAction("patch", path, ...args);
+export function httpPatch(path?: PathIdentifier, doc?: RouterActionDocOptions, ...middlewares: Middleware[]): any
+export function httpPatch(path?: PathIdentifier, ...middlewares: Middleware[]): any
+export function httpPatch(path?: PathIdentifier, ...args: any[]): any {
+    return httpAction("patch", path, ...args);
 }
 
 /**
@@ -111,10 +111,10 @@ export function HttpPatch(path?: PathIdentifier, ...args: any[]): any {
  * @param doc 
  * @param middlewares 
  */
-export function HttpHead(path?: PathIdentifier, doc?: RouterActionDocOptions, ...middlewares: Middleware[]): any
-export function HttpHead(path?: PathIdentifier, ...middlewares: Middleware[]): any
-export function HttpHead(path?: PathIdentifier, ...args: any[]): any {
-    return HttpAction("head", path, ...args);
+export function httpHead(path?: PathIdentifier, doc?: RouterActionDocOptions, ...middlewares: Middleware[]): any
+export function httpHead(path?: PathIdentifier, ...middlewares: Middleware[]): any
+export function httpHead(path?: PathIdentifier, ...args: any[]): any {
+    return httpAction("head", path, ...args);
 }
 
 /**
@@ -123,10 +123,10 @@ export function HttpHead(path?: PathIdentifier, ...args: any[]): any {
  * @param doc 
  * @param middlewares 
  */
-export function HttpDelete(path?: PathIdentifier, doc?: RouterActionDocOptions, ...middlewares: Middleware[]): any
-export function HttpDelete(path?: PathIdentifier, ...middlewares: Middleware[]): any
-export function HttpDelete(path?: PathIdentifier, ...args: any[]): any {
-    return HttpAction("delete", path, ...args);
+export function httpDelete(path?: PathIdentifier, doc?: RouterActionDocOptions, ...middlewares: Middleware[]): any
+export function httpDelete(path?: PathIdentifier, ...middlewares: Middleware[]): any
+export function httpDelete(path?: PathIdentifier, ...args: any[]): any {
+    return httpAction("delete", path, ...args);
 }
 
 /**
@@ -136,9 +136,9 @@ export function HttpDelete(path?: PathIdentifier, ...args: any[]): any {
  * @param doc 
  * @param middlewares 
  */
-export function HttpAction(method: HttpMethod, path: PathIdentifier, doc?: RouterActionDocOptions, ...middlewares: Middleware[]): any
-export function HttpAction(method: HttpMethod, path: PathIdentifier, ...middlewares: Middleware[]): any
-export function HttpAction(method: HttpMethod, path: PathIdentifier = "/", ...args: any[]): any {
+export function httpAction(method: HttpMethod, path: PathIdentifier, doc?: RouterActionDocOptions, ...middlewares: Middleware[]): any
+export function httpAction(method: HttpMethod, path: PathIdentifier, ...middlewares: Middleware[]): any
+export function httpAction(method: HttpMethod, path: PathIdentifier = "/", ...args: any[]): any {
     return function (target: any, property: string, descriptor: PropertyDescriptor) {
         let doc, middlewares;
 
@@ -180,9 +180,9 @@ export function HttpAction(method: HttpMethod, path: PathIdentifier = "/", ...ar
  * @param doc 
  * @param middlewares 
  */
-export function EntityRouter(path: PathIdentifier, entity: Type, doc?: RouterDocOptions, ...middlewares: Middleware[]): any
-export function EntityRouter(path: PathIdentifier, entity: Type, ...middlewares: Middleware[]): any
-export function EntityRouter(path: PathIdentifier, entity: Type, ...args: any[]): any {
+export function entityRouter(path: PathIdentifier, entity: Type, doc?: RouterDocOptions, ...middlewares: Middleware[]): any
+export function entityRouter(path: PathIdentifier, entity: Type, ...middlewares: Middleware[]): any
+export function entityRouter(path: PathIdentifier, entity: Type, ...args: any[]): any {
     return function (target: any) {
         injectable()(target);
         let doc, middlewares;

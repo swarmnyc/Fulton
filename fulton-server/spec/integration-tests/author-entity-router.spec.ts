@@ -1,4 +1,4 @@
-import { FultonApp, FultonAppOptions, authorize, AccessToken, Request, Response, FultonEntityRouter, EntityRouter, OperationResult, QueryParams, OperationOneResult, OperationStatus, Router, MongoEntityService, injectable, HttpGet } from "../../src/index";
+import { FultonApp, FultonAppOptions, authorize, AccessToken, Request, Response, FultonEntityRouter, entityRouter, OperationResult, QueryParams, OperationOneResult, OperationStatus, router, MongoEntityService, injectable, httpGet } from "../../src/index";
 import { UserServiceMock } from "../helpers/user-service-mock";
 import { HttpTester, HttpResult } from "../helpers/http-tester";
 import { Hotdog } from "../helpers/entities/hot-dog";
@@ -39,20 +39,20 @@ class AuthorEntityService extends MongoEntityService<Author>{
     }
 }
 
-@Router(/\/authors?/)
+@router(/\/authors?/)
 class AuthorEntityRouter extends FultonEntityRouter<Author>{
     constructor(protected entityService: AuthorEntityService) {
         super(entityService)
     }
 
-    @HttpGet("/tags")
+    @httpGet("/tags")
     tags(req: Request, res: Response) {
         this.entityService
             .getTags(req.queryParams)
             .then(this.sendResult(res));
     }
 
-    @HttpGet("/:id/tags")
+    @httpGet("/:id/tags")
     authorTags(req: Request, res: Response) {
         this.entityService
             .getTagsByAuthorId(req.params.id)

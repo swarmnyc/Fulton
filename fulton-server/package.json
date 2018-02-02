@@ -1,7 +1,7 @@
 {
   "name": "fulton-server",
   "version": "0.0.0-PLACEHOLDER",
-  "description": "",
+  "description": "Fulton is the best practical way to build web apis or websites we have done in our company. Basically, Fulton is integrated many popular libraries or frameworks seamlessly. By use Fulton, developers can build a completed web api or a websites quickly.",
   "main": "./build/index.js",
   "types": "./build/index.d.ts",
   "scripts": {
@@ -14,8 +14,21 @@
     "test:debug": "ts-node --inspect-brk=9229 ./spec/test.ts",
     "test:debug:it": "ts-node --inspect-brk=9229 ./spec/test.ts --it"
   },
-  "author": "",
-  "license": "ISC",
+  "author": {
+    "name": "SWARM",
+    "email": "dev@swarmnyc.com",
+    "url": "https://swarmnyc.com"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/swarmnyc/fulton.git"
+  },
+  "bugs": {
+    "url": "https://github.com/swarmnyc/fulton/issues"
+  },
+  "homepage": "https://github.com/swarmnyc/fulton",
+  "readme": "readme.md",
+  "license": "MIT",
   "devDependencies": {
     "@types/chalk": "^2.2.0",
     "@types/cors": "^2.8.3",
@@ -35,7 +48,7 @@
     "google-auth-library": "^1.1.0",
     "jasmine": "^2.9.0",
     "jasmine-ts": "^0.2.1",
-    "jsonapi-serializer": "^3.5.6",    
+    "jsonapi-serializer": "^3.5.6",
     "jws": "^3.1.4",
     "mongodb": "^2.2.34",
     "passport-github": "^1.1.0",

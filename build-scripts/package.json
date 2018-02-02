@@ -1,0 +1,15 @@
+{
+  "name": "fultion-build-scripts",
+  "version": "0.0.2",
+  "scripts": {
+    "build": "gulp build",
+    "publish": "gulp publish",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+    "gulp": "^3.9.1",
+    "gulp-replace": "^0.6.1",
+    "gulp-sequence": "^1.0.0",
+    "rimraf": "^2.6.2"
+  }
+}

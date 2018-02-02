@@ -28,7 +28,6 @@ import { isFunction } from "util";
 
 export abstract class FultonApp {
     private isInitialized: boolean = false;
-    private entityMetadataHelper: EntityMetadataHelper;
 
     /**
      * app name, use in output, parser. default is class name.
@@ -287,8 +286,6 @@ export abstract class FultonApp {
             FultonLog.error("initDatabases fails", error);
             throw error;
         });
-
-        this.entityMetadataHelper = new EntityMetadataHelper(this.connections);
 
         await this.didInitDatabases(this.connections);
     }

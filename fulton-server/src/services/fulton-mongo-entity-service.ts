@@ -55,11 +55,7 @@ export class FultonMongoEntityService<TEntity> implements IEntityService<TEntity
             this.mainRepository = this.getRepository(input);
         }
     }
-
-    private get metadataHelper(): EntityMetadataHelper {
-        return this.app["entityMetadataHelper"];
-    }
-
+    
     get currentUser(): IUser {
         return this.app.userService.currentUser;
     }

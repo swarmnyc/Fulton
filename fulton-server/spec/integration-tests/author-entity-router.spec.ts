@@ -1,4 +1,4 @@
-import { FultonApp, FultonAppOptions, authorize, AccessToken, Request, Response, FultonEntityRouter, EntityRouter, OperationResult, QueryParams, OperationOneResult, OperationStatus, Router, FultonMongoEntityService, Injectable, HttpGet } from "../../src/index";
+import { FultonApp, FultonAppOptions, authorize, AccessToken, Request, Response, FultonEntityRouter, EntityRouter, OperationResult, QueryParams, OperationOneResult, OperationStatus, Router, MongoEntityService, Injectable, HttpGet } from "../../src/index";
 import { UserServiceMock } from "../helpers/user-service-mock";
 import { HttpTester, HttpResult } from "../helpers/http-tester";
 import { Hotdog } from "../helpers/entities/hot-dog";
@@ -10,7 +10,7 @@ import { MongoRepository } from "typeorm/repository/MongoRepository";
 
 
 @Injectable()
-class AuthorEntityService extends FultonMongoEntityService<Author>{
+class AuthorEntityService extends MongoEntityService<Author>{
     private tagRepository: MongoRepository<Tag>;
     constructor() {
         super(Author);

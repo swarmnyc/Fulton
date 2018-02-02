@@ -1,4 +1,4 @@
-import { FultonService, Injectable, IUser, OperationResult, QueryColumnStates, Type } from "../index";
+import { Service, Injectable, IUser, OperationResult, QueryColumnStates, Type } from "../index";
 import { MongoRepository, getMongoRepository } from "typeorm";
 import { IEntityService, Inject, QueryParams, OperationOneResult, OperationStatus } from "../interfaces";
 import { FultonApp } from "../fulton-app";
@@ -17,7 +17,7 @@ interface IncludeOptions {
  * 
  * ```
  * @Injectable()
- * class HotdogEntityService extends FultonMongoEntityService<Hotdog>{
+ * class HotdogEntityService extends MongoEntityService<Hotdog>{
  *    constructor(){
  *        super(Hotdog) // just give a type, so it can find the repository.
  *    }
@@ -33,7 +33,7 @@ interface IncludeOptions {
  * // remember add HotdogRepository to options.repositories, so it can be injectable.
  * 
  * @Injectable()
- * class HotdogEntityService extends FultonMongoEntityService<Hotdog>{
+ * class HotdogEntityService extends MongoEntityService<Hotdog>{
  *    constructor(repository HotdogRepository) { 
  *        super(repository)
  *    }
@@ -41,7 +41,7 @@ interface IncludeOptions {
  * 
  */
 @Injectable()
-export class FultonMongoEntityService<TEntity> implements IEntityService<TEntity> {
+export class MongoEntityService<TEntity> implements IEntityService<TEntity> {
     @Inject(FultonApp)
     protected app: FultonApp;
     protected mainRepository: MongoRepository<TEntity>
@@ -55,7 +55,7 @@ export class FultonMongoEntityService<TEntity> implements IEntityService<TEntity
             this.mainRepository = this.getRepository(input);
         }
     }
-    
+
     get currentUser(): IUser {
         return this.app.userService.currentUser;
     }

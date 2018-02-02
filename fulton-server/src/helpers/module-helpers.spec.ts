@@ -3,7 +3,7 @@ import * as moduleA from "../../spec/helpers/modules/module-a"
 import * as moduleB from "../../spec/helpers/modules/module-b"
 import * as moduleC from "../../spec/helpers/modules/sub-modules/module-c"
 import * as moduleD from "../../spec/helpers/modules/sub-modules/sub-modules/module-d"
-import { FultonRouter, FultonService, moduleExists } from "../index";
+import { FultonRouter, Service, moduleExists } from "../index";
 import { RouterA, ServiceA } from "../../spec/helpers/classes/classes1/classes-a";
 import { RouterB, RouterC } from "../../spec/helpers/classes/classes1/classes-b";
 import RouterD, { ServiceB } from "../../spec/helpers/classes/classes2/classes-d";
@@ -37,7 +37,7 @@ describe("module helper", () => {
     });
 
     it("should load service classes", async () => {
-        let services = await defaultClassLoader(FultonService)(["spec/helpers/classes/"]);
+        let services = await defaultClassLoader(Service)(["spec/helpers/classes/"]);
         expect(services.length).toEqual(2);
         expect(services).toContain(ServiceA);
         expect(services).toContain(ServiceB);

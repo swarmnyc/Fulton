@@ -8,7 +8,7 @@ import { AppMode, ErrorMiddleware, Middleware, PathIdentifier, JsonApiOptions } 
 import { ConnectionOptions, Repository } from 'typeorm';
 import { FultonClassLoader, defaultClassLoader } from './helpers/module-helpers';
 import { FultonLoggerLevel, FultonLoggerOptions } from './fulton-log';
-import { FultonRouter, FultonService, Type } from './index';
+import { FultonRouter, Service, Type } from './index';
 import { Provider, TypeProvider } from './helpers/type-helpers';
 import { default404ErrorHandler, defaultErrorHandler } from './middlewares';
 
@@ -281,7 +281,7 @@ export class FultonAppOptions {
          * the router loader (a function), loads all services under the folders of all serviceDirs
          * default is FultonClassLoader
          */
-        serviceLoader: FultonClassLoader<FultonService>;
+        serviceLoader: FultonClassLoader<Service>;
 
         /**
          * if true, Fulton will load repositories based on repositoryDirs automatically
@@ -537,7 +537,7 @@ export class FultonAppOptions {
 
             serviceLoaderEnabled: false,
             serviceDirs: ["services"],
-            serviceLoader: defaultClassLoader(FultonService),
+            serviceLoader: defaultClassLoader(Service),
 
             repositoryLoaderEnabled: false,
             repositoryDirs: ["repositories"],

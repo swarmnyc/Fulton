@@ -1,12 +1,12 @@
 
 
 import { FultonRouter } from "../../../../src/index";
-import { FultonService } from "../../../../src/services/fulton-service";
+import { Service } from "../../../../src/services/service";
 
 export default class RouterD extends FultonRouter {
 
 }
 
-export class ServiceB extends FultonService {
+export class ServiceB extends Service {
 
 }

@@ -1,12 +1,12 @@
-import { Factory, FultonApp, FultonAppOptions, DiContainer, FultonRouter, FultonService, Inject, Injectable, Router, EntityService } from "./index";
+import { Factory, FultonApp, FultonAppOptions, DiContainer, FultonRouter, Service, Inject, Injectable, Router, EntityService } from "./index";
 
 @Injectable()
-class ServiceA extends FultonService {
+class ServiceA extends Service {
     value = "a"
 }
 
 @Injectable()
-class ServiceB extends FultonService {
+class ServiceB extends Service {
     constructor(public serviceA: ServiceA) {
         super();
     }

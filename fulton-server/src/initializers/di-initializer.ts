@@ -1,4 +1,4 @@
-import { DiContainer, EntityService, EntityServiceFactory, FultonMongoEntityService, Type, RepositoryFactory } from "../index";
+import { DiContainer, EntityService, EntityServiceFactory, MongoEntityService, Type, RepositoryFactory } from "../index";
 import { MongoRepository, getConnection, getRepository } from "typeorm";
 
 import { FultonApp } from "../fulton-app";
@@ -26,7 +26,7 @@ function entityServiceFactory<T>(ctx: interfaces.Context): EntityServiceFactory<
         let service;
         if (repo instanceof MongoRepository) {
             // for mongo
-            service = new FultonMongoEntityService(repo);
+            service = new MongoEntityService(repo);
             service["app"] = ctx.container.get(FultonApp);
         } else {
             // for sql

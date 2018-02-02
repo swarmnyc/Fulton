@@ -1,9 +1,9 @@
-import { FultonMongoEntityService } from "./fulton-mongo-entity-service";
+import { MongoEntityService } from "./mongo-entity-service";
 import { MongoRepository } from "typeorm";
 
 describe('Fulton entity service', () => {
     it('should transform includes', async () => {
-        let service = new FultonMongoEntityService(new MongoRepository());
+        let service = new MongoEntityService(new MongoRepository());
 
         let result = service["transformIncludes"](["author", "author.tag", "author.tag.test", "tag"]);
 

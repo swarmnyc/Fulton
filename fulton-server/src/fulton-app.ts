@@ -18,7 +18,7 @@ import { Express } from "express";
 import { FultonAppOptions } from "./fulton-app-options";
 import FultonLog from "./fulton-log";
 import { FultonRouter } from "./routers/fulton-router";
-import { FultonService } from "./services";
+import { Service } from "./services";
 import { defaultHttpLoggerHandler } from "./middlewares/http-logger";
 import { fultonDebug } from "./helpers/debug";
 import { getRepositoryMetadata } from "./repositories/repository-decorator-helper";

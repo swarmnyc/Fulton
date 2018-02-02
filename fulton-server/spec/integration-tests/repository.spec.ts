@@ -49,7 +49,7 @@ class MyApp extends FultonApp {
     }
 }
 
-xdescribe('repository', () => {
+describe('repository', () => {
     let app: MyApp;
 
     beforeAll(async () => {

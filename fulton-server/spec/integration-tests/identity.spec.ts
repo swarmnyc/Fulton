@@ -29,7 +29,7 @@ class MyApp extends FultonApp {
     }
 }
 
-xdescribe('Identity Integration Test', () => {
+describe('Identity Integration Test', () => {
     let app: MyApp;
     let httpTester: HttpTester;
 

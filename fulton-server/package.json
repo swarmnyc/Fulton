@@ -9,7 +9,10 @@
     "build": "npm run clean && tsc -p tsconfig-build.json",
     "build:live": "npm run clean && tsc -w -p tsconfig-build.json",
     "test": "jasmine-ts",
-    "test:debug": "ts-node --inspect-brk=9229 ./spec/test.ts"
+    "test:it": "jasmine-ts --config=./spec/support/jasmine.it.json",
+    "test:all": "npm run test && npm run test:it",
+    "test:debug": "ts-node --inspect-brk=9229 ./spec/test.ts",
+    "test:debug:it": "ts-node --inspect-brk=9229 ./spec/test.ts --it"
   },
   "author": "",
   "license": "ISC",
@@ -55,8 +58,5 @@
     "typeorm": "^0.1.11",
     "validator": "^9.3.0",
     "winston": "^2.4.0"
-  },
-  "peerDependencies": {
-    "fulton-core": "0.0.0-PLACEHOLDER"
   }
 }

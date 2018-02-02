@@ -3,7 +3,6 @@ import { isFunction } from "util";
 
 export type TypeIdentifier<T = any> = (string | symbol | Type<T>);
 
-
 export interface AbstractType<T> extends Function {
 }
 

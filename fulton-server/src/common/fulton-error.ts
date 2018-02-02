@@ -27,7 +27,7 @@ export class FultonError {
             propertyName = args[0];
             errorMessage = args[1];
         } else {
-            propertyName = "";
+            propertyName = "message";
             errorMessage = args[0];            
         }
 

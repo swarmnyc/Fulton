@@ -9,7 +9,7 @@ import * as winston from 'winston';
 import { AppMode, ErrorMiddleware, FultonDiContainer, Middleware, Request, Response } from "./interfaces";
 import { Connection, ConnectionOptions, createConnections } from "typeorm";
 import { Container, interfaces } from "inversify";
-import { FultonLoggerLevel, queryParamsParser } from "./index";
+import { FultonLoggerLevel, queryParamsParser, EntityService } from "./index";
 import { IUser, IUserService } from "./identity";
 import { Provider, Type, TypeIdentifier, TypeProvider, ValueProvider } from "./helpers/type-helpers";
 
@@ -227,7 +227,8 @@ export abstract class FultonApp {
 
     protected initDiContainer(): void | Promise<void> {
         this.container = new Container();
-        this.container.bind(FultonApp).toConstantValue(this);
+
+        require("./initializers/di-initializer")(this, this.container);
     }
 
     protected initLogging(): void | Promise<void> {

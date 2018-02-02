@@ -1,11 +1,10 @@
-import "reflect-metadata";
-
 import * as express from "express";
 
 import { IUser, IUserService } from "./identity";
 import { inject, injectable, interfaces } from "inversify";
 
 import { FultonApp } from "./fulton-app";
+import { Type } from "./helpers";
 
 export const Injectable = injectable;
 
@@ -44,6 +43,8 @@ export interface ErrorMiddleware extends express.ErrorRequestHandler {
     (err: any, req: Request, res: Response, next: NextFunction): any;
 }
 
+export type EntityServiceFactory<TEntity> = ((entity: Type<TEntity>) => IEntityService<TEntity>);
+
 export interface RouterDocOptions {
     title?: string;
     description?: string;
@@ -57,8 +58,8 @@ export interface RouterActionDocOptions {
 
 
 export interface FultonErrorObject {
-    message?: string | string[];
-    [key: string]: string | string[];
+    message?: string[];
+    [key: string]: string[];
 }
 
 export interface IEntityService<TEntity> {
@@ -185,21 +186,3 @@ declare global {
     }
 
 }
-
-// declare module "typeorm/decorator/options/ColumnOptions" {
-//     interface ColumnOptions {
-//         /**
-//          * only EntityService.find() supports, don't not output this colume to client
-//          */
-//         hide?: boolean;
-//     }
-// }
-
-// declare module "typeorm/decorator/options/ColumnCommonOptions" {
-//     interface ColumnCommonOptions {
-//         /**
-//          * only EntityService.find() supports, don't not output this colume to client
-//          */
-//         hide?: boolean;
-//     }
-// }

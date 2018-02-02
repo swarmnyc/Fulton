@@ -1,11 +1,10 @@
 import { FullEntityRouterMetadata, getFullEntityRouterMethodMetadata } from "./route-decorators-helpers";
 import { HttpDelete, HttpGet, HttpPatch, HttpPost } from "./route-decorators";
+import { IEntityService, Injectable, NextFunction, OperationOneResult, OperationResult, OperationStatus, Request, Response, EntityServiceFactory } from "../interfaces";
 
+import { EntityService } from "../services";
 import { FultonRouter } from "./fulton-router";
-import { IEntityService, Injectable, NextFunction, Request, Response, OperationResult, OperationOneResult } from "../interfaces";
-import { createEntityService } from "../services/fulton-entity-service-helper";
-import { queryById } from "../middlewares/query-params-parser";
-import { OperationStatus } from "../index";
+import { queryById } from "../middlewares";
 
 @Injectable()
 export abstract class FultonEntityRouter<TEntity> extends FultonRouter {
@@ -22,7 +21,8 @@ export abstract class FultonEntityRouter<TEntity> extends FultonRouter {
     init() {
         if (this.entityService == null) {
             // use default implementation
-            this.entityService = createEntityService(this.metadata.router.entity, this.app);
+            let factory: EntityServiceFactory<TEntity> = this.app.container.get<any>(EntityService);
+            this.entityService = factory(this.metadata.router.entity);
         }
 
         super.init();

@@ -20,7 +20,7 @@ export class ExampleApp extends FultonApp {
             { folder: "./assets/" }
         ]
 
-        this.express.all("/error", (req, res) => {
+        this.express.all("/error", (req: Request, res: Response) => {
             throw new Error("test error handler");
         });
 

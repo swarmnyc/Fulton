@@ -3,7 +3,7 @@ import { MongoRepository, getConnection, getRepository } from "typeorm";
 
 import { FultonApp } from "../fulton-app";
 import { Repository } from "typeorm/repository/Repository";
-import { getRepositoryMetadata } from "../repositories/repository-decorator-helper";
+import { getRepositoryMetadata } from "../entities/repository-decorator-helper";
 import { interfaces } from "inversify";
 
 module.exports = function (app: FultonApp, container: DiContainer) {

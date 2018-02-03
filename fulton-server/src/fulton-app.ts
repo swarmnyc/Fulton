@@ -21,8 +21,9 @@ import { Router } from "./routers/router";
 import { Service } from "./services";
 import { defaultHttpLoggerHandler } from "./middlewares/http-logger";
 import { fultonDebug } from "./helpers/debug";
-import { getRepositoryMetadata } from "./repositories/repository-decorator-helper";
+import { getRepositoryMetadata } from "./entities/repository-decorator-helper";
 import { queryParamsParser } from './middlewares/query-params-parser';
+import { MimeTypes } from './constants';
 
 export abstract class FultonApp {
     private isInitialized: boolean = false;
@@ -397,10 +398,10 @@ export abstract class FultonApp {
 
     protected initFormatter(): void | Promise<void> {
         if (this.options.formatter.json) {
-            let types = ["application/json"]
+            let types = [MimeTypes.json]
 
             if (this.options.formatter.jsonApi) {
-                types.push("application/vnd.api+json")
+                types.push(MimeTypes.jsonApi)
             }
 
             this.express.use(express.json({ type: types }));
@@ -411,7 +412,7 @@ export abstract class FultonApp {
         }
 
         if (this.options.formatter.jsonApi) {
-            this.express.use(require("./middlewares/jsonapi")(this.options.formatter.jsonApiOptions));
+            this.express.use(require("./middlewares/jsonapi")(this));
         }
 
         if (this.options.formatter.queryParams) {

@@ -79,7 +79,7 @@ export function queryById(name: string = "id") {
                     id: req.params[name]
                 }
             } else {
-                req.queryParams.filter["id"] = req.params[name];
+                req.queryParams.filter[name] = req.params[name];
 
             }
         }

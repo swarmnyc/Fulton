@@ -12,6 +12,6 @@ export * from "./routers";
 export * from "./helpers";
 
 export * from "./middlewares"
-export * from "./repositories/repository-decorator"
+export * from "./entities"
 
 export * from "./extensions"

@@ -1,5 +1,6 @@
 import { Author } from "./author";
 import { entity, column, objectIdColumn, manyToOne } from "../../../src/interfaces";
+import { relatedTo } from "../../../src/index";
 
 @entity("hotdogs")
 export class Hotdog {
@@ -21,9 +22,6 @@ export class Hotdog {
     @column({ select: false })
     picture: string;
 
-    @column()
-    authorId: string;
-
-    @manyToOne(type => Author, key => "authorId")
+    @relatedTo(Author)
     author: Author;
 }

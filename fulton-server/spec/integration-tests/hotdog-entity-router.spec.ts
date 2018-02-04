@@ -158,7 +158,7 @@ describe('MongoEntityRouter Integration Test', () => {
             ],
             "address": "earth",
             "review": "great",
-            "authorId": "624",
+            "author": { "id": "624" },
             "picture": "no"
         } as Hotdog;
 
@@ -181,7 +181,7 @@ describe('MongoEntityRouter Integration Test', () => {
             "name": "Test",
             "address": "earth",
             "review": "great",
-            "authorId": "123",
+            "author": { "id": "123" },
             "picture": "no"
         } as Hotdog;
 

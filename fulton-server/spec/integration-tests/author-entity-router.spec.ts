@@ -33,7 +33,7 @@ class AuthorEntityService extends MongoEntityService<Author>{
 
     async getTagsByAuthorId(authorId: string): Promise<Tag[]> {
         let author = await this.mainRepository.findOne({ "_id": authorId } as any);
-        let tagIds = author.tagIds;
+        let tagIds = author.tags.map((tag) => tag.id );
 
         return this.tagRepository.find({ "_id": { "$in": tagIds } } as any);
     }

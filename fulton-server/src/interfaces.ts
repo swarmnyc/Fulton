@@ -69,10 +69,6 @@ export interface OperationOneResult<T=any> {
     }
 }
 
-export interface JsonApiOptions {
-    // TODO: JsonApiOptions
-}
-
 export interface QueryParams {
     /**
      * filter options

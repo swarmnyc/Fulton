@@ -1,5 +1,6 @@
 import { Tag } from "./tag";
 import { entity, objectIdColumn, column, manyToMany } from "../../../src/interfaces";
+import { relatedTo } from "../../../src/index";
 
 @entity("authors")
 export class Author {
@@ -12,9 +13,6 @@ export class Author {
     @column({ select: false })
     imageUrl: string;
 
-    @column()
-    tagIds: string[];
-
-    @manyToMany(type => Tag, keys => "tagIds")
+    @relatedTo(Tag)
     tags: Tag[];
 }

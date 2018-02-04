@@ -1,9 +1,11 @@
-import { Service, injectable, IUser, OperationResult, QueryColumnStates, Type } from "../index";
+import { IEntityService, OperationOneResult, OperationStatus, QueryParams, inject } from "../interfaces";
+import { IUser, OperationResult, QueryColumnStates, Service, Type, injectable } from "../index";
 import { MongoRepository, getMongoRepository } from "typeorm";
-import { IEntityService, inject, QueryParams, OperationOneResult, OperationStatus } from "../interfaces";
-import { FultonApp } from "../fulton-app";
+
 import { EntityMetadataHelper } from "../helpers/entity-metadata-helper";
+import { FultonApp } from "../fulton-app";
 import FultonLog from "../fulton-log";
+import { getRelatedToMetadata } from "../entities/related-decorators-helpers";
 
 interface IncludeOptions {
     [key: string]: IncludeOptions | false
@@ -190,7 +192,7 @@ export class MongoEntityService<TEntity> implements IEntityService<TEntity> {
             })
 
             return Promise.all(tasks);
-        } else {
+        } else if (data) {
             return this.processIncludeInternal(repository, data, includeOptions);
         }
     }
@@ -298,35 +300,38 @@ export class MongoEntityService<TEntity> implements IEntityService<TEntity> {
     private processIncludeInternal(repository: MongoRepository<any>, target: any, options: IncludeOptions): Promise<any> {
         //TODO: should cover more situations and better proformance
         let tasks = Object.getOwnPropertyNames(options).map((columnName): Promise<any> => {
-            let columnMetadata = repository.metadata.findRelationWithPropertyPath(columnName);
+            let relatedToMetadata = getRelatedToMetadata(repository.metadata.target);
 
-            if (columnMetadata == null) {
+            if (relatedToMetadata == null || relatedToMetadata[columnName] == null) {
                 return;
             }
 
-            let refId = target[columnMetadata.inverseSidePropertyPath];
-            if (refId == null) {
+            let refItems = target[columnName];
+            if (refItems == null) {
                 return;
             }
 
-            let columnRepo = this.getRepository(columnMetadata.type as Type);
+            let relatedType = relatedToMetadata[columnName];
+            let relatedRepo = this.getRepository(relatedType);
 
             let exec = async (id: string): Promise<any> => {
-                let ref = await this.findOneInternal(columnRepo, { filter: { "_id": refId } });
+                let ref = await this.findOneInternal(relatedRepo, { filter: { "_id": id } });
 
                 // includes sub-columns
                 if (options[columnName]) {
-                    await this.processIncludeInternal(columnRepo, ref, options[columnName] as IncludeOptions);
+                    await this.processIncludeInternal(relatedRepo, ref, options[columnName] as IncludeOptions);
                 }
 
                 return ref;
             }
 
             let execP;
-            if (refId instanceof Array) {
-                execP = Promise.all(refId.map(exec));
+            if (refItems instanceof Array) {
+                let ids = refItems.map((item) => item[relatedRepo.metadata.objectIdColumn.propertyName]);
+                execP = Promise.all(refItems.map(exec));
             } else {
-                execP = exec(refId);
+                let id = refItems[relatedRepo.metadata.objectIdColumn.propertyName];
+                execP = exec(id);
             }
 
             return execP.then(data => {

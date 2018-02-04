@@ -10,7 +10,7 @@ export class Hotdog {
     @column()
     name: string;
 
-    @column({ select: false })
+    @column()
     location: number[];
 
     @column()

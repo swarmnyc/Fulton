@@ -48,7 +48,6 @@
     "google-auth-library": "^1.1.0",
     "jasmine": "^2.9.0",
     "jasmine-ts": "^0.2.1",
-    "jsonapi-serializer": "^3.5.6",
     "jws": "^3.1.4",
     "mongodb": "^2.2.34",
     "passport-github": "^1.1.0",

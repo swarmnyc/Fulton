@@ -4,7 +4,7 @@ import * as lodash from 'lodash';
 import * as path from 'path';
 import * as winston from 'winston';
 
-import { AppMode, ErrorMiddleware, Middleware, PathIdentifier, JsonApiOptions } from './interfaces';
+import { AppMode, ErrorMiddleware, Middleware, PathIdentifier } from './interfaces';
 import { ConnectionOptions, Repository } from 'typeorm';
 import { FultonClassLoader, defaultClassLoader } from './helpers/module-helpers';
 import { FultonLoggerLevel, FultonLoggerOptions } from './fulton-log';
@@ -208,11 +208,6 @@ export class FultonAppOptions {
          * the default value is false
          */
         jsonApi?: boolean;
-
-        /**
-         * options for json api
-         */
-        jsonApiOptions?: JsonApiOptions;
 
         /**
          * if true, add express.urlencoded({ extended: true })() as a middleware

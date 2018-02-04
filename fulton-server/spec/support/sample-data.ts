@@ -15,7 +15,7 @@ export const sampleData = {
 				],
 				"address": "2291 S Fort Apache Rd, Las Vegas, NV 89117",
 				"review": "Great variety of delicious hot dogs, and I'm glad they've recently expanded the menu to include burritos and a few other things. Spicy food if you want it!",
-				"authorId": "1019",
+				"author":  { "id": "1019" },
 				"picture": "picture1"
 			},
 			{
@@ -27,7 +27,7 @@ export const sampleData = {
 				],
 				"address": "338 3rd Avenue, 162 East 25th Street, New York, NY 10010",
 				"review": "Really great atmosphere here, the food is good and reasonably priced, bartenders are fast. \n\nWould recommend!",
-				"authorId": "965",
+				"author":  { "id": "965" },
 				"picture": "picture2"
 			},
 			{
@@ -39,7 +39,7 @@ export const sampleData = {
 				],
 				"address": "2 Pennsylvania Plaza, New York, NY 10121",
 				"review": "I only ordered take out. One of the worst burgers I have had in my life. \nThe meat was cold and it tasted like it had been lying there for days. \nThe bun was super soggy as well. I will never go there again.",
-				"authorId": "384",
+				"author":  { "id": "384" },
 				"picture": "picture3"
 			},
 			{
@@ -51,7 +51,7 @@ export const sampleData = {
 				],
 				"address": "7500 W Lake Mead Blvd, Las Vegas, NV 89128",
 				"review": "This place was amazing!! The hot dogs were delicious! But what I loved most about the place was the people and customer service!!! My friend and I actually walked in right when they closed. So we thought we would have to find another place to eat. But they made our hot dogs anyway! Every single person was genuinely friendly and we felt so welcome. They seemed like really sincere and genuine people. The food was so tasty too. My friend and I had an amazing time. Overall one of my favorite experiences eating out. \n\nI strongly recommend this place. I will definitely be coming back! :-)",
-				"authorId": "689",
+				"author":  { "id": "689" },
 				"picture": "picture4"
 			},
 			{
@@ -63,7 +63,7 @@ export const sampleData = {
 				],
 				"address": "239 1st Avenue, New York, NY 10003",
 				"review": "So after my exam I was starving,  so I saw this place nearby on 1st Ave. So I ate two hot dogs and a coke and immediately got bloated and by the time I got home I was in the bathroom with serious stomach pain, and I was throwing up, for about 5 minutes. \n\nThe workers wears gloves, the only problem is they never take them off, I witnessed one guy come from the bathroom still wearing his gloves and he touched the side of a garbage can located inside and  he never took them off, and went right back behind the counter to prepare more food. Mind you, I saw this after I ate my food. \n\nI will never eat there again.",
-				"authorId": "675",
+				"author":  { "id": "675" },
 				"picture": "https://lh3.googleusercontent.com/proxy/i-oa-6itOrdYNxrnOAVRYKl2KQ6G465Lrwgn97kZOxzFk1UJi45_0evuyMcvw0bL0mcKhpwm-D-IPnnHXeeSh2kaBL8OPDKA094JZ5RKjHBiI6iwONmogEsHD1W9uC70sX8-ubHXDviCTROtgGyWDTXSJB6ngug=w90-h90-n-k-no"
 			},
 			{
@@ -75,7 +75,7 @@ export const sampleData = {
 				],
 				"address": "1471 Broadway, New York, NY 10036",
 				"review": "I can't say that they're New York's 'best' hot dog, but I wouldn't be surprised. It was amazing. Pickles, sauerkraut, mustard and sauce - what more could you want.",
-				"authorId": "553",
+				"author":  { "id": "553" },
 				"picture": "https://lh5.googleusercontent.com/p/AF1QipOXNyAKq3OX1Jym9c6Ah11Dc4fxiKSocbHf17c1=w90-h90-n-k-no"
 			},
 			{
@@ -87,7 +87,7 @@ export const sampleData = {
 				],
 				"address": "790 9th Ave, New York, NY 10019",
 				"review": "NYE, my girlfriend and I literally stumbled into this place in an attempt to get out of the cold. While we waited to defrost, one of the workers asked us if we were planning to order, and placed a 'reserved' sign at our table to save our spot while we did. The menu has vegan options (a huge plus for my vegan girlfriend!) in their menu of burgers, fries, snacks, and sides. There's a wide selection of sodas and beer as well. I, a dumb Australian, struggle to understand the speed and slur of New York accents, and on my second night in the city, the servers spoke clearly, concisely, and slow enough  for me to understand! The food was hot, and the Mac and cheese balls weren't as oily as expected, my girlfriend loved the burger, the service was like coming home to your family, and we will be returning in the near future, I imagine! thank you for a wonderful evening, boys.",
-				"authorId": "1311",
+				"author":  { "id": "1311" },
 				"picture": "https://lh5.googleusercontent.com/p/AF1QipPc_XzLRyY8N4Ngl74rtEW4Q4Tqo2YCIqXEViM6=w90-h90-n-k-no"
 			},
 			{
@@ -99,7 +99,7 @@ export const sampleData = {
 				],
 				"address": "417 Castro St, San Francisco, CA 94114",
 				"review": "If you're a pizza lover, you're obligated to try the pizza hot dog. Their other hot dogs are delicious as well. Fries are crisp. Countertop eating space inside and a few tables outside. A great quick stop before going into the Castro Theatre.",
-				"authorId": "1363",
+				"author":  { "id": "1363" },
 				"picture": "picture9"
 			},
 			{
@@ -111,7 +111,7 @@ export const sampleData = {
 				],
 				"address": "3224 1/2 22nd St, San Francisco, CA 94110",
 				"review": "Sad to see that it's catering only now. Would love a new storefront that was properly advertised. Gave me a love of hot dogs & a new understanding of my Guatemalan cuisine heritage. Street food done right, and ever so memorable!",
-				"authorId": "1123",
+				"author":  { "id": "1123" },
 				"picture": "picture11"
 			},
 			{
@@ -123,7 +123,7 @@ export const sampleData = {
 				],
 				"address": "545 Haight St, San Francisco, CA 94117",
 				"review": "Pretty decent hot dogs and sausages, I had the Wild Boar but I wasn't impressed by it. It was lacking in flavor, and the dog didn't stand out to me, especially considering the high prices($8 each!).",
-				"authorId": "1383",
+				"author":  { "id": "1383" },
 				"picture": "picture10"
 			},
 			{
@@ -136,7 +136,7 @@ export const sampleData = {
 				],
 				"address": "207 W 38th St, New York, NY 10018",
 				"review": "Korean fried chicken is the bomb!  Seriously, go, you'll love it. If you don't love it, your tastebuds are dead. Normally,  I'd be all over the wings,  but the husband isn't a wing guy, so we did the tenders. Half ginger soy, half spicy. Let's just say that spicy is an understatement.  We'll go again if we are near one....please bring one to Boston. Oh, the staff, they were all great, tip them well!",
-				"authorId": "324",
+				"author":  { "id": "324" },
 				"picture": "https://s-media-cache-ak0.pinimg.com/originals/46/9d/57/469d57c5630a594f4b6070ff35fa32f1.jpg"
 			},
 			{
@@ -149,7 +149,7 @@ export const sampleData = {
 				],
 				"address": "472 Fulton St, Brooklyn, NY 11201",
 				"review": "A major staple in downtown brooklyn. Always make it a habit to stop by when I am in the neighborhood. Quick service, you can choose which hotdog you would like as you can see it on the grill right in front of you. Great juices also!",
-				"authorId": "684",
+				"author":  { "id": "684" },
 				"picture": "http://myminidoxie.com/wp-content/uploads/2012/11/which-came-first-the-wiener-or-the-dachshund.jpg"
 			},
 			{
@@ -161,7 +161,7 @@ export const sampleData = {
 				],
 				"address": "113 St Marks Pl, New York, NY 10009",
 				"review": "Popped in here for a quick snack after a few rounds of drinks in the East Village. The Hot Dogs are solid and remind me of the kinds you get on the streets in LA.  I had a 'Spicy Redneck' which was bacon wrapped with chili and jalapenos on it.  It wasn't sloppy and definitely hit the spot. Between the hot dogs, the waffle cheese fries and an IPA, I felt a bit dirty but definitely satisfied.",
-				"authorId": "18",
+				"author":  { "id": "18" },
 				"picture": "https://lh5.googleusercontent.com/p/AF1QipOySsxz5PtIUcWSZ9x1-MkmdqbB1uSPCgKMbQKa=w90-h90-n-k-no"
 			}
 		]
@@ -288,9 +288,9 @@ export const sampleData = {
 				"_id": "965",
 				"name": "Miyah Myles",
 				"imageUrl": "https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixlib=rb-0.3.5&q=80&fm=jpg&crop=entropy&cs=tinysrgb&w=200&fit=max&s=707b9c33066bf8808c934c8ab394dff6",
-				"tagIds": [
-					"57dafbafe73bbf531a10598c",
-					"57dafd1277c8e338b97b5dcb"
+				"tags": [
+					{ "id": "57dafbafe73bbf531a10598c" },
+					{ "id": "57dafd1277c8e338b97b5dcb" }
 				]
 			},
 			{

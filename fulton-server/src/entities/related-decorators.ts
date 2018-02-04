@@ -1,4 +1,4 @@
-import { Type } from "../index";
+import { Type, column } from "../index";
 import { RelatedToMetadata } from "./related-decorators-helpers";
 import { Keys } from "../constants";
 
@@ -10,7 +10,7 @@ import { Keys } from "../constants";
  * let book = {
  *    ...
  *   author: {
- *      _id: "authorId"
+ *      id: "authorId"
  *   }
  * } 
  * 
@@ -18,7 +18,8 @@ import { Keys } from "../constants";
  */
 export function relatedTo(entity: Type): any {
     return function (target: any, property: string, descriptor: PropertyDescriptor) {
-        
+        column()(target, property, descriptor);
+
         let metadata: RelatedToMetadata;
 
         if (Reflect.hasOwnMetadata(Keys.RelatedToMetadata, target.constructor)) {

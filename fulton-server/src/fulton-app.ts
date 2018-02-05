@@ -14,16 +14,18 @@ import { IUser, IUserService } from "./identity";
 import { Container } from "inversify";
 import { EntityMetadataHelper } from "./helpers/entity-metadata-helper";
 import Env from "./helpers/env";
+import { EventEmitter } from 'events';
 import { Express } from "express";
 import { FultonAppOptions } from "./fulton-app-options";
 import FultonLog from "./fulton-log";
+import { JsonApiConverter } from './helpers/jsonapi-converter';
+import { MimeTypes } from './constants';
 import { Router } from "./routers/router";
 import { Service } from "./services";
 import { defaultHttpLoggerHandler } from "./middlewares/http-logger";
 import { fultonDebug } from "./helpers/debug";
 import { getRepositoryMetadata } from "./entities/repository-decorator-helper";
 import { queryParamsParser } from './middlewares/query-params-parser';
-import { MimeTypes } from './constants';
 
 export abstract class FultonApp {
     private isInitialized: boolean = false;
@@ -32,21 +34,6 @@ export abstract class FultonApp {
      * app name, use in output, parser. default is class name.
      */
     appName: string;
-
-    /**
-     * the instance of http server of nodejs, created during start()
-     */
-    httpServer: http.Server;
-
-    /**
-     * the instance of https server of nodejs, created during start()
-     */
-    httpsServer: https.Server;
-
-    /**
-     * database connections, created during init();
-     */
-    connections: Connection[];
 
     /**
      * the instance of Express, created during init().
@@ -64,9 +51,39 @@ export abstract class FultonApp {
     options: FultonAppOptions;
 
     /**
+     * the EventEmitter, every init{name} will emit didInit{name} event
+     * 
+     * ## example
+     * ```
+     * app.events.on("didInitRouters", (app:FultonApp)=>{});
+     * ```
+     */
+    events: EventEmitter;
+
+    /**
      * user service, created during init() if options.identity.enabled = true.
      */
     userService: IUserService<IUser>;
+
+    /**
+     * the instance of http server of nodejs, created during start()
+     */
+    httpServer: http.Server;
+
+    /**
+     * the instance of https server of nodejs, created during start()
+     */
+    httpsServer: https.Server;
+
+    /**
+     * database connections, created during init();
+     */
+    connections: Connection[];
+
+    /**
+     * routers, created during initRouters();
+     */
+    routers: Router[];
 
     /**
      * @param mode There are some different default values for api and web-view. 
@@ -74,6 +91,7 @@ export abstract class FultonApp {
     constructor(public readonly mode: AppMode = "api") {
         this.appName = this.constructor.name;
         this.options = new FultonAppOptions(this.appName, mode);
+        this.events = new EventEmitter();
     }
 
     /**
@@ -119,7 +137,7 @@ export abstract class FultonApp {
         /* end express middlewares */
 
         this.isInitialized = true;
-        await this.didInit();
+        this.events.emit("didInit", this);
 
         fultonDebug("Options: %O", this.options);
     }
@@ -222,12 +240,15 @@ export abstract class FultonApp {
         this.express.request.constructor.prototype.fultonApp = this;
 
         this.express.disable('x-powered-by');
+
+        this.events.emit("didInitServer", this);
     }
 
     protected initDiContainer(): void | Promise<void> {
         this.container = new Container();
 
         require("./initializers/di-initializer")(this, this.container);
+        this.events.emit("didInitDiContainer", this);
     }
 
     protected initLogging(): void | Promise<void> {
@@ -244,10 +265,14 @@ export abstract class FultonApp {
                 (winston.default.transports.console as any).colorize = true;
             }
         }
+
+        this.events.emit("didInitLogging", this);
     }
 
     protected initProviders(): void | Promise<void> {
         this.registerTypes(this.options.providers || []);
+
+        this.events.emit("didInitProviders", this);
     }
 
     /**
@@ -287,7 +312,7 @@ export abstract class FultonApp {
             throw error;
         });
 
-        await this.didInitDatabases(this.connections);
+        this.events.emit("didInitDatabases", this);
     }
 
     protected async initRepositories(): Promise<void> {
@@ -308,6 +333,8 @@ export abstract class FultonApp {
         });
 
         this.registerTypes(newProviders);
+
+        this.events.emit("didInitRepositories", this);
     }
 
     protected async initServices(): Promise<void> {
@@ -319,12 +346,20 @@ export abstract class FultonApp {
         }
 
         this.registerTypes(providers);
+
+        this.events.emit("didInitServices", this);
     }
 
     protected initIdentity(): void | Promise<void> {
         if (this.options.identity.enabled) {
             // won't load passport-* modules if it is not enabled;
-            return (require("./identity/identity-initializer")(this));
+            let promise: Promise<any> = (require("./identity/identity-initializer")(this));
+
+            return promise.then(() => {
+                this.events.emit("didInitIdentity", this);
+            })
+        } else {
+            return;
         }
     }
 
@@ -337,7 +372,8 @@ export abstract class FultonApp {
         }
 
         let ids = this.registerTypes(prodivers, true);
-        let routers = ids.map((id) => {
+
+        this.routers = ids.map((id) => {
             let router = this.container.get<Router>(id);
 
             router.init(); //register router to express
@@ -345,7 +381,7 @@ export abstract class FultonApp {
             return router;
         });
 
-        await this.didInitRouters(routers);
+        this.events.emit("didInitRouters", this);
     }
 
     protected initHttpLogging(): void | Promise<void> {
@@ -355,6 +391,8 @@ export abstract class FultonApp {
             } else if (this.options.logging.httpLoggerOptions) {
                 this.express.use(defaultHttpLoggerHandler(this.options.logging.httpLoggerOptions));
             }
+
+            this.events.emit("didInitHttpLogging", this);
         }
     }
 
@@ -377,6 +415,8 @@ export abstract class FultonApp {
                     }
                 })
             }
+
+            this.events.emit("didInitStaticFile", this);
         }
     }
 
@@ -387,12 +427,16 @@ export abstract class FultonApp {
             } else {
                 this.express.use(cors(this.options.cors.options));
             }
+
+            this.events.emit("didInitCors", this);
         }
     }
 
     protected initMiddlewares(): void | Promise<void> {
         if (lodash.some(this.options.middlewares)) {
             this.express.use(...this.options.middlewares);
+
+            this.events.emit("didInitMiddlewares", this);
         }
     }
 
@@ -422,6 +466,8 @@ export abstract class FultonApp {
         if (lodash.some(this.options.formatter.customs)) {
             this.express.use(...this.options.formatter.customs);
         }
+
+        this.events.emit("didInitFormatter", this);
     }
 
     protected initIndex(): void | Promise<void> {
@@ -431,29 +477,21 @@ export abstract class FultonApp {
 
         if (this.options.index.handler) {
             this.express.all("/", this.options.index.handler);
-            return;
-        }
-
-        if (this.options.index.filepath) {
+        } else if (this.options.index.filepath) {
             this.express.all("/", (res, req) => {
                 req.sendFile(path.resolve(this.options.index.filepath));
             });
-
-            return;
-        }
-
-        if (this.options.index.message) {
+        } else if (this.options.index.message) {
             this.express.all("/", (res, req) => {
                 req.send(this.options.index.message);
             });
-
-            return;
         }
+
+        this.events.emit("didInitIndex", this);
     }
 
     protected initErrorHandler(): void | Promise<void> {
         if (this.options.errorHandler) {
-
             if (lodash.some(this.options.errorHandler.error404Middlewares)) {
                 this.express.use(...this.options.errorHandler.error404Middlewares);
             }
@@ -461,6 +499,8 @@ export abstract class FultonApp {
             if (lodash.some(this.options.errorHandler.errorMiddlewares)) {
                 this.express.use(...this.options.errorHandler.errorMiddlewares);
             }
+
+            this.events.emit("didInitErrorHandler", this);
         }
     }
 
@@ -525,10 +565,4 @@ export abstract class FultonApp {
      * @param options the options for start app
      */
     protected abstract onInit(options: FultonAppOptions): void | Promise<void>;
-
-    protected didInit(): void | Promise<void> { }
-
-    protected didInitRouters(routers: Router[]): void | Promise<void> { }
-
-    protected didInitDatabases(connections: Connection[]): void | Promise<void> { }
 }

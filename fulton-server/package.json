@@ -58,6 +58,7 @@
   "dependencies": {
     "@types/node": "^9.3.0",
     "@types/passport": "^0.4.2",
+    "@types/qs": "^6.5.1",
     "cors": "^2.8.4",
     "express": "^4.16.2",
     "inversify": "^4.9.0",
@@ -66,6 +67,7 @@
     "passport-http-bearer": "^1.0.1",
     "passport-local": "^1.0.0",
     "password-hash": "^1.2.2",
+    "qs": "^6.5.1",
     "reflect-metadata": "^0.1.12",
     "typeorm": "^0.1.11",
     "validator": "^9.3.0",

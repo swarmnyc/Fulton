@@ -2,7 +2,31 @@ import * as lodash from 'lodash';
 
 // Cannot find other good package to handle convertion, so write it by ourself,
 // but the features isn't complete yet.
+// maybe make it independent package. 
 // TODO: JSON API Links
+
+export interface JsonApiConverterOptions {
+    /**
+     * the domain includes protocol, like http://example.com/
+     */
+    domain?: string;
+}
+
+export interface JsonApiSerializeOptions {
+    /**
+     * current url
+     */
+    baseUrl: string;
+    /**
+     * the domain includes protocol, like http://example.com/
+     */
+    domain?: string;
+
+    /**
+     * the value that pass to other function which like linkFn
+     */
+    args?: any;
+}
 
 export interface JsonApiRelationshipOptions {
     /**
@@ -32,12 +56,25 @@ export interface JsonApiTypeOptions {
         [key: string]: JsonApiRelationshipOptions
     }
 
-    linkFn?: any;
+    linksFn?: (options: JsonApiSerializeOptions, typeOtions: JsonApiTypeOptions, data: JsonApiData) => JsonApiLinks;
 
-    rootLinkFn?: any;
+    /**
+     * the function to generate root links
+     */
+    rootLinksFn?: (options: JsonApiSerializeOptions) => JsonApiRootLinks;
+}
+
+export interface JsonApiRootLinks {
+    first?: string;
+    prev?: string;
+    next?: string;
+    last?: string;
+
+    meta?: any;
 }
 
 export interface JsonApiLinks {
+    self?: string;
     [link: string]: string
 }
 
@@ -66,7 +103,7 @@ export interface JsonApiRefationshipData {
 export interface JsonApiResult {
     data?: JsonApiData | JsonApiData[];
     errors?: any;
-    links?: JsonApiLinks;
+    links?: JsonApiRootLinks;
     included?: JsonApiData[];
     meta?: any;
 }
@@ -78,7 +115,17 @@ const defaultOptions = {
 const emptyIncluded: any[] = [];
 
 export class JsonApiConverter {
-    private optionsMap = new Map<string, JsonApiTypeOptions>();
+    private typeMap = new Map<string, JsonApiTypeOptions>();
+
+    constructor(public options?: JsonApiConverterOptions) {
+        if (!options) {
+            this.options = {};
+        }
+    }
+
+    isRegister(type: string): boolean {
+        return this.typeMap.has(type);
+    }
 
     register(type: string, options: JsonApiTypeOptions) {
         if (!options.attributes) {
@@ -89,11 +136,11 @@ export class JsonApiConverter {
             options.relationships = {}
         }
 
-        this.optionsMap.set(type, options);
+        this.typeMap.set(type, options);
     }
 
-    serialize(type: string, items: any | any[]) {
-        return new JsonApiSerializer(this.optionsMap).exec(type, items);
+    serialize(type: string, items: any | any[], options?: JsonApiSerializeOptions) {
+        return new JsonApiSerializer(this.typeMap, options).exec(type, items);
     }
 
     deserialize(result: JsonApiResult): any {
@@ -110,7 +157,7 @@ export class JsonApiConverter {
     }
 
     private deserializeData(data: JsonApiData, included: JsonApiData[]): any {
-        let options = this.optionsMap.get(data.type) || defaultOptions;
+        let options = this.typeMap.get(data.type) || defaultOptions;
         let json: any = {};
 
         json[options.id] = data.id;
@@ -144,7 +191,7 @@ export class JsonApiConverter {
         if (includedData) {
             return this.deserializeData(includedData, included);
         } else {
-            let options = this.optionsMap.get(data.type) || defaultOptions;
+            let options = this.typeMap.get(data.type) || defaultOptions;
             let json: any = {};
 
             json[options.id] = data.id;
@@ -160,7 +207,7 @@ class JsonApiSerializer {
     result: JsonApiResult = {};
     included: JsonApiData[] = [];
 
-    constructor(private optionsMap: Map<string, JsonApiTypeOptions>) { }
+    constructor(private typeMap: Map<string, JsonApiTypeOptions>, private options: JsonApiSerializeOptions) { }
 
     exec(type: string, items: any | any[]) {
         if (items) {
@@ -177,30 +224,34 @@ class JsonApiSerializer {
             this.result.data = [];
         }
 
-        // this.result.links = links
+        let typeOpts = this.typeMap.get(type);
+
+        if (typeOpts.rootLinksFn) {
+            this.result.links = typeOpts.rootLinksFn(this.options);
+        }
 
         return this.result;
     }
 
     serializeData(type: string, item: any): JsonApiData {
-        let options = this.optionsMap.get(type);
+        let typeOpts = this.typeMap.get(type);
         let data: JsonApiData = {};
-        data.id = item[options.id];
+        data.id = item[typeOpts.id];
         data.type = type;
         // data.links = links
 
-        data.attributes = lodash.pick(item, options.attributes);
+        data.attributes = lodash.pick(item, typeOpts.attributes);
 
         // relationships
-        let refProps = Object.getOwnPropertyNames(options.relationships);
+        let refProps = Object.getOwnPropertyNames(typeOpts.relationships);
         if (refProps.length > 0) {
             data.relationships = {};
 
             for (const prop of refProps) {
-                let relOptions = options.relationships[prop];
+                let relOpts = typeOpts.relationships[prop];
                 let relItmes = item[prop];
                 if (relItmes) {
-                    data.relationships[prop] = this.serializeRelationData(relOptions, item[prop]);
+                    data.relationships[prop] = this.serializeRelationData(relOpts, item[prop]);
                 }
             }
         }

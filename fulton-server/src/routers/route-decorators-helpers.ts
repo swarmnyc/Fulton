@@ -1,7 +1,7 @@
-import { KEY_ROUTER_ERROR_HANDLER_METADATA, KEY_ROUTER_HTTP_METHOD_LIST_METADATA, KEY_ROUTER_METADATA } from "../constants";
+import { Middleware, PathIdentifier, RouterActionDocOptions, RouterDocOptions } from "../interfaces";
 
+import { Keys } from "../constants";
 import { Router } from "./router";
-import { PathIdentifier, Middleware, RouterDocOptions, RouterActionDocOptions } from "../interfaces";
 import { Type } from "../index";
 
 export interface RouterMetadata {
@@ -36,15 +36,15 @@ export interface FullEntityRouterMetadata extends AllRouterMethodMetadata {
 }
 
 export function getRouterMetadata(target: any): RouterMetadata {
-    return Reflect.getOwnMetadata(KEY_ROUTER_METADATA, target);
+    return Reflect.getOwnMetadata(Keys.RouterMetadata, target);
 }
 
 export function getEntityRouterMetadata(target: any): EntityRouterMetadata {
-    return Reflect.getOwnMetadata(KEY_ROUTER_METADATA, target);
+    return Reflect.getOwnMetadata(Keys.RouterMetadata, target);
 }
 
 export function getRouterErrorHandler(target: any): string {
-    return Reflect.getOwnMetadata(KEY_ROUTER_ERROR_HANDLER_METADATA, target);
+    return Reflect.getOwnMetadata(Keys.RouterErrorHandlerMetadata, target);
 }
 
 /**
@@ -52,7 +52,7 @@ export function getRouterErrorHandler(target: any): string {
  * @param target 
  */
 export function getRouterMethodMetadataList(target: any): RouterMethodMetadata[] {
-    return Reflect.getOwnMetadata(KEY_ROUTER_HTTP_METHOD_LIST_METADATA, target) || [];
+    return Reflect.getOwnMetadata(Keys.HttpMethods, target) || [];
 }
 
 export function getFullRouterMethodMetadata(target: any): FullRouterMetadata {

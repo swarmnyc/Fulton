@@ -1,4 +1,4 @@
-import { FultonApp, FultonAppOptions, OperationResult, Request, Response } from "../index";
+import { FultonApp, FultonAppOptions, OperationResult, Request, Response, EntityRouter, entityRouter, httpGet, IEntityService } from "../index";
 
 import { Author } from "../../spec/helpers/entities/author";
 import { Connection } from "typeorm/connection/Connection";
@@ -7,6 +7,80 @@ import { HttpTester } from "../../spec/helpers/http-tester";
 import { Tag } from "../../spec/helpers/entities/tag";
 import { queryParamsParser } from "./query-params-parser";
 import { sampleData } from "../../spec/support/sample-data";
+import { QueryParams, OperationOneResult, OperationStatus } from "../interfaces";
+
+class HotdogEntityService implements IEntityService<Hotdog> {
+    find(queryParams: QueryParams): Promise<OperationResult<Hotdog>> {
+        let data: Hotdog[] = [];
+
+        data.push(Object.assign(new Hotdog(), {
+            "hotdogId": "1",
+            "name": "name",
+            "location": [1, 2],
+            "address": "address",
+            "review": "review",
+            "author": { "id": "1" },
+            "picture": "picture"
+        }));
+
+        data.push(Object.assign(new Hotdog(), {
+            "hotdogId": "2",
+            "name": "name",
+            "address": "address",
+            "review": "review",
+            "author": {
+                "id": "2",
+                "name": "name",
+                "imageUrl": "imageUrl",
+                "tags": [
+                    { "id": "10", "name": "name" },
+                    { "id": "11", "name": "name" }]
+            },
+            "pictureUrl": "pictureUrl"
+        }));
+
+        return Promise.resolve({
+            data: data,
+            pagination: {
+                index: 1,
+                size: 2,
+                total: 10
+            }
+        });
+    }
+
+    findOne(queryParams: QueryParams): Promise<OperationOneResult<Hotdog>> {
+        let data: Hotdog = Object.assign(new Hotdog(), {
+            "hotdogId": "1",
+            "name": "name",
+            "location": [1, 2],
+            "address": "address",
+            "review": "review",
+            "author": { "id": "1" },
+            "picture": "picture"
+        });
+
+        return Promise.resolve({
+            data: data
+        });
+    }
+    create(entity: Hotdog): Promise<OperationOneResult<Hotdog>> {
+        throw new Error("Method not implemented.");
+    }
+    update(id: string, entity: Hotdog): Promise<OperationStatus> {
+        throw new Error("Method not implemented.");
+    }
+    delete(id: string): Promise<OperationStatus> {
+        throw new Error("Method not implemented.");
+    }
+}
+
+@entityRouter("/hotdogs", Hotdog)
+class HotdogRouter extends EntityRouter<Hotdog> {
+    constructor() {
+        super(new HotdogEntityService());
+    }
+}
 
 class MyApp extends FultonApp {
     protected onInit(options: FultonAppOptions): void | Promise<void> {
@@ -15,6 +89,8 @@ class MyApp extends FultonApp {
             res.send(req.body);
         }
 
+        this.options.routers = [HotdogRouter];
+
         let conn = new Connection({
             type: "mongodb",
             entities: [Hotdog, Author, Tag]
@@ -22,59 +98,6 @@ class MyApp extends FultonApp {
 
         conn["buildMetadatas"]();
         this.connections = [conn]
-    }
-
-    didInitRouters() {
-        this.express.get("/hotdog", (req: Request, res: Response) => {
-
-            let data = Object.assign(new Hotdog(), {
-                "hotdogId": "1",
-                "name": "name",
-                "location": [1, 2],
-                "address": "address",
-                "review": "review",
-                "author": { "id": "1" },
-                "picture": "picture"
-            });
-
-            res.send({
-                data: data
-            });
-        });
-
-        this.express.get("/hotdogs", (req: Request, res: Response) => {
-            let data: Hotdog[] = [];
-
-            data.push(Object.assign(new Hotdog(), {
-                "hotdogId": "1",
-                "name": "name",
-                "location": [1, 2],
-                "address": "address",
-                "review": "review",
-                "author": { "id": "1" },
-                "picture": "picture"
-            }));
-
-            data.push(Object.assign(new Hotdog(), {
-                "hotdogId": "2",
-                "name": "name",
-                "address": "address",
-                "review": "review",
-                "author": {
-                    "id": "2",
-                    "name": "name",
-                    "imageUrl": "imageUrl",
-                    "tags": [
-                        { "id": "10", "name": "name" },
-                        { "id": "11", "name": "name" }]
-                },
-                "pictureUrl": "pictureUrl"
-            }));
-
-            res.send({
-                data: data
-            });
-        });
     }
 }
 
@@ -206,7 +229,7 @@ describe('query parser', () => {
             "accept": "application/vnd.api+json"
         })
 
-        let result = await httpTester.get("/hotdog");
+        let result = await httpTester.get("/hotdogs/1");
 
         // console.log(result.body)
         expect(result.body).toEqual({
@@ -231,13 +254,13 @@ describe('query parser', () => {
         })
     });
 
-    it('should serializer hotdogs', async () => {
+    fit('should serializer hotdogs', async () => {
         httpTester.setHeaders({
             "content-type": "application/vnd.api+json",
             "accept": "application/vnd.api+json"
         })
 
-        let result = await httpTester.get("/hotdogs");
+        let result = await httpTester.get("/hotdogs?test=test");
 
         // console.log(result.body)
         expect(result.body).toEqual({
@@ -278,6 +301,13 @@ describe('query parser', () => {
                     }
                 }
             ],
+            "links": {
+                "first": 'http://localhost:3000/hotdogs?filter%5Btest%5D=test&pagination%5Bindex%5D=0&pagination%5Bsize%5D=2',
+                "last": 'http://localhost:3000/hotdogs?filter%5Btest%5D=test&pagination%5Bindex%5D=4&pagination%5Bsize%5D=2',
+                "prev": 'http://localhost:3000/hotdogs?filter%5Btest%5D=test&pagination%5Bindex%5D=0&pagination%5Bsize%5D=2',
+                "next": 'http://localhost:3000/hotdogs?filter%5Btest%5D=test&pagination%5Bindex%5D=2&pagination%5Bsize%5D=2',
+                "meta": { "index": 1, "size": 2, "total": 10 }
+            },
             "included": [
                 {
                     "id": "10",

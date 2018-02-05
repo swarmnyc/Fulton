@@ -1,6 +1,7 @@
-import { KEY_ROUTER_ERROR_HANDLER_METADATA, KEY_ROUTER_HTTP_METHOD_LIST_METADATA, KEY_ROUTER_METADATA } from "../constants";
-import { PathIdentifier, injectable, RouterDocOptions, HttpMethod, Middleware, RouterActionDocOptions, Type } from "../index";
-import { RouterMetadata, RouterMethodMetadata, EntityRouterMetadata } from "./route-decorators-helpers";
+import { EntityRouterMetadata, RouterMetadata, RouterMethodMetadata } from "./route-decorators-helpers";
+import { HttpMethod, Middleware, PathIdentifier, RouterActionDocOptions, RouterDocOptions, Type, injectable } from "../index";
+
+import { Keys } from "../constants";
 import { isFunction } from "util";
 
 /**
@@ -27,7 +28,7 @@ export function router(path: PathIdentifier, ...args: any[]): any {
         }
 
         Reflect.defineMetadata(
-            KEY_ROUTER_METADATA,
+            Keys.RouterMetadata,
             {
                 path,
                 doc,
@@ -42,7 +43,7 @@ export function router(path: PathIdentifier, ...args: any[]): any {
  */
 export function errorHandler() {
     return function (target: any, property: string, descriptor: PropertyDescriptor) {
-        Reflect.defineMetadata(KEY_ROUTER_ERROR_HANDLER_METADATA, property, target.constructor);
+        Reflect.defineMetadata(Keys.RouterErrorHandlerMetadata, property, target.constructor);
     };
 }
 
@@ -161,11 +162,11 @@ export function httpAction(method: HttpMethod, path: PathIdentifier = "/", ...ar
 
         let metadataList: RouterMethodMetadata[];
 
-        if (Reflect.hasOwnMetadata(KEY_ROUTER_HTTP_METHOD_LIST_METADATA, target.constructor)) {
-            metadataList = Reflect.getOwnMetadata(KEY_ROUTER_HTTP_METHOD_LIST_METADATA, target.constructor);
+        if (Reflect.hasOwnMetadata(Keys.HttpMethods, target.constructor)) {
+            metadataList = Reflect.getOwnMetadata(Keys.HttpMethods, target.constructor);
         } else {
             metadataList = [];
-            Reflect.defineMetadata(KEY_ROUTER_HTTP_METHOD_LIST_METADATA, metadataList, target.constructor);
+            Reflect.defineMetadata(Keys.HttpMethods, metadataList, target.constructor);
         }
 
         metadataList.push(metadata);
@@ -197,7 +198,7 @@ export function entityRouter(path: PathIdentifier, entity: Type, ...args: any[])
         }
 
         Reflect.defineMetadata(
-            KEY_ROUTER_METADATA,
+            Keys.RouterMetadata,
             {
                 path,
                 entity,

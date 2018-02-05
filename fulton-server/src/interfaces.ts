@@ -49,24 +49,21 @@ export interface OperationStatus {
     errors?: FultonErrorObject;
 }
 
+export interface OperationResultPagination {
+    total?: number;
+    index?: number;
+    size?: number;
+}
+
 export interface OperationResult<T=any> {
     data?: T[];
     errors?: FultonErrorObject;
-    pagination?: {
-        total?: number;
-        index?: number;
-        size?: number;
-    }
+    pagination?: OperationResultPagination;
 }
 
 export interface OperationOneResult<T=any> {
     data?: T;
     errors?: FultonErrorObject;
-    pagination?: {
-        total?: number;
-        index?: number;
-        size?: number;
-    }
 }
 
 export interface QueryParams {

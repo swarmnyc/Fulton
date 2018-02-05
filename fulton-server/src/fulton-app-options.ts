@@ -459,7 +459,7 @@ export class FultonAppOptions {
 
         /**
          * the port for http
-         * the default value is 80
+         * the default value is 3000
          * It can be overrided by procces.env["{appName}.options.server.httpPort"]
          */
         httpPort: number,
@@ -542,7 +542,7 @@ export class FultonAppOptions {
         this.server = {
             httpEnabled: true,
             httpsEnabled: false,
-            httpPort: 80,
+            httpPort: 3000,
             httpsPort: 443,
             clusterEnabled: false,
             clusterWorkerNumber: 0

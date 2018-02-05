@@ -1,10 +1,11 @@
 import * as qs from "qs";
-import { NextFunction, OperationOneResult, OperationResult, Request, Response, Type, QueryParams } from "../index";
+import * as url from "url";
+import { NextFunction, OperationOneResult, OperationResult, Request, Response, Type, QueryParams, EntityRouter, Router } from "../index";
 
 import { FultonApp } from "../fulton-app";
 import { MimeTypes } from "../constants";
 import { getRelatedToMetadata } from "../entities/related-decorators-helpers";
-import { JsonApiConverter, JsonApiTypeOptions, JsonApiSerializeOptions, JsonApiRootLinks } from "../helpers/jsonapi-converter";
+import { JsonApiConverter, JsonApiTypeOptions, JsonApiSerializeOptions, JsonApiRootLinks, JsonApiData, JsonApiLinks } from "../helpers/jsonapi-converter";
 import { OperationResultPagination } from "../interfaces";
 
 
@@ -111,6 +112,7 @@ function initConverter(app: FultonApp): JsonApiConverter {
                     id: id,
                     attributes: attributes,
                     relationships: {},
+                    linksFn: dataLinks,
                     rootLinksFn: rootLinks
                 }
 
@@ -121,6 +123,19 @@ function initConverter(app: FultonApp): JsonApiConverter {
                     options.relationships[propertyName] = {
                         type: refType.name
                     }
+                }
+
+                // for router path
+                let entityRouter = app.routers.find((router: Router) => {
+                    if (router instanceof EntityRouter) {
+                        return router["metadata"].router.entity == type
+                    }
+
+                    return false;
+                });
+
+                if (entityRouter) {
+                    options.path = entityRouter["metadata"].router.path.toString();
                 }
 
                 converter.register(type.name, options);
@@ -162,5 +177,13 @@ function rootLinks(opts: JsonApiSerializeOptions): JsonApiRootLinks {
         links.meta = pagination;
 
         return links;
+    }
+}
+
+function dataLinks(options: JsonApiSerializeOptions, typeOtions: JsonApiTypeOptions, data: JsonApiData): JsonApiLinks {
+    if (typeOtions.path) {
+        return {
+            self: url.resolve(options.domain, typeOtions.path) + "/" + data.id
+        }
     }
 }

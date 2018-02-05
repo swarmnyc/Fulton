@@ -236,6 +236,9 @@ describe('query parser', () => {
             "data": {
                 "id": "1",
                 "type": "Hotdog",
+                "links": {
+                    "self": 'http://localhost:3000/hotdogs/1'
+                },
                 "attributes": {
                     "name": "name",
                     "location": [1, 2],
@@ -254,7 +257,7 @@ describe('query parser', () => {
         })
     });
 
-    fit('should serializer hotdogs', async () => {
+    it('should serializer hotdogs', async () => {
         httpTester.setHeaders({
             "content-type": "application/vnd.api+json",
             "accept": "application/vnd.api+json"
@@ -268,6 +271,9 @@ describe('query parser', () => {
                 {
                     "id": "1",
                     "type": "Hotdog",
+                    "links": {
+                        "self": "http://localhost:3000/hotdogs/1"
+                    },
                     "attributes": {
                         "name": "name",
                         "location": [1, 2],
@@ -290,6 +296,9 @@ describe('query parser', () => {
                         "name": "name",
                         "address": "address",
                         "review": "review"
+                    },
+                    "links": {
+                        "self": "http://localhost:3000/hotdogs/2"
                     },
                     "relationships": {
                         "author": {

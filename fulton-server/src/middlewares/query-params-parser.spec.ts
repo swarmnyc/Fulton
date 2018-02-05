@@ -5,16 +5,15 @@ import { HttpTester } from "../../spec/helpers/http-tester";
 
 class MyApp extends FultonApp {
     protected onInit(options: FultonAppOptions): void | Promise<void> {
-    }
-
-    didInitRouters() {
-        this.express.get("/", (req: Request, res: Response) => {
-            res.send(req.queryParams);
-        })
-
-        this.express.get("/test/:id", queryById(), (req: Request, res: Response) => {
-            res.send(req.queryParams);
-        })
+        this.events.once("didInitRouters", () => {
+            this.express.get("/", (req: Request, res: Response) => {
+                res.send(req.queryParams);
+            })
+    
+            this.express.get("/test/:id", queryById(), (req: Request, res: Response) => {
+                res.send(req.queryParams);
+            })
+        });
     }
 }
 

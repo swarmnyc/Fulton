@@ -3,7 +3,6 @@ import * as lodash from 'lodash';
 // Cannot find other good package to handle convertion, so write it by ourself,
 // but the features isn't complete yet.
 // maybe make it independent package. 
-// TODO: JSON API Links
 
 export interface JsonApiConverterOptions {
     /**
@@ -56,6 +55,14 @@ export interface JsonApiTypeOptions {
         [key: string]: JsonApiRelationshipOptions
     }
 
+    /**
+     * the pamaters
+     */
+    path?: string;
+
+    /**
+     * the function to generate links for every data
+     */
     linksFn?: (options: JsonApiSerializeOptions, typeOtions: JsonApiTypeOptions, data: JsonApiData) => JsonApiLinks;
 
     /**
@@ -256,6 +263,10 @@ class JsonApiSerializer {
             }
         }
 
+        if (typeOpts.linksFn) {
+            data.links = typeOpts.linksFn(this.options, typeOpts, data);
+        }
+
         return data;
     }
 
@@ -272,6 +283,7 @@ class JsonApiSerializer {
         }
 
         return {
+            // TODO: JSON API relation data
             // links:links
             data: refData
         }

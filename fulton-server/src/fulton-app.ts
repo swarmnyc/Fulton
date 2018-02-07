@@ -279,7 +279,7 @@ export abstract class FultonApp {
      * init databases, it will be ignored if repository is empty.
      */
     protected async initDatabases(): Promise<void> {
-        if (this.options.identity.useDefaultImplement()) {
+        if (this.options.identity.isUseDefaultImplement) {
             // add User Entity to typeorm if identity is enabled and use FultonUser and FultonUserService
             this.options.entities.push(this.options.identity.userType);
         } else if (this.options.databases.size == 0) {

@@ -40,7 +40,7 @@ export class UserServiceMock implements IUserService<FultonUser> {
         return Promise.resolve(profile);
     }
 
-    findByAccessToken(token: string): Promise<FultonUser> {
+    loginByAccessToken(token: string): Promise<FultonUser> {
         let info = token.split("-");
         if (info[1] == "accessToken") {
             let user = new FultonUser();
@@ -68,8 +68,8 @@ export class UserServiceMock implements IUserService<FultonUser> {
     issueAccessToken(user: FultonUser): Promise<AccessToken> {
         return Promise.resolve({
             access_token: `${user.username}-accessToken`,
-            token_type: this.app.options.identity.accessTokenType,
-            expires_in: this.app.options.identity.accessTokenDuration
+            token_type: this.app.options.identity.accessToken.type,
+            expires_in: this.app.options.identity.accessToken.duration
         });
     }
 

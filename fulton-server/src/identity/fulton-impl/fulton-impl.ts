@@ -33,11 +33,15 @@ export let FultonImpl = {
      * for TokenStrategyVerify like bearer
      */
     async tokenStrategyVerifier(req: Request, token: string, done: StrategyVerifyDone) {
-        let user = await req.userService.findByAccessToken(token);
+        try {
+            let user = await req.userService.loginByAccessToken(token);
 
-        if (user) {
-            return done(null, user);
-        } else {
+            if (user) {
+                return done(null, user);
+            } else {
+                return done(null, false);
+            }
+        } catch (error) {
             return done(null, false);
         }
     },

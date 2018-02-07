@@ -43,17 +43,50 @@ export class IdentityOptions {
     userService: Type<IUserService<IUser>> | IUserService<IUser>;
 
     /**
-     * access token duratio in seconds
-     * 
-     * default is a mouth = 2,592,000
+     * the options for access token
      */
-    accessTokenDuration: number;
+    accessToken: {
+        /**
+         * the type of access token
+         * default is bearer, it affect authenticate method for every in coming request
+         */
+        type?: string;
 
-    /**
-     * access token type
-     * default is bearer, it affect authenticate method for every in coming request
-     */
-    accessTokenType: string;
+        /**
+         * the duration of access token in seconds
+         * 
+         * default is a mouth = 2,592,000
+         */
+        duration?: number;
+
+        /**
+         * the security level of access token
+         * default is medium
+         * 
+         * if level is low, the jwt payload is unencrypted and just verify the jwt token when authenticate
+         * if level is medium, the jwt payload is encrypted and just verify the jwt token when authenticate
+         * if level is hight, the jwt payload is encrypted and also check database when authenticate
+         */
+        secureLevel?: "low" | "medium" | "high";
+
+        /**
+         * the scopes of access token
+         * default is "[profile, roles]"
+         */
+        scopes?: string[];
+
+        /**
+         * the secret for JWT Token
+         * default is app_name
+         */
+        secret?: string;
+
+        /**
+         * the aes key for encrypt and decrypt
+         * default is app_name
+         */
+        key?: string | Buffer;
+    };
 
     /**
      * the authenticate every request to get user info, enabled strategies like "bearer", "session"
@@ -392,8 +425,13 @@ export class IdentityOptions {
         this.userService = FultonUserService;
 
         this.defaultAuthorizes = [];
-        this.accessTokenDuration = 2592000;
-        this.accessTokenType = "bearer";
+
+        this.accessToken = {
+            duration: 2592000,
+            type: "bearer",
+            secureLevel: "medium",
+            scopes: ["profile", "roles"]
+        }
 
         this.defaultAuthenticate = FultonImpl.defaultAuthenticate;
         this.defaultAuthenticateErrorIfFailure = false;
@@ -477,6 +515,13 @@ export class IdentityOptions {
         }
     }
 
+    get isUseDefaultImplement(): boolean {
+        return this.enabled &&
+            (this.userType == FultonUser) &&
+            (this.userRepository == null) &&
+            (this.userService == FultonUserService)
+    }
+
     /**
      * load options from environment to override the current options 
      */
@@ -515,13 +560,6 @@ export class IdentityOptions {
         }
 
         lodash.assignWith(this, envValues, customer);
-    }
-
-    useDefaultImplement(): boolean {
-        return this.enabled &&
-            (this.userType == FultonUser) &&
-            (this.userRepository == null) &&
-            (this.userService == FultonUserService)
     }
 
     addStrategy(options: StrategyOptions | OAuthStrategyOptions, strategy: Strategy | Type<Strategy>) {

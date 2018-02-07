@@ -2,6 +2,7 @@ import * as crypto from 'crypto';
 import * as lodash from 'lodash';
 import * as passwordHash from 'password-hash';
 import * as validator from 'validator';
+import * as jws from 'jws';
 
 import { AccessToken, FultonAccessToken, IFultonUser, IUserRegister, IUserService } from "../interfaces";
 import { EntityRepository, MongoRepository, Repository } from "typeorm";
@@ -11,6 +12,17 @@ import { FultonApp } from "../../fulton-app";
 import { FultonError } from "../../common";
 import { FultonUser } from "./fulton-user";
 import { IdentityOptions } from '../identity-options';
+import { IProfile } from '../../index';
+
+interface TokenPayload {
+    id?: string;
+    email?: string;
+    username?: string;
+    displayName?: string;
+    portraitUrl?: string;
+    roles?: string[];
+    expiredAt: number;
+}
 
 //TODO: multiple database engines supports
 
@@ -202,7 +214,7 @@ export class FultonUserService implements IUserService<FultonUser> {
         }
     }
 
-    async loginByOauth(token: AccessToken, profile: any): Promise<FultonUser> {
+    async loginByOauth(token: AccessToken, profile: IProfile): Promise<FultonUser> {
         let errors = new FultonError();
 
         // verify email
@@ -233,6 +245,7 @@ export class FultonUserService implements IUserService<FultonUser> {
             let newUser: IUserRegister = {
                 email: profile.email,
                 username: profile.username || profile.email,
+                portraitUrl: profile.portraitUrl,
                 oauthToken: token
             }
 
@@ -240,19 +253,80 @@ export class FultonUserService implements IUserService<FultonUser> {
         }
     }
 
-    findByAccessToken(token: string): Promise<FultonUser> {
-        return this.runner.findUserByToken(token);
+    loginByAccessToken(token: string): Promise<FultonUser> {
+        if (jws.verify(token, "HS256", this.jwtSecret)) {
+
+            let level = this.app.options.identity.accessToken.secureLevel;
+            if (level == "high") {
+                return this.runner.findUserByToken(token);
+            }
+
+            let jwt = jws.decode(token);
+            let payload: TokenPayload;
+            if (level == "medium") {
+                let decipher = crypto.createDecipher("aes256", this.cipherPassword)
+                let json = decipher.update(jwt.payload, "base64", "utf8");
+                json += decipher.final();
+
+                payload = JSON.parse(json);
+
+            } else {
+                payload = JSON.parse(jwt.payload);
+            }
+
+            if (payload.expiredAt > Date.now()) {
+                return Promise.resolve(payload as FultonUser);
+            } else {
+                return Promise.reject("Token Expired");
+            }
+
+        } else {
+            return Promise.reject("Invalid Token");
+        }
+
     }
 
     async issueAccessToken(user: FultonUser): Promise<AccessToken> {
-        const hash = crypto.createHmac('sha256', (Math.random() * 10000).toString());
-        let token = hash.update(user.id.toString()).digest("base64");
-
         let now = new Date();
+
+        let expiredAt = now.valueOf() + (this.app.options.identity.accessToken.duration * 1000);
+        let payload: TokenPayload | string = {
+            expiredAt: expiredAt
+        };
+
+        let scopes = this.app.options.identity.accessToken.scopes;
+
+        payload.id = user.id;
+
+        if (lodash.some(scopes, (s) => s == "profile")) {
+            payload.username = user.username;
+            payload.displayName = user.displayName;
+            payload.email = user.email;
+            payload.portraitUrl = user.portraitUrl;
+        }
+
+        if (lodash.some(scopes, (s) => s == "roles")) {
+            payload.roles = user.roles;
+        }
+
+        if (this.app.options.identity.accessToken.secureLevel != "low") {
+            let cipher = crypto.createCipher("aes256", this.cipherPassword)
+            payload = cipher.update(JSON.stringify(payload), "utf8", "base64");
+            payload += cipher.final("base64");
+        }
+
+        let token = jws.sign({
+            header: {
+                alg: "HS256"
+            },
+            secret: this.jwtSecret,
+            payload: payload
+        });
+
         let userToken = {
             token: token,
             issuredAt: now,
-            expiredAt: new Date(now.valueOf() + (this.app.options.identity.accessTokenDuration * 1000)),
+            expiredAt: new Date(expiredAt),
             revoked: false
         };
 
@@ -260,8 +334,8 @@ export class FultonUserService implements IUserService<FultonUser> {
 
         return {
             access_token: token,
-            token_type: this.app.options.identity.accessTokenType,
-            expires_in: this.app.options.identity.accessTokenDuration
+            token_type: this.app.options.identity.accessToken.type,
+            expires_in: this.app.options.identity.accessToken.duration
         }
     }
 
@@ -274,7 +348,14 @@ export class FultonUserService implements IUserService<FultonUser> {
     }
 
     refreshAccessToken(token: string): Promise<AccessToken> {
-
         throw new Error("Method not implemented.");
+    }
+
+    private get jwtSecret(): string | Buffer {
+        return this.app.options.identity.accessToken.key || this.app.appName;
+    }
+
+    private get cipherPassword(): string | Buffer {
+        return this.app.options.identity.accessToken.key || this.app.appName;
     }
 }

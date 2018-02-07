@@ -1,8 +1,8 @@
 import * as crypto from 'crypto';
+import * as jws from 'jws';
 import * as lodash from 'lodash';
 import * as passwordHash from 'password-hash';
 import * as validator from 'validator';
-import * as jws from 'jws';
 
 import { AccessToken, FultonAccessToken, IFultonUser, IUserRegister, IUserService } from "../interfaces";
 import { EntityRepository, MongoRepository, Repository } from "typeorm";
@@ -11,8 +11,8 @@ import { inject, injectable } from "../../interfaces";
 import { FultonApp } from "../../fulton-app";
 import { FultonError } from "../../common";
 import { FultonUser } from "./fulton-user";
-import { IdentityOptions } from '../identity-options';
 import { IProfile } from '../../index';
+import { IdentityOptions } from '../identity-options';
 
 interface TokenPayload {
     id?: string;
@@ -102,7 +102,7 @@ export class FultonUserService implements IUserService<FultonUser> {
 
     async register(input: IUserRegister): Promise<FultonUser> {
         let errors = new FultonError();
-        let registorOptions = this.app.options.identity.register;
+        let registorOptions = this.options.register;
 
         // verify username, password, email
         errors.verifyRequireds(input, ["username", "email"])
@@ -256,7 +256,7 @@ export class FultonUserService implements IUserService<FultonUser> {
     loginByAccessToken(token: string): Promise<FultonUser> {
         if (jws.verify(token, "HS256", this.jwtSecret)) {
 
-            let level = this.app.options.identity.accessToken.secureLevel;
+            let level = this.options.accessToken.secureLevel;
             if (level == "high") {
                 return this.runner.findUserByToken(token);
             }
@@ -289,27 +289,31 @@ export class FultonUserService implements IUserService<FultonUser> {
     async issueAccessToken(user: FultonUser): Promise<AccessToken> {
         let now = new Date();
 
-        let expiredAt = now.valueOf() + (this.app.options.identity.accessToken.duration * 1000);
+        let expiredAt = now.valueOf() + (this.options.accessToken.duration * 1000);
         let payload: TokenPayload | string = {
+            id: user.id,
             expiredAt: expiredAt
         };
 
-        let scopes = this.app.options.identity.accessToken.scopes;
+        let level = this.options.accessToken.secureLevel;
+        let scopes = this.options.accessToken.scopes;
 
-        payload.id = user.id;
+        if (level != "high") {
+            // if high, don't put others into payload
+            if (lodash.some(scopes, (s) => s == "profile")) {
+                payload.username = user.username;
+                payload.displayName = user.displayName;
+                payload.email = user.email;
+                payload.portraitUrl = user.portraitUrl;
+            }
 
-        if (lodash.some(scopes, (s) => s == "profile")) {
-            payload.username = user.username;
-            payload.displayName = user.displayName;
-            payload.email = user.email;
-            payload.portraitUrl = user.portraitUrl;
+            if (lodash.some(scopes, (s) => s == "roles")) {
+                payload.roles = user.roles;
+            }
         }
 
-        if (lodash.some(scopes, (s) => s == "roles")) {
-            payload.roles = user.roles;
-        }
-
-        if (this.app.options.identity.accessToken.secureLevel != "low") {
+        if (level != "low") {
+            // if level greater than low, encrypte the payload 
             let cipher = crypto.createCipher("aes256", this.cipherPassword)
             payload = cipher.update(JSON.stringify(payload), "utf8", "base64");
             payload += cipher.final("base64");
@@ -334,17 +338,13 @@ export class FultonUserService implements IUserService<FultonUser> {
 
         return {
             access_token: token,
-            token_type: this.app.options.identity.accessToken.type,
-            expires_in: this.app.options.identity.accessToken.duration
+            token_type: this.options.accessToken.type,
+            expires_in: this.options.accessToken.duration
         }
     }
 
-    checkRoles(user: FultonUser, ...roles: string[]): boolean {
-        return false;
-    }
-
     resetPassword(email: string) {
-
+        // TODO: reset password
     }
 
     refreshAccessToken(token: string): Promise<AccessToken> {
@@ -352,10 +352,10 @@ export class FultonUserService implements IUserService<FultonUser> {
     }
 
     private get jwtSecret(): string | Buffer {
-        return this.app.options.identity.accessToken.key || this.app.appName;
+        return this.options.accessToken.key || this.app.appName;
     }
 
     private get cipherPassword(): string | Buffer {
-        return this.app.options.identity.accessToken.key || this.app.appName;
+        return this.options.accessToken.key || this.app.appName;
     }
 }

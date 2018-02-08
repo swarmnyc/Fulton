@@ -28,7 +28,7 @@ export class FultonError {
             errorMessage = args[1];
         } else {
             propertyName = "message";
-            errorMessage = args[0];            
+            errorMessage = args[0];
         }
 
         if (this.errors[propertyName]) {
@@ -36,26 +36,32 @@ export class FultonError {
         } else {
             this.errors[propertyName] = [errorMessage];
         }
-        
+
         return this;
     }
 
-    verifyRequireds(target: any, propertyNames: string[], errorMessages?: string[]): boolean {
+    verifyRequired(target: any, propertyName: string, errorMessages?: string): boolean
+    verifyRequired(target: any, propertyNames: string[], errorMessages?: string[]): boolean
+    verifyRequired(target: any, arg1: any, arg2: any): boolean {
         let result: boolean = true;
-        propertyNames.forEach((name: string, i: number) => {
-            result = this.verifyRequired(target, name, errorMessages ? errorMessages[i] : null) && result
-        });
+        if (arg1 instanceof Array) {
+            let propertyNames: string[] = arg1;
+            let errorMessages: string[] = arg2;
 
-        return result;
-    }
+            propertyNames.forEach((name: string, i: number) => {
+                result = this.verifyRequired(target, name, errorMessages ? errorMessages[i] : null) && result
+            });
+        } else {
+            let propertyName: string = arg1;
+            let errorMessage: string = arg2;
 
-    verifyRequired(target: any, propertyName: string, errorMessage?: string): boolean {
-        if (!lodash.some(target[propertyName])) {
-            this.addError(propertyName, errorMessage || `${propertyName} is required`);
-            return false;
+            if (!lodash.some(target[propertyName])) {
+                this.addError(propertyName, errorMessage || `${propertyName} is required`);
+                return false;
+            }
         }
 
-        return true;
+        return result;
     }
 
     hasErrors(): boolean {

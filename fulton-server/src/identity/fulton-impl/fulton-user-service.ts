@@ -11,7 +11,7 @@ import { inject, injectable } from "../../interfaces";
 import { FultonApp } from "../../fulton-app";
 import { FultonError } from "../../common";
 import { FultonUser } from "./fulton-user";
-import { IProfile } from '../../index';
+import { IProfile, Request } from '../../index';
 import { IdentityOptions } from '../identity-options';
 
 interface TokenPayload {
@@ -92,9 +92,9 @@ export class FultonUserService implements IUserService<FultonUser> {
     }
 
     get currentUser(): FultonUser {
-        let zone = (global as any).Zone;
-        if (zone && zone.current.ctx) {
-            return zone.current.ctx.request.user;
+        let res: Request = Zone.current.get("res");
+        if (res) {
+            return res.user;
         } else {
             return null;
         }
@@ -102,20 +102,20 @@ export class FultonUserService implements IUserService<FultonUser> {
 
     async register(input: IUserRegister): Promise<FultonUser> {
         let errors = new FultonError();
-        let registorOptions = this.options.register;
+        let registerOptions = this.options.register;
 
         // verify username, password, email
-        errors.verifyRequireds(input, ["username", "email"])
+        errors.verifyRequired(input, ["username", "email"])
 
         if (!input.oauthToken) {
             // if oauth register, no need password.
             errors.verifyRequired(input, "password")
 
             let pwResult: boolean;
-            if (registorOptions.passwordVerifier instanceof Function) {
-                pwResult = registorOptions.passwordVerifier(input.password)
+            if (registerOptions.passwordVerifier instanceof Function) {
+                pwResult = registerOptions.passwordVerifier(input.password)
             } else {
-                pwResult = registorOptions.passwordVerifier.test(input.password)
+                pwResult = registerOptions.passwordVerifier.test(input.password)
             }
 
             if (!pwResult) {
@@ -124,10 +124,10 @@ export class FultonUserService implements IUserService<FultonUser> {
 
             // if oauth register, skip usename verify.            
             let unResult: boolean;
-            if (registorOptions.usernameVerifier instanceof Function) {
-                unResult = registorOptions.usernameVerifier(input.username)
+            if (registerOptions.usernameVerifier instanceof Function) {
+                unResult = registerOptions.usernameVerifier(input.username)
             } else {
-                unResult = registorOptions.usernameVerifier.test(input.username)
+                unResult = registerOptions.usernameVerifier.test(input.username)
             }
 
             if (!unResult) {
@@ -146,7 +146,7 @@ export class FultonUserService implements IUserService<FultonUser> {
         input.email = input.email.toLocaleLowerCase();
         input.username = input.username.toLocaleLowerCase();
 
-        let fileds = ["username", "email", "portraitUrl"].concat(registorOptions.otherFileds);
+        let fileds = ["username", "email", "portraitUrl"].concat(registerOptions.otherFileds);
         let newUser = lodash.pick(input, fileds) as FultonUser;
 
         // verify existence
@@ -182,7 +182,7 @@ export class FultonUserService implements IUserService<FultonUser> {
         }
 
         if (input.password) {
-            newUser.hashedPassword = passwordHash.generate(input.password, registorOptions.passwordHashOptons);
+            newUser.hashedPassword = passwordHash.generate(input.password, registerOptions.passwordHashOptons);
         }
 
         return this.userRepository.save(newUser);

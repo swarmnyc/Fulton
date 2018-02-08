@@ -36,26 +36,26 @@
     "@types/express": "^4.11.0",
     "@types/inversify": "^2.0.33",
     "@types/jasmine": "^2.8.4",
+    "@types/jws": "^3.1.0",
     "@types/lodash": "^4.14.93",
     "@types/mongodb": "^2.2.20",
     "@types/passport-http-bearer": "^1.0.31",
     "@types/passport-local": "^1.0.32",
     "@types/password-hash": "^1.2.20",
+    "@types/qs": "^6.5.1",
     "@types/request": "^2.0.13",
     "@types/validator": "^6.3.0",
     "@types/winston": "^2.3.7",
-    "@types/jws": "^3.1.0",   
-    "@types/qs": "^6.5.1",     
     "debug": "^3.1.0",
     "google-auth-library": "^1.1.0",
     "jasmine": "^2.9.0",
     "jasmine-ts": "^0.2.1",
     "mongodb": "^2.2.34",
     "passport-github": "^1.1.0",
+    "qs": "^6.5.1",
     "request": "^2.83.0",
     "rimraf": "^2.6.2",
-    "typescript": "^2.6.2",
-    "qs": "^6.5.1"    
+    "typescript": "^2.6.2"
   },
   "dependencies": {
     "@types/node": "^9.3.0",
@@ -72,6 +72,7 @@
     "reflect-metadata": "^0.1.12",
     "typeorm": "^0.1.11",
     "validator": "^9.3.0",
-    "winston": "^2.4.0"
+    "winston": "^2.4.0",
+    "zone.js": "^0.8.20"
   }
 }

@@ -58,7 +58,7 @@ export class UserServiceMock implements IUserService<FultonUser> {
 
         let newUser = lodash.pick(input, ["username", "password", "email"]);
 
-        if (errors.verifyRequireds(input, ["username", "password", "email"])) {
+        if (errors.verifyRequired(input, ["username", "password", "email"])) {
             return Promise.resolve(input as FultonUser);
         } else {
             return Promise.reject(errors);

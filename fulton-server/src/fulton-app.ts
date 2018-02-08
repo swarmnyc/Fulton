@@ -95,8 +95,28 @@ export abstract class FultonApp {
     }
 
     /**
+     * get data from res.locals[key], and use Zone to manage context
+     */
+    getLocalData(key: string): any {
+        let res: Response = Zone.current.get("res");
+        if (res) {
+            return res.locals[key];
+        }
+    }
+
+    /**
+     * set data from res.locals[key], and use Zone to manage context
+     */
+    setLocalData(key: string, value: any) {
+        let res: Response = Zone.current.get("res");
+        if (res) {
+            res.locals[key] = value;
+        }
+    }
+
+    /**
      * initialize FultonApp. It will be called on start(), if the app isn't initialized;
-     * it can be run many times, everytime call this will reset all the related objects
+     * it can be run many times, every times call this will reset all the related objects
      */
     async init(): Promise<void> {
         await this.initServer();
@@ -164,7 +184,7 @@ export abstract class FultonApp {
         if (this.options.server.httpEnabled) {
             tasks.push(new Promise((resolve, reject) => {
                 this.httpServer = http
-                    .createServer(this.express)
+                    .createServer(this.serve)
                     .on("error", (error) => {
                         FultonLog.error(`${this.appName} failed to start http server on port ${this.options.server.httpPort}`);
                         this.httpServer = null;
@@ -188,7 +208,7 @@ export abstract class FultonApp {
                 }
 
                 this.httpsServer = https
-                    .createServer(this.options.server.sslOptions, this.express)
+                    .createServer(this.options.server.sslOptions, this.serve)
                     .on("error", (error) => {
                         FultonLog.error(`${this.appName} failed to start https server on port ${this.options.server.httpsPort}`);
                         this.httpsServer = null;
@@ -565,4 +585,14 @@ export abstract class FultonApp {
      * @param options the options for start app
      */
     protected abstract onInit(options: FultonAppOptions): void | Promise<void>;
+
+    private serve = (req: any, res: any) => {
+        Zone.current.fork({
+            name: this.appName,
+            properties: { req, res },
+
+        }).run(async () => {
+            this.express(req, res);
+        });
+    }
 }

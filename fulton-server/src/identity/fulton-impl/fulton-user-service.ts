@@ -122,7 +122,7 @@ export class FultonUserService implements IUserService<FultonUser> {
                 errors.addError("password", "password is invalid")
             }
 
-            // if oauth register, skip usename verify.            
+            // if oauth register, skip username verify.            
             let unResult: boolean;
             if (registerOptions.usernameVerifier instanceof Function) {
                 unResult = registerOptions.usernameVerifier(input.username)
@@ -146,8 +146,8 @@ export class FultonUserService implements IUserService<FultonUser> {
         input.email = input.email.toLocaleLowerCase();
         input.username = input.username.toLocaleLowerCase();
 
-        let fileds = ["username", "email", "portraitUrl"].concat(registerOptions.otherFileds);
-        let newUser = lodash.pick(input, fileds) as FultonUser;
+        let fields = ["username", "email", "portraitUrl"].concat(registerOptions.otherFields);
+        let newUser = lodash.pick(input, fields) as FultonUser;
 
         // verify existence
         let count = await this.userRepository.count({
@@ -176,13 +176,13 @@ export class FultonUserService implements IUserService<FultonUser> {
                     accessToken: input.oauthToken.access_token,
                     refreshToken: input.oauthToken.refresh_token,
                     provider: input.oauthToken.provider,
-                    issuredAt: new Date()
+                    issuedAt: new Date()
                 }
             ]
         }
 
         if (input.password) {
-            newUser.hashedPassword = passwordHash.generate(input.password, registerOptions.passwordHashOptons);
+            newUser.hashedPassword = passwordHash.generate(input.password, registerOptions.passwordHashOptions);
         }
 
         return this.userRepository.save(newUser);
@@ -236,7 +236,7 @@ export class FultonUserService implements IUserService<FultonUser> {
                 provider: token.provider,
                 accessToken: token.access_token,
                 refreshToken: token.refresh_token,
-                issuredAt: new Date()
+                issuedAt: new Date()
             });
 
             return user;
@@ -313,7 +313,7 @@ export class FultonUserService implements IUserService<FultonUser> {
         }
 
         if (level != "low") {
-            // if level greater than low, encrypte the payload 
+            // if level greater than low, encrypt the payload 
             let cipher = crypto.createCipher("aes256", this.cipherPassword)
             payload = cipher.update(JSON.stringify(payload), "utf8", "base64");
             payload += cipher.final("base64");
@@ -329,7 +329,7 @@ export class FultonUserService implements IUserService<FultonUser> {
 
         let userToken = {
             token: token,
-            issuredAt: now,
+            issuedAt: now,
             expiredAt: new Date(expiredAt),
             revoked: false
         };

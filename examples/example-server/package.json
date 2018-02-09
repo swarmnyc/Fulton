@@ -1,6 +1,7 @@
 {
   "name": "example-server",
   "version": "0.0.0-PLACEHOLDER",
+  "displayName": "Fulton Example Server",
   "description": "",
   "main": "build/main.js",
   "author": "",

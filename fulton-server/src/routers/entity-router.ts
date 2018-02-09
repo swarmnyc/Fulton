@@ -8,7 +8,7 @@ import { queryById } from "../middlewares";
 
 @injectable()
 export abstract class EntityRouter<TEntity> extends Router {
-    protected metadata: FullEntityRouterMetadata
+    public metadata: FullEntityRouterMetadata
 
     constructor(protected entityService?: IEntityService<TEntity>) {
         super();

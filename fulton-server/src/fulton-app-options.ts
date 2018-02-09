@@ -17,43 +17,38 @@ import Env from './helpers/env';
 import Helper from './helpers/helper';
 import { IdentityOptions } from './identity/identity-options';
 import { ServeStaticOptions } from 'serve-static';
+import { InfoObject } from '@loopback/openapi-spec';
 
 export class FultonAppOptions {
-    // generate api doc
-    //enabledApiDoc: boolean;
-
-    // default is /api/docs
-    // apiDocPath: string;
-
     /**
      * User manager and authentication based on passport
      */
     identity: IdentityOptions;
 
     /**
-     * Databases connection options, you can defien connection options on FultonApp.onInt(),  
+     * Databases connection options, you can define connection options on FultonApp.onInt(),  
      * and use 
-     * `procces.env["{appName}.options.databases[{connectionName}].{optionName}"]` to override data.
+     * `process.env["{appName}.options.databases[{connectionName}].{optionName}"]` to override data.
      * 
      * for example: 
      * FultonApp.options.databases[default].url={url}
      * 
      * and 
-     * `procces.env["{appName}.options.database.{optionName}"]` is the sortcut of 
-     * `procces.env["{appName}.options.databases[default].{optionName}"]`
+     * `process.env["{appName}.options.database.{optionName}"]` is the shortcut of 
+     * `process.env["{appName}.options.databases[default].{optionName}"]`
      * 
      * if the map is empty, it will use typeorm.json, for more information see [typeorm](http://typeorm.io/)
      */
     databases: Map<string, ConnectionOptions> = new Map();
 
     /**
-     * behavior for "/" request, only one of three methods can be actived at the same time.
+     * behavior for "/" request, only one of three methods can be activated at the same time.
      */
     index: {
         /**
          * If true, log every http request.
          * The default is true.
-         * It can be overrided by procces.env["{appName}.options.index.enabled"]
+         * It can be overridden by process.env["{appName}.options.index.enabled"]
          */
         enabled: boolean;
 
@@ -191,7 +186,7 @@ export class FultonAppOptions {
 
     /**
      * the entities for typeorm, the value will concatenate all database CollectionOptions.entities
-     * you can directly defien enitiies on each CollectionOptions
+     * you can directly define entities on each CollectionOptions
      * typeorm will automatically road entities under ./entities
      */
     entities: Type[] = [];
@@ -203,7 +198,7 @@ export class FultonAppOptions {
          */
         json?: boolean;
         /**
-         * if true, add fultonJsonapi() as a middleware
+         * if true, add fulton Jsonapi() as a middleware
          * if true, have to run `npm install jsonapi-serializer`
          * the default value is false
          */
@@ -245,7 +240,7 @@ export class FultonAppOptions {
         /**
          * if true, Fulton will load routers based on routerDirs automatically 
          * the default value is false
-         * It can be overrided by procces.env["{appName}.options.loader.routerLoaderEnabled"]
+         * It can be overridden by process.env["{appName}.options.loader.routerLoaderEnabled"]
          */
         routerLoaderEnabled: boolean;
 
@@ -263,7 +258,7 @@ export class FultonAppOptions {
         /**
          * if true, Fulton will load services based on serviceDirs automatically 
          * the default value is false
-         * It can be overrided by procces.env["{appName}.options.loader.serviceLoaderEnabled"]
+         * It can be overridden by process.env["{appName}.options.loader.serviceLoaderEnabled"]
          */
         serviceLoaderEnabled: boolean;
 
@@ -281,7 +276,7 @@ export class FultonAppOptions {
         /**
          * if true, Fulton will load repositories based on repositoryDirs automatically
          * the default value is false
-         * It can be overrided by procces.env["{appName}.options.loader.repositoryLoaderEnabled"] 
+         * It can be overridden by process.env["{appName}.options.loader.repositoryLoaderEnabled"] 
          */
         repositoryLoaderEnabled: boolean;
 
@@ -291,26 +286,26 @@ export class FultonAppOptions {
         repositoryDirs: string[];
 
         /**
-         * the respository loader (a function), it loads all respositories under the folders of all repositoryDirs
+         * the repository loader (a function), it loads all repositories under the folders of all repositoryDirs
          * default is FultonClassLoader
          */
         repositoryLoader: FultonClassLoader<Repository<any>>;
     }
 
     /**
-     * Logging optons
+     * Logging options
      */
     logging: {
 
         /**
          * the default logger logging level
          * default is "debug"
-         * It can be overrided by procces.env["{appName}.options.logging.defaultLoggerLevel"]
+         * It can be overridden by process.env["{appName}.options.logging.defaultLoggerLevel"]
          */
         defaultLoggerLevel?: FultonLoggerLevel;
 
         /**
-         * if not null, reset winstion default logger with this value, the default value is null
+         * if not null, reset winston default logger with this value, the default value is null
          * 
          * ## example
          * ```
@@ -325,14 +320,14 @@ export class FultonAppOptions {
         /**
          * enable default logger console transport colorized
          * the default value is true
-         * It can be overrided by procces.env["{appName}.options.logging.defaultLoggerColorized"]
+         * It can be overridden by process.env["{appName}.options.logging.defaultLoggerColorized"]
          */
         defaultLoggerColorized?: boolean;
 
         /**
          * if true, app will logs every http requests.
          * the default value is true
-         * It can be overrided by procces.env["${appName}.options.logging.httpLoggerEnabled"]
+         * It can be overridden by process.env["${appName}.options.logging.httpLoggerEnabled"]
          */
         httpLoggerEnabled: boolean;
 
@@ -368,7 +363,7 @@ export class FultonAppOptions {
         /**
          * if true, app will serve static files.
          * the default value is false
-         * It can be overrided by procces.env["{appName}.options.staticFile.enabled]
+         * It can be overridden by process.env["{appName}.options.staticFile.enabled]
          */
         enabled?: boolean;
 
@@ -417,7 +412,7 @@ export class FultonAppOptions {
         /**
          * if true, app will enable cors.
          * the default value is false
-         * It can be overrided by procces.env["{appName}.options.cors.enabled]
+         * It can be overridden by process.env["{appName}.options.cors.enabled]
          */
         enabled: boolean;
 
@@ -440,34 +435,80 @@ export class FultonAppOptions {
     }
 
     /**
+     * use swagger to serve docs, see https://swagger.io/specification/.
+     * 
+     * if the docsFilePath is empty, then Fulton will generate docs dynamically.
+     * 
+     * you can add a listener on didInitDocs event to modify generated docs
+     * ### for example
+     * ```
+     * this.events.on("didInitDocs", (docs:OpenApiSpec)=>{
+     *   // modify the docs
+     * });
+     * ```
+     */
+    docs: {
+        /**
+         * if true, app will enable docs.
+         * the default value is false
+         * It can be overridden by process.env["{appName}.options.docs.enabled]
+         */
+        enabled?: boolean;
+
+        /**
+         * the path for docs
+         * the default value is /docs
+         */
+        path?: PathIdentifier;
+
+        /** 
+         * the access key for the docs, if provided, to access the docs needs key on the url
+         * for example `http://localhost:3000/docs?key=the-key`
+         * the default value is empty
+        */
+        accessKey?: string;
+
+        /**
+         * use the specific swagger format json file, if you don't want to use Fulton generate docs
+         * the default value is empty
+         */
+        docsFilePath?: string;
+
+        /**        
+         * the information of the app. default values are from package.json
+         */
+        info?: InfoObject;
+    }
+
+    /**
      * the settings for http and https servers
      */
     server: {
         /**
          * if true, start a http server
          * the default value is true
-         * It can be overrided by procces.env["{appName}.options.server.httpEnabled]
+         * It can be overridden by process.env["{appName}.options.server.httpEnabled]
          */
         httpEnabled: boolean,
 
         /**
          * if true, start a https server
          * the default value is false
-         * It can be overrided by procces.env["{appName}.options.server.httpsEnabled]
+         * It can be overridden by process.env["{appName}.options.server.httpsEnabled]
          */
         httpsEnabled: boolean,
 
         /**
          * the port for http
          * the default value is 3000
-         * It can be overrided by procces.env["{appName}.options.server.httpPort"]
+         * It can be overridden by process.env["{appName}.options.server.httpPort"]
          */
         httpPort: number,
 
         /**
          * the port for https 
          * the default value is 443
-         * It can be overrided by procces.env["{appName}.options.server.httpsPort"]
+         * It can be overridden by process.env["{appName}.options.server.httpsPort"]
          */
         httpsPort: number,
 
@@ -479,14 +520,14 @@ export class FultonAppOptions {
         /**
          * if true, app will start in cluster mode
          * the default value is false
-         * It can be overrided by procces.env["{appName}.options.server.clusterEnabled]
+         * It can be overridden by process.env["{appName}.options.server.clusterEnabled]
          */
         clusterEnabled?: boolean
 
         /**
          * the number of worker for cluster
          * the default value is 0, which will use the number of cup cores
-         * It can be overrided by procces.env["{appName}.options.server.clusterWorkerNumber]
+         * It can be overridden by process.env["{appName}.options.server.clusterWorkerNumber]
          */
         clusterWorkerNumber?: number
     }
@@ -570,6 +611,19 @@ export class FultonAppOptions {
 
         this.settings = {
             paginationSize: 20
+        }
+
+        // TODO: get more information
+        let info = require(global.process.cwd() + "/package.json");
+
+        this.docs = {
+            enabled: false,
+            path: "/docs",
+            info: {
+                title: info.displayName || info.name,
+                description: info.description,
+                version: info.version
+            }
         }
 
         this.identity = new IdentityOptions(this.appName, this.appMode);

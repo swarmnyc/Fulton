@@ -23,7 +23,7 @@ class TestRouter extends Router {
     @httpGet()
     async get(req: Request, res: Response) {
         this.service.setId(req.query.id)
-
+        
         await this.delay(req.query.id).then(() => {
             console.log(`id:${req.query.id}, then, zone:${Zone.current.name}`);
         });

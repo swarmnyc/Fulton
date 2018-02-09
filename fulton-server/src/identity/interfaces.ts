@@ -38,13 +38,13 @@ export interface FultonUserOauth {
     userId?: string;
     accessToken?: string;
     refreshToken?: string;
-    issuredAt?: Date;
+    issuedAt?: Date;
     expiredAt?: Date;
 }
 
 export interface FultonAccessToken {
     token?: string;
-    issuredAt?: Date;
+    issuedAt?: Date;
     expiredAt?: Date;
     revoked?: boolean;
 }
@@ -92,7 +92,7 @@ export interface StrategyOptions {
 
     /**
     * for passport, use it when create new Strategy object, like
-    * new LocalStrategy(options.strageyOptions, options.verifier)
+    * new LocalStrategy(options.strategyOptions, options.verifier)
     * the default value is null
     */
     strategyOptions?: {[key: string]: any};
@@ -139,7 +139,7 @@ export interface OAuthStrategyOptions extends StrategyOptions {
     /**
      * the route path for google auth callback
      * the default value is /auth/google/callback
-     * It can be overrided by procces.env["{appName}.options.identity.google.callbackPath"]
+     * It can be overridden by process.env["{appName}.options.identity.google.callbackPath"]
      */
     callbackPath?: string;
 
@@ -177,7 +177,7 @@ export interface OAuthStrategyOptions extends StrategyOptions {
     /**
      * transform the oauth profile to our user format
      */
-    prfoileTransformer?: (profile: any) => any;
+    profileTransformer?: (profile: any) => any;
 
     /**
      * the middleware next to authenticate

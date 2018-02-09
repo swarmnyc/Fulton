@@ -14,7 +14,7 @@ import { Strategy } from "passport";
 export class IdentityOptions {
     /**
      * the default value is false
-     * It can be overrided by procces.env["{appName}.options.identity.enabled"]
+     * It can be overridden by process.env["{appName}.options.identity.enabled"]
      */
     enabled: boolean;
 
@@ -37,7 +37,7 @@ export class IdentityOptions {
      * `req.userService`
      * 
      * if your user schema is like FultonUser and auth strategies is
-     * usernamn-password and bearer token, then you don't need to change this value,
+     * username-password and bearer token, then you don't need to change this value,
      * otherwise you have to custom your user service;
      */
     userService: Type<IUserService<IUser>> | IUserService<IUser>;
@@ -63,7 +63,7 @@ export class IdentityOptions {
          * the security level of access token
          * default is medium
          * 
-         * if level is low, the jwt payload is unencrypted and just verify the jwt token when authenticate
+         * if level is low, the jwt payload is un-encrypted and just verify the jwt token when authenticate
          * if level is medium, the jwt payload is encrypted and just verify the jwt token when authenticate
          * if level is hight, the jwt payload is encrypted and also check database when authenticate
          */
@@ -148,7 +148,7 @@ export class IdentityOptions {
      *     list(req: Request, res: Response) { }     
      * 
      *     // action level authorization
-     *     // authorize by admin role and loggined
+     *     // authorize by admin role and logged in
      *     @httpDelete("/:id", authorizeByRole("admin")) 
      *     delete(req: Request, res: Response) { }
      * }
@@ -171,7 +171,7 @@ export class IdentityOptions {
      *     }
      * 
      *     // if you want to put all logics altogether
-     *     // you can set options.identity.register.endabled = false
+     *     // you can set options.identity.register.enabled = false
      *     // and add this action.
      *     @httpPost("/register"))
      *     register(req: Request, res: Response) {
@@ -220,7 +220,7 @@ export class IdentityOptions {
         /**
          * the options for hash password
          */
-        passwordHashOptons?: {
+        passwordHashOptions?: {
             /** 
              * the default value is sha256
              */
@@ -238,19 +238,19 @@ export class IdentityOptions {
         session?: boolean;
 
         /**
-         * accept other fields, like nickname or phonenumber
+         * accept other fields, like nickname or phone-number
          * the default value is empty
          */
-        otherFileds?: string[];
+        otherFields?: string[];
 
         /**
-         * verify password is vaild or not
+         * verify password is valid or not
          * the default value is /^[a-zA-Z0-9_-]{4,64}$/
          */
         usernameVerifier?: RegExp | ((username: string) => boolean);
 
         /**
-         * verify password is vaild or not
+         * verify password is valid or not
          * the default value is /^\S{6,64}$/, any 4 to 64 non-whitespace characters
          */
         passwordVerifier?: RegExp | ((pw: string) => boolean);
@@ -287,7 +287,7 @@ export class IdentityOptions {
      *     }
      * 
      *     // if you want to all logics altogether
-     *     // you can set options.identity.login.endabled = false
+     *     // you can set options.identity.login.enabled = false
      *     // and add this action.
      *     @httpPost("/login", authenticate("local", { failureRedirect: "/auth/login" }))
      *     login(req: Request, res: Response) {
@@ -299,7 +299,7 @@ export class IdentityOptions {
     login: {
         /**
          * the default value is true
-         * it can be overrided by procces.env["{appName}.options.identity.login.enabled"]
+         * it can be overridden by process.env["{appName}.options.identity.login.enabled"]
          */
         enabled?: boolean;
 
@@ -328,7 +328,7 @@ export class IdentityOptions {
          * 
          * the default value is FultonImpl.localStrategyVerifier
          * 
-         * ### customzing example
+         * ### customizing example
          * verifier = (req: Request, username: string, password: string, done: LocalStrategyVerifyDone) => {
          *     req.userService
          *         .login(username, password)
@@ -356,7 +356,7 @@ export class IdentityOptions {
     bearer: {
         /**
          * default is true
-         * it can be overrided by procces.env["{appName}.options.identity.bearer.enabled"]
+         * it can be overridden by process.env["{appName}.options.identity.bearer.enabled"]
          */
         enabled?: boolean;
 
@@ -391,8 +391,8 @@ export class IdentityOptions {
      * ## Require "google-auth-library" package ##
      * run `npm install google-auth-library` to install it
      * 
-     * clientId can be overrided by procces.env["{appName}.options.identity.google.clientId"]
-     * clientSecret can be overrided by procces.env["{appName}.options.identity.google.clientSecret"]
+     * clientId can be overridden by process.env["{appName}.options.identity.google.clientId"]
+     * clientSecret can be overridden by process.env["{appName}.options.identity.google.clientSecret"]
      */
     google: GoogleStrategyOptions;
 
@@ -405,12 +405,12 @@ export class IdentityOptions {
      * ## Require "passport-github" package ##
      * run `npm install passport-github` to install it
      * 
-     * clientId can be overrided by procces.env["{appName}.options.identity.github.clientId"]
-     * clientSecret can be overrided by procces.env["{appName}.options.identity.github.clientSecret"]
+     * clientId can be overridden by process.env["{appName}.options.identity.github.clientId"]
+     * clientSecret can be overridden by process.env["{appName}.options.identity.github.clientSecret"]
      */
     github: OAuthStrategyOptions;
 
-    /** other passport stratogies */
+    /** other passport strategies */
     readonly strategies: CustomStrategySettings[] = [];
 
     /**
@@ -445,11 +445,11 @@ export class IdentityOptions {
             emailField: "email",
             usernameVerifier: /^[a-zA-Z0-9_-]{4,64}$/,
             passwordVerifier: /\S{6,64}/,
-            passwordHashOptons: {
+            passwordHashOptions: {
                 algorithm: "sha256"
             },
             session: false,
-            otherFileds: [],
+            otherFields: [],
             handler: FultonImpl.registerHandler,
             successCallback: FultonImpl.successMiddleware
         };

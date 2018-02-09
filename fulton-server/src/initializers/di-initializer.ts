@@ -4,17 +4,21 @@ import { MongoRepository, getConnection, getRepository } from "typeorm";
 import { FultonApp } from "../fulton-app";
 import { Repository } from "typeorm/repository/Repository";
 import { getRepositoryMetadata } from "../entities/repository-decorator-helper";
-import { interfaces } from "inversify";
+import { interfaces, Container } from "inversify";
 
-module.exports = function (app: FultonApp, container: DiContainer) {
+export default function DiInitializer(app: FultonApp) {
+    app.container = new Container();
+
     // for FultonApp
-    container.bind(FultonApp).toConstantValue(app);
+    app.container.bind(FultonApp).toConstantValue(app);
 
     // for EntityService
-    container.bind(EntityService).toFactory(entityServiceFactory);
+    app.container.bind(EntityService).toFactory(entityServiceFactory);
 
     // for Repository
-    container.bind(Repository).toFactory(repositoryFactory);
+    app.container.bind(Repository).toFactory(repositoryFactory);
+
+    app.events.emit("didInitDiContainer", app);
 }
 
 /**

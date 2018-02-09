@@ -11,7 +11,8 @@ import { ClassProvider, FactoryProvider, FunctionProvider, Provider, Type, TypeI
 import { Connection, ConnectionOptions, Repository, createConnections } from "typeorm";
 import { IUser, IUserService } from "./identity";
 
-import { Container } from "inversify";
+import DiInitializer from './initializers/di-initializer';
+import DocsInitializer from './initializers/docs-initializer';
 import { EntityMetadataHelper } from "./helpers/entity-metadata-helper";
 import Env from "./helpers/env";
 import { EventEmitter } from 'events';
@@ -153,6 +154,8 @@ export abstract class FultonApp {
 
         await this.initRouters();
 
+        await this.initDocs();
+
         await this.initErrorHandler();
         /* end express middlewares */
 
@@ -237,7 +240,7 @@ export abstract class FultonApp {
         if (this.httpServer) {
             tasks.push(new Promise((resolve, reject) => {
                 this.httpServer.close(() => {
-                    FultonLog.info(`${this.appName} stoped http server`);
+                    FultonLog.info(`${this.appName} stopped http server`);
                     resolve();
                 })
             }));
@@ -246,7 +249,7 @@ export abstract class FultonApp {
         if (this.httpsServer) {
             tasks.push(new Promise((resolve, reject) => {
                 this.httpServer.close(() => {
-                    FultonLog.info(`${this.appName} stoped https server`);
+                    FultonLog.info(`${this.appName} stopped https server`);
                     resolve();
                 })
             }));
@@ -265,10 +268,7 @@ export abstract class FultonApp {
     }
 
     protected initDiContainer(): void | Promise<void> {
-        this.container = new Container();
-
-        require("./initializers/di-initializer")(this, this.container);
-        this.events.emit("didInitDiContainer", this);
+        DiInitializer(this);
     }
 
     protected initLogging(): void | Promise<void> {
@@ -343,7 +343,7 @@ export abstract class FultonApp {
             providers = loadedProviders.concat(providers);
         }
 
-        // reposities needs to be singleton to integrate typeorm and inversify
+        // repositories needs to be singleton to integrate typeorm and inversify
         let factory: RepositoryFactory = this.container.get<any>(Repository);
         let newProviders: ValueProvider[] = providers.map((provider) => {
             return {
@@ -384,14 +384,14 @@ export abstract class FultonApp {
     }
 
     protected async initRouters(): Promise<void> {
-        let prodivers = this.options.routers || [];
+        let providers = this.options.routers || [];
         if (this.options.loader.routerLoaderEnabled) {
             let dirs = this.options.loader.routerDirs.map((dir) => path.join(this.options.loader.appDir, dir));
             let loadProviders = await this.options.loader.routerLoader(dirs, true) as Provider[];
-            prodivers = loadProviders.concat(prodivers);
+            providers = loadProviders.concat(providers);
         }
 
-        let ids = this.registerTypes(prodivers, true);
+        let ids = this.registerTypes(providers, true);
 
         this.routers = ids.map((id) => {
             let router = this.container.get<Router>(id);
@@ -521,6 +521,12 @@ export abstract class FultonApp {
             }
 
             this.events.emit("didInitErrorHandler", this);
+        }
+    }
+
+    protected initDocs(): void | Promise<void> {
+        if (this.options.docs.enabled) {
+            DocsInitializer(this);
         }
     }
 

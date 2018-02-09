@@ -31,7 +31,7 @@ export function router(path: PathIdentifier, ...args: any[]): any {
             Keys.RouterMetadata,
             {
                 path,
-                doc,
+                doc: doc || {},
                 middlewares
             } as RouterMetadata,
             target);
@@ -156,7 +156,7 @@ export function httpAction(method: HttpMethod, path: PathIdentifier = "/", ...ar
             path,
             method,
             property,
-            doc,
+            doc: doc || {},
             middlewares
         };
 
@@ -202,7 +202,7 @@ export function entityRouter(path: PathIdentifier, entity: Type, ...args: any[])
             {
                 path,
                 entity,
-                doc,
+                doc: doc || {},
                 middlewares
             } as EntityRouterMetadata,
             target);

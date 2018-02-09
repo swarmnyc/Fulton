@@ -47,10 +47,10 @@ export let FultonImpl = {
     },
 
     /**
-     * for StategySuccessHandler like login, bearer
+     * for StrategySuccessHandler like login, bearer
      */
     async successMiddleware(req: Request, res: Response) {
-        //TODO: Web-view for fultonStategySuccessCallback
+        //TODO: Web-view for fultonStrategySuccessCallback
         let accessToken = await req.userService.issueAccessToken(req.user);
         res.send(accessToken);
     },
@@ -79,9 +79,6 @@ export let FultonImpl = {
 
     /**
      * the wrapper of auth verifier, the purpose of it is to call req.userService.loginByOauth with the formated parameters.
-     * @param provider 
-     * @param options 
-     * @param prfoileTransformer 
      */
     oauthVerifierFn(options: OAuthStrategyOptions): OAuthStrategyVerifier {
         return (req: Request, access_token: string, fresh_token: string, profile: any, done: StrategyVerifyDone) => {
@@ -91,8 +88,8 @@ export let FultonImpl = {
                 refresh_token: fresh_token
             }
 
-            if (options.prfoileTransformer) {
-                profile = options.prfoileTransformer(profile);
+            if (options.profileTransformer) {
+                profile = options.profileTransformer(profile);
             }
 
             req.userService

@@ -33,7 +33,7 @@ import { TypeIdentifier } from "../helpers/type-helpers";
  */
 @injectable()
 export abstract class Router {
-    protected metadata: FullRouterMetadata
+    public metadata: FullRouterMetadata
     protected router: Router;
     @inject(FultonApp)
     protected app: FultonApp;
@@ -47,7 +47,7 @@ export abstract class Router {
     }
 
     init() {
-        //TODO: valify metadata;
+        //TODO: verify metadata;
         this.onInit();
 
         assert(this.metadata.router, `${this.constructor.name} don't have @router(path) decorator`)

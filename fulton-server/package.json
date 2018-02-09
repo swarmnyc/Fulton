@@ -55,9 +55,11 @@
     "qs": "^6.5.1",
     "request": "^2.83.0",
     "rimraf": "^2.6.2",
+    "swagger-ui-express": "^2.0.15",
     "typescript": "^2.6.2"
   },
   "dependencies": {
+    "@loopback/openapi-spec": "^4.0.0-alpha.25",
     "@types/node": "^9.3.0",
     "@types/passport": "^0.4.2",
     "cors": "^2.8.4",
@@ -71,6 +73,7 @@
     "password-hash": "^1.2.2",
     "reflect-metadata": "^0.1.12",
     "typeorm": "^0.1.11",
+    "url-join": "^4.0.0",
     "validator": "^9.3.0",
     "winston": "^2.4.0",
     "zone.js": "^0.8.20"

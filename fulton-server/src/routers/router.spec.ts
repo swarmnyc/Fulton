@@ -75,18 +75,18 @@ export class AuthRouter extends Router {
 }
 
 describe('Fulton Router', () => {
-    it('should use router metada', async () => {
+    it('should use router metadata', async () => {
         let router = new RouterA();
         let metadata = router["metadata"];
         expect(metadata.router.path).toEqual("/A");
         expect(metadata.router.doc.title).toEqual("RouterA");
         expect(metadata.router.middlewares.length).toEqual(0);
 
-        expect(metadata.methods.length).toEqual(2);
-        expect(metadata.methods[0].path).toEqual("/");
+        expect(metadata.actions.length).toEqual(2);
+        expect(metadata.actions[0].path).toEqual("/");
 
-        expect(metadata.methods[1].path).toEqual("/:id");
-        expect(metadata.methods[1].doc.title).toEqual("Get");
+        expect(metadata.actions[1].path).toEqual("/:id");
+        expect(metadata.actions[1].doc.title).toEqual("Get");
 
         expect(metadata.errorhandler).not.toBeUndefined();
     });
@@ -104,34 +104,34 @@ describe('Fulton Router', () => {
         let router = new RouterC();
         let metadata = router["metadata"];
         expect(metadata.router.path).toEqual("/C");
-        expect(metadata.router.doc).toBeUndefined();
+        expect(metadata.router.doc).toEqual({});
         expect(metadata.router.middlewares.length).toEqual(1);
-        expect(metadata.methods.length).toEqual(2);
+        expect(metadata.actions.length).toEqual(2);
 
-        expect(metadata.methods[0].path).toEqual("/list");
-        expect(metadata.methods[0].doc).toBeUndefined();
-        expect(metadata.methods[0].middlewares.length).toEqual(2);
+        expect(metadata.actions[0].path).toEqual("/list");
+        expect(metadata.actions[0].doc).toEqual({});
+        expect(metadata.actions[0].middlewares.length).toEqual(2);
 
-        expect(metadata.methods[1].path).toEqual("/:key");
-        expect(metadata.methods[1].doc.title).toEqual("get");
-        expect(metadata.methods[1].middlewares.length).toEqual(3);
+        expect(metadata.actions[1].path).toEqual("/:key");
+        expect(metadata.actions[1].doc.title).toEqual("get");
+        expect(metadata.actions[1].middlewares.length).toEqual(3);
 
         expect(metadata.errorhandler).not.toBeUndefined();
     });
 
-    it('should extend router metada', async () => {
+    it('should extend router metadata', async () => {
         let router = new RouterD();
         let metadata = router["metadata"];
         expect(metadata.router.path).toEqual("/D");
-        expect(metadata.router.doc).toBeUndefined();
+        expect(metadata.router.doc).toEqual({});
         expect(metadata.router.middlewares.length).toEqual(2);
-        expect(metadata.methods.length).toEqual(4);
-        expect(metadata.methods[2].path).toEqual("/");
-        expect(metadata.methods[3].path).toEqual("/:id");
+        expect(metadata.actions.length).toEqual(4);
+        expect(metadata.actions[2].path).toEqual("/");
+        expect(metadata.actions[3].path).toEqual("/:id");
 
-        expect(metadata.methods[0].method).toEqual("put");
-        expect(metadata.methods[0].middlewares.length).toEqual(3);
-        expect(metadata.methods[1].method).toEqual("delete");
+        expect(metadata.actions[0].method).toEqual("put");
+        expect(metadata.actions[0].middlewares.length).toEqual(3);
+        expect(metadata.actions[1].method).toEqual("delete");
     });
 
     it('should init router', async () => {

@@ -23,7 +23,7 @@ module.exports = async function identityInitializer(app: FultonApp) {
 
         if (idOptions.userService instanceof Function) {
             if (idOptions.userRepository) {
-                // use specical repository
+                // use special repository
                 if (idOptions.userRepository instanceof Function) {
                     app.container.bind("UserRepository").to(idOptions.userRepository);
                 } else {
@@ -105,7 +105,7 @@ module.exports = async function identityInitializer(app: FultonApp) {
                 strategyOptions: {
                     clientID: opts.clientId
                 },
-                prfoileTransformer: (profile: any) => {
+                profileTransformer: (profile: any) => {
                     let email;
                     if (profile.emails instanceof Array) {
                         email = profile.emails.find((e: any) => e.primary || e.primary == null).value;

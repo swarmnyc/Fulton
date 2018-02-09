@@ -23,7 +23,7 @@ export interface RouterMethodMetadata {
 }
 
 export interface AllRouterMethodMetadata {
-    methods: RouterMethodMetadata[],
+    actions: RouterMethodMetadata[],
     errorhandler: string;
 }
 
@@ -70,17 +70,17 @@ export function getFullEntityRouterMethodMetadata(target: any): FullEntityRouter
 }
 
 function getAllRouterMethodMetadata(target: any): AllRouterMethodMetadata {
-    let methods = [];
+    let actions = [];
     let errorhandler;
     let keys = new Map<string, boolean>();
 
-    // get metadata from parent class recurrsively
+    // get metadata from parent class recursively
     while (target.prototype instanceof Router) {
         let metadata = getRouterMethodMetadataList(target);
         for (const method of metadata) {
             // skip if exists
             if (!keys.has(method.property)) {
-                methods.push(method);
+                actions.push(method);
                 keys.set(method.property, true);
             }
         }
@@ -93,5 +93,5 @@ function getAllRouterMethodMetadata(target: any): AllRouterMethodMetadata {
         target = target.__proto__;
     }
 
-    return { methods, errorhandler };
+    return { actions, errorhandler };
 }

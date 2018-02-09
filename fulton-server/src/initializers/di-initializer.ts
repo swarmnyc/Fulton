@@ -44,7 +44,7 @@ function entityServiceFactory<T>(ctx: interfaces.Context): EntityServiceFactory<
 
 /**
  * a factory for hacking typeorm to create repository, so make repository can be injectable
- * it should only be used in FulonApp.initRepository()
+ * it should only be used in FultonApp.initRepository()
  */
 function repositoryFactory<T>(ctx: interfaces.Context): RepositoryFactory<T> {
     return (repoType: Type<T>) => {

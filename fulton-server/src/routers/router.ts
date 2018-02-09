@@ -59,19 +59,19 @@ export abstract class Router {
             router.use(...this.metadata.router.middlewares);
         }
 
-        for (const methodMetadata of this.metadata.methods) {
-            let routeMethod: IRouterMatcher<any> = lodash.get(router, methodMetadata.method);
+        for (const action of this.metadata.actions) {
+            let routeMethod: IRouterMatcher<any> = lodash.get(router, action.method);
             let middlewares: Middleware[] = [];
 
-            if (lodash.some(methodMetadata.middlewares)) {
-                middlewares.push(...methodMetadata.middlewares);
+            if (lodash.some(action.middlewares)) {
+                middlewares.push(...action.middlewares);
             }
 
-            let method: Middleware = lodash.get(this, methodMetadata.property);
+            let method: Middleware = lodash.get(this, action.property);
             method = method.bind(this);
             middlewares.push(method);
 
-            routeMethod.call(router, methodMetadata.path, middlewares)
+            routeMethod.call(router, action.path, middlewares)
         }
 
         if (this.metadata.errorhandler) {

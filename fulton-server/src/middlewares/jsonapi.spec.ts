@@ -1,4 +1,4 @@
-import { FultonApp, FultonAppOptions, OperationResult, Request, Response, EntityRouter, entityRouter, httpGet, IEntityService } from "../index";
+import { FultonApp, FultonAppOptions, OperationResult, Request, Response, EntityRouter, entityRouter, httpGet, IEntityService, Type } from "../index";
 
 import { Author } from "../../spec/helpers/entities/author";
 import { Connection } from "typeorm/connection/Connection";
@@ -97,7 +97,11 @@ class MyApp extends FultonApp {
         });
 
         conn["buildMetadatas"]();
-        this.connections = [conn]
+        this.connections = [conn];
+        this.entityMetadatas = new Map();
+        this.connections[0].entityMetadatas.forEach((metadata) => {
+            this.entityMetadatas.set(metadata.target as Type, metadata);
+        })
     }
 }
 
@@ -117,7 +121,7 @@ describe('query parser', () => {
         return httpTester.stop();
     });
 
-    it('should deserializer', async () => {
+    it('should deserialize', async () => {
         httpTester.setHeaders({
             "content-type": "application/vnd.api+json"
         })
@@ -223,7 +227,7 @@ describe('query parser', () => {
             });
     });
 
-    it('should serializer hotdog', async () => {
+    it('should serialize hotdog', async () => {
         httpTester.setHeaders({
             "content-type": "application/vnd.api+json",
             "accept": "application/vnd.api+json"
@@ -257,7 +261,7 @@ describe('query parser', () => {
         })
     });
 
-    it('should serializer hotdogs', async () => {
+    it('should serialize hotdogs', async () => {
         httpTester.setHeaders({
             "content-type": "application/vnd.api+json",
             "accept": "application/vnd.api+json"

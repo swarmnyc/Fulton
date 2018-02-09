@@ -13,6 +13,7 @@ import { IUser, IUserService } from "./identity";
 
 import DiInitializer from './initializers/di-initializer';
 import DocsInitializer from './initializers/docs-initializer';
+import { EntityMetadata } from 'typeorm/metadata/EntityMetadata';
 import { EntityMetadataHelper } from "./helpers/entity-metadata-helper";
 import Env from "./helpers/env";
 import { EventEmitter } from 'events';
@@ -26,6 +27,7 @@ import { Service } from "./services";
 import { defaultHttpLoggerHandler } from "./middlewares/http-logger";
 import { fultonDebug } from "./helpers/debug";
 import { getRepositoryMetadata } from "./entities/repository-decorator-helper";
+import jsonapi from './middlewares/jsonapi';
 import { queryParamsParser } from './middlewares/query-params-parser';
 
 export abstract class FultonApp {
@@ -80,6 +82,11 @@ export abstract class FultonApp {
      * database connections, created during init();
      */
     connections: Connection[];
+
+    /**
+     * the metadatas of the entities, which added after initDatabases
+     */
+    entityMetadatas: Map<Type, EntityMetadata>;
 
     /**
      * routers, created during initRouters();
@@ -332,6 +339,16 @@ export abstract class FultonApp {
             throw error;
         });
 
+        this.entityMetadatas = new Map();
+        for (const conn of this.connections) {
+            for (const metadata of conn.entityMetadatas) {
+                let type = metadata.target as Type;
+                if (!this.entityMetadatas.has(type)) {
+                    this.entityMetadatas.set(type, metadata)
+                }
+            }
+        }
+
         this.events.emit("didInitDatabases", this);
     }
 
@@ -476,7 +493,7 @@ export abstract class FultonApp {
         }
 
         if (this.options.formatter.jsonApi) {
-            this.express.use(require("./middlewares/jsonapi")(this));
+            this.express.use(jsonapi(this));
         }
 
         if (this.options.formatter.queryParams) {
@@ -595,8 +612,7 @@ export abstract class FultonApp {
     private serve = (req: any, res: any) => {
         Zone.current.fork({
             name: this.appName,
-            properties: { req, res },
-
+            properties: { req, res }
         }).run(async () => {
             this.express(req, res);
         });

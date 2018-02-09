@@ -87,26 +87,26 @@ export interface QueryParams {
      * 
      * ## examples
      * two styles: 
-     *  - ?sort=columeA,-columeB 
-     *  - ?sort[columeA]=1|true&sort[columeB]=-1|false
+     *  - ?sort=columnA,-columnB 
+     *  - ?sort[columnA]=1|true&sort[columnB]=-1|false
      */
     sort?: QueryColumnStates,
 
     /**
      * select options,
-     * if undefined, all output all columns excepts @Colume({hide:true})
+     * if undefined, all output all columns excepts @column({hide:true})
      * ## examples
      * two styles: 
-     *  - ?select=columeA,columeB 
-     *  - ?select=columeA&select=columeB
+     *  - ?select=columnA,columnB 
+     *  - ?select=columnA&select=columnB
      */
     select?: string[];
 
     /**
      * pagination options,
      * ## examples
-     *  - ?includes=columeA,columeB 
-     *  - ?includes=columeA&includes=columeB
+     *  - ?includes=columnA,columnB 
+     *  - ?includes=columnA&includes=columnB
      */
     includes?: string[];
 

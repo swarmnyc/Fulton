@@ -244,7 +244,7 @@ export class FultonUserService implements IUserService<FultonUser> {
             // create a new user
             let newUser: IUserRegister = {
                 email: profile.email,
-                username: profile.username || profile.email,
+                username: profile.email, // use email to avoid the same name
                 portraitUrl: profile.portraitUrl,
                 oauthToken: token
             }

@@ -30,9 +30,6 @@ export class ExampleApp extends FultonApp {
         });
 
         options.cors.enabled = true;
-
-        options.server.httpPort = 3000;
-
-        options.identity.enabled = true;
+        options.docs.enabled = true;
     }
 }

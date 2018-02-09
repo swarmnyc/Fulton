@@ -9,7 +9,7 @@ import { JsonApiConverter, JsonApiTypeOptions, JsonApiSerializeOptions, JsonApiR
 import { OperationResultPagination } from "../interfaces";
 
 
-module.exports = function (app: FultonApp) {
+export default function jsonapi (app: FultonApp) {
     let converter: JsonApiConverter;
 
     // init jsonapi needs after initRouters, but middleware have to register before initRouters
@@ -84,64 +84,58 @@ function initConverter(app: FultonApp): JsonApiConverter {
     let converter: JsonApiConverter = new JsonApiConverter();
 
     app.events.emit("onInitJsonApi", app, converter);
+    
+    app.entityMetadatas.forEach((metadata, type) => {
+        let relatedToMetadata = getRelatedToMetadata(type);
+        let id: string;
 
-    for (const conn of app.connections) {
-        for (const metadata of conn.entityMetadatas) {
-            let type = metadata.target as Type;
+        if (metadata.objectIdColumn) {
+            id = metadata.objectIdColumn.propertyName;
+        } else if (metadata.primaryColumns.length > 0) {
+            //TODO: ids for SQL
+            id = metadata.primaryColumns[0].propertyName;
+        } else {
+            id = "id"
+        }
 
-            if (!converter.isRegister(type.name)) {
-                let relatedToMetadata = getRelatedToMetadata(type);
-                let id: string;
+        let attributes = metadata.columns
+            .filter((col) => {
+                return col.isSelect && !col.isObjectId && !col.isPrimary && relatedToMetadata[col.propertyName] == null
+            })
+            .map((col) => col.propertyName)
 
-                if (metadata.objectIdColumn) {
-                    id = metadata.objectIdColumn.propertyName;
-                } else if (metadata.primaryColumns.length > 0) {
-                    //TODO: ids for SQL
-                    id = metadata.primaryColumns[0].propertyName;
-                } else {
-                    id = "id"
-                }
+        let options: JsonApiTypeOptions = {
+            id: id,
+            attributes: attributes,
+            relationships: {},
+            linksFn: dataLinks,
+            rootLinksFn: rootLinks
+        }
 
-                let attributes = metadata.columns
-                    .filter((col) => {
-                        return col.isSelect && !col.isObjectId && !col.isPrimary && relatedToMetadata[col.propertyName] == null
-                    })
-                    .map((col) => col.propertyName)
+        //TODO: relationships for SQL
+        for (const propertyName of Object.getOwnPropertyNames(relatedToMetadata)) {
+            let refType = relatedToMetadata[propertyName];
 
-                let options: JsonApiTypeOptions = {
-                    id: id,
-                    attributes: attributes,
-                    relationships: {},
-                    linksFn: dataLinks,
-                    rootLinksFn: rootLinks
-                }
-
-                //TODO: relationships for SQL
-                for (const propertyName of Object.getOwnPropertyNames(relatedToMetadata)) {
-                    let refType = relatedToMetadata[propertyName];
-
-                    options.relationships[propertyName] = {
-                        type: refType.name
-                    }
-                }
-
-                // for router path
-                let entityRouter = app.routers.find((router: Router) => {
-                    if (router instanceof EntityRouter) {
-                        return router["metadata"].router.entity == type
-                    }
-
-                    return false;
-                });
-
-                if (entityRouter) {
-                    options.path = entityRouter["metadata"].router.path.toString();
-                }
-
-                converter.register(type.name, options);
+            options.relationships[propertyName] = {
+                type: refType.name
             }
         }
-    }
+
+        // for router path
+        let entityRouter = app.routers.find((router: Router) => {
+            if (router instanceof EntityRouter) {
+                return router["metadata"].router.entity == type
+            }
+
+            return false;
+        });
+
+        if (entityRouter) {
+            options.path = entityRouter["metadata"].router.path.toString();
+        }
+
+        converter.register(type.name, options);
+    })
 
     app.events.emit("didInitJsonApi", app, converter);
 
@@ -180,10 +174,10 @@ function rootLinks(opts: JsonApiSerializeOptions): JsonApiRootLinks {
     }
 }
 
-function dataLinks(options: JsonApiSerializeOptions, typeOtions: JsonApiTypeOptions, data: JsonApiData): JsonApiLinks {
-    if (typeOtions.path) {
+function dataLinks(options: JsonApiSerializeOptions, typeOptions: JsonApiTypeOptions, data: JsonApiData): JsonApiLinks {
+    if (typeOptions.path) {
         return {
-            self: url.resolve(options.domain, typeOtions.path) + "/" + data.id
+            self: url.resolve(options.domain, typeOptions.path) + "/" + data.id
         }
     }
 }

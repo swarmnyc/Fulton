@@ -1,8 +1,8 @@
 import * as fs from 'fs';
-import { Middleware, NextFunction, Request, Response, PathIdentifier } from "../index";
+import { Middleware, NextFunction, Request, Response, PathIdentifier, EntityRouter } from "../index";
 
 import { FultonApp } from "../fulton-app";
-import { OpenApiSpec, PathItemObject } from '@loopback/openapi-spec';
+import { OpenApiSpec, PathItemObject, ParameterObject, SchemaObject } from '@loopback/openapi-spec';
 import { MimeTypes } from '../constants';
 
 let urlJoin = require('url-join');
@@ -53,7 +53,9 @@ function generateDocs(app: FultonApp): OpenApiSpec {
         consumes: [],
         produces: [],
         tags: [],
-        paths: {}
+        paths: {},
+        definitions: {},
+        parameters: {}
     };
 
     if (app.options.server.httpEnabled) {
@@ -74,6 +76,9 @@ function generateDocs(app: FultonApp): OpenApiSpec {
         docs.produces.push(MimeTypes.jsonApi);
     }
 
+    docs.parameters["QueryParams"] = queryParams;
+    docs.definitions["QueryParams"] = queryParamSchema;
+
     for (const router of app.routers) {
         let tagName: string = router.metadata.router.doc.title || router.constructor.name.replace(/router/i, "");
         docs.tags.push({
@@ -81,20 +86,38 @@ function generateDocs(app: FultonApp): OpenApiSpec {
             description: router.metadata.router.doc.description
         });
 
+        let entity;
+        if (router instanceof EntityRouter) {
+            entity = router.metadata.router.entity;
+        }
+
         let root = toPath(router.metadata.router.path);
-        for (const method of router.metadata.methods) {
-            let path = toPath(root, method.path);
+        for (const action of router.metadata.actions) {
+            let path = toPath(root, action.path);
             let doc = docs.paths[path];
 
             if (doc == null) {
                 doc = docs.paths[path] = {};
             }
 
-            doc[method.method] = {
-                summary: method.doc.title || method.property,
-                description: method.doc.description,
-                tags: [tagName]
+            let actionDoc: PathItemObject = {
+                summary: action.doc.title || action.property,
+                description: action.doc.description,
+                tags: [tagName],
+                parameters: []
+            };
+
+            if (entity) {
+                switch (action.property) {
+                    case "list":
+                        actionDoc.parameters.push({
+                            "$ref": "#/parameters/QueryParams"
+                        });
+                        break;
+                }
             }
+
+            doc[action.method] = actionDoc;
         }
     }
 
@@ -132,4 +155,30 @@ function toPath(...args: PathIdentifier[]): string {
     }
 
     return path;
+}
+
+let queryParams: ParameterObject = {
+    name: " Query Params",
+    in: "query",
+    description: "the params for filter, select fields, includes related entities and pagination",
+    required: false,
+    schema: {
+        $ref: "#/definitions/QueryParams"
+    }
+}
+
+let queryParamSchema: SchemaObject = {
+    type: "object",
+    properties: {
+        filter: {
+            type: "string",
+            example: "filter[id]=theId&filter[name][$like]=portOfName",
+            description: "filter the entities"
+        },
+        sort: {
+            type: "string",
+            example: "sort=columnA,-columnB",
+            description: "sort the entities"
+        }
+    }
 }

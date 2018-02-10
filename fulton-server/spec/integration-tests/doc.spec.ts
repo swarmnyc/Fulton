@@ -46,8 +46,7 @@ class AuthorEntityRouter extends EntityRouter<Hotdog>{
 class MyApp extends FultonApp {
     protected onInit(options: FultonAppOptions): void {
         options.entities = [Hotdog, Author, Tag];
-        options.routers = [AuthorEntityRouter];
-        //options.routers = [HotdogEntityRouter, AuthorEntityRouter];
+        options.routers = [HotdogEntityRouter, AuthorEntityRouter];
         options.services = [FakeEntityService];
 
         let conn = new Connection({
@@ -82,7 +81,7 @@ describe('Doc Integration Test', () => {
         return httpTester.stop();
     });
 
-    it('should return docs', async () => {
+    fit('should return docs', async () => {
         let result = await httpTester.get("/docs")
 
         expect(result.response.statusCode).toEqual(200);

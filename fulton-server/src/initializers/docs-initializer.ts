@@ -1,10 +1,12 @@
 import * as fs from 'fs';
+import * as lodash from 'lodash';
+
 import { Middleware, NextFunction, Request, Response, PathIdentifier, EntityRouter } from "../index";
 
 import { FultonApp } from "../fulton-app";
-import { OpenApiSpec, PathItemObject, ParameterObject, SchemaObject, DefinitionsObject } from '@loopback/openapi-spec';
+import { OpenApiSpec, PathItemObject, ParameterObject, SchemaObject, DefinitionsObject, ResponseObject, ParametersDefinitionsObject } from '@loopback/openapi-spec';
 import { MimeTypes } from '../constants';
-import { entity } from '../re-export';
+import { entity, column } from '../re-export';
 
 let urlJoin = require('url-join');
 
@@ -56,7 +58,10 @@ function generateDocs(app: FultonApp): OpenApiSpec {
         tags: [],
         paths: {},
         definitions: {},
-        parameters: {}
+        parameters: parameters,
+        responses: {
+            Error: errorResponse
+        }
     };
 
     if (app.options.server.httpEnabled) {
@@ -79,6 +84,52 @@ function generateDocs(app: FultonApp): OpenApiSpec {
 
     generateDefinitions(app, docs.definitions);
 
+    generatePath(app, docs);
+
+    return docs;
+}
+
+function generateDefinitions(app: FultonApp, definitions: DefinitionsObject) {
+    app.entityMetadatas.forEach((metadata, entity) => {
+        let schema: SchemaObject = {
+            type: "object"
+        };
+
+
+        schema.properties = {};
+
+        for (const column of metadata.columns) {
+            let type;
+            if (column.type instanceof Function) {
+                type = column.type.name.toLocaleLowerCase()
+            } else {
+                type = column.type || "string";
+            }
+
+            schema.properties[column.propertyName] = {
+                type: type
+            }
+
+            let relType = metadata.relatedToMetadata[column.propertyName];
+
+            if (relType) {
+                if (type == "array") {
+                    schema.properties[column.propertyName].items = {
+                        "$ref": "#/definitions/" + relType.name
+                    }
+                } else {
+                    schema.properties[column.propertyName] = {
+                        "$ref": "#/definitions/" + relType.name
+                    }
+                }
+            }
+        }
+
+        definitions[entity.name] = schema
+    });
+}
+
+function generatePath(app: FultonApp, docs: OpenApiSpec) {
     for (const router of app.routers) {
         let tagName: string = router.metadata.router.doc.title || router.constructor.name.replace(/router/i, "");
         docs.tags.push({
@@ -104,39 +155,79 @@ function generateDocs(app: FultonApp): OpenApiSpec {
                 summary: action.doc.title || action.property,
                 description: action.doc.description,
                 tags: [tagName],
-                parameters: []
+                parameters: [],
+                responses: {}
             };
+
+            let def = "#/definitions/" + entity.name;
+            let res: ResponseObject;
+            let body: ParameterObject;
 
             if (entity) {
                 switch (action.property) {
                     case "list":
-                        actionDoc.parameters.push(...queryParams);
+                        actionDoc.parameters.push(...queryParamsRef);
+
+                        res = lodash.clone(operationResultResponse);
+
+                        res.schema.properties.data.items.$ref = def
+
+                        actionDoc.responses["200"] = res;
+                        break;
+                    case "detail":
+                        actionDoc.parameters.push({
+                            $ref: "#parameters/Id"
+                        })
+
+                        res = lodash.clone(operationOneResultResponse)
+
+                        res.schema.properties.data.$ref = def
+
+                        actionDoc.responses["200"] = res;
                         break;
                     case "create":
+                        body = lodash.clone(entityBody)
+                        body.schema.properties.data.$ref = def
+
+                        actionDoc.parameters.push(body);
+
+                        res = lodash.clone(operationOneResultResponse)
+                        res.schema.properties.data.$ref = def
+                        actionDoc.responses["200"] = res;
+                        break;
                     case "update":
                         actionDoc.parameters.push({
-                            name: "body",
-                            in: "body",
-                            required: true,
-                            schema: {
-                                type: "object",
-                                properties: {
-                                    data: {
-                                        $ref: "#/definitions/" + entity.name
-                                    }
-                                }
-                            }
-                        });
+                            $ref: "#parameters/Id"
+                        })
+
+                        body = lodash.clone(entityBody)
+                        body.schema.properties.data.$ref = def
+
+                        actionDoc.parameters.push(body);
+
+                        actionDoc.responses["201"] = {
+                            description: "accept"
+                        }
                         break;
+                    case "delete":
+                        actionDoc.parameters.push({
+                            $ref: "#parameters/Id"
+                        })
+
+                        actionDoc.responses["201"] = {
+                            description: "accept"
+                        }
+                        break;
+                }
+
+                actionDoc.responses["400"] = {
+                    "$ref": "#responses/Error"
                 }
             }
 
             doc[action.method] = actionDoc;
         }
     }
-
-
-    return docs;
 }
 
 function checkKey(accessKey: string): Middleware {
@@ -171,36 +262,79 @@ function toPath(...args: PathIdentifier[]): string {
     return path;
 }
 
-function generateDefinitions(app: FultonApp, definitions: DefinitionsObject) {
-    app.entityMetadatas.forEach((metadata, entity) => {
-        let schema: SchemaObject = {
-            type: "object"
-        };
-
-        
-        schema.properties = {};
-
-        for (const column of metadata.columns) {
-            let type;
-            if (column.type instanceof Function) {
-                type = column.type.name.toLocaleLowerCase()
-            } else  {
-                type = column.type || "string";
+let errorResponse: ResponseObject = {
+    description: "Error",
+    schema: {
+        type: "object",
+        properties: {
+            errors: {
+                type: "object",
+                properties: {
+                    message: {
+                        type: "array",
+                        items: {
+                            type: "string"
+                        }
+                    },
+                    "error-property": {
+                        type: "array",
+                        items: {
+                            type: "string"
+                        }
+                    }
+                }
             }
-
-            schema.properties[column.propertyName] = {
-                type: type
-            }
-
-            let relatedTo = metadata.relatedToMetadata[column.propertyName]
         }
-
-        definitions[entity.name] = schema
-    });
+    }
 }
 
-let queryParams: ParameterObject[] = [
-    {
+let operationResultResponse: ResponseObject = {
+    description: "success",
+    schema: {
+        type: "object",
+        properties: {
+            data: {
+                type: "array",
+                items: {}
+            },
+            pagination: {
+                type: "object",
+                properties: {
+                    index: {
+                        type: "number"
+                    },
+                    size: {
+                        type: "number"
+                    },
+                    total: {
+                        type: "number"
+                    }
+                }
+            }
+        }
+    }
+}
+
+let operationOneResultResponse: ResponseObject = {
+    description: "success",
+    schema: {
+        type: "object",
+        properties: {
+            data: {
+            }
+        }
+    }
+}
+
+let parameters: ParametersDefinitionsObject = {
+    "Id": {
+        name: "id",
+        in: "path",
+        description: "the id of the entity",
+        required: true,
+        type: "string"
+    },
+    "Filter": {
         name: "filter[prop]",
         in: "query",
         description: "the params for filter, see https://swarmnyc.gitbooks.io/fulton/content/server/query-params.html for more info",
@@ -208,7 +342,7 @@ let queryParams: ParameterObject[] = [
         type: "string",
         example: "?filter[id]=theId&filter[name][$like]=portOfName"
     },
-    {
+    "Sort": {
         name: "sort",
         in: "query",
         description: "the params for sort",
@@ -216,7 +350,7 @@ let queryParams: ParameterObject[] = [
         type: "string",
         example: "sort=columnA,-columnB"
     },
-    {
+    "Select": {
         name: "select",
         in: "query",
         description: "the params for select fields to display",
@@ -224,7 +358,7 @@ let queryParams: ParameterObject[] = [
         type: "string",
         example: "?select=columnA,columnB"
     },
-    {
+    "Includes": {
         name: "includes",
         in: "query",
         description: "the params for select fields to display",
@@ -232,7 +366,7 @@ let queryParams: ParameterObject[] = [
         type: "string",
         example: "?includes=columnA,columnB"
     },
-    {
+    "Pagination-Index": {
         name: "pagination[index]",
         in: "query",
         description: "the params for pagination",
@@ -240,7 +374,7 @@ let queryParams: ParameterObject[] = [
         type: "integer",
         example: "?pagination[index]=1"
     },
-    {
+    "Pagination-Size": {
         name: "pagination[size]",
         in: "query",
         description: "the params for pagination",
@@ -248,4 +382,40 @@ let queryParams: ParameterObject[] = [
         type: "integer",
         example: "?pagination[size]=100"
     }
+}
+
+let queryParamsRef = [
+    {
+        $ref: "#parameters/Filter"
+    },
+    {
+        $ref: "#parameters/Sort"
+    },
+    {
+        $ref: "#parameters/Includes"
+    },
+    {
+        $ref: "#parameters/Select"
+    },
+    {
+        $ref: "#parameters/Pagination-Index"
+    },
+    {
+        $ref: "#parameters/Pagination-Size"
+    }
 ]
+
+let entityBody: ParameterObject = {
+    name: "body",
+    in: "body",
+    required: true,
+    schema: {
+        type: "object",
+        properties: {
+            data: {
+                $ref: "#/definitions/"
+            }
+        }
+    }
+};
+

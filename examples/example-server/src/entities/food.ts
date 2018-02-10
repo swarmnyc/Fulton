@@ -1,4 +1,4 @@
-import { entity, objectIdColumn, column } from "fulton-server";
+import { entity, objectIdColumn, column, relatedTo } from "fulton-server";
 import { Ingredient } from "./Ingredient";
 
 @entity()
@@ -9,7 +9,8 @@ export class Food {
     name?: String;
     @column()
     category?: String;
-    @column()
+    
+    @relatedTo(Ingredient)
     ingredients?: Ingredient[];
 }
 

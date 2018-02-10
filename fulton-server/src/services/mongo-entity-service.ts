@@ -5,7 +5,6 @@ import { MongoRepository, getMongoRepository } from "typeorm";
 import { EntityMetadataHelper } from "../helpers/entity-metadata-helper";
 import { FultonApp } from "../fulton-app";
 import FultonLog from "../fulton-log";
-import { getRelatedToMetadata } from "../entities/related-decorators-helpers";
 
 interface IncludeOptions {
     [key: string]: IncludeOptions | false
@@ -300,7 +299,7 @@ export class MongoEntityService<TEntity> implements IEntityService<TEntity> {
     private processIncludeInternal(repository: MongoRepository<any>, target: any, options: IncludeOptions): Promise<any> {
         //TODO: should cover more situations and better proformance
         let tasks = Object.getOwnPropertyNames(options).map((columnName): Promise<any> => {
-            let relatedToMetadata = getRelatedToMetadata(repository.metadata.target);
+            let relatedToMetadata = repository.metadata.relatedToMetadata;
 
             if (relatedToMetadata == null || relatedToMetadata[columnName] == null) {
                 return;

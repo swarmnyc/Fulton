@@ -8,6 +8,7 @@ import { Tag } from "../../spec/helpers/entities/tag";
 import { queryParamsParser } from "./query-params-parser";
 import { sampleData } from "../../spec/support/sample-data";
 import { QueryParams, OperationOneResult, OperationStatus } from "../interfaces";
+import { getRelatedToMetadata } from "../entities/related-decorators-helpers";
 
 class HotdogEntityService implements IEntityService<Hotdog> {
     find(queryParams: QueryParams): Promise<OperationResult<Hotdog>> {
@@ -100,6 +101,7 @@ class MyApp extends FultonApp {
         this.connections = [conn];
         this.entityMetadatas = new Map();
         this.connections[0].entityMetadatas.forEach((metadata) => {
+            metadata.relatedToMetadata = getRelatedToMetadata(metadata.target);
             this.entityMetadatas.set(metadata.target as Type, metadata);
         })
     }

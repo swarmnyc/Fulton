@@ -8,11 +8,9 @@ import * as winston from 'winston';
 
 import { AppMode, DiContainer, ErrorMiddleware, Middleware, RepositoryFactory, Request, Response } from "./interfaces";
 import { ClassProvider, FactoryProvider, FunctionProvider, Provider, Type, TypeIdentifier, TypeProvider, ValueProvider } from "./helpers/type-helpers";
-import { Connection, ConnectionOptions, Repository, createConnections } from "typeorm";
+import { Connection, Repository } from 'typeorm';
 import { IUser, IUserService } from "./identity";
 
-import DiInitializer from './initializers/di-initializer';
-import DocsInitializer from './initializers/docs-initializer';
 import { EntityMetadata } from 'typeorm/metadata/EntityMetadata';
 import { EntityMetadataHelper } from "./helpers/entity-metadata-helper";
 import Env from "./helpers/env";
@@ -24,9 +22,11 @@ import { JsonApiConverter } from './helpers/jsonapi-converter';
 import { MimeTypes } from './constants';
 import { Router } from "./routers/router";
 import { Service } from "./services";
+import databaseInitializer from './initializers/database-initializer';
 import { defaultHttpLoggerHandler } from "./middlewares/http-logger";
+import diInitializer from './initializers/di-initializer';
+import docsInitializer from './initializers/docs-initializer';
 import { fultonDebug } from "./helpers/debug";
-import { getRepositoryMetadata } from "./entities/repository-decorator-helper";
 import jsonapi from './middlewares/jsonapi';
 import { queryParamsParser } from './middlewares/query-params-parser';
 
@@ -100,6 +100,9 @@ export abstract class FultonApp {
         this.appName = this.constructor.name;
         this.options = new FultonAppOptions(this.appName, mode);
         this.events = new EventEmitter();
+        this.entityMetadatas = new Map();
+        this.connections = [];
+        this.routers = [];
     }
 
     /**
@@ -275,7 +278,7 @@ export abstract class FultonApp {
     }
 
     protected initDiContainer(): void | Promise<void> {
-        DiInitializer(this);
+        return diInitializer(this);
     }
 
     protected initLogging(): void | Promise<void> {
@@ -305,51 +308,8 @@ export abstract class FultonApp {
     /**
      * init databases, it will be ignored if repository is empty.
      */
-    protected async initDatabases(): Promise<void> {
-        if (this.options.identity.isUseDefaultImplement) {
-            // add User Entity to typeorm if identity is enabled and use FultonUser and FultonUserService
-            this.options.entities.push(this.options.identity.userType);
-        } else if (this.options.databases.size == 0) {
-            // if databases = 0 and repositories = 0, skip initDatabases
-            if (lodash.isEmpty(this.options.repositories) && this.options.loader.repositoryLoaderEnabled == false)
-                return;
-        }
-
-        let connOptions: ConnectionOptions[] = [];
-
-        this.options.databases.forEach((conn, name) => {
-            lodash.set(conn, "name", name);
-
-            // extends entities
-            if (lodash.some(this.options.entities)) {
-                if (conn.entities) {
-                    let arr = conn.entities as any[];
-                    arr.push(this.options.entities);
-                } else {
-                    lodash.set(conn, "entities", this.options.entities);
-                }
-            }
-
-            connOptions.push(conn);
-        });
-
-
-        this.connections = await createConnections(connOptions).catch((error) => {
-            FultonLog.error("initDatabases fails", error);
-            throw error;
-        });
-
-        this.entityMetadatas = new Map();
-        for (const conn of this.connections) {
-            for (const metadata of conn.entityMetadatas) {
-                let type = metadata.target as Type;
-                if (!this.entityMetadatas.has(type)) {
-                    this.entityMetadatas.set(type, metadata)
-                }
-            }
-        }
-
-        this.events.emit("didInitDatabases", this);
+    protected initDatabases(): Promise<void> {
+        return databaseInitializer(this);
     }
 
     protected async initRepositories(): Promise<void> {
@@ -543,7 +503,7 @@ export abstract class FultonApp {
 
     protected initDocs(): void | Promise<void> {
         if (this.options.docs.enabled) {
-            DocsInitializer(this);
+            docsInitializer(this);
         }
     }
 

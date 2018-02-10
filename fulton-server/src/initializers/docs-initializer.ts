@@ -2,12 +2,13 @@ import * as fs from 'fs';
 import { Middleware, NextFunction, Request, Response, PathIdentifier, EntityRouter } from "../index";
 
 import { FultonApp } from "../fulton-app";
-import { OpenApiSpec, PathItemObject, ParameterObject, SchemaObject } from '@loopback/openapi-spec';
+import { OpenApiSpec, PathItemObject, ParameterObject, SchemaObject, DefinitionsObject } from '@loopback/openapi-spec';
 import { MimeTypes } from '../constants';
+import { entity } from '../re-export';
 
 let urlJoin = require('url-join');
 
-export default function DocsInitializer(app: FultonApp) {
+export default function docsInitializer(app: FultonApp) {
     let options = app.options.docs;
     let docs: OpenApiSpec;
 
@@ -76,8 +77,7 @@ function generateDocs(app: FultonApp): OpenApiSpec {
         docs.produces.push(MimeTypes.jsonApi);
     }
 
-    docs.parameters["QueryParams"] = queryParams;
-    docs.definitions["QueryParams"] = queryParamSchema;
+    generateDefinitions(app, docs.definitions);
 
     for (const router of app.routers) {
         let tagName: string = router.metadata.router.doc.title || router.constructor.name.replace(/router/i, "");
@@ -110,8 +110,22 @@ function generateDocs(app: FultonApp): OpenApiSpec {
             if (entity) {
                 switch (action.property) {
                     case "list":
+                        actionDoc.parameters.push(...queryParams);
+                        break;
+                    case "create":
+                    case "update":
                         actionDoc.parameters.push({
-                            "$ref": "#/parameters/QueryParams"
+                            name: "body",
+                            in: "body",
+                            required: true,
+                            schema: {
+                                type: "object",
+                                properties: {
+                                    data: {
+                                        $ref: "#/definitions/" + entity.name
+                                    }
+                                }
+                            }
                         });
                         break;
                 }
@@ -157,28 +171,81 @@ function toPath(...args: PathIdentifier[]): string {
     return path;
 }
 
-let queryParams: ParameterObject = {
-    name: " Query Params",
-    in: "query",
-    description: "the params for filter, select fields, includes related entities and pagination",
-    required: false,
-    schema: {
-        $ref: "#/definitions/QueryParams"
-    }
+function generateDefinitions(app: FultonApp, definitions: DefinitionsObject) {
+    app.entityMetadatas.forEach((metadata, entity) => {
+        let schema: SchemaObject = {
+            type: "object"
+        };
+
+        
+        schema.properties = {};
+
+        for (const column of metadata.columns) {
+            let type;
+            if (column.type instanceof Function) {
+                type = column.type.name.toLocaleLowerCase()
+            } else  {
+                type = column.type || "string";
+            }
+
+            schema.properties[column.propertyName] = {
+                type: type
+            }
+
+            let relatedTo = metadata.relatedToMetadata[column.propertyName]
+        }
+
+        definitions[entity.name] = schema
+    });
 }
 
-let queryParamSchema: SchemaObject = {
-    type: "object",
-    properties: {
-        filter: {
-            type: "string",
-            example: "filter[id]=theId&filter[name][$like]=portOfName",
-            description: "filter the entities"
-        },
-        sort: {
-            type: "string",
-            example: "sort=columnA,-columnB",
-            description: "sort the entities"
-        }
+let queryParams: ParameterObject[] = [
+    {
+        name: "filter[prop]",
+        in: "query",
+        description: "the params for filter, see https://swarmnyc.gitbooks.io/fulton/content/server/query-params.html for more info",
+        required: false,
+        type: "string",
+        example: "?filter[id]=theId&filter[name][$like]=portOfName"
+    },
+    {
+        name: "sort",
+        in: "query",
+        description: "the params for sort",
+        required: false,
+        type: "string",
+        example: "sort=columnA,-columnB"
+    },
+    {
+        name: "select",
+        in: "query",
+        description: "the params for select fields to display",
+        required: false,
+        type: "string",
+        example: "?select=columnA,columnB"
+    },
+    {
+        name: "includes",
+        in: "query",
+        description: "the params for select fields to display",
+        required: false,
+        type: "string",
+        example: "?includes=columnA,columnB"
+    },
+    {
+        name: "pagination[index]",
+        in: "query",
+        description: "the params for pagination",
+        required: false,
+        type: "integer",
+        example: "?pagination[index]=1"
+    },
+    {
+        name: "pagination[size]",
+        in: "query",
+        description: "the params for pagination",
+        required: false,
+        type: "integer",
+        example: "?pagination[size]=100"
     }
-}
+]

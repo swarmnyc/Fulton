@@ -1,5 +1,6 @@
-import { FultonApp, FultonAppOptions, DiContainer, NextFunction, Request, Response } from "fulton-server"
+import { FultonApp, FultonAppOptions } from 'fulton-server';
 
+import { Food } from './entities/food';
 import { FoodRouter } from "./routers/food-router";
 
 export class ExampleApp extends FultonApp {
@@ -9,21 +10,8 @@ export class ExampleApp extends FultonApp {
         ];
 
         options.index.message = "hello world";
-        options.index.filepath = "./assets/index.html";
-        options.index.handler = (req: Request, res: Response, next: NextFunction) => {
-            res.send("Hello World!!");
-        };
 
-        options.staticFile.enabled = true;
-        options.staticFile.folders = [
-            { path: "/public", folder: "./assets/" },
-            { folder: "./assets/" }
-        ]
-
-        this.express.all("/error", (req: Request, res: Response) => {
-            throw new Error("test error handler");
-        });
-
+        options.entities = [Food]
         options.databases.set("default", {
             type: "mongodb",
             url: "mongodb://localhost:27017/fulton-test"

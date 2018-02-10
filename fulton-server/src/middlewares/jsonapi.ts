@@ -4,7 +4,6 @@ import { NextFunction, OperationOneResult, OperationResult, Request, Response, T
 
 import { FultonApp } from "../fulton-app";
 import { MimeTypes } from "../constants";
-import { getRelatedToMetadata } from "../entities/related-decorators-helpers";
 import { JsonApiConverter, JsonApiTypeOptions, JsonApiSerializeOptions, JsonApiRootLinks, JsonApiData, JsonApiLinks } from "../helpers/jsonapi-converter";
 import { OperationResultPagination } from "../interfaces";
 
@@ -86,7 +85,7 @@ function initConverter(app: FultonApp): JsonApiConverter {
     app.events.emit("onInitJsonApi", app, converter);
     
     app.entityMetadatas.forEach((metadata, type) => {
-        let relatedToMetadata = getRelatedToMetadata(type);
+        let relatedToMetadata = metadata.relatedToMetadata;
         let id: string;
 
         if (metadata.objectIdColumn) {

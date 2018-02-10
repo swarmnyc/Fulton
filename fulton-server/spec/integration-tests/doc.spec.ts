@@ -1,4 +1,4 @@
-import { FultonApp, FultonAppOptions, authorize, AccessToken, Request, Response, EntityRouter, entityRouter, OperationResult, QueryParams, OperationOneResult, OperationStatus, IEntityService, injectable } from "../../src/index";
+import { FultonApp, FultonAppOptions, authorize, AccessToken, Request, Response, EntityRouter, entityRouter, OperationResult, QueryParams, OperationOneResult, OperationStatus, IEntityService, injectable, Type } from "../../src/index";
 import { UserServiceMock } from "../helpers/user-service-mock";
 import { HttpTester, HttpResult } from "../helpers/http-tester";
 import { Hotdog } from "../helpers/entities/hot-dog";
@@ -6,6 +6,8 @@ import { MongoHelper } from "../helpers/mongo-helper";
 import { sampleData } from "../support/sample-data";
 import { Author } from "../helpers/entities/author";
 import { Tag } from "../helpers/entities/tag";
+import { Connection } from "typeorm";
+import { getRelatedToMetadata } from '../../src/entities/related-decorators-helpers';
 
 @injectable()
 class FakeEntityService implements IEntityService<any>{
@@ -34,7 +36,7 @@ class HotdogEntityRouter extends EntityRouter<Hotdog>{
     }
 }
 
-@entityRouter(["api", /authors?/i], Hotdog)
+@entityRouter(["api", /authors?/i], Author)
 class AuthorEntityRouter extends EntityRouter<Hotdog>{
     constructor(service: FakeEntityService) {
         super(service)
@@ -47,6 +49,19 @@ class MyApp extends FultonApp {
         options.routers = [AuthorEntityRouter];
         //options.routers = [HotdogEntityRouter, AuthorEntityRouter];
         options.services = [FakeEntityService];
+
+        let conn = new Connection({
+            type: "mongodb",
+            entities: options.entities
+        });
+
+        conn["buildMetadatas"]();
+        this.connections = [conn];
+        this.entityMetadatas = new Map();
+        this.connections[0].entityMetadatas.forEach((metadata) => {
+            metadata.relatedToMetadata = getRelatedToMetadata(metadata.target);
+            this.entityMetadatas.set(metadata.target as Type, metadata);
+        })
 
         options.docs.enabled = true;
     }
@@ -63,10 +78,11 @@ describe('Doc Integration Test', () => {
     });
 
     afterAll(async () => {
+        app.connections = [];
         return httpTester.stop();
     });
 
-    fit('should return docs', async () => {
+    it('should return docs', async () => {
         let result = await httpTester.get("/docs")
 
         expect(result.response.statusCode).toEqual(200);

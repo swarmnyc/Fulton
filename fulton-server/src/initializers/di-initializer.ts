@@ -6,7 +6,7 @@ import { Repository } from "typeorm/repository/Repository";
 import { getRepositoryMetadata } from "../entities/repository-decorator-helper";
 import { interfaces, Container } from "inversify";
 
-export default function DiInitializer(app: FultonApp) {
+export default function diInitializer(app: FultonApp) {
     app.container = new Container();
 
     // for FultonApp

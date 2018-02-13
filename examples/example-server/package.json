@@ -14,14 +14,12 @@
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "dependencies": {
-    "example-core": "file:../example-core"
+    "fulton-server": "0.0.4",
+    "mongodb": "^2.2.34"
   },
   "devDependencies": {
     "debug": "^3.1.0",
     "ts-node": "^3.3.0",
     "typescript": "^2.6.2"
-  },
-  "peerDependencies": {
-    "fulton-server": "0.0.0-PLACEHOLDER"
   }
 }

@@ -1,13 +1,13 @@
 import * as fs from 'fs';
 import * as lodash from 'lodash';
 
-import { Middleware, NextFunction, Request, Response, PathIdentifier, EntityRouter, Type } from "../index";
+import { DefinitionsObject, OpenApiSpec, OperationObject, ParameterObject, ParametersDefinitionsObject, PathItemObject, PathsObject, ResponseObject, SchemaObject } from '@loopback/openapi-spec';
+import { EntityRouter, Middleware, NextFunction, PathIdentifier, Request, Response, Type } from "../index";
+import { column, entity, manyToMany } from '../re-export';
 
 import { FultonApp } from "../fulton-app";
-import { OpenApiSpec, PathItemObject, ParameterObject, SchemaObject, DefinitionsObject, ResponseObject, ParametersDefinitionsObject, PathsObject, OperationObject } from '@loopback/openapi-spec';
 import { MimeTypes } from '../constants';
-import { entity, column, manyToMany } from '../re-export';
-import { OAuthStrategyOptions } from '../../build/identity/interfaces';
+import { OAuthStrategyOptions } from '../identity/interfaces';
 
 let urlJoin = require('url-join');
 

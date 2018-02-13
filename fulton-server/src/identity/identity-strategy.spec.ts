@@ -19,7 +19,7 @@ class MyApp extends FultonApp {
             path: "/test/login",
             httpMethod: "post",
             verifier: FultonImpl.localStrategyVerifier,
-            successMiddleware: FultonImpl.successMiddleware
+            successMiddleware: FultonImpl.issueAccessToken
         }, LocalStrategy);
 
         this.options.identity.addStrategy({

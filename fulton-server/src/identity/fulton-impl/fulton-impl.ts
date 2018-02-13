@@ -49,7 +49,7 @@ export let FultonImpl = {
     /**
      * for StrategySuccessHandler like login, bearer
      */
-    async successMiddleware(req: Request, res: Response) {
+    async issueAccessToken(req: Request, res: Response) {
         //TODO: Web-view for fultonStrategySuccessCallback
         let accessToken = await req.userService.issueAccessToken(req.user);
         res.send(accessToken);
@@ -142,7 +142,7 @@ export let FultonImpl = {
                                 if (options.callbackSuccessMiddleware) {
                                     options.callbackSuccessMiddleware(req, res, next);
                                 } else {
-                                    FultonImpl.successMiddleware(req, res);
+                                    FultonImpl.issueAccessToken(req, res);
                                 }
                             }
                         });
@@ -160,9 +160,11 @@ export let FultonImpl = {
         let options = req.fultonApp.options.identity.register;
 
         let input = req.body;
-        input.username = req.body[options.usernameField];
-        input.password = req.body[options.passwordField];
-        input.email = req.body[options.emailField];
+
+        // rename
+        input.username = input[options.usernameField];
+        input.password = input[options.passwordField];
+        input.email = input[options.emailField];
 
         req.userService
             .register(input)

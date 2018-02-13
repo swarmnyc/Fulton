@@ -451,7 +451,7 @@ export class IdentityOptions {
             session: false,
             otherFields: [],
             handler: FultonImpl.registerHandler,
-            successCallback: FultonImpl.successMiddleware
+            successCallback: FultonImpl.issueAccessToken
         };
 
         this.login = {
@@ -459,7 +459,7 @@ export class IdentityOptions {
             path: "/auth/login",
             httpMethod: "post",
             verifier: FultonImpl.localStrategyVerifier,
-            successMiddleware: FultonImpl.successMiddleware
+            successMiddleware: FultonImpl.issueAccessToken
         };
 
         this.bearer = {

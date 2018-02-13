@@ -22,5 +22,12 @@ export class ExampleApp extends FultonApp {
 
         options.cors.enabled = true;
         options.docs.enabled = true;
+
+        options.identity.enabled = true;
+        options.identity.google.enabled = true;
+        options.identity.github.enabled = true;
+        options.identity.github.clientId = "test";
+
+        options.formatter.jsonApi = true;
     }
 }

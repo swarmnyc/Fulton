@@ -1,12 +1,13 @@
 import * as fs from 'fs';
 import * as lodash from 'lodash';
 
-import { Middleware, NextFunction, Request, Response, PathIdentifier, EntityRouter } from "../index";
+import { Middleware, NextFunction, Request, Response, PathIdentifier, EntityRouter, Type } from "../index";
 
 import { FultonApp } from "../fulton-app";
-import { OpenApiSpec, PathItemObject, ParameterObject, SchemaObject, DefinitionsObject, ResponseObject, ParametersDefinitionsObject } from '@loopback/openapi-spec';
+import { OpenApiSpec, PathItemObject, ParameterObject, SchemaObject, DefinitionsObject, ResponseObject, ParametersDefinitionsObject, PathsObject, OperationObject } from '@loopback/openapi-spec';
 import { MimeTypes } from '../constants';
-import { entity, column } from '../re-export';
+import { entity, column, manyToMany } from '../re-export';
+import { OAuthStrategyOptions } from '../../build/identity/interfaces';
 
 let urlJoin = require('url-join');
 
@@ -84,6 +85,8 @@ function generateDocs(app: FultonApp): OpenApiSpec {
 
     generateDefinitions(app, docs.definitions);
 
+    generateAuthDefinitions(app, docs);
+
     generatePath(app, docs);
 
     return docs;
@@ -91,10 +94,13 @@ function generateDocs(app: FultonApp): OpenApiSpec {
 
 function generateDefinitions(app: FultonApp, definitions: DefinitionsObject) {
     app.entityMetadatas.forEach((metadata, entity) => {
+        if (entity == app.options.identity.userType) {
+            return;
+        }
+
         let schema: SchemaObject = {
             type: "object"
         };
-
 
         schema.properties = {};
 
@@ -159,51 +165,34 @@ function generatePath(app: FultonApp, docs: OpenApiSpec) {
                 responses: {}
             };
 
-            let def = "#/definitions/" + entity.name;
             let res: ResponseObject;
-            let body: ParameterObject;
 
             if (entity) {
                 switch (action.property) {
                     case "list":
                         actionDoc.parameters.push(...queryParamsRef);
 
-                        res = lodash.clone(operationResultResponse);
-
-                        res.schema.properties.data.items.$ref = def
-
-                        actionDoc.responses["200"] = res;
+                        actionDoc.responses["200"] = getOperationResultResponse(entity);
                         break;
                     case "detail":
                         actionDoc.parameters.push({
                             $ref: "#parameters/Id"
                         })
 
-                        res = lodash.clone(operationOneResultResponse)
+                        actionDoc.responses["200"] = getOperationOneResultResponse(entity);
 
-                        res.schema.properties.data.$ref = def
-
-                        actionDoc.responses["200"] = res;
                         break;
                     case "create":
-                        body = lodash.clone(entityBody)
-                        body.schema.properties.data.$ref = def
+                        actionDoc.parameters.push(getBodyParameter(entity));
 
-                        actionDoc.parameters.push(body);
-
-                        res = lodash.clone(operationOneResultResponse)
-                        res.schema.properties.data.$ref = def
-                        actionDoc.responses["200"] = res;
+                        actionDoc.responses["200"] = getOperationOneResultResponse(entity);
                         break;
                     case "update":
                         actionDoc.parameters.push({
                             $ref: "#parameters/Id"
                         })
 
-                        body = lodash.clone(entityBody)
-                        body.schema.properties.data.$ref = def
-
-                        actionDoc.parameters.push(body);
+                        actionDoc.parameters.push(getBodyParameter(entity));
 
                         actionDoc.responses["201"] = {
                             description: "accept"
@@ -226,6 +215,161 @@ function generatePath(app: FultonApp, docs: OpenApiSpec) {
             }
 
             doc[action.method] = actionDoc;
+        }
+    }
+}
+
+function generateAuthDefinitions(app: FultonApp, docs: OpenApiSpec) {
+    let options = app.options.identity;
+    if (!options.enabled) {
+        return;
+    }
+
+    // for access token
+    docs.responses["AccessToken"] = {
+        description: "Access Token",
+        schema: {
+            type: "object",
+            properties: {
+                access_token: { type: "string" },
+                token_type: { type: "string" },
+                expires_in: { type: "number" },
+                refresh_token: { type: "string" }
+            }
+        }
+    }
+
+    let accessTokenResponse = {
+        $ref: "#/responses/AccessToken"
+    }
+
+    let responses = {
+        "200": accessTokenResponse,
+        "400": errorResponse
+    }
+
+    // for register
+    if (options.register) {
+        let path = toPath(options.register.path);
+        let paths: PathsObject = docs.paths[path] = {}
+
+        let body: SchemaObject = {
+            type: "object",
+            properties: {},
+            required: [
+                options.register.usernameField,
+                options.register.emailField,
+                options.register.passwordField
+            ]
+        }
+
+        body.properties[options.register.usernameField || "username"] = {
+            type: "string"
+        }
+
+        body.properties[options.register.emailField || "email"] = {
+            type: "string"
+        }
+
+        body.properties[options.register.passwordField || "password"] = {
+            type: "string"
+        }
+
+        for (const field of options.register.otherFields) {
+            body.properties[field] = {}
+        }
+
+        let actionDoc: OperationObject = {
+            summary: "register",
+            description: "Register a new user",
+            tags: ["Identity"],
+            parameters: [
+                {
+                    name: "body",
+                    in: "body",
+                    required: true,
+                    schema: body
+                }
+            ],
+            responses: responses
+        }
+
+        paths[options.register.httpMethod] = actionDoc;
+    }
+
+    // for login
+    if (options.login) {
+        let path = toPath(options.login.path);
+        let paths: PathsObject = docs.paths[path] = {}
+        let body: SchemaObject = {
+            type: "object",
+            properties: {},
+            required: [options.login.usernameField, options.login.passwordField]
+        }
+
+        body.properties[options.login.usernameField || "username"] = {
+            type: "string"
+        }
+
+        body.properties[options.login.passwordField || "password"] = {
+            type: "string"
+        }
+
+        let actionDoc: OperationObject = {
+            summary: "login",
+            description: "user login",
+            tags: ["Identity"],
+            parameters: [
+                {
+                    name: "body",
+                    in: "body",
+                    required: true,
+                    schema: body
+                }
+            ],
+            responses: responses
+        }
+
+        paths[options.login.httpMethod] = actionDoc;
+    }
+
+    let oauthes = ["google", "github"];
+
+    for (const oauth of oauthes) {
+        let opts: OAuthStrategyOptions = (<any>options)[oauth];
+        if (opts.enabled) {
+            let path = toPath(opts.path);
+
+            docs.paths[path] = {
+                get: {
+                    summary: `${oauth} login`,
+                    description: `${oauth} login`,
+                    tags: ["Identity"],
+                    responses: {
+                        "200": {
+                            headers: {
+                                location: {
+                                    description: `${oauth} login page`,
+                                    schema: {
+                                        type: "string"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            let callbackPath = toPath(opts.callbackPath);
+
+            docs.paths[callbackPath] = {
+                get: {
+                    summary: `${oauth} login callback`,
+                    description: `${oauth} login callback`,
+                    tags: ["Identity"],
+                    responses: responses
+                }
+            }
         }
     }
 }
@@ -262,6 +406,67 @@ function toPath(...args: PathIdentifier[]): string {
     return path;
 }
 
+function getOperationResultResponse(type: Type): ResponseObject {
+    return {
+        description: "success",
+        schema: {
+            type: "object",
+            properties: {
+                data: {
+                    type: "array",
+                    items: {
+                        $ref: "#/definitions/" + type.name
+                    }
+                },
+                pagination: {
+                    type: "object",
+                    properties: {
+                        index: {
+                            type: "number"
+                        },
+                        size: {
+                            type: "number"
+                        },
+                        total: {
+                            type: "number"
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+function getOperationOneResultResponse(type: Type): ResponseObject {
+    return {
+        description: "success",
+        schema: {
+            type: "object",
+            properties: {
+                data: {
+                    $ref: "#/definitions/" + type.name
+                }
+            }
+        }
+    }
+}
+
+function getBodyParameter(type: Type): ParameterObject {
+    return {
+        name: "body",
+        in: "body",
+        required: true,
+        schema: {
+            type: "object",
+            properties: {
+                data: {
+                    $ref: "#/definitions/" + type.name
+                }
+            }
+        }
+    }
+}
+
 let errorResponse: ResponseObject = {
     description: "Error",
     schema: {
@@ -283,44 +488,6 @@ let errorResponse: ResponseObject = {
                         }
                     }
                 }
-            }
-        }
-    }
-}
-
-let operationResultResponse: ResponseObject = {
-    description: "success",
-    schema: {
-        type: "object",
-        properties: {
-            data: {
-                type: "array",
-                items: {}
-            },
-            pagination: {
-                type: "object",
-                properties: {
-                    index: {
-                        type: "number"
-                    },
-                    size: {
-                        type: "number"
-                    },
-                    total: {
-                        type: "number"
-                    }
-                }
-            }
-        }
-    }
-}
-
-let operationOneResultResponse: ResponseObject = {
-    description: "success",
-    schema: {
-        type: "object",
-        properties: {
-            data: {
             }
         }
     }
@@ -404,18 +571,4 @@ let queryParamsRef = [
         $ref: "#parameters/Pagination-Size"
     }
 ]
-
-let entityBody: ParameterObject = {
-    name: "body",
-    in: "body",
-    required: true,
-    schema: {
-        type: "object",
-        properties: {
-            data: {
-                $ref: "#/definitions/"
-            }
-        }
-    }
-};
 

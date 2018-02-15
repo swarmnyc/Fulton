@@ -1,140 +1,23 @@
-import { IEntityService, OperationOneResult, OperationStatus, QueryParams, inject } from "../interfaces";
-import { IUser, OperationResult, QueryColumnStates, Service, Type, injectable } from "../index";
-import { MongoRepository, getMongoRepository } from "typeorm";
 
-import { EntityMetadataHelper } from "../helpers/entity-metadata-helper";
-import { FultonApp } from "../fulton-app";
-import FultonLog from "../fulton-log";
+import { MongoRepository, getMongoRepository, Repository } from "typeorm";
+import { IEntityRunner, QueryParams, QueryColumnStates, injectable } from "../../interfaces";
+import { Type } from "../../helpers";
+import { repository } from '../repository-decorator';
 
 interface IncludeOptions {
     [key: string]: IncludeOptions | false
 }
 
-/**
- * A mongo implement for high level CURD, it contains many features that a pure MongoRepository doesn't have, like support Fulton.QueryParams, error handler, includes etc. 
- * 
- * two ways of extends
- * ## example 1: use default repository 
- * 
- * ```
- * @injectable()
- * class HotdogEntityService extends MongoEntityService<Hotdog>{
- *    constructor(){
- *        super(Hotdog) // just give a type, so it can find the repository.
- *    }
- * }
- * ```
- * 
- * ## example 2: use your HotdogRepository 
- * 
- * @repository(Hotdog)
- * class HotdogRepository extends MongoRepository<Hotdog> {
- * }
- * 
- * // remember add HotdogRepository to options.repositories, so it can be injectable.
- * 
- * @injectable()
- * class HotdogEntityService extends MongoEntityService<Hotdog>{
- *    constructor(repository HotdogRepository) { 
- *        super(repository)
- *    }
- * }
- * 
- */
 @injectable()
-export class MongoEntityService<TEntity> implements IEntityService<TEntity> {
-    @inject(FultonApp)
-    protected app: FultonApp;
-    protected mainRepository: MongoRepository<TEntity>
-
-    constructor(entity: Type<TEntity>)
-    constructor(mainRepository: MongoRepository<TEntity>)
-    constructor(input: MongoRepository<TEntity> | Type<TEntity>) {
-        if (input instanceof MongoRepository) {
-            this.mainRepository = input
-        } else {
-            this.mainRepository = this.getRepository(input);
-        }
-    }
-
-    get currentUser(): IUser {
-        return this.app.userService.currentUser;
-    }
-
-    protected getRepository<T>(entity: Type<T>, connectionName?: string): MongoRepository<T> {
-        return getMongoRepository(entity, connectionName)
-    }
-
-    find(queryParams: QueryParams): Promise<OperationResult<TEntity>> {
-        return this.findInternal(this.mainRepository, queryParams)
-            .then((data) => {
-                return {
-                    data: data[0],
-                    pagination: {
-                        total: data[1],
-                        index: queryParams.pagination.index,
-                        size: queryParams.pagination.size
-                    }
-                }
-            }).catch(this.errorHandler);
-    }
-
-    findOne(queryParams: QueryParams): Promise<OperationOneResult<TEntity>> {
-        return this.findOneInternal(this.mainRepository, queryParams)
-            .then((data) => {
-                return {
-                    data: data
-                }
-            }).catch(this.errorHandler);
-    }
-
-    create(entity: TEntity): Promise<OperationOneResult<TEntity>> {
-        //TODO: valid and remove extra data
-        return this.mainRepository
-            .insertOne(entity)
-            .then((result) => {
-                // TODO: should move this code to typeorm
-                let e: any = entity;
-                e[this.mainRepository.metadata.objectIdColumn.propertyName] = e[this.mainRepository.metadata.objectIdColumn.databaseName];
-                delete e[this.mainRepository.metadata.objectIdColumn.databaseName];
-
-                return {
-                    data: entity
-                }
-            })
-            .catch(this.errorHandler);
-    }
-
-    update(id: string, entity: TEntity, replace?: boolean): Promise<OperationStatus> {
-        //TODO: valid and remove extra data
-        return this.mainRepository
-            .updateOne({ _id: id }, replace ? entity : { $set: entity })
-            .then((result) => {
-                return {
-                    status: 202
-                }
-            })
-            .catch(this.errorHandler);
-    }
-
-    delete(id: string): Promise<OperationStatus> {
-        return this.mainRepository
-            .deleteOne({ _id: id })
-            .then((result) => {
-                return {
-                    status: 202
-                }
-            })
-            .catch(this.errorHandler);
-    }
-
+export class MongoEntityRunner implements IEntityRunner {
     /**
      * use provided repository to find entities
      * @param repository 
      * @param queryParams 
      */
-    protected async findInternal<T>(repository: MongoRepository<T>, queryParams: QueryParams): Promise<[T[], number]> {
-        this.transformQueryParams(repository, queryParams);
+    async find<T>(repository: Repository<T>, queryParams: QueryParams): Promise<[T[], number]> {
+        let repo = (<any>repository as MongoRepository<T>);
+        this.transformQueryParams(repo, queryParams);
 
         let skip;
 
@@ -146,7 +29,7 @@ export class MongoEntityService<TEntity> implements IEntityService<TEntity> {
 
         // let select = this.transformSelect(queryParams);
 
-        let data = await repository.findAndCount({
+        let data = await repo.findAndCount({
             where: queryParams.filter,
             skip: skip,
             take: queryParams.pagination.size,
@@ -154,7 +37,7 @@ export class MongoEntityService<TEntity> implements IEntityService<TEntity> {
         });
 
         if (data[0].length > 0 && queryParams.includes) {
-            await this.processIncludes(repository, data[0], queryParams.includes);
+            await this.processIncludes(repo, data[0], queryParams.includes);
         }
 
         return data;
@@ -165,21 +48,45 @@ export class MongoEntityService<TEntity> implements IEntityService<TEntity> {
      * @param repository 
      * @param queryParams 
      */
-    protected async findOneInternal<T>(repository: MongoRepository<T>, queryParams: QueryParams): Promise<T> {
-        this.transformQueryParams(repository, queryParams);
+    async findOne<T>(repository: Repository<T>, queryParams: QueryParams): Promise<T> {
+        let repo = (<any>repository as MongoRepository<T>);
+        this.transformQueryParams(repo, queryParams);
 
         //let select = this.transformSelect(queryParams);
 
-        let data = await repository.findOne({
+        let data = await repo.findOne({
             where: queryParams.filter,
             order: queryParams.sort as any
         });
 
         if (data && queryParams.includes) {
-            await this.processIncludes(repository, data, queryParams.includes);
+            await this.processIncludes(repo, data, queryParams.includes);
         }
 
         return data
+    }
+
+    create<T>(repository: Repository<T>, entity: T): Promise<T> {
+        return (<any>repository as MongoRepository<T>)
+            .insertOne(entity)
+            .then((result) => {
+                // TODO: should move this code to typeorm
+                let e: any = entity;
+                e[repository.metadata.objectIdColumn.propertyName] = e[repository.metadata.objectIdColumn.databaseName];
+                delete e[repository.metadata.objectIdColumn.databaseName];
+
+                return entity
+            });
+    }
+
+    update<T>(repository: Repository<T>, id: any, entity: T, replace?: boolean): Promise<any> {
+        return (<any>repository as MongoRepository<T>)
+            .updateOne({ _id: id }, replace ? entity : { $set: entity })
+    }
+
+    delete<T>(repository: Repository<T>, id: any): Promise<any> {
+        return (<any>repository as MongoRepository<T>)
+            .deleteOne({ _id: id })
     }
 
     protected processIncludes<T>(repository: MongoRepository<T>, data: T | T[], includes: string[]): Promise<any> {
@@ -222,23 +129,9 @@ export class MongoEntityService<TEntity> implements IEntityService<TEntity> {
      * transform select to mongo projection
      * @param queryParams 
      */
-    protected transformSelect<T>(repository: MongoRepository<T>, queryParams: QueryParams): QueryColumnStates {
-        // TODO: typeorm has bug on prjection on mongodb
+    private transformSelect<T>(repository: MongoRepository<T>, queryParams: QueryParams): QueryColumnStates {
+        // TODO: typeorm has bug on projection on mongodb
         return;
-    }
-
-    /**
-     * handler operation fails
-     * @param error 
-     */
-    protected errorHandler(error: any) {
-        FultonLog.error("MongoEntityService operation failed with error:\n%O", error);
-
-        return {
-            errors: {
-                "message": [error.message as string]
-            }
-        }
     }
 
     /**
@@ -297,7 +190,7 @@ export class MongoEntityService<TEntity> implements IEntityService<TEntity> {
     }
 
     private processIncludeInternal(repository: MongoRepository<any>, target: any, options: IncludeOptions): Promise<any> {
-        //TODO: should cover more situations and better proformance
+        //TODO: should cover more situations and better performance
         let tasks = Object.getOwnPropertyNames(options).map((columnName): Promise<any> => {
             let relatedToMetadata = repository.metadata.relatedToMetadata;
 
@@ -311,10 +204,10 @@ export class MongoEntityService<TEntity> implements IEntityService<TEntity> {
             }
 
             let relatedType = relatedToMetadata[columnName];
-            let relatedRepo = this.getRepository(relatedType);
+            let relatedRepo = getMongoRepository(relatedType);
 
             let exec = async (id: string): Promise<any> => {
-                let ref = await this.findOneInternal(relatedRepo, { filter: { "_id": id } });
+                let ref = await this.findOne(relatedRepo, { filter: { "_id": id } });
 
                 // includes sub-columns
                 if (options[columnName]) {

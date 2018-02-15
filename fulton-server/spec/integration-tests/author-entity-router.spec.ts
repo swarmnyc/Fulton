@@ -1,4 +1,4 @@
-import { FultonApp, FultonAppOptions, authorized, AccessToken, Request, Response, EntityRouter, entityRouter, OperationResult, QueryParams, OperationOneResult, OperationStatus, router, MongoEntityService, injectable, httpGet } from "../../src/index";
+import { FultonApp, FultonAppOptions, authorized, AccessToken, Request, Response, EntityRouter, entityRouter, OperationResult, QueryParams, OperationOneResult, OperationStatus, router, EntityService, injectable, httpGet } from "../../src/index";
 import { UserServiceMock } from "../helpers/user-service-mock";
 import { HttpTester, HttpResult } from "../helpers/http-tester";
 import { Hotdog } from "../helpers/entities/hot-dog";
@@ -10,16 +10,16 @@ import { MongoRepository } from "typeorm/repository/MongoRepository";
 
 
 @injectable()
-class AuthorEntityService extends MongoEntityService<Author>{
+class AuthorEntityService extends EntityService<Author>{
     private tagRepository: MongoRepository<Tag>;
     constructor() {
         super(Author);
 
-        this.tagRepository = this.getRepository(Tag);
+        this.tagRepository = this.getMongoRepository(Tag);
     }
 
     getTags(queryParams: QueryParams): Promise<OperationResult<Tag>> {
-        return this.findInternal(this.tagRepository, queryParams)
+        return this.runner.find(this.tagRepository, queryParams)
             .then((result) => {
                 return {
                     data: result[0],
@@ -85,7 +85,7 @@ class MyApp extends FultonApp {
     }
 }
 
-describe('MongoEntityRouter Integration Test', () => {
+describe('EntityRouter Integration Test', () => {
     let app: MyApp;
     let httpTester: HttpTester;
 

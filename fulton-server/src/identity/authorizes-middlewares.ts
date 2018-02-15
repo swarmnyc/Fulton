@@ -18,7 +18,7 @@ export interface AuthorizeOptions {
 }
 
 /**
- * check the requrest is authenticated.
+ * check the request is authenticated.
  * @param options 
  */
 export function authorized(options?: AuthorizeOptions) {

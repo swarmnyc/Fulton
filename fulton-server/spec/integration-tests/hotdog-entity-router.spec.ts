@@ -24,7 +24,7 @@ class MyApp extends FultonApp {
     }
 }
 
-describe('MongoEntityRouter Integration Test', () => {
+describe('EntityRouter Integration Test', () => {
     let app: MyApp;
     let httpTester: HttpTester;
 

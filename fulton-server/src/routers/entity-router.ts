@@ -2,7 +2,7 @@ import { FullEntityRouterMetadata, getFullEntityRouterMethodMetadata } from "./r
 import { httpDelete, httpGet, httpPatch, httpPost } from "./route-decorators";
 import { IEntityService, injectable, NextFunction, OperationOneResult, OperationResult, OperationStatus, Request, Response, EntityServiceFactory } from "../interfaces";
 
-import { EntityService } from "../services";
+import { EntityService } from "../entities";
 import { Router } from "./router";
 import { queryById } from "../middlewares";
 
@@ -21,8 +21,15 @@ export abstract class EntityRouter<TEntity> extends Router {
     init() {
         if (this.entityService == null) {
             // use default implementation
-            let factory: EntityServiceFactory<TEntity> = this.app.container.get<any>(EntityService);
-            this.entityService = factory(this.metadata.router.entity);
+            let di = this.app.container.get<any>(EntityService);
+            if (di instanceof Function) {
+                // factory
+                let factory: EntityServiceFactory<TEntity> = di;
+                this.entityService = factory(this.metadata.router.entity);
+            } else {
+                // instance
+                this.entityService = di;
+            }
         }
 
         super.init();

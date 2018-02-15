@@ -1,10 +1,11 @@
-import { DiContainer, EntityService, EntityServiceFactory, MongoEntityService, Type, RepositoryFactory } from "../index";
+import { DiContainer, EntityService, EntityServiceFactory, Type, RepositoryFactory } from "../index";
 import { MongoRepository, getConnection, getRepository } from "typeorm";
 
 import { FultonApp } from "../fulton-app";
 import { Repository } from "typeorm/repository/Repository";
 import { getRepositoryMetadata } from "../entities/repository-decorator-helper";
 import { interfaces, Container } from "inversify";
+import { MongoEntityRunner } from "../entities/runner/mongo-entity-runner";
 
 export default function diInitializer(app: FultonApp) {
     app.container = new Container();
@@ -18,6 +19,9 @@ export default function diInitializer(app: FultonApp) {
     // for Repository
     app.container.bind(Repository).toFactory(repositoryFactory);
 
+    // for EntityRunner
+    app.container.bind(MongoEntityRunner).toSelf();
+
     app.events.emit("didInitDiContainer", app);
 }
 
@@ -26,17 +30,8 @@ export default function diInitializer(app: FultonApp) {
  */
 function entityServiceFactory<T>(ctx: interfaces.Context): EntityServiceFactory<T> {
     return (entity: Type<T>) => {
-        let repo = getRepository(entity); // get repository from typeorm
-        let service;
-        if (repo instanceof MongoRepository) {
-            // for mongo
-            service = new MongoEntityService(repo);
-            service["app"] = ctx.container.get(FultonApp);
-        } else {
-            // for sql
-            service = new EntityService(repo);
-            service["app"] = ctx.container.get(FultonApp);
-        }
+        let service = new EntityService(entity);
+        service["app"] = ctx.container.get(FultonApp);
 
         return service;
     }

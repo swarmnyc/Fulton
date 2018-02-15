@@ -1,7 +1,7 @@
 import { Entity, ObjectIdColumn, Column } from "typeorm";
 import { router, httpGet, entityRouter } from "./route-decorators";
 import { EntityRouter } from "./entity-router";
-import { EntityService } from "../services/entity-service";
+import { EntityService } from "../entities/entity-service";
 import { injectable } from "../index";
 import { FultonApp } from "../fulton-app";
 import { FultonAppOptions } from "../fulton-app-options";

@@ -25,6 +25,9 @@ export interface FultonErrorObject {
     [key: string]: string[];
 }
 
+/**
+ * Entity Service provides basic CRUD
+ */
 export interface IEntityService<TEntity> {
     find(queryParams: QueryParams): Promise<OperationResult<TEntity>>;
 
@@ -32,9 +35,22 @@ export interface IEntityService<TEntity> {
 
     create(entity: TEntity): Promise<OperationOneResult<TEntity>>;
 
-    update(id: string, entity: TEntity): Promise<OperationStatus>;
+    update(id: any, entity: TEntity): Promise<OperationStatus>;
 
-    delete(id: string): Promise<OperationStatus>;
+    delete(id: any): Promise<OperationStatus>;
+}
+
+/** the real runner of entity service, it can be Mongo runner or Sql Runner */
+export interface IEntityRunner {
+    find<TEntity>(repository: Repository<TEntity>, queryParams: QueryParams): Promise<[TEntity[], number]>;
+
+    findOne<TEntity>(repository: Repository<TEntity>, queryParams: QueryParams): Promise<TEntity>;
+
+    create<TEntity>(repository: Repository<TEntity>, entity: TEntity): Promise<TEntity>;
+
+    update<TEntity>(repository: Repository<TEntity>, id: any, entity: TEntity): Promise<void>;
+
+    delete<TEntity>(repository: Repository<TEntity>, id: any): Promise<void>;
 }
 
 /**

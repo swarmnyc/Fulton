@@ -1,11 +1,11 @@
-import { MongoEntityService } from "./mongo-entity-service";
 import { MongoRepository } from "typeorm";
+import { MongoEntityRunner } from "./mongo-entity-runner";
 
 describe('Fulton entity service', () => {
     it('should transform includes', async () => {
-        let service = new MongoEntityService(new MongoRepository());
+        let runner = new MongoEntityRunner();
 
-        let result = service["transformIncludes"](["author", "author.tag", "author.tag.test", "tag"]);
+        let result = runner["transformIncludes"](["author", "author.tag", "author.tag.test", "tag"]);
 
         expect(result).toEqual({
             author: {
@@ -17,7 +17,7 @@ describe('Fulton entity service', () => {
         });
 
 
-        result = service["transformIncludes"](["author.tag.test", "tag"]);
+        result = runner["transformIncludes"](["author.tag.test", "tag"]);
 
         expect(result).toEqual({
             author: {

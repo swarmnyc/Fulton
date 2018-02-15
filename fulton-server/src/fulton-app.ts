@@ -30,6 +30,11 @@ import { fultonDebug } from "./helpers/debug";
 import jsonapi from './middlewares/jsonapi';
 import { queryParamsParser } from './middlewares/query-params-parser';
 
+/**
+ * The app of Fulton Server, it is the main class of Fulton Server
+ * 
+ * `onInit` is the required function when extends from FultonApp
+ */
 export abstract class FultonApp {
     private isInitialized: boolean = false;
 

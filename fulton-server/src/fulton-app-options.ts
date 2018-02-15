@@ -542,7 +542,8 @@ export class FultonAppOptions {
 
     constructor(private appName: string, private appMode: AppMode) {
         this.index = {
-            enabled: true
+            enabled: true,
+            message: `${appName} works.`
         };
 
         this.logging = {

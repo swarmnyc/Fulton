@@ -8,7 +8,7 @@ import { JsonApiConverter, JsonApiTypeOptions, JsonApiSerializeOptions, JsonApiR
 import { OperationResultPagination } from "../interfaces";
 
 
-export default function jsonapi (app: FultonApp) {
+export default function jsonapi(app: FultonApp) {
     let converter: JsonApiConverter;
 
     // init jsonapi needs after initRouters, but middleware have to register before initRouters
@@ -83,7 +83,7 @@ function initConverter(app: FultonApp): JsonApiConverter {
     let converter: JsonApiConverter = new JsonApiConverter();
 
     app.events.emit("onInitJsonApi", app, converter);
-    
+
     app.entityMetadatas.forEach((metadata, type) => {
         let relatedToMetadata = metadata.relatedToMetadata;
         let id: string;
@@ -146,25 +146,27 @@ function rootLinks(opts: JsonApiSerializeOptions): JsonApiRootLinks {
         let pagination = opts.args.pagination as OperationResultPagination
         let queryParams = opts.args.queryParams as QueryParams;
 
-        queryParams.pagination.size = pagination.size;
-
         let links: JsonApiRootLinks = {}
         let last = Math.ceil(pagination.total / pagination.size) - 1;
 
-        queryParams.pagination.index = 0;
-        links.first = `${opts.domain}${opts.baseUrl}?${qs.stringify(queryParams)}`;
+        if (pagination.total > pagination.size) {
+            queryParams.pagination.size = pagination.size;
 
-        queryParams.pagination.index = last;
-        links.last = `${opts.domain}${opts.baseUrl}?${qs.stringify(queryParams)}`;
+            queryParams.pagination.index = 0;
+            links.first = `${opts.domain}${opts.baseUrl}?${qs.stringify(queryParams)}`;
 
-        if (pagination.index > 0) {
-            queryParams.pagination.index = pagination.index - 1;
-            links.prev = `${opts.domain}${opts.baseUrl}?${qs.stringify(queryParams)}`;
-        }
+            queryParams.pagination.index = last;
+            links.last = `${opts.domain}${opts.baseUrl}?${qs.stringify(queryParams)}`;
 
-        if (pagination.index < last) {
-            queryParams.pagination.index = pagination.index + 1;
-            links.next = `${opts.domain}${opts.baseUrl}?${qs.stringify(queryParams)}`;
+            if (pagination.index > 0) {
+                queryParams.pagination.index = pagination.index - 1;
+                links.prev = `${opts.domain}${opts.baseUrl}?${qs.stringify(queryParams)}`;
+            }
+
+            if (pagination.index < last) {
+                queryParams.pagination.index = pagination.index + 1;
+                links.next = `${opts.domain}${opts.baseUrl}?${qs.stringify(queryParams)}`;
+            }
         }
 
         links.meta = pagination;

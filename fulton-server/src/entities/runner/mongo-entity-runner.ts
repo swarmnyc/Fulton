@@ -15,7 +15,7 @@ export class MongoEntityRunner implements IEntityRunner {
      * @param repository 
      * @param queryParams 
      */
-    async find<T>(repository: Repository<T>, queryParams: QueryParams): Promise<[T[], number]> {
+    async find<T>(repository: Repository<T>, queryParams: QueryParams = {}): Promise<[T[], number]> {
         let repo = (<any>repository as MongoRepository<T>);
         this.transformQueryParams(repo, queryParams);
 
@@ -48,7 +48,7 @@ export class MongoEntityRunner implements IEntityRunner {
      * @param repository 
      * @param queryParams 
      */
-    async findOne<T>(repository: Repository<T>, queryParams: QueryParams): Promise<T> {
+    async findOne<T>(repository: Repository<T>, queryParams: QueryParams = {}): Promise<T> {
         let repo = (<any>repository as MongoRepository<T>);
         this.transformQueryParams(repo, queryParams);
 
@@ -64,6 +64,24 @@ export class MongoEntityRunner implements IEntityRunner {
         }
 
         return data
+    }
+
+    /**
+     * use provided repository to find one entity
+     * @param repository 
+     * @param queryParams 
+     */
+    async findById<T>(repository: Repository<T>, id: any, queryParams: QueryParams = {}): Promise<T> {
+        //let select = this.transformSelect(queryParams);
+        if (repository.metadata.objectIdColumn.type == "number") {
+            id = parseInt(id);
+        }
+
+        queryParams.filter = {
+            id: id
+        }
+
+        return this.findOne(repository, queryParams);
     }
 
     create<T>(repository: Repository<T>, entity: T): Promise<T> {

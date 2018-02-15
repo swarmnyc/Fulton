@@ -4,7 +4,6 @@ import { IEntityService, injectable, NextFunction, OperationOneResult, Operation
 
 import { EntityService } from "../entities";
 import { Router } from "./router";
-import { queryById } from "../middlewares";
 
 @injectable()
 export abstract class EntityRouter<TEntity> extends Router {
@@ -56,10 +55,10 @@ export abstract class EntityRouter<TEntity> extends Router {
             .then(this.sendResult(res));
     }
 
-    @httpGet("/:id", queryById())
+    @httpGet("/:id")
     detail(req: Request, res: Response) {
         this.entityService
-            .findOne(req.queryParams)
+            .findById(req.params.id, req.queryParams)
             .then(this.sendResult(res));
     }
 
@@ -112,8 +111,14 @@ export abstract class EntityRouter<TEntity> extends Router {
                 let status = (<OperationStatus>result).status;
                 if (status) {
                     res.status(status).end();
-                } else {
+                } else if ((<OperationResult>result).data) {
                     res.send(result);
+                } else {
+                    res.status(400).send({
+                        errors: {
+                            "message": "no data"
+                        }
+                    });
                 }
             }
         }

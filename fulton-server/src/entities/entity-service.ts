@@ -47,7 +47,7 @@ export class EntityService<TEntity> implements IEntityService<TEntity> {
         return getMongoRepository(entity, connectionName)
     }
 
-    find(queryParams: QueryParams): Promise<OperationResult<TEntity>> {
+    find(queryParams?: QueryParams): Promise<OperationResult<TEntity>> {
         return this.runner
             .find(this.mainRepository, queryParams)
             .then((data) => {
@@ -62,9 +62,19 @@ export class EntityService<TEntity> implements IEntityService<TEntity> {
             }).catch(this.errorHandler);
     }
 
-    findOne(queryParams: QueryParams): Promise<OperationOneResult<TEntity>> {
+    findOne(queryParams?: QueryParams): Promise<OperationOneResult<TEntity>> {
         return this.runner
             .findOne(this.mainRepository, queryParams)
+            .then((data) => {
+                return {
+                    data: data
+                }
+            }).catch(this.errorHandler);
+    }
+
+    findById(id: any, queryParams?: QueryParams): Promise<OperationOneResult<TEntity>> {
+        return this.runner
+            .findById(this.mainRepository, id, queryParams)
             .then((data) => {
                 return {
                     data: data

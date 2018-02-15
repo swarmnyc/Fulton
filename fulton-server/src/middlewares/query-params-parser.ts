@@ -68,6 +68,7 @@ function parseArray(arr: string[]): string[] {
 }
 
 /**
+ * @deprecated
  * put id into QueryParams
  * @param name rotuer params like /users/:userId, the value should be userId
  */
@@ -80,7 +81,6 @@ export function queryById(name: string = "id") {
                 }
             } else {
                 req.queryParams.filter[name] = req.params[name];
-
             }
         }
 

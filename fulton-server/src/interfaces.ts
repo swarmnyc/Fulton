@@ -29,9 +29,11 @@ export interface FultonErrorObject {
  * Entity Service provides basic CRUD
  */
 export interface IEntityService<TEntity> {
-    find(queryParams: QueryParams): Promise<OperationResult<TEntity>>;
+    find(queryParams?: QueryParams): Promise<OperationResult<TEntity>>;
 
-    findOne(queryParams: QueryParams): Promise<OperationOneResult<TEntity>>;
+    findOne(queryParams?: QueryParams): Promise<OperationOneResult<TEntity>>;
+
+    findById(id: any, QueryParams?: QueryParams): Promise<OperationOneResult<TEntity>>;
 
     create(entity: TEntity): Promise<OperationOneResult<TEntity>>;
 
@@ -45,6 +47,8 @@ export interface IEntityRunner {
     find<TEntity>(repository: Repository<TEntity>, queryParams: QueryParams): Promise<[TEntity[], number]>;
 
     findOne<TEntity>(repository: Repository<TEntity>, queryParams: QueryParams): Promise<TEntity>;
+
+    findById<TEntity>(repository: Repository<TEntity>, id: any, queryParams: QueryParams): Promise<TEntity>;
 
     create<TEntity>(repository: Repository<TEntity>, entity: TEntity): Promise<TEntity>;
 

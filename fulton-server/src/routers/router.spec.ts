@@ -1,6 +1,6 @@
 import * as express from 'express';
 
-import { Middleware, errorHandler, authenticate, authorize, authorizeByRole } from "../index";
+import { Middleware, errorHandler, authenticate, authorized, authorizedByRole } from "../index";
 import { Request, Response } from "../interfaces";
 import { getFullRouterMethodMetadata, getRouterMethodMetadataList } from "./route-decorators-helpers";
 

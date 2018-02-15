@@ -2,7 +2,7 @@ import { FultonApp } from "../fulton-app";
 import { FultonAppOptions } from "../fulton-app-options";
 import { IStrategyOptionsWithRequest, Strategy as LocalStrategy } from 'passport-local';
 import { HttpTester } from "../../spec/helpers/http-tester";
-import { AccessToken, authorize, authorizeByRole, authorizeByRoles, router, httpGet, Request, Response, Router, FultonImpl } from "../index";
+import { AccessToken, authorized, authorizedByRole, authorizedByRoles, router, httpGet, Request, Response, Router, FultonImpl } from "../index";
 import { UserServiceMock } from "../../spec/helpers/user-service-mock";
 import { GoogleStrategy } from "./strategies/google-strategy";
 

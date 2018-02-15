@@ -28,14 +28,14 @@ export class FultonAppOptions {
     /**
      * Databases connection options, you can define connection options on FultonApp.onInt(),  
      * and use 
-     * `process.env["{appName}.options.databases[{connectionName}].{optionName}"]` to override data.
+     * `process.env["{appName}.options.databases.{connectionName}.{optionName}"]` to override data.
      * 
      * for example: 
-     * FultonApp.options.databases[default].url={url}
+     * FultonApp.options.databases.default.url={url}
      * 
      * and 
      * `process.env["{appName}.options.database.{optionName}"]` is the shortcut of 
-     * `process.env["{appName}.options.databases[default].{optionName}"]`
+     * `process.env["{appName}.options.databases.default.{optionName}"]`
      * 
      * if the map is empty, it will use typeorm.json, for more information see [typeorm](http://typeorm.io/)
      */
@@ -689,7 +689,7 @@ export class FultonAppOptions {
      */
     loadEnvDatabaseOptions() {
         let defaultReg = new RegExp(`^${this.appName}\\.options\\.database\\.(\\w+?)$`, "i");
-        let namedReg = new RegExp(`^${this.appName}\\.options\\.databases\\[(\\w+?)\\]\\.(\\w+?)$`, "i");
+        let namedReg = new RegExp(`^${this.appName}\\.options\\.databases\\.(\\w+?)\\.(\\w+?)$`, "i");
 
         for (const key in process.env) {
             let connName, propName, value;

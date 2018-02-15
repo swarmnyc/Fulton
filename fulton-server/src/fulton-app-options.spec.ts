@@ -73,10 +73,10 @@ describe('Fulton App Options', () => {
     it('should load databases options', async () => {
         let options = new FultonAppOptions("test", "api");
 
-        process.env[`test.options.databases[test].url`] = "http://test"
-        process.env[`test.options.databases[test].cache`] = "true"
-        process.env[`test.options.databases[test].authSource`] = "true."
-        process.env[`test.options.databases[test].port`] = "80"
+        process.env[`test.options.databases.test.url`] = "http://test"
+        process.env[`test.options.databases.test.cache`] = "true"
+        process.env[`test.options.databases.test.authSource`] = "true."
+        process.env[`test.options.databases.test.port`] = "80"
 
         options.loadEnvOptions();
 
@@ -87,10 +87,10 @@ describe('Fulton App Options', () => {
         expect(dbOptions.authSource).toEqual("true.");
         expect(dbOptions.port).toEqual(80);
 
-        process.env[`test.options.databases[test2].url`] = "http://test2"
-        process.env[`test.options.databases[test2].cache`] = "true"
-        process.env[`test.options.databases[test2].authSource`] = "true."
-        process.env[`test.options.databases[test2].port`] = "80"
+        process.env[`test.options.databases.test2.url`] = "http://test2"
+        process.env[`test.options.databases.test2.cache`] = "true"
+        process.env[`test.options.databases.test2.authSource`] = "true."
+        process.env[`test.options.databases.test2.port`] = "80"
 
         options.loadEnvOptions();
 

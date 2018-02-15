@@ -73,7 +73,8 @@ export class MongoEntityRunner implements IEntityRunner {
      */
     async findById<T>(repository: Repository<T>, id: any, queryParams: QueryParams = {}): Promise<T> {
         //let select = this.transformSelect(queryParams);
-        if (repository.metadata.objectIdColumn.type == "number") {
+        if (repository.metadata.objectIdColumn.type == "number" ||
+            repository.metadata.objectIdColumn.type == Number) {
             id = parseInt(id);
         }
 
@@ -238,7 +239,7 @@ export class MongoEntityRunner implements IEntityRunner {
             let execP;
             if (refItems instanceof Array) {
                 let ids = refItems.map((item) => item[relatedRepo.metadata.objectIdColumn.propertyName]);
-                execP = Promise.all(refItems.map(exec));
+                execP = Promise.all(ids.map(exec));
             } else {
                 let id = refItems[relatedRepo.metadata.objectIdColumn.propertyName];
                 execP = exec(id);

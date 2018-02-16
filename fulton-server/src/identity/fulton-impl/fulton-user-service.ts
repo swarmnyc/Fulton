@@ -80,7 +80,7 @@ export class FultonUserService implements IUserService<FultonUser> {
     private options: IdentityOptions;
     private runner: IRunner;
 
-    constructor( @inject(FultonApp) private app: FultonApp,
+    constructor(@inject(FultonApp) private app: FultonApp,
         @inject("UserRepository") private userRepository: Repository<FultonUser>) {
         this.options = app.options.identity;
 
@@ -92,11 +92,13 @@ export class FultonUserService implements IUserService<FultonUser> {
     }
 
     get currentUser(): FultonUser {
-        let res: Request = Zone.current.get("res");
-        if (res) {
-            return res.user;
-        } else {
-            return null;
+        if(this.app.options.settings.zoneEnabled){
+            let res: Request = Zone.current.get("res");
+            if (res) {
+                return res.user;
+            } else {
+                return null;
+            }
         }
     }
 

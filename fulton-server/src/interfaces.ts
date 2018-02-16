@@ -1,3 +1,5 @@
+import "reflect-metadata";
+
 import { Type } from "./helpers";
 import { Repository } from "typeorm";
 

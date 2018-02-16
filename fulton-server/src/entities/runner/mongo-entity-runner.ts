@@ -1,9 +1,8 @@
+import { IEntityRunner, QueryColumnStates, QueryParams, injectable } from "../../interfaces";
+import { MongoRepository, Repository, getMongoRepository } from "typeorm";
 
-import { MongoRepository, getMongoRepository, Repository } from "typeorm";
-import { IEntityRunner, QueryParams, QueryColumnStates, injectable } from "../../interfaces";
-import { Type } from "../../helpers";
-import { repository } from '../repository-decorator';
 import { ObjectId } from 'bson';
+import { Type } from "../../index";
 
 interface IncludeOptions {
     [key: string]: IncludeOptions | false

@@ -50,7 +50,7 @@ class HotdogEntityService implements IEntityService<Hotdog> {
         });
     }
 
-    findOne(queryParams: QueryParams): Promise<OperationOneResult<Hotdog>> {
+    findById(id: any, QueryParams?: QueryParams): Promise<OperationOneResult<Hotdog>> {
         let data: Hotdog = Object.assign(new Hotdog(), {
             "hotdogId": "1",
             "name": "name",
@@ -65,6 +65,11 @@ class HotdogEntityService implements IEntityService<Hotdog> {
             data: data
         });
     }
+
+    findOne(queryParams: QueryParams): Promise<OperationOneResult<Hotdog>> {
+        throw new Error("Method not implemented.");
+    }
+    
     create(entity: Hotdog): Promise<OperationOneResult<Hotdog>> {
         throw new Error("Method not implemented.");
     }

@@ -114,9 +114,11 @@ export abstract class FultonApp {
      * get data from res.locals[key], and use Zone to manage context
      */
     getLocalData(key: string): any {
-        let res: Response = Zone.current.get("res");
-        if (res) {
-            return res.locals[key];
+        if (this.options.settings.zoneEnabled) {
+            let res: Response = Zone.current.get("res");
+            if (res) {
+                return res.locals[key];
+            }
         }
     }
 
@@ -124,9 +126,11 @@ export abstract class FultonApp {
      * set data from res.locals[key], and use Zone to manage context
      */
     setLocalData(key: string, value: any) {
-        let res: Response = Zone.current.get("res");
-        if (res) {
-            res.locals[key] = value;
+        if (this.options.settings.zoneEnabled) {
+            let res: Response = Zone.current.get("res");
+            if (res) {
+                res.locals[key] = value;
+            }
         }
     }
 
@@ -191,6 +195,10 @@ export abstract class FultonApp {
                 FultonLog.error(`${this.appName} failed to initialization`, err);
                 throw err;
             });
+        }
+
+        if (this.options.settings.zoneEnabled) {
+            require("zone.js");
         }
 
         if (this.httpServer || this.httpsServer) {

@@ -56,7 +56,7 @@ class MyApp extends FultonApp {
     }
 }
 
-xdescribe('Zone', () => {
+describe('Zone', () => {
     let app: MyApp;
     let httpTester: HttpTester;
 

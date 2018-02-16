@@ -3,6 +3,7 @@ import { MongoRepository, getMongoRepository, Repository } from "typeorm";
 import { IEntityRunner, QueryParams, QueryColumnStates, injectable } from "../../interfaces";
 import { Type } from "../../helpers";
 import { repository } from '../repository-decorator';
+import { ObjectId } from 'bson';
 
 interface IncludeOptions {
     [key: string]: IncludeOptions | false
@@ -20,10 +21,11 @@ export class MongoEntityRunner implements IEntityRunner {
         this.transformQueryParams(repo, queryParams);
 
         let skip;
-
+        let size;
         if (queryParams.pagination) {
+            size = queryParams.pagination.size;
             if (queryParams.pagination.index && queryParams.pagination.size) {
-                skip = queryParams.pagination.index * queryParams.pagination.size;
+                skip = queryParams.pagination.index * size;
             }
         }
 
@@ -32,7 +34,7 @@ export class MongoEntityRunner implements IEntityRunner {
         let data = await repo.findAndCount({
             where: queryParams.filter,
             skip: skip,
-            take: queryParams.pagination.size,
+            take: size,
             order: queryParams.sort as any
         });
 
@@ -85,14 +87,19 @@ export class MongoEntityRunner implements IEntityRunner {
         return this.findOne(repository, queryParams);
     }
 
-    create<T>(repository: Repository<T>, entity: T): Promise<T> {
+    create<T extends any>(repository: Repository<T>, entity: T): Promise<T> {
+        if (entity[repository.metadata.objectIdColumn.propertyName]) {
+            // TODO: should move this code to typeorm
+            entity._id = entity[repository.metadata.objectIdColumn.propertyName];
+            delete entity[repository.metadata.objectIdColumn.propertyName];
+        }
+
         return (<any>repository as MongoRepository<T>)
             .insertOne(entity)
             .then((result) => {
                 // TODO: should move this code to typeorm
-                let e: any = entity;
-                e[repository.metadata.objectIdColumn.propertyName] = e[repository.metadata.objectIdColumn.databaseName];
-                delete e[repository.metadata.objectIdColumn.databaseName];
+                entity[repository.metadata.objectIdColumn.propertyName] = entity._id;
+                delete entity._id;
 
                 return entity
             });
@@ -162,6 +169,11 @@ export class MongoEntityRunner implements IEntityRunner {
 
         for (const name of Object.getOwnPropertyNames(target)) {
             let value = target[name];
+
+            if (value instanceof ObjectId) {
+                continue;
+            }
+
             if (name == idName) {
                 // TODO: should move this code to typeorm
                 target[databaseName] = value;
@@ -217,35 +229,48 @@ export class MongoEntityRunner implements IEntityRunner {
                 return;
             }
 
-            let refItems = target[columnName];
-            if (refItems == null) {
+            let relItems = target[columnName];
+            if (relItems == null) {
                 return;
             }
 
-            let relatedType = relatedToMetadata[columnName];
-            let relatedRepo = getMongoRepository(relatedType);
+            let relType = relatedToMetadata[columnName];
+            let relRepo = getMongoRepository(relType);
 
-            let exec = async (id: string): Promise<any> => {
-                let ref = await this.findOne(relatedRepo, { filter: { "_id": id } });
-
+            let fetchSubInclude = async (ref: any): Promise<any> => {
                 // includes sub-columns
                 if (options[columnName]) {
-                    await this.processIncludeInternal(relatedRepo, ref, options[columnName] as IncludeOptions);
+                    await this.processIncludeInternal(relRepo, ref, options[columnName] as IncludeOptions);
                 }
 
                 return ref;
             }
 
-            let execP;
-            if (refItems instanceof Array) {
-                let ids = refItems.map((item) => item[relatedRepo.metadata.objectIdColumn.propertyName]);
-                execP = Promise.all(ids.map(exec));
+            let fetchTask;
+            if (relItems instanceof Array) {
+                if (relItems.length == 0) {
+                    return;
+                }
+
+                let ids = relItems.map((item) => item[relRepo.metadata.objectIdColumn.propertyName]);
+
+                fetchTask = this.find(relRepo, { filter: { "_id": { "$in": ids } } }).then((result) => {
+                    let refs = result[0];
+                    if (refs.length == 0) {
+                        return [];
+                    } else {
+                        return Promise.all(refs.map(fetchSubInclude)).then(() => {
+                            return refs;
+                        });
+                    }
+                });
             } else {
-                let id = refItems[relatedRepo.metadata.objectIdColumn.propertyName];
-                execP = exec(id);
+                let id = relItems[relRepo.metadata.objectIdColumn.propertyName];
+
+                fetchTask = this.findOne(relRepo, { filter: { "_id": id } }).then(fetchSubInclude);
             }
 
-            return execP.then(data => {
+            return fetchTask.then(data => {
                 target[columnName] = data;
             });
         });

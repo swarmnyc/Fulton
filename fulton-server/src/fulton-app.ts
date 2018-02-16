@@ -575,11 +575,22 @@ export abstract class FultonApp {
     protected abstract onInit(options: FultonAppOptions): void | Promise<void>;
 
     private serve = (req: any, res: any) => {
-        Zone.current.fork({
-            name: this.appName,
-            properties: { req, res }
-        }).run(async () => {
+        if (this.options.settings.zoneEnabled) {
+            Zone.current.fork({
+                name: this.appName,
+                properties: { req, res },
+                onHandleError: (parentZoneDelegate: ZoneDelegate, currentZone: Zone, targetZone: Zone, error: any) => {
+                    this.options.errorHandler.errorMiddlewares.forEach((handler) => {
+                        handler(error, req, res, null)
+                    });
+
+                    return false;
+                }
+            }).run(() => {
+                this.express(req, res);
+            });
+        } else {
             this.express(req, res);
-        });
+        }
     }
 }

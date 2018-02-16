@@ -14,7 +14,7 @@ export class MongoHelper {
 
         let tasks = Object.getOwnPropertyNames(collections).map(name => {
             let collection = collections[name];
-            return manager.insertMany(collection.entity, collection.data);
+            return manager.insertMany(collection.type, collection.data);
         });
 
         await Promise.all(tasks);

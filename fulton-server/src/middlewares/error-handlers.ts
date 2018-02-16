@@ -6,7 +6,7 @@ export function defaultErrorHandler(err: any, req: Request, res: Response, next:
     if (err instanceof FultonError) {
         res.status(400).send(err);
     } else {
-        FultonLog.error(`${req.method} ${req.url}\nrequest: %O\nerror: `,
+        FultonLog.error(`${req.method} ${req.url}\nrequest: %O\nerror: %s`,
             { httpHeaders: req.headers, httpBody: req.body },
             err.stack || err);
             

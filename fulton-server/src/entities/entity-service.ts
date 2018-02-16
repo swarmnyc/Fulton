@@ -59,7 +59,8 @@ export class EntityService<TEntity> implements IEntityService<TEntity> {
                         size: queryParams.pagination.size
                     }
                 }
-            }).catch(this.errorHandler);
+            })
+            .catch(this.errorHandler);
     }
 
     findOne(queryParams?: QueryParams): Promise<OperationOneResult<TEntity>> {
@@ -69,7 +70,8 @@ export class EntityService<TEntity> implements IEntityService<TEntity> {
                 return {
                     data: data
                 }
-            }).catch(this.errorHandler);
+            })
+            .catch(this.errorHandler);
     }
 
     findById(id: any, queryParams?: QueryParams): Promise<OperationOneResult<TEntity>> {
@@ -79,7 +81,8 @@ export class EntityService<TEntity> implements IEntityService<TEntity> {
                 return {
                     data: data
                 }
-            }).catch(this.errorHandler);
+            })
+        //.catch(this.errorHandler);
     }
 
     create(entity: TEntity): Promise<OperationOneResult<TEntity>> {
@@ -122,7 +125,7 @@ export class EntityService<TEntity> implements IEntityService<TEntity> {
      * @param error 
      */
     protected errorHandler(error: any) {
-        FultonLog.error("MongoEntityService operation failed with error:\n%O", error);
+        FultonLog.error("MongoEntityService operation failed with error:\n", error);
 
         return {
             errors: {

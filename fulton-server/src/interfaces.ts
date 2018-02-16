@@ -44,11 +44,11 @@ export interface IEntityService<TEntity> {
 
 /** the real runner of entity service, it can be Mongo runner or Sql Runner */
 export interface IEntityRunner {
-    find<TEntity>(repository: Repository<TEntity>, queryParams: QueryParams): Promise<[TEntity[], number]>;
+    find<TEntity>(repository: Repository<TEntity>, queryParams?: QueryParams): Promise<[TEntity[], number]>;
 
-    findOne<TEntity>(repository: Repository<TEntity>, queryParams: QueryParams): Promise<TEntity>;
+    findOne<TEntity>(repository: Repository<TEntity>, queryParams?: QueryParams): Promise<TEntity>;
 
-    findById<TEntity>(repository: Repository<TEntity>, id: any, queryParams: QueryParams): Promise<TEntity>;
+    findById<TEntity>(repository: Repository<TEntity>, id: any, queryParams?: QueryParams): Promise<TEntity>;
 
     create<TEntity>(repository: Repository<TEntity>, entity: TEntity): Promise<TEntity>;
 

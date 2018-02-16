@@ -537,7 +537,16 @@ export class FultonAppOptions {
     }
 
     settings: {
-        paginationSize: number
+        /**
+         * the size of a page for pagination.
+         * the default value is 20
+         */
+        paginationSize?: number,
+        /**
+         * use zone.js for context management.
+         * the default value is true
+         */
+        zoneEnabled?: boolean
     }
 
     constructor(private appName: string, private appMode: AppMode) {
@@ -611,7 +620,8 @@ export class FultonAppOptions {
         };
 
         this.settings = {
-            paginationSize: 20
+            paginationSize: 20,
+            zoneEnabled: true
         }
 
         // TODO: get more information

@@ -4,9 +4,6 @@
 			"path": "fulton-server"
 		},
 		{
-			"path": "examples\\example-server"
-		},
-		{
 			"path": "build-scripts"
 		}
 	]

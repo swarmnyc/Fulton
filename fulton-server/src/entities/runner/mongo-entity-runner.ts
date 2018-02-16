@@ -73,14 +73,8 @@ export class MongoEntityRunner implements IEntityRunner {
      * @param queryParams 
      */
     async findById<T>(repository: Repository<T>, id: any, queryParams: QueryParams = {}): Promise<T> {
-        //let select = this.transformSelect(queryParams);
-        if (repository.metadata.objectIdColumn.type == "number" ||
-            repository.metadata.objectIdColumn.type == Number) {
-            id = parseInt(id);
-        }
-
         queryParams.filter = {
-            id: id
+            id: this.convertType(repository.metadata.objectIdColumn.type, id)
         }
 
         return this.findOne(repository, queryParams);
@@ -164,7 +158,7 @@ export class MongoEntityRunner implements IEntityRunner {
      */
     private transformFilter<T>(repository: MongoRepository<T>, target: any) {
         let idName = repository.metadata.objectIdColumn.propertyName;
-        let databaseName = repository.metadata.objectIdColumn.databaseName;
+        let type = repository.metadata.objectIdColumn.type;
 
         for (const name of Object.getOwnPropertyNames(target)) {
             let value = target[name];
@@ -175,10 +169,10 @@ export class MongoEntityRunner implements IEntityRunner {
 
             if (name == idName) {
                 // TODO: should move this code to typeorm
-                target[databaseName] = value;
+                target._id = this.convertType(type, value);
                 delete target[idName]
             } else if (name == "id") {
-                target[databaseName] = value;
+                target._id = this.convertType(type, value);
                 delete target["id"]
             } else if (name == "$like") {
                 target["$regex"] = value;
@@ -188,6 +182,14 @@ export class MongoEntityRunner implements IEntityRunner {
                 this.transformFilter(repository, value);
             }
         }
+    }
+
+    private convertType(type: Type | string, value: string) {
+        if (type == "number" || type == Number) {
+            return parseInt(value);
+        }
+
+        return value;
     }
 
     /**

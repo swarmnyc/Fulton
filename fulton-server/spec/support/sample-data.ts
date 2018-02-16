@@ -1708,7 +1708,10 @@ sampleData.territories = {
 		{
 			"_id": NumberInt(19713),
 			"territoryDescription": "Neward",
-			"regionId": NumberInt(1)
+			"regionId": NumberInt(1),
+			"categories": [
+				{ "categoryId": new ObjectId("000000000000000000000003") },
+			]
 		},
 		{
 			"_id": NumberInt(20852),

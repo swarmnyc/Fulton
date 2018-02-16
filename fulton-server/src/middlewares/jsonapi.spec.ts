@@ -1,43 +1,79 @@
 import { FultonApp, FultonAppOptions, OperationResult, Request, Response, EntityRouter, entityRouter, httpGet, IEntityService, Type } from "../index";
 
-import { Author } from "../../spec/helpers/entities/author";
 import { Connection } from "typeorm/connection/Connection";
-import { Hotdog } from "../../spec/helpers/entities/hot-dog";
 import { HttpTester } from "../../spec/helpers/http-tester";
-import { Tag } from "../../spec/helpers/entities/tag";
 import { queryParamsParser } from "./query-params-parser";
 import { sampleData } from "../../spec/support/sample-data";
 import { QueryParams, OperationOneResult, OperationStatus } from "../interfaces";
 import { getRelatedToMetadata } from "../entities/related-decorators-helpers";
+import { Employee } from '../../spec/entities/employee';
+import { Category } from '../../spec/entities/category';
+import { Territory } from '../../spec/entities/territory';
 
-class HotdogEntityService implements IEntityService<Hotdog> {
-    find(queryParams: QueryParams): Promise<OperationResult<Hotdog>> {
-        let data: Hotdog[] = [];
+class EmployeeEntityService implements IEntityService<Employee> {
+    find(queryParams: QueryParams): Promise<OperationResult<Employee>> {
+        let data: Employee[] = [];
 
-        data.push(Object.assign(new Hotdog(), {
-            "hotdogId": "1",
-            "name": "name",
-            "location": [1, 2],
-            "address": "address",
-            "review": "review",
-            "author": { "id": "1" },
-            "picture": "picture"
+        data.push(Object.assign(new Employee(), {
+            "_id": 1,
+            "lastName": "Davolio",
+            "firstName": "Nancy",
+            "title": "Sales Representative",
+            "titleOfCourtesy": "Ms.",
+            "birthDate": "1948-12-08T00:00:00.000+0000",
+            "hireDate": "1992-05-01T00:00:00.000+0000",
+            "address": "507 20th Ave. E. Apt. 2A",
+            "city": "Seattle",
+            "region": "WA",
+            "postalCode": 98122,
+            "country": "USA",
+            "homePhone": "(206) 555-9857",
+            "extension": 5467,
+            "notes": "Education includes a BA in psychology from Colorado State University in 1970.  She also completed The Art of the Cold Call.  Nancy is a member of Toastmasters International.",
+            "reportsTo": 2,
+            "photoPath": "http://accweb/emmployees/davolio.bmp",
+            "territories": [
+                {
+                    "territoryId": 6897
+                },
+                {
+                    "territoryId": 19713
+                }
+            ]
         }));
 
-        data.push(Object.assign(new Hotdog(), {
-            "hotdogId": "2",
-            "name": "name",
-            "address": "address",
-            "review": "review",
-            "author": {
-                "id": "2",
-                "name": "name",
-                "imageUrl": "imageUrl",
-                "tags": [
-                    { "id": "10", "name": "name" },
-                    { "id": "11", "name": "name" }]
-            },
-            "pictureUrl": "pictureUrl"
+        data.push(Object.assign(new Employee(), {
+            "_id": 3,
+            "lastName": "Leverling",
+            "firstName": "Janet",
+            "title": "Sales Representative",
+            "titleOfCourtesy": "Ms.",
+            "birthDate": "1963-08-30T00:00:00.000+0000",
+            "hireDate": "1992-04-01T00:00:00.000+0000",
+            "address": "722 Moss Bay Blvd.",
+            "city": "Kirkland",
+            "region": "WA",
+            "postalCode": 98033,
+            "country": "USA",
+            "homePhone": "(206) 555-3412",
+            "extension": 3355,
+            "notes": "Janet has a BS degree in chemistry from Boston College (1984). She has also completed a certificate program in food retailing management.  Janet was hired as a sales associate in 1991 and promoted to sales representative in February 1992.",
+            "reportsTo": 2,
+            "photoPath": "http://accweb/emmployees/leverling.bmp",
+            "territories": [
+                {
+                    "territoryId": 30346
+                },
+                {
+                    "territoryId": 31406
+                },
+                {
+                    "territoryId": 32859
+                },
+                {
+                    "territoryId": 33607
+                }
+            ]
         }));
 
         return Promise.resolve({
@@ -50,15 +86,33 @@ class HotdogEntityService implements IEntityService<Hotdog> {
         });
     }
 
-    findById(id: any, QueryParams?: QueryParams): Promise<OperationOneResult<Hotdog>> {
-        let data: Hotdog = Object.assign(new Hotdog(), {
-            "hotdogId": "1",
-            "name": "name",
-            "location": [1, 2],
-            "address": "address",
-            "review": "review",
-            "author": { "id": "1" },
-            "picture": "picture"
+    findById(id: any, QueryParams?: QueryParams): Promise<OperationOneResult<Employee>> {
+        let data: Employee = Object.assign(new Employee(), {
+            "_id": 1,
+            "lastName": "Davolio",
+            "firstName": "Nancy",
+            "title": "Sales Representative",
+            "titleOfCourtesy": "Ms.",
+            "birthDate": "1948-12-08T00:00:00.000+0000",
+            "hireDate": "1992-05-01T00:00:00.000+0000",
+            "address": "507 20th Ave. E. Apt. 2A",
+            "city": "Seattle",
+            "region": "WA",
+            "postalCode": 98122,
+            "country": "USA",
+            "homePhone": "(206) 555-9857",
+            "extension": 5467,
+            "notes": "Education includes a BA in psychology from Colorado State University in 1970.  She also completed The Art of the Cold Call.  Nancy is a member of Toastmasters International.",
+            "reportsTo": 2,
+            "photoPath": "http://accweb/emmployees/davolio.bmp",
+            "territories": [
+                {
+                    "territoryId": 6897
+                },
+                {
+                    "territoryId": 19713
+                }
+            ]
         });
 
         return Promise.resolve({
@@ -66,14 +120,14 @@ class HotdogEntityService implements IEntityService<Hotdog> {
         });
     }
 
-    findOne(queryParams: QueryParams): Promise<OperationOneResult<Hotdog>> {
+    findOne(queryParams: QueryParams): Promise<OperationOneResult<Employee>> {
         throw new Error("Method not implemented.");
     }
-    
-    create(entity: Hotdog): Promise<OperationOneResult<Hotdog>> {
+
+    create(entity: Employee): Promise<OperationOneResult<Employee>> {
         throw new Error("Method not implemented.");
     }
-    update(id: string, entity: Hotdog): Promise<OperationStatus> {
+    update(id: string, entity: Employee): Promise<OperationStatus> {
         throw new Error("Method not implemented.");
     }
     delete(id: string): Promise<OperationStatus> {
@@ -81,10 +135,10 @@ class HotdogEntityService implements IEntityService<Hotdog> {
     }
 }
 
-@entityRouter("/hotdogs", Hotdog)
-class HotdogRouter extends EntityRouter<Hotdog> {
+@entityRouter("/employees", Employee)
+class EmployeeRouter extends EntityRouter<Employee> {
     constructor() {
-        super(new HotdogEntityService());
+        super(new EmployeeEntityService());
     }
 }
 
@@ -95,11 +149,11 @@ class MyApp extends FultonApp {
             res.send(req.body);
         }
 
-        this.options.routers = [HotdogRouter];
+        this.options.routers = [EmployeeRouter];
 
         let conn = new Connection({
             type: "mongodb",
-            entities: [Hotdog, Author, Tag]
+            entities: [Employee, Category, Territory]
         });
 
         conn["buildMetadatas"]();
@@ -234,136 +288,152 @@ describe('query parser', () => {
             });
     });
 
-    it('should serialize hotdog', async () => {
+    it('should serialize employee', async () => {
         httpTester.setHeaders({
             "content-type": "application/vnd.api+json",
             "accept": "application/vnd.api+json"
         })
 
-        let result = await httpTester.get("/hotdogs/1");
+        let result = await httpTester.get("/employees/1");
 
-        // console.log(result.body)
+        //console.log(JSON.stringify(result.body));
         expect(result.body).toEqual({
             "data": {
-                "id": "1",
-                "type": "Hotdog",
-                "links": {
-                    "self": 'http://localhost:3000/hotdogs/1'
-                },
+                "type": "Employee",
                 "attributes": {
-                    "name": "name",
-                    "location": [1, 2],
-                    "address": "address",
-                    "review": "review"
+                    "lastName": "Davolio",
+                    "firstName": "Nancy",
+                    "title": "Sales Representative",
+                    "titleOfCourtesy": "Ms.",
+                    "birthDate": "1948-12-08T00:00:00.000+0000",
+                    "hireDate": "1992-05-01T00:00:00.000+0000",
+                    "address": "507 20th Ave. E. Apt. 2A",
+                    "city": "Seattle",
+                    "region": "WA", "postalCode": 98122, "country": "USA", "homePhone": "(206) 555-9857",
+                    "extension": 5467,
+                    "notes": "Education includes a BA in psychology from Colorado State University in 1970.  She also completed The Art of the Cold Call.  Nancy is a member of Toastmasters International.",
+                    "reportsTo": 2,
+                    "photoPath": "http://accweb/emmployees/davolio.bmp"
                 },
                 "relationships": {
-                    "author": {
-                        "data": {
-                            "id": "1",
-                            "type": "Author"
+                    "territories":
+                        {
+                            "data": [
+                                { "id": 6897, "type": "Territory" },
+                                { "id": 19713, "type": "Territory" }]
                         }
-                    }
-                }
+                }, "links": { "self": "http://localhost:3000/employees/undefined" }
             }
         })
     });
 
-    it('should serialize hotdogs', async () => {
+    it('should serialize employees', async () => {
         httpTester.setHeaders({
             "content-type": "application/vnd.api+json",
             "accept": "application/vnd.api+json"
         })
 
-        let result = await httpTester.get("/hotdogs?test=test");
+        let result = await httpTester.get("/employees");
 
-        // console.log(result.body)
+        //console.log(JSON.stringify(result.body, null, 4));
         expect(result.body).toEqual({
             "data": [
                 {
-                    "id": "1",
-                    "type": "Hotdog",
-                    "links": {
-                        "self": "http://localhost:3000/hotdogs/1"
-                    },
+                    "type": "Employee",
                     "attributes": {
-                        "name": "name",
-                        "location": [1, 2],
-                        "address": "address",
-                        "review": "review"
+                        "lastName": "Davolio",
+                        "firstName": "Nancy",
+                        "title": "Sales Representative",
+                        "titleOfCourtesy": "Ms.",
+                        "birthDate": "1948-12-08T00:00:00.000+0000",
+                        "hireDate": "1992-05-01T00:00:00.000+0000",
+                        "address": "507 20th Ave. E. Apt. 2A",
+                        "city": "Seattle",
+                        "region": "WA",
+                        "postalCode": 98122,
+                        "country": "USA",
+                        "homePhone": "(206) 555-9857",
+                        "extension": 5467,
+                        "notes": "Education includes a BA in psychology from Colorado State University in 1970.  She also completed The Art of the Cold Call.  Nancy is a member of Toastmasters International.",
+                        "reportsTo": 2,
+                        "photoPath": "http://accweb/emmployees/davolio.bmp"
                     },
                     "relationships": {
-                        "author": {
-                            "data": {
-                                "id": "1",
-                                "type": "Author"
-                            }
+                        "territories": {
+                            "data": [
+                                {
+                                    "id": 6897,
+                                    "type": "Territory"
+                                },
+                                {
+                                    "id": 19713,
+                                    "type": "Territory"
+                                }
+                            ]
                         }
+                    },
+                    "links": {
+                        "self": "http://localhost:3000/employees/undefined"
                     }
                 },
                 {
-                    "id": "2",
-                    "type": "Hotdog",
+                    "type": "Employee",
                     "attributes": {
-                        "name": "name",
-                        "address": "address",
-                        "review": "review"
-                    },
-                    "links": {
-                        "self": "http://localhost:3000/hotdogs/2"
+                        "lastName": "Leverling",
+                        "firstName": "Janet",
+                        "title": "Sales Representative",
+                        "titleOfCourtesy": "Ms.",
+                        "birthDate": "1963-08-30T00:00:00.000+0000",
+                        "hireDate": "1992-04-01T00:00:00.000+0000",
+                        "address": "722 Moss Bay Blvd.",
+                        "city": "Kirkland",
+                        "region": "WA",
+                        "postalCode": 98033,
+                        "country": "USA",
+                        "homePhone": "(206) 555-3412",
+                        "extension": 3355,
+                        "notes": "Janet has a BS degree in chemistry from Boston College (1984). She has also completed a certificate program in food retailing management.  Janet was hired as a sales associate in 1991 and promoted to sales representative in February 1992.",
+                        "reportsTo": 2,
+                        "photoPath": "http://accweb/emmployees/leverling.bmp"
                     },
                     "relationships": {
-                        "author": {
-                            "data": {
-                                "id": "2",
-                                "type": "Author"
-                            }
+                        "territories": {
+                            "data": [
+                                {
+                                    "id": 30346,
+                                    "type": "Territory"
+                                },
+                                {
+                                    "id": 31406,
+                                    "type": "Territory"
+                                },
+                                {
+                                    "id": 32859,
+                                    "type": "Territory"
+                                },
+                                {
+                                    "id": 33607,
+                                    "type": "Territory"
+                                }
+                            ]
                         }
+                    },
+                    "links": {
+                        "self": "http://localhost:3000/employees/undefined"
                     }
                 }
             ],
             "links": {
-                "first": 'http://localhost:3000/hotdogs?filter%5Btest%5D=test&pagination%5Bindex%5D=0&pagination%5Bsize%5D=2',
-                "last": 'http://localhost:3000/hotdogs?filter%5Btest%5D=test&pagination%5Bindex%5D=4&pagination%5Bsize%5D=2',
-                "prev": 'http://localhost:3000/hotdogs?filter%5Btest%5D=test&pagination%5Bindex%5D=0&pagination%5Bsize%5D=2',
-                "next": 'http://localhost:3000/hotdogs?filter%5Btest%5D=test&pagination%5Bindex%5D=2&pagination%5Bsize%5D=2',
-                "meta": { "index": 1, "size": 2, "total": 10 }
-            },
-            "included": [
-                {
-                    "id": "10",
-                    "type": "Tag",
-                    "attributes": {
-                        "name": "name"
-                    }
-                },
-                {
-                    "id": "11",
-                    "type": "Tag",
-                    "attributes": {
-                        "name": "name"
-                    }
-                },
-                {
-                    "id": "2",
-                    "type": "Author",
-                    "attributes": {
-                        "name": "name"
-                    },
-                    "relationships": {
-                        "tags": {
-                            "data": [
-                                {
-                                    "id": "10",
-                                    "type": "Tag"
-                                },
-                                {
-                                    "id": "11",
-                                    "type": "Tag"
-                                }]
-                        }
-                    }
+                "first": "http://localhost:3000/employees?pagination%5Bindex%5D=0&pagination%5Bsize%5D=2",
+                "last": "http://localhost:3000/employees?pagination%5Bindex%5D=4&pagination%5Bsize%5D=2",
+                "prev": "http://localhost:3000/employees?pagination%5Bindex%5D=0&pagination%5Bsize%5D=2",
+                "next": "http://localhost:3000/employees?pagination%5Bindex%5D=2&pagination%5Bsize%5D=2",
+                "meta": {
+                    "index": 1,
+                    "size": 2,
+                    "total": 10
                 }
-            ]
+            }
         })
     });
 });

@@ -1,13 +1,13 @@
 import { FultonApp, FultonAppOptions, authorized, AccessToken, Request, Response, EntityRouter, entityRouter, OperationResult, QueryParams, OperationOneResult, OperationStatus, IEntityService, injectable, Type } from "../../src/index";
 import { UserServiceMock } from "../helpers/user-service-mock";
 import { HttpTester, HttpResult } from "../helpers/http-tester";
-import { Hotdog } from "../helpers/entities/hot-dog";
 import { MongoHelper } from "../helpers/mongo-helper";
 import { sampleData } from "../support/sample-data";
-import { Author } from "../helpers/entities/author";
-import { Tag } from "../helpers/entities/tag";
 import { Connection } from "typeorm";
 import { getRelatedToMetadata } from '../../src/entities/related-decorators-helpers';
+import { Employee } from '../entities/employee';
+import { Territory } from '../entities/territory';
+import { Category } from '../entities/category';
 
 @injectable()
 class FakeEntityService implements IEntityService<any>{
@@ -32,15 +32,15 @@ class FakeEntityService implements IEntityService<any>{
 
 }
 
-@entityRouter("/hotdogs", Hotdog)
-class HotdogEntityRouter extends EntityRouter<Hotdog>{
+@entityRouter("/employees", Employee)
+class EmployeeEntityRouter extends EntityRouter<Employee>{
     constructor(service: FakeEntityService) {
         super(service)
     }
 }
 
-@entityRouter(["api", /authors?/i], Author)
-class AuthorEntityRouter extends EntityRouter<Hotdog>{
+@entityRouter(["api", /territor(y|ies)?/i], Territory)
+class TerritoryEntityRouter extends EntityRouter<Territory>{
     constructor(service: FakeEntityService) {
         super(service)
     }
@@ -48,8 +48,8 @@ class AuthorEntityRouter extends EntityRouter<Hotdog>{
 
 class MyApp extends FultonApp {
     protected onInit(options: FultonAppOptions): void {
-        options.entities = [Hotdog, Author, Tag];
-        options.routers = [HotdogEntityRouter, AuthorEntityRouter];
+        options.entities = [Employee, Category, Territory];
+        options.routers = [EmployeeEntityRouter, TerritoryEntityRouter];
         options.services = [FakeEntityService];
 
         let conn = new Connection({

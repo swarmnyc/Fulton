@@ -4,9 +4,6 @@ import { Territory } from './territory';
 @entity("employees")
 export class Employee {
     @objectIdColumn({ type: Number }) // if the type isn't ObjectId, you needs give the type
-    id: number;
-
-    @column()
     employeeId: number;
 
     @column()

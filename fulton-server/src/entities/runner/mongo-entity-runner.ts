@@ -1,4 +1,4 @@
-import { IEntityRunner, QueryColumnStates, QueryParams, injectable } from "../../interfaces";
+import { IEntityRunner, QueryColumnOptions, QueryParams, injectable } from "../../interfaces";
 import { MongoRepository, Repository, getMongoRepository } from "typeorm";
 
 import { ObjectId } from 'bson';
@@ -17,7 +17,7 @@ export class MongoEntityRunner implements IEntityRunner {
      */
     async find<T>(repository: Repository<T>, queryParams: QueryParams = {}): Promise<[T[], number]> {
         let repo = (<any>repository as MongoRepository<T>);
-        this.transformQueryParams(repo, queryParams);
+        this.adjustQueryParams(repo, queryParams);
 
         let skip;
         let size;
@@ -28,8 +28,7 @@ export class MongoEntityRunner implements IEntityRunner {
             }
         }
 
-        // let select = this.transformSelect(queryParams);
-
+        // TODO: typeorm has bug on projection on mongodb        
         let data = await repo.findAndCount({
             where: queryParams.filter,
             skip: skip,
@@ -51,10 +50,9 @@ export class MongoEntityRunner implements IEntityRunner {
      */
     async findOne<T>(repository: Repository<T>, queryParams: QueryParams = {}): Promise<T> {
         let repo = (<any>repository as MongoRepository<T>);
-        this.transformQueryParams(repo, queryParams);
+        this.adjustQueryParams(repo, queryParams);
 
-        //let select = this.transformSelect(queryParams);
-
+        // TODO: typeorm has bug on projection on mongodb        
         let data = await repo.findOne({
             where: queryParams.filter,
             order: queryParams.sort as any
@@ -74,8 +72,11 @@ export class MongoEntityRunner implements IEntityRunner {
      */
     async findById<T>(repository: Repository<T>, id: any, queryParams: QueryParams = {}): Promise<T> {
         queryParams.filter = {
-            id: this.convertType(repository.metadata.objectIdColumn.type, id)
+            _id: id
         }
+
+        queryParams.sort = null;
+        queryParams.pagination = null;
 
         return this.findOne(repository, queryParams);
     }
@@ -123,45 +124,35 @@ export class MongoEntityRunner implements IEntityRunner {
     }
 
     /**
-     * transform like change id to _id, change $like to {$regex, $options} 
+     * adjust like change id to _id, change $like to {$regex, $options} 
      */
-    protected transformQueryParams<T>(repository: MongoRepository<T>, queryParams: QueryParams): void {
+    protected adjustQueryParams<T>(repository: MongoRepository<T>, queryParams: QueryParams): void {
         if (queryParams.filter) {
-            this.transformFilter(repository, queryParams.filter);
+            this.adjustFilter(repository, queryParams.filter);
         }
 
-        // TODO: should move this code to typeorm
-        let idName = repository.metadata.objectIdColumn.propertyName;
-        let databaseName = repository.metadata.objectIdColumn.databaseName;
+        if (queryParams.select) {
+            queryParams.projection = this.transformSelect(queryParams.select);
+        }
+
+
         if (queryParams.sort) {
-            if (queryParams.sort[idName]) {
-                queryParams.sort[databaseName] = queryParams.sort[idName];
-                delete queryParams.sort[idName]
-            } else if (queryParams.sort["id"]) {
-                queryParams.sort[databaseName] = queryParams.sort["id"];
-                delete queryParams.sort["id"]
-            }
+            this.adjustIdInOptions(repository, queryParams.sort);
+        }
+
+        if (queryParams.projection) {
+            this.adjustIdInOptions(repository, queryParams.projection);
         }
     }
 
     /**
-     * transform select to mongo projection
-     * @param queryParams 
+     * adjust filter like change id to _id, change $like to {$regex, $options} 
      */
-    private transformSelect<T>(repository: MongoRepository<T>, queryParams: QueryParams): QueryColumnStates {
-        // TODO: typeorm has bug on projection on mongodb
-        return;
-    }
-
-    /**
-     * transform like change id to _id, change $like to {$regex, $options} 
-     */
-    private transformFilter<T>(repository: MongoRepository<T>, target: any) {
+    private adjustFilter<T>(repository: MongoRepository<T>, filter: any) {
         let idName = repository.metadata.objectIdColumn.propertyName;
-        let type = repository.metadata.objectIdColumn.type;
 
-        for (const name of Object.getOwnPropertyNames(target)) {
-            let value = target[name];
+        for (const name of Object.getOwnPropertyNames(filter)) {
+            let value = filter[name];
 
             if (value instanceof ObjectId) {
                 continue;
@@ -169,27 +160,51 @@ export class MongoEntityRunner implements IEntityRunner {
 
             if (name == idName) {
                 // TODO: should move this code to typeorm
-                target._id = this.convertType(type, value);
-                delete target[idName]
+                filter._id = value;
+                delete filter[idName]
             } else if (name == "id") {
-                target._id = this.convertType(type, value);
-                delete target["id"]
+                filter._id = value;
+                delete filter["id"]
             } else if (name == "$like") {
-                target["$regex"] = value;
-                target["$options"] = "i";
-                delete target["$like"]
+                filter["$regex"] = value;
+                filter["$options"] = "i";
+                delete filter["$like"]
             } else if (typeof value == "object") {
-                this.transformFilter(repository, value);
+                this.adjustFilter(repository, value);
             }
         }
     }
 
-    private convertType(type: Type | string, value: string) {
-        if (type == "number" || type == Number) {
-            return parseInt(value);
+    /**
+     * adjust options like change id to _id
+     */
+    private adjustIdInOptions<T>(repository: MongoRepository<T>, options: any) {
+        // TODO: should move this code to typeorm        
+        let idName = repository.metadata.objectIdColumn.propertyName;
+
+        for (const name of Object.getOwnPropertyNames(options)) {
+            if (name == idName) {
+                // TODO: should move this code to typeorm
+                options._id = options[name];
+                delete options[idName]
+            } else if (name == "id") {
+                options._id = options[name];
+                delete options["id"]
+            }
+        }
+    }
+
+    /**
+     * transform select to projection
+     * @param queryParams 
+     */
+    private transformSelect(select: string[]): QueryColumnOptions {
+        let options: QueryColumnOptions = {};
+        for (const s of select) {
+            options[s] = 1;
         }
 
-        return value;
+        return options
     }
 
     /**

@@ -724,9 +724,9 @@ export class FultonAppOptions {
                 this.databases.set(connName, options as ConnectionOptions);
             }
 
-            if (Helper.isBoolean(value)) {
+            if (Helper.isBooleanString(value)) {
                 options[propName] = Helper.getBoolean(value);
-            } else if (Helper.isNumber(value)) {
+            } else if (Helper.isNumberString(value)) {
                 options[propName] = Helper.getFloat(value);
             } else {
                 options[propName] = value;

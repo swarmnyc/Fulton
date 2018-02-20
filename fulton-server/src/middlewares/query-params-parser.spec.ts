@@ -7,7 +7,7 @@ class MyApp extends FultonApp {
     protected onInit(options: FultonAppOptions): void | Promise<void> {
         this.options.index.enabled = false;
         this.events.once("didInitRouters", () => {
-            this.express.get("/", (req: Request, res: Response) => {
+            this.express.get("/", (req: Request, res: Response) => {            
                 res.send(req.queryParams);
             })
 

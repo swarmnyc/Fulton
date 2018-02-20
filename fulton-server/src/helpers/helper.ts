@@ -1,8 +1,9 @@
 const booleanReg = /^((true)|(false))$/i;
 const trueReg = /^((true)|1)$/i;
+const numberReg = /^\d+(?:.\d+)?$/;
 
 export default class Helper {
-    static isBoolean(str: string): boolean {
+    static isBooleanString(str: string): boolean {
         return booleanReg.test(str);
     }
 
@@ -13,8 +14,8 @@ export default class Helper {
         return trueReg.test(str);
     }
 
-    static isNumber(str: string): boolean {
-        return !isNaN(parseFloat(str));
+    static isNumberString(str: string): boolean {
+        return numberReg.test(str);
     }
 
     static getInt(str: string, defaultValue?: number): number {

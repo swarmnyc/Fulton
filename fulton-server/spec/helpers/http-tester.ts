@@ -11,8 +11,6 @@ export interface HttpResult {
 }
 
 export class HttpTester {
-    private baseUrl: string;
-
     private headers: Headers;
 
     constructor(private app: FultonApp) {
@@ -21,10 +19,13 @@ export class HttpTester {
         this.headers = {};
     }
 
+
+    private get baseUrl(): string {
+        return "http://localhost:" + this.app.options.server.httpPort;
+    }
+
     start(): Promise<void> {
-        return this.app.start().then(() => {
-            this.baseUrl = "http://localhost:" + this.app.options.server.httpPort;
-        });
+        return this.app.start();
     }
 
     stop(): Promise<void> {

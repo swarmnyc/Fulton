@@ -1,31 +1,31 @@
-import { Request, Response, NextFunction, QueryParams, QueryColumnStates } from "../interfaces";
+import { Request, Response, NextFunction, QueryParams, QueryColumnOptions } from "../interfaces";
 import Helper from "../helpers/helper";
 
-let sortReg = /^([+-]?)(.+?)([+-]?)$/;
-function parseSortString(arrStr: string): QueryColumnStates {
-    let sort: QueryColumnStates;
+let optReg = /^([+-]?)(.+?)([+-]?)$/;
+function parseOptionsString(arrStr: string): QueryColumnOptions {
+    let options: QueryColumnOptions;
 
     let arr = arrStr.split(",");
     if (arr.length > 0) {
-        sort = {};
+        options = {};
         for (let str of arr) {
             str = str.trim();
             if (!str) continue;
 
-            let match = sortReg.exec(str);
+            let match = optReg.exec(str);
             if (match == null) continue;
 
             let name = match[2];
             let way = (match[1] == "-" || match[3] == "-") ? -1 : 1;
-            sort[name] = way;
+            options[name] = way;
         }
     }
 
-    return sort;
+    return options;
 }
 
-function parseSortObject(input: any): QueryColumnStates {
-    let sort: QueryColumnStates = {};
+function parseOptionsObject(input: any): QueryColumnOptions {
+    let sort: QueryColumnOptions = {};
     for (const name of Object.getOwnPropertyNames(input)) {
         let value = input[name];
 
@@ -70,7 +70,7 @@ function parseArray(arr: string[]): string[] {
 /**
  * @deprecated
  * put id into QueryParams
- * @param name rotuer params like /users/:userId, the value should be userId
+ * @param name router params like /users/:userId, the value should be userId
  */
 export function queryById(name: string = "id") {
     return (req: Request, res: Response, next: NextFunction) => {
@@ -104,9 +104,16 @@ export function queryParamsParser(req: Request, res: Response, next: NextFunctio
                     continue;
                 case "sort":
                     if (typeof value == "string") {
-                        params.sort = parseSortString(value);
+                        params.sort = parseOptionsString(value);
                     } else if (typeof value == "object") {
-                        params.sort = parseSortObject(value);
+                        params.sort = parseOptionsObject(value);
+                    }
+                    continue;
+                case "projection":
+                    if (typeof value == "string") {
+                        params.projection = parseOptionsString(value);
+                    } else if (typeof value == "object") {
+                        params.projection = parseOptionsObject(value);
                     }
                     continue;
                 case "select":
@@ -116,6 +123,7 @@ export function queryParamsParser(req: Request, res: Response, next: NextFunctio
                         params.select = parseArray(value);
                     }
                     continue;
+                case "include":
                 case "includes":
                     if (typeof value == "string") {
                         params.includes = parseString(value);

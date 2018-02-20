@@ -36,6 +36,8 @@ export abstract class EntityRouter<TEntity> extends Router {
 
     @httpGet("/")
     list(req: Request, res: Response, next: NextFunction) {
+        req.queryParams.needAdjust = true;
+        
         // by default don't return all entities
         if (req.queryParams.pagination) {
             if (req.queryParams.pagination.index == null)
@@ -57,6 +59,8 @@ export abstract class EntityRouter<TEntity> extends Router {
 
     @httpGet("/:id")
     detail(req: Request, res: Response) {
+        req.queryParams.needAdjust = true;
+
         this.entityService
             .findById(req.params.id, req.queryParams)
             .then(this.sendResult(res));

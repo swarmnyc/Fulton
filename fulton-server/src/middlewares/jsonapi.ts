@@ -145,6 +145,7 @@ function rootLinks(opts: JsonApiSerializeOptions): JsonApiRootLinks {
     if (opts.args && opts.args.queryParams && opts.args.pagination) {
         let pagination = opts.args.pagination as OperationResultPagination
         let queryParams = opts.args.queryParams as QueryParams;
+        delete queryParams.needAdjust;
 
         let links: JsonApiRootLinks = {}
         let last = Math.ceil(pagination.total / pagination.size) - 1;

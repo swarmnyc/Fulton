@@ -11,7 +11,7 @@ import { Category } from '../../spec/entities/category';
 import { Territory } from '../../spec/entities/territory';
 
 class EmployeeEntityService implements IEntityService<Employee> {
-    find(queryParams: QueryParams): Promise<OperationResult<Employee>> {
+    find(queryParams: QueryParams): Promise<OperationResult<Employee>> {        
         let data: Employee[] = [];
 
         data.push(Object.assign(new Employee(), {

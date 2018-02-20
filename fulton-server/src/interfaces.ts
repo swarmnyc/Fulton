@@ -62,7 +62,7 @@ export interface IEntityRunner {
 /**
  * for sorting and select, for example sort = {column1:1 , column2:-1 }
  */
-export interface QueryColumnStates {
+export interface QueryColumnOptions {
     [key: string]: number;
 }
 
@@ -104,19 +104,31 @@ export interface QueryParams {
 
     /**
      * sort options
-     * true is ascending order
-     * false is descending order
+     * 1 is ascending order
+     * -1 is descending order
      * 
      * ## examples
      * two styles: 
      *  - ?sort=columnA,-columnB 
-     *  - ?sort[columnA]=1|true&sort[columnB]=-1|false
+     *  - ?sort[columnA]=1&sort[columnB]=-1
      */
-    sort?: QueryColumnStates,
+    sort?: QueryColumnOptions;
+
+    /**
+     * projection options, can be parsed by select (for show)
+     * 1 is show
+     * -1 is descending order
+     * 
+     * ## examples
+     * two styles: 
+     *  - ?projection=columnA,-columnB 
+     *  - ?projection[columnA]=1&projection[columnB]=-1
+     */
+    projection?: QueryColumnOptions;
 
     /**
      * select options,
-     * if undefined, all output all columns excepts @column({hide:true})
+     * if undefined, all output all columns excepts @column({select:false})
      * ## examples
      * two styles: 
      *  - ?select=columnA,columnB 
@@ -135,13 +147,22 @@ export interface QueryParams {
     /**
      * pagination options,
      * ## examples
+     *  - ?includes=columnA,columnB 
+     *  - ?includes=columnA&includes=columnB
+     */
+    include?: string[];
+
+    /**
+     * pagination options,
+     * ## examples
      *  - ?pagination[index]=1
      *  - ?pagination[size]=100
      */
     pagination?: {
         index?: number,
         size?: number,
-    }
+    },
+    needAdjust?: boolean;
 }
 
 export type HttpMethod = "all" | "get" | "post" | "patch" | "delete" | "head" | "put";

@@ -33,6 +33,8 @@ class TerritoryService extends EntityService<Territory>{
     }
 
     async getCategoriesByTerritoryId(territoryId: string): Promise<Category[]> {
+        territoryId = this.convertId(this.mainRepository.metadata, territoryId);
+
         let territory = await this.runner.findById(this.mainRepository, territoryId);
         let tagIds = territory.categories.map((c) => c.categoryId);
 

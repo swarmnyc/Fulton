@@ -76,12 +76,12 @@ class SqlRunner implements IRunner {
 
 @injectable()
 export class FultonUserService implements IUserService<FultonUser> {
-    private options: IdentityOptions;
+    @inject("FultonApp")
+    protected app: FultonApp;
+
     private runner: IRunner;
 
-    constructor(@inject(FultonApp) private app: FultonApp,
-        @inject("UserRepository") private userRepository: Repository<FultonUser>) {
-        this.options = app.options.identity;
+    constructor(@inject("UserRepository") private userRepository: Repository<FultonUser>) {
 
         if (userRepository instanceof MongoRepository) {
             this.runner = new MongoRunner(this.userRepository as MongoRepository<FultonUser>)
@@ -90,6 +90,10 @@ export class FultonUserService implements IUserService<FultonUser> {
         }
     }
 
+    private get options(): IdentityOptions{
+        return this.app.options.identity;
+    }
+    
     get currentUser(): FultonUser {
         if(this.app.options.settings.zoneEnabled){
             let res: Request = Zone.current.get("res");

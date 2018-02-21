@@ -11,7 +11,7 @@ import { MongoEntityRunner } from "./runner/mongo-entity-runner";
 
 @injectable()
 export class EntityService<TEntity> implements IEntityService<TEntity> {
-    @inject(FultonApp)
+    @inject("FultonApp")
     protected app: FultonApp;
     protected mainRepository: Repository<TEntity>
     private _runner: IEntityRunner

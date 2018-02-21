@@ -34,7 +34,7 @@ import { FultonApp } from '../fulton-app';
 export abstract class Router {
     public metadata: FullRouterMetadata
     protected router: Router;
-    @inject(FultonApp)
+    @inject("FultonApp")
     protected app: FultonApp;
 
     constructor() {

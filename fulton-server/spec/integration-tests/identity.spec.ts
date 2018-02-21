@@ -1,10 +1,9 @@
+import { HttpResult, HttpTester } from "../helpers/http-tester";
 import { Request, Response } from "../../src/interfaces";
-import { UserServiceMock } from "../helpers/user-service-mock";
-import { HttpTester, HttpResult } from "../helpers/http-tester";
+
+import { AccessToken } from '../../src/identity/interfaces';
 import { FultonApp } from '../../src/fulton-app';
 import { FultonAppOptions } from '../../src/fulton-app-options';
-import { AccessToken } from '../../src/identity/interfaces';
-
 
 class MyApp extends FultonApp {
     protected onInit(options: FultonAppOptions): void {

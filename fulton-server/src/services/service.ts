@@ -7,6 +7,6 @@ import { FultonApp } from "../fulton-app";
  */
 @injectable()
 export abstract class Service {
-    @inject(FultonApp)
+    @inject("FultonApp")
     protected app: FultonApp;
 }

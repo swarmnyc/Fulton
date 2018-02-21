@@ -124,7 +124,7 @@ class MyFultonApp extends FultonApp {
     }
 }
 
-fdescribe('Fulton App', () => {
+describe('Fulton App', () => {
     let app: MyFultonApp;
 
     beforeEach(() => {

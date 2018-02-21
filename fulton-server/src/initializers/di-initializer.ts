@@ -11,7 +11,7 @@ module.exports = function (app: FultonApp) {
     app.container = new Container();
 
     // for FultonApp
-    app.container.bind(FultonApp).toConstantValue(app);
+    app.container.bind("FultonApp").toConstantValue(app);
 
     // for EntityService
     app.container.bind(EntityService).toFactory(entityServiceFactory);
@@ -31,7 +31,7 @@ module.exports = function (app: FultonApp) {
 function entityServiceFactory<T>(ctx: interfaces.Context): EntityServiceFactory<T> {
     return (entity: Type<T>) => {
         let service = new EntityService(entity);
-        service["app"] = ctx.container.get(FultonApp);
+        service["app"] = ctx.container.get("FultonApp");
 
         return service;
     }

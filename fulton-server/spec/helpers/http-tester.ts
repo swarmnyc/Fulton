@@ -1,9 +1,11 @@
 import * as request from 'request';
-import { FultonApp } from '../../src/index';
 import * as url from 'url';
-import { RequiredUriUrl, OptionsWithUrl, Headers } from 'request';
-import FultonLog from '../../src/fulton-log';
+
+import { Headers, OptionsWithUrl, RequiredUriUrl } from 'request';
+
 import { ClientResponse } from 'http';
+import { FultonApp } from '../../src/fulton-app';
+import FultonLog from '../../src/fulton-log';
 
 export interface HttpResult {
     response?: ClientResponse;

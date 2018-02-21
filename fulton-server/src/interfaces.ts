@@ -1,9 +1,18 @@
 import "reflect-metadata";
+import "./extensions"
 
-import { Type } from "./helpers";
 import { Repository } from "typeorm";
 
 export * from "./re-export"
+
+export interface AbstractType<T> extends Function {
+}
+
+export interface Type<T = any> extends Function {
+    new(...args: any[]): T;
+}
+
+export type TypeIdentifier<T = any> = (string | symbol | Type<T>);
 
 export type PathIdentifier = (string | RegExp | (string | RegExp)[]);
 

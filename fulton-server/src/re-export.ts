@@ -1,7 +1,7 @@
 import * as express from "express";
 
 import { IUser, IUserService } from "./identity";
-import { inject as inversifyInject, injectable as inversifyInjectable, interfaces } from "inversify";
+import { inject as inversifyInject, injectable as inversifyInjectable, optional as inversifyOptional, interfaces } from "inversify";
 import { Entity, ObjectIdColumn, Column, ManyToMany, PrimaryColumn, PrimaryGeneratedColumn, ManyToOne, OneToMany, OneToOne } from "typeorm"
 
 /**
@@ -13,6 +13,11 @@ export const injectable = inversifyInjectable;
  * alias for inversify.inject
  */
 export const inject = inversifyInject;
+
+/**
+ * alias for inversify.optional
+ */
+export const optional = inversifyOptional;
 
 /**
  * alias for typeorm.Entity

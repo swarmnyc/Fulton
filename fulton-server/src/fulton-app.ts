@@ -6,10 +6,12 @@ import * as lodash from 'lodash';
 import * as path from 'path';
 import * as winston from 'winston';
 
-import { AppMode, DiContainer, ErrorMiddleware, Middleware, RepositoryFactory, Request, Response } from "./interfaces";
-import { ClassProvider, FactoryProvider, FunctionProvider, Provider, Type, TypeIdentifier, TypeProvider, ValueProvider } from "./helpers/type-helpers";
+// don't load too modules classes here, it will cause cyclical dependencies and cause very hard to debug and wired Error.
+
+import { AppMode, DiContainer, ErrorMiddleware, Middleware, RepositoryFactory, Request, Response, Type, TypeIdentifier } from "./interfaces";
+import { ClassProvider, FactoryProvider, FunctionProvider, Provider, TypeProvider, ValueProvider } from "./helpers/type-helpers";
 import { Connection, Repository } from 'typeorm';
-import { IUser, IUserService } from "./identity";
+import { IUser, IUserService } from "./identity/interfaces";
 
 import { EntityMetadata } from 'typeorm/metadata/EntityMetadata';
 import { EntityMetadataHelper } from "./helpers/entity-metadata-helper";
@@ -22,12 +24,8 @@ import { JsonApiConverter } from './helpers/jsonapi-converter';
 import { MimeTypes } from './constants';
 import { Router } from "./routers/router";
 import { Service } from "./services";
-import databaseInitializer from './initializers/database-initializer';
 import { defaultHttpLoggerHandler } from "./middlewares/http-logger";
-import diInitializer from './initializers/di-initializer';
-import docsInitializer from './initializers/docs-initializer';
 import { fultonDebug } from "./helpers/debug";
-import jsonapi from './middlewares/jsonapi';
 import { queryParamsParser } from './middlewares/query-params-parser';
 
 /**
@@ -291,7 +289,7 @@ export abstract class FultonApp {
     }
 
     protected initDiContainer(): void | Promise<void> {
-        return diInitializer(this);
+        return require('./initializers/di-initializer')(this);
     }
 
     protected initLogging(): void | Promise<void> {
@@ -322,7 +320,7 @@ export abstract class FultonApp {
      * init databases, it will be ignored if repository is empty.
      */
     protected initDatabases(): Promise<void> {
-        return databaseInitializer(this);
+        return require('./initializers/database-initializer')(this);
     }
 
     protected async initRepositories(): Promise<void> {
@@ -466,7 +464,7 @@ export abstract class FultonApp {
         }
 
         if (this.options.formatter.jsonApi) {
-            this.express.use(jsonapi(this));
+            this.express.use(require("./middlewares/jsonapi")(this));
         }
 
         if (this.options.formatter.queryParams) {
@@ -516,7 +514,7 @@ export abstract class FultonApp {
 
     protected initDocs(): void | Promise<void> {
         if (this.options.docs.enabled) {
-            docsInitializer(this);
+            require("./initializers/docs-initializer")(this);
         }
     }
 

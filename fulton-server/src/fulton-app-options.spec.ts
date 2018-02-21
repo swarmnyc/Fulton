@@ -1,5 +1,6 @@
-import { Factory, FultonApp, FultonAppOptions, DiContainer, Router, Service, inject, injectable, router } from "./index";
 import { MongoConnectionOptions } from "typeorm/driver/mongodb/MongoConnectionOptions";
+import { FultonApp } from './fulton-app';
+import { FultonAppOptions } from './fulton-app-options';
 
 class MyFultonApp extends FultonApp {
     protected onInit(options: FultonAppOptions): void | Promise<void> {
@@ -136,6 +137,6 @@ describe('Fulton App Options', () => {
         expect(options.identity.google.clientSecret).toEqual("cda");
 
         expect(options.identity.github.clientSecret).toEqual("abc");
-        
+
     });
 });

@@ -1,6 +1,6 @@
 import FultonLog from "../fulton-log";
 import { Request, Response, Middleware, NextFunction } from "../interfaces";
-import { FultonApp, FultonError } from "../index";
+import { FultonError } from '../common/fulton-error';
 
 export function defaultErrorHandler(err: any, req: Request, res: Response, next: NextFunction) {
     if (err instanceof FultonError) {

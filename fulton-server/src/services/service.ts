@@ -1,7 +1,6 @@
-import { DiContainer, inject, injectable } from "../interfaces";
+import { DiContainer, Type, inject, injectable } from "../interfaces";
 
 import { FultonApp } from "../fulton-app";
-import { Type } from "../helpers/type-helpers";
 
 /**
  * Fulton Service
@@ -10,5 +9,4 @@ import { Type } from "../helpers/type-helpers";
 export abstract class Service {
     @inject(FultonApp)
     protected app: FultonApp;
-
 }

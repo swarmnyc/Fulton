@@ -1,10 +1,10 @@
 import * as passport from 'passport';
 import * as lodash from 'lodash';
 
-import { FultonUser, Type, IFultonUser } from '../index';
+import { Type } from '../interfaces';
 import { IStrategyOptionsWithRequest, Strategy as LocalStrategy } from 'passport-local';
 import { Strategy } from 'passport';
-import { IUser, IUserService } from './interfaces';
+import { IUser, IUserService, IFultonUser } from './interfaces';
 
 import { Strategy as BearerStrategy } from 'passport-http-bearer';
 import { FultonApp } from "../fulton-app";

@@ -4,10 +4,10 @@ import { Connection, ConnectionOptions, createConnections } from "typeorm";
 
 import { FultonApp } from '../fulton-app';
 import FultonLog from "../fulton-log";
-import { Type } from '../helpers/type-helpers';
+import { Type } from '../interfaces';
 import { getRelatedToMetadata } from '../entities/related-decorators-helpers';
 
-export default async function databaseInitializer(app: FultonApp): Promise<any> {
+module.exports = async function (app: FultonApp): Promise<any> {
     if (app.options.identity.isUseDefaultImplement) {
         // add User Entity to typeorm if identity is enabled and use FultonUser and FultonUserService
         app.options.entities.push(app.options.identity.userType);

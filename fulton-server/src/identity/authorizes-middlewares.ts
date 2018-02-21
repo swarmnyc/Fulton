@@ -1,4 +1,4 @@
-import { Request, Response } from "../index";
+import { Request, Response } from "../interfaces";
 import { NextFunction } from "express";
 import * as lodash from 'lodash';
 

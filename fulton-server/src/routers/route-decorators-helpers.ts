@@ -1,8 +1,7 @@
-import { Middleware, PathIdentifier, RouterActionDocOptions, RouterDocOptions } from "../interfaces";
+import { Middleware, PathIdentifier, RouterActionDocOptions, RouterDocOptions, Type } from '../interfaces';
 
 import { Keys } from "../constants";
 import { Router } from "./router";
-import { Type } from "../index";
 
 export interface RouterMetadata {
     path: PathIdentifier,

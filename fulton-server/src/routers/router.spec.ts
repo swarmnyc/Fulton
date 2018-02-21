@@ -1,14 +1,13 @@
 import * as express from 'express';
 
-import { Middleware, errorHandler, authenticate, authorized, authorizedByRole } from "../index";
-import { Request, Response } from "../interfaces";
+import { Request, Response, Middleware } from "../interfaces";
 import { getFullRouterMethodMetadata, getRouterMethodMetadataList } from "./route-decorators-helpers";
 
 import { Router } from "./router";
-import { router, httpPost, httpDelete, httpGet, httpPut } from "./route-decorators";
+import { router, httpPost, httpDelete, httpGet, httpPut, errorHandler } from './route-decorators';
+import { authenticate } from '../identity/authenticate-middlewares';
 
 let middleware: Middleware = function () {
-
 }
 
 let middlewares: Middleware[] = [

@@ -1,6 +1,6 @@
 import { FultonApp } from "../../src/fulton-app";
 import { FultonAppOptions } from "../../src/fulton-app-options";
-import { router, Router, httpGet, Request, Response, Service } from "../../src/index";
+import { Request, Response } from "../../src/interfaces";
 import { HttpTester } from "../helpers/http-tester";
 import { setTimeout } from "timers";
 

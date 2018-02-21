@@ -1,14 +1,16 @@
 import * as qs from "qs";
 import * as url from "url";
-import { NextFunction, OperationOneResult, OperationResult, Request, Response, Type, QueryParams, EntityRouter, Router } from "../index";
 
+import { JsonApiConverter, JsonApiData, JsonApiLinks, JsonApiRootLinks, JsonApiSerializeOptions, JsonApiTypeOptions } from "../helpers/jsonapi-converter";
+import { NextFunction, OperationOneResult, OperationResult, QueryParams, Request, Response, Type } from "../interfaces";
+
+import { EntityRouter } from '../routers/entity-router';
 import { FultonApp } from "../fulton-app";
 import { MimeTypes } from "../constants";
-import { JsonApiConverter, JsonApiTypeOptions, JsonApiSerializeOptions, JsonApiRootLinks, JsonApiData, JsonApiLinks } from "../helpers/jsonapi-converter";
 import { OperationResultPagination } from "../interfaces";
+import { Router } from '../routers/router';
 
-
-export default function jsonapi(app: FultonApp) {
+module.exports = function (app: FultonApp) {
     let converter: JsonApiConverter;
 
     // init jsonapi needs after initRouters, but middleware have to register before initRouters
@@ -88,20 +90,27 @@ function initConverter(app: FultonApp): JsonApiConverter {
         let relatedToMetadata = metadata.relatedToMetadata;
         let id: string;
 
-        if (metadata.objectIdColumn) {
-            id = metadata.objectIdColumn.propertyName;
-        } else if (metadata.primaryColumns.length > 0) {
-            //TODO: ids for SQL
-            id = metadata.primaryColumns[0].propertyName;
+        if (metadata.primaryColumns.length > 0) {
+            // only support one primary
+            id = metadata.primaryColumns[0].propertyPath;
         } else {
             id = "id"
         }
 
         let attributes = metadata.columns
             .filter((col) => {
-                return col.isSelect && !col.isObjectId && !col.isPrimary && relatedToMetadata[col.propertyName] == null
+                return col.isSelect &&
+                    !col.isPrimary &&
+                    col.embeddedMetadata == null &&
+                    relatedToMetadata[col.propertyPath] == null
             })
-            .map((col) => col.propertyName)
+            .map((col) => col.propertyPath)
+
+        if (metadata.embeddeds) {
+            for (const embedded of metadata.embeddeds) {
+                attributes.push(embedded.propertyPath);
+            }
+        }
 
         let options: JsonApiTypeOptions = {
             id: id,

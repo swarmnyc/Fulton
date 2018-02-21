@@ -1,4 +1,4 @@
-import { FultonApp, FultonAppOptions, authorized, AccessToken, Request, Response, EntityRouter, entityRouter, OperationResult, QueryParams, OperationOneResult, OperationStatus, IEntityService, injectable, Type } from "../../src/index";
+import { Request, Response, OperationResult, QueryParams, OperationOneResult, OperationStatus, IEntityService, injectable, Type } from "../../src/interfaces";
 import { UserServiceMock } from "../helpers/user-service-mock";
 import { HttpTester, HttpResult } from "../helpers/http-tester";
 import { MongoHelper } from "../helpers/mongo-helper";
@@ -8,6 +8,10 @@ import { getRelatedToMetadata } from '../../src/entities/related-decorators-help
 import { Employee } from '../entities/employee';
 import { Territory } from '../entities/territory';
 import { Category } from '../entities/category';
+import { EntityRouter } from '../../src/routers/entity-router';
+import { entityRouter } from '../../src/routers/route-decorators';
+import { FultonApp } from '../../src/fulton-app';
+import { FultonAppOptions } from '../../src/fulton-app-options';
 
 @injectable()
 class FakeEntityService implements IEntityService<any>{

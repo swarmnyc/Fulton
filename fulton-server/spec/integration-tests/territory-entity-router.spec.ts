@@ -1,9 +1,14 @@
 import * as lodash from 'lodash';
 
-import { AccessToken, EntityRouter, EntityService, FultonApp, FultonAppOptions, OperationOneResult, OperationResult, OperationStatus, QueryParams, Request, Response, authorized, entityRouter, httpGet, injectable, router } from "../../src/index";
 import { HttpResult, HttpTester } from "../helpers/http-tester";
+import { OperationOneResult, OperationResult, OperationStatus, QueryParams, Request, Response, injectable } from "../../src/interfaces";
+import { httpGet, router } from '../../src/routers/route-decorators';
 
 import { Category } from '../entities/category';
+import { EntityRouter } from '../../src/routers/entity-router';
+import { EntityService } from '../../src/entities/entity-service';
+import { FultonApp } from '../../src/fulton-app';
+import { FultonAppOptions } from '../../src/fulton-app-options';
 import { MongoHelper } from "../helpers/mongo-helper";
 import { Repository } from "typeorm";
 import { Territory } from '../entities/territory';
@@ -277,5 +282,20 @@ describe('EntityRouter Integration Test with Territory', () => {
                 "description": "Desserts candies and sweet breads"
             }
         ] as any);
+    });
+
+    it('should return the categories by tag id', async () => {
+        let result = await httpTester.get("/territories", {
+            filter: {
+                categories: {
+                    categoryId: "000000000000000000000001"
+                }
+            }
+        })
+
+        expect(result.response.statusCode).toEqual(200);
+
+        let queryResult: OperationResult<Territory> = result.body;
+        expect(queryResult.data.length).toEqual(1);
     });
 });

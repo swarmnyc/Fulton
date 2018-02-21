@@ -1,7 +1,9 @@
-import { FultonApp, FultonAppOptions, Response, Request } from "../index";
-import { queryParamsParser, queryById } from "./query-params-parser";
-import { HttpTester } from "../../spec/helpers/http-tester";
+import { Request, Response } from "../interfaces";
+import { queryById, queryParamsParser } from "./query-params-parser";
 
+import { FultonApp } from '../fulton-app';
+import { FultonAppOptions } from '../fulton-app-options';
+import { HttpTester } from "../../spec/helpers/http-tester";
 
 class MyApp extends FultonApp {
     protected onInit(options: FultonAppOptions): void | Promise<void> {

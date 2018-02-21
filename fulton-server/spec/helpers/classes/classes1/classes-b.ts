@@ -1,4 +1,4 @@
-import { Router } from "../../../../src/index";
+import { Router } from '../../../../src/routers/router';
 
 export class RouterB extends Router {
 

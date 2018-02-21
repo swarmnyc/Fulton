@@ -1,6 +1,6 @@
 import * as winston from "winston"
 
-import { FultonApp } from "./index";
+import { FultonApp } from "./fulton-app";
 import { NPMLoggingLevel } from "winston";
 
 /**

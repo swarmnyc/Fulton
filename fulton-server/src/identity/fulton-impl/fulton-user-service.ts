@@ -4,14 +4,13 @@ import * as lodash from 'lodash';
 import * as passwordHash from 'password-hash';
 import * as validator from 'validator';
 
-import { AccessToken, FultonAccessToken, IFultonUser, IUserRegister, IUserService } from "../interfaces";
+import { AccessToken, FultonAccessToken, IFultonUser, IProfile, IUserRegister, IUserService } from "../interfaces";
 import { EntityRepository, MongoRepository, Repository } from "typeorm";
-import { inject, injectable } from "../../interfaces";
+import { Request, inject, injectable } from "../../interfaces";
 
 import { FultonApp } from "../../fulton-app";
 import { FultonError } from "../../common";
 import { FultonUser } from "./fulton-user";
-import { IProfile, Request } from '../../index';
 import { IdentityOptions } from '../identity-options';
 
 interface TokenPayload {

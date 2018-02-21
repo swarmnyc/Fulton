@@ -1,10 +1,13 @@
+import { IStrategyOptionsWithRequest, Strategy as LocalStrategy } from 'passport-local';
+import { Request, Response } from "../interfaces";
+
+import { AccessToken } from './interfaces';
 import { FultonApp } from "../fulton-app";
 import { FultonAppOptions } from "../fulton-app-options";
-import { IStrategyOptionsWithRequest, Strategy as LocalStrategy } from 'passport-local';
-import { HttpTester } from "../../spec/helpers/http-tester";
-import { AccessToken, authorized, authorizedByRole, authorizedByRoles, router, httpGet, Request, Response, Router, FultonImpl } from "../index";
-import { UserServiceMock } from "../../spec/helpers/user-service-mock";
+import { FultonImpl } from './fulton-impl/fulton-impl';
 import { GoogleStrategy } from "./strategies/google-strategy";
+import { HttpTester } from "../../spec/helpers/http-tester";
+import { UserServiceMock } from "../../spec/helpers/user-service-mock";
 
 class MyApp extends FultonApp {
     protected onInit(options: FultonAppOptions): void | Promise<void> {

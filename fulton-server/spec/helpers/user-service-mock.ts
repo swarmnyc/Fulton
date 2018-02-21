@@ -1,8 +1,11 @@
 import * as lodash from 'lodash';
 
-import { AccessToken, FultonError, FultonUser, IUserService, inject, injectable, IUserRegister } from "../../src/index";
+import { AccessToken, IUserRegister, IUserService } from '../../src/identity/interfaces';
+import { inject, injectable } from "../../src/interfaces";
 
 import { FultonApp } from "../../src/fulton-app";
+import { FultonError } from '../../src/common/fulton-error';
+import { FultonUser } from '../../src/identity/fulton-impl/fulton-user';
 
 export class UserServiceMock implements IUserService<FultonUser> {
     currentUser: FultonUser;

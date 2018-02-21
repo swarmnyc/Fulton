@@ -6,8 +6,9 @@
   "types": "./build/index.d.ts",
   "scripts": {
     "clean": "rimraf ./build",
-    "build": "npm run clean && tsc -p tsconfig-build.json",
-    "build:live": "npm run clean && tsc -w -p tsconfig-build.json",
+    "build": "npm run clean && tsc -p tsconfig-prod.json",
+    "build:test": "npm run clean && tsc -p tsconfig.json",
+    "build:live": "npm run clean && tsc -w -p tsconfig-prod.json",
     "test": "jasmine-ts",
     "test:it": "jasmine-ts --config=./spec/support/jasmine.it.json",
     "test:all": "npm run test && npm run test:it",

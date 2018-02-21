@@ -1,5 +1,5 @@
 import { EntityRouterMetadata, RouterMetadata, RouterMethodMetadata } from "./route-decorators-helpers";
-import { HttpMethod, Middleware, PathIdentifier, RouterActionDocOptions, RouterDocOptions, Type, injectable } from "../index";
+import { HttpMethod, Middleware, PathIdentifier, RouterActionDocOptions, RouterDocOptions, injectable, Type } from "../interfaces";
 
 import { Keys } from "../constants";
 import { isFunction } from "util";
@@ -26,6 +26,8 @@ export function router(path: PathIdentifier, ...args: any[]): any {
                 middlewares = args.slice(1);
             }
         }
+
+        path = ensurePath(path);
 
         Reflect.defineMetadata(
             Keys.RouterMetadata,
@@ -152,6 +154,8 @@ export function httpAction(method: HttpMethod, path: PathIdentifier = "/", ...ar
             }
         }
 
+        path = ensurePath(path);
+
         let metadata: RouterMethodMetadata = {
             path,
             method,
@@ -197,6 +201,8 @@ export function entityRouter(path: PathIdentifier, entity: Type, ...args: any[])
             }
         }
 
+        path = ensurePath(path);
+
         Reflect.defineMetadata(
             Keys.RouterMetadata,
             {
@@ -208,3 +214,26 @@ export function entityRouter(path: PathIdentifier, entity: Type, ...args: any[])
             target);
     };
 };
+
+/**
+ * make sure the first char is "/" for string
+ * if users use regex, they have to ensure themselves
+ */
+function ensurePath(path: PathIdentifier): PathIdentifier {
+    if (typeof path == "string" && !path.startsWith("/")) {
+        return "/" + path;
+    }
+
+    if (path instanceof Array) {
+        if (path.length == 0) {
+            return "/"
+        }
+
+        let path0 = path[0]
+        if (typeof path0 == "string" && !path0.startsWith("/")) {
+            path[0] = "/" + path;
+        }
+    }
+
+    return path;
+}

@@ -1,5 +1,5 @@
 import { Keys, None } from "../constants";
-import { Type } from "../index";
+import { Type } from "../interfaces";
 
 export interface RelatedToMetadata {
     [key: string]: Type;

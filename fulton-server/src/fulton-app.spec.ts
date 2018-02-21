@@ -1,4 +1,11 @@
-import { Factory, FultonApp, FultonAppOptions, DiContainer, Router, Service, inject, injectable, router, EntityService } from "./index";
+import { Service } from './services/service';
+import { inject, injectable, DiContainer } from './interfaces';
+import { Router, router } from './routers';
+import { FultonApp } from './fulton-app';
+import { FultonAppOptions } from './fulton-app-options';
+import { EntityService } from './entities';
+import { Factory } from './helpers';
+
 
 @injectable()
 class ServiceA extends Service {
@@ -41,7 +48,7 @@ class ServiceE {
 
 @injectable()
 class ApiService {
-    constructor( @inject("api_key") public apiKey: string) {
+    constructor(@inject("api_key") public apiKey: string) {
 
     }
 }
@@ -107,7 +114,7 @@ class MyFultonApp extends FultonApp {
         ];
     }
 
-    protected initDatabases() : Promise<void> {
+    protected initDatabases(): Promise<void> {
         return;
     }
 
@@ -117,7 +124,7 @@ class MyFultonApp extends FultonApp {
     }
 }
 
-describe('Fulton App', () => {
+fdescribe('Fulton App', () => {
     let app: MyFultonApp;
 
     beforeEach(() => {

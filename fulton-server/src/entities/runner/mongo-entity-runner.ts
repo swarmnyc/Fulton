@@ -2,7 +2,7 @@ import { IEntityRunner, QueryColumnOptions, QueryParams, injectable } from "../.
 import { MongoRepository, Repository, getMongoRepository } from "typeorm";
 
 import { ObjectId } from 'bson';
-import { Type } from "../../index";
+import { Type } from "../../interfaces";
 
 interface IncludeOptions {
     [key: string]: IncludeOptions | false

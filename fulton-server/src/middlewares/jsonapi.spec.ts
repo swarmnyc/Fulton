@@ -1,17 +1,19 @@
-import { FultonApp, FultonAppOptions, OperationResult, Request, Response, EntityRouter, entityRouter, httpGet, IEntityService, Type } from "../index";
+import { EntityRouter, entityRouter } from '../routers';
+import { IEntityService, OperationOneResult, OperationResult, OperationStatus, QueryParams, Request, Response, Type } from "../interfaces";
 
+import { Category } from '../../spec/entities/category';
 import { Connection } from "typeorm/connection/Connection";
+import { Employee } from '../../spec/entities/employee';
+import { FultonApp } from '../fulton-app';
+import { FultonAppOptions } from '../fulton-app-options';
 import { HttpTester } from "../../spec/helpers/http-tester";
+import { Territory } from '../../spec/entities/territory';
+import { getRelatedToMetadata } from "../entities/related-decorators-helpers";
 import { queryParamsParser } from "./query-params-parser";
 import { sampleData } from "../../spec/support/sample-data";
-import { QueryParams, OperationOneResult, OperationStatus } from "../interfaces";
-import { getRelatedToMetadata } from "../entities/related-decorators-helpers";
-import { Employee } from '../../spec/entities/employee';
-import { Category } from '../../spec/entities/category';
-import { Territory } from '../../spec/entities/territory';
 
 class EmployeeEntityService implements IEntityService<Employee> {
-    find(queryParams: QueryParams): Promise<OperationResult<Employee>> {        
+    find(queryParams: QueryParams): Promise<OperationResult<Employee>> {
         let data: Employee[] = [];
 
         data.push(Object.assign(new Employee(), {

@@ -2,15 +2,13 @@ import * as lodash from 'lodash';
 import * as passport from 'passport';
 import * as url from 'url';
 
-import { StrategyVerifyDone, IUserRegister, AccessToken, OAuthStrategyVerifier, StrategyOptions, OAuthStrategyOptions } from "../interfaces";
-import { Middleware, Request, Response, NextFunction } from "../../interfaces";
+import { AccessToken, IUser, IUserRegister, OAuthStrategyOptions, OAuthStrategyVerifier, StrategyOptions, StrategyVerifyDone } from "../interfaces";
+import { Middleware, NextFunction, Request, Response } from "../../interfaces";
 
 import { FultonApp } from '../../fulton-app';
-import { FultonUser } from "./fulton-user";
 import { FultonError } from '../../common/fulton-error';
 import FultonLog from '../../fulton-log';
-import { IUser } from '../../index';
-
+import { FultonUser } from "./fulton-user";
 
 /**
  * Default Fulton Implements

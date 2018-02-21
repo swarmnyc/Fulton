@@ -1,13 +1,14 @@
 import * as lodash from 'lodash';
 
-import { AppMode, HttpMethod, PathIdentifier } from "../interfaces";
-import { CustomStrategySettings, FultonUser, FultonUserService, IUser, Middleware, StrategyOptions, Type } from "../index";
-import { GoogleStrategyOptions, IUserService, LocalStrategyVerifier, OAuthStrategyOptions, OAuthStrategyVerifier, TokenStrategyVerifier } from "./interfaces";
+import { AppMode, HttpMethod, Middleware, PathIdentifier, Type } from "../interfaces";
+import { CustomStrategySettings, GoogleStrategyOptions, IUser, IUserService, LocalStrategyVerifier, OAuthStrategyOptions, OAuthStrategyVerifier, TokenStrategyVerifier, StrategyOptions } from './interfaces';
 
 import { AuthenticateOptions } from "passport";
 import { AuthorizeOptions } from "./authorizes-middlewares";
 import Env from "../helpers/env";
 import { FultonImpl } from "./fulton-impl/fulton-impl";
+import { FultonUser } from './fulton-impl/fulton-user';
+import { FultonUserService } from './fulton-impl/fulton-user-service';
 import { Repository } from "typeorm";
 import { Strategy } from "passport";
 

@@ -1,6 +1,6 @@
 
 
-import { Router } from "../../../../src/index";
+import { Router } from '../../../../src/routers/router';
 import { Service } from "../../../../src/services/service";
 
 export default class RouterD extends Router {

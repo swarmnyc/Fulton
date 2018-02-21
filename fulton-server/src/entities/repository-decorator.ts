@@ -1,9 +1,8 @@
 import * as typeorm from "typeorm";
 
-import { injectable } from "../interfaces";
+import { injectable, Type } from "../interfaces";
 import { KEY_REPOSITORY_METADATA } from "../constants";
 import { RepositoryMetadata } from "./repository-decorator-helper";
-import { Type } from "../helpers/type-helpers";
 
 // parent have to injectable too.
 injectable()(typeorm.Repository)

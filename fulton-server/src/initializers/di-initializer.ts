@@ -1,13 +1,13 @@
-import { DiContainer, EntityService, EntityServiceFactory, Type, RepositoryFactory } from "../index";
-import { MongoRepository, getConnection, getRepository } from "typeorm";
+import { Container, interfaces } from "inversify";
+import { EntityServiceFactory, RepositoryFactory, Type } from '../interfaces';
+import { MongoRepository, Repository, getConnection, getRepository } from "typeorm";
 
+import { EntityService } from '../entities';
 import { FultonApp } from "../fulton-app";
-import { Repository } from "typeorm/repository/Repository";
-import { getRepositoryMetadata } from "../entities/repository-decorator-helper";
-import { interfaces, Container } from "inversify";
 import { MongoEntityRunner } from "../entities/runner/mongo-entity-runner";
+import { getRepositoryMetadata } from "../entities/repository-decorator-helper";
 
-export default function diInitializer(app: FultonApp) {
+module.exports = function (app: FultonApp) {
     app.container = new Container();
 
     // for FultonApp

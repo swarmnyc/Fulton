@@ -1,12 +1,11 @@
 import * as assert from "assert";
 import * as lodash from "lodash";
 
-import { ErrorMiddleware, FultonApp, Request, Response, Middleware } from "../index";
+import { ErrorMiddleware, Request, Response, Middleware,TypeIdentifier } from "../interfaces";
 import { FullRouterMetadata, RouterMetadata, getFullRouterMethodMetadata, getRouterMetadata } from "./route-decorators-helpers";
 import { DiContainer, PathIdentifier, inject, injectable } from "../interfaces";
 import { IRouterMatcher, Router as ExpressRouter } from "express";
-
-import { TypeIdentifier } from "../helpers/type-helpers";
+import { FultonApp } from '../fulton-app';
 
 /**
  * Express Router Wrap

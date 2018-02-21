@@ -1,5 +1,7 @@
-import { entity, objectIdColumn, column, relatedTo } from "../../src/index";
+import { column, entity, objectIdColumn } from "../../src/interfaces";
+
 import { Territory } from './territory';
+import { relatedTo } from '../../src/entities/related-decorators';
 
 @entity("employees")
 export class Employee {

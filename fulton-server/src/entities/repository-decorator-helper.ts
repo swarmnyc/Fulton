@@ -1,5 +1,5 @@
 import { KEY_REPOSITORY_METADATA } from "../constants";
-import { Type } from "../index";
+import { Type } from "../interfaces";
 
 export interface RepositoryMetadata {
     entity: Type,

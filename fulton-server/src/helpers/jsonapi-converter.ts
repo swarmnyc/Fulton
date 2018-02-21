@@ -98,11 +98,11 @@ export interface JsonApiData {
         [key: string]: any;
     };
     relationships?: {
-        [key: string]: JsonApiRefationshipData;
+        [key: string]: JsonApiRelationshipData;
     };
 }
 
-export interface JsonApiRefationshipData {
+export interface JsonApiRelationshipData {
     links?: JsonApiLinks;
     data?: JsonApiIdData | JsonApiIdData[];
 }
@@ -173,11 +173,11 @@ export class JsonApiConverter {
             Object.assign(json, data.attributes);
         }
 
-        //refationships
+        //relationships
         if (data.relationships) {
             let refProps = Object.getOwnPropertyNames(data.relationships);
             for (const prop of refProps) {
-                let ref: JsonApiRefationshipData = data.relationships[prop];
+                let ref: JsonApiRelationshipData = data.relationships[prop];
 
                 if (ref.data instanceof Array) {
                     json[prop] = ref.data.map((item) => this.deserializeRelationData(item, included));
@@ -256,8 +256,8 @@ class JsonApiSerializer {
 
             for (const prop of refProps) {
                 let relOpts = typeOpts.relationships[prop];
-                let relItmes = item[prop];
-                if (relItmes) {
+                let relItems = item[prop];
+                if (relItems) {
                     data.relationships[prop] = this.serializeRelationData(relOpts, item[prop]);
                 }
             }
@@ -270,7 +270,7 @@ class JsonApiSerializer {
         return data;
     }
 
-    serializeRelationData(relOptions: JsonApiRelationshipOptions, items: any | any[]): JsonApiRefationshipData {
+    serializeRelationData(relOptions: JsonApiRelationshipOptions, items: any | any[]): JsonApiRelationshipData {
         let refData;
         if (items instanceof Array) {
             refData = items.map((item) => {

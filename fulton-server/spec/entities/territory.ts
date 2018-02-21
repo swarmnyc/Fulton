@@ -1,4 +1,4 @@
-import { entity, objectIdColumn, column } from "../../src/index";
+import { entity, objectIdColumn, column } from "../../src/interfaces";
 import { Category } from './category';
 import { relatedTo } from '../../src/entities/related-decorators';
 

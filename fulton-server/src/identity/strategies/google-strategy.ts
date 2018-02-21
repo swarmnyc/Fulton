@@ -1,15 +1,14 @@
+import * as https from 'https';
 import * as lodash from 'lodash';
 import * as querystring from 'querystring';
 import * as url from 'url';
-import * as https from 'https';
 
-import { AccessToken, IUser, Request } from '../../index';
+import { AccessToken, GoogleStrategyOptions, IUser, OAuthStrategyVerifier } from '../interfaces';
 
 import { OAuth2Client } from "google-auth-library";
-import { OAuthStrategyVerifier, GoogleStrategyOptions } from '../interfaces';
+import { Request } from '../../interfaces';
 import { Strategy } from 'passport-strategy';
 import { fultonDebug } from '../../helpers/debug';
-
 
 export class GoogleStrategy extends Strategy {
     // only require google-auth-library when options.google.enabled = true;

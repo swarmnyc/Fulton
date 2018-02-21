@@ -2,16 +2,17 @@ import * as fs from 'fs';
 import * as lodash from 'lodash';
 
 import { DefinitionsObject, OpenApiSpec, OperationObject, ParameterObject, ParametersDefinitionsObject, PathItemObject, PathsObject, ResponseObject, SchemaObject } from '@loopback/openapi-spec';
-import { EntityRouter, Middleware, NextFunction, PathIdentifier, Request, Response, Type } from "../index";
+import { Middleware, NextFunction, PathIdentifier, Request, Response, Type } from "../interfaces";
 import { column, entity, manyToMany } from '../re-export';
 
 import { FultonApp } from "../fulton-app";
 import { MimeTypes } from '../constants';
 import { OAuthStrategyOptions } from '../identity/interfaces';
+import { EntityRouter } from '../routers/entity-router';
 
 let urlJoin = require('url-join');
 
-export default function docsInitializer(app: FultonApp) {
+module.exports = function (app: FultonApp) {
     let options = app.options.docs;
     let docs: OpenApiSpec;
 

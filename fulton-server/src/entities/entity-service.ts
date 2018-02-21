@@ -1,5 +1,4 @@
-import { FultonErrorObject, IEntityRunner, IEntityService, OperationOneResult, OperationResult, OperationStatus, QueryParams, inject } from '../interfaces';
-import { IUser, Type, injectable } from "../index";
+import { FultonErrorObject, IEntityRunner, IEntityService, OperationOneResult, OperationResult, OperationStatus, QueryParams, Type, entity, inject, injectable } from '../interfaces';
 import { MongoRepository, Repository, getMongoRepository, getRepository } from 'typeorm';
 
 import { ColumnMetadata } from 'typeorm/metadata/ColumnMetadata';
@@ -7,8 +6,8 @@ import { EntityMetadata } from 'typeorm/metadata/EntityMetadata';
 import { FultonApp } from "../fulton-app";
 import FultonLog from "../fulton-log";
 import Helper from '../helpers/helper';
+import { IUser } from '../identity';
 import { MongoEntityRunner } from "./runner/mongo-entity-runner";
-import { entity } from '../re-export';
 
 @injectable()
 export class EntityService<TEntity> implements IEntityService<TEntity> {
@@ -184,12 +183,12 @@ export class EntityService<TEntity> implements IEntityService<TEntity> {
         }
     }
 
-    private getPropertyType(metadata: EntityMetadata, name: string): any {
+    private getColumnMetadata(metadata: EntityMetadata, name: string): ColumnMetadata {
         if (name) {
-            if (name == "id" && metadata.primaryColumns.length == 1) {
-                return metadata.primaryColumns[0].type;
+            if ((name == "id" || name == "_id") && metadata.primaryColumns.length == 1) {
+                return metadata.primaryColumns[0];
             } else {
-                return metadata.columns.find((col) => col.propertyName == name || col.databaseName == name);
+                return metadata.columns.find((col) => col.propertyPath == name);
             }
         }
     }
@@ -197,9 +196,10 @@ export class EntityService<TEntity> implements IEntityService<TEntity> {
     /** 
      * adjust filter, because some properties are miss type QueryString is always string, but some params int or date
      * support some mongo query operators https://docs.mongodb.com/manual/reference/operator/query/
-     * not support embedded and related documents
      */
-    private adjustFilter<T>(metadata: EntityMetadata, filter: any, parent: string) {
+    private adjustFilter<T>(metadata: EntityMetadata, filter: any, targetColumn: ColumnMetadata) {
+        //TODO: make adjustFilter to support embedded objects
+
         if (typeof filter == "object") {
             for (const name of Object.getOwnPropertyNames(filter)) {
                 let value = filter[name];
@@ -214,8 +214,8 @@ export class EntityService<TEntity> implements IEntityService<TEntity> {
                     this.adjustFilter(metadata, value, null)
                 } else {
                     if (name.startsWith("$")) {
-                        if (parent == null) {
-                            // these operators must have parent                        
+                        if (targetColumn == null) {
+                            // these operators must have target column                        
                             continue;
                         }
 
@@ -223,16 +223,16 @@ export class EntityService<TEntity> implements IEntityService<TEntity> {
                             // do nothing
                         } else if (["$size", "$minDistance", "$maxDistance"].includes(name)) {
                             // { filter: { tags: { $size: number }}}
-                            filter[parent][name] = this.convertType("number", value);
+                            filter[name] = this.convertType("number", value);
                             continue;
                         } else if (["$in", "$nin"].includes(name)) {
                             // { filter: { name: { $in: [ value, value, value] }}}
                             if (value instanceof Array) {
-                                filter[parent][name] = value.map((item) => this.convertType(this.getPropertyType(metadata, parent), item));
+                                filter[name] = value.map((item) => this.convertType(targetColumn, item));
                             }
                         } else if (["$eq", "$gt", "$gte", "$lt", "$lte", "$ne"].includes(name)) {
                             // { filter: { price: { $gte: value }}}
-                            filter[parent][name] = this.convertType(this.getPropertyType(metadata, parent), value);
+                            filter[name] = this.convertType(targetColumn, value);
                         } else if (["$near", "$nearSphere", "$center", "$centerSphere", "$box", "$polygon", "$mod"].includes(name)) {
                             // { filter: { location : { $near : [ number, number ]}}}
                             // { filter: { location : { $box : [[ number, number ], [ number, number ]]}}}
@@ -245,29 +245,41 @@ export class EntityService<TEntity> implements IEntityService<TEntity> {
                             }
 
                             if (value instanceof Array) {
-                                filter[parent][name] = value.map(convert);
+                                filter[name] = value.map(convert);
                             }
                         } else if (name == "$exists") {
                             // { filter: { tags: { $exists: boolean }}}
-                            filter[parent][name] = this.convertType("boolean", value);
+                            filter[name] = this.convertType("boolean", value);
                         } else if (name == "$all") {
                             if (value instanceof Array && value.length > 0) {
                                 if (typeof value[0] == "object") {
                                     // { filter: { tags: { $all: [ object, object, object] }}}
-                                    value.forEach((item) => this.adjustFilter(metadata, item, null));
+                                    // might not work because embedded document don't have metadata.
+                                    value.forEach((item) => this.adjustFilter(metadata, item, targetColumn));
                                 } else {
                                     // { filter: { tags: { $all: [ value, value, value] }}}
-                                    filter[parent][name] = value.map((item) => this.convertType(this.getPropertyType(metadata, parent), item));
+                                    filter[name] = value.map((item) => this.convertType(targetColumn, item));
                                 }
                             }
                         }
                     } else {
-                        if (typeof value == "object") {
+                        let columnMetadata = this.getColumnMetadata(metadata, name);
+                        if (columnMetadata) {
                             // { filter: { name: object }}
-                            this.adjustFilter(metadata, value, name);
-                        } else {
-                            // { filter: { name: value }}
-                            filter[name] = this.convertType(this.getPropertyType(metadata, name), value);
+                            if (typeof value == "object") {
+                                let targetMetadata = metadata;
+                                if (columnMetadata.relationMetadata) {
+                                    targetMetadata = columnMetadata.relationMetadata.inverseEntityMetadata;
+                                } else if (metadata.relatedToMetadata[name]) {
+                                    targetMetadata = this.app.entityMetadatas.get(metadata.relatedToMetadata[name]);
+                                    columnMetadata = null;
+                                }
+
+                                this.adjustFilter(targetMetadata, value, columnMetadata);
+                            } else {
+                                // { filter: { name: value }}
+                                filter[name] = this.convertType(columnMetadata, value);
+                            }
                         }
                     }
                 }
@@ -280,17 +292,23 @@ export class EntityService<TEntity> implements IEntityService<TEntity> {
      */
     protected adjustAndVerifyEntity(em: EntityMetadata | Type, entity: any): any {
         //TODO: valid and remove extra data
-
-
     }
 
     protected convertType(metadata: string | ColumnMetadata, value: any): any {
-        if (metadata != null) {
+        if (metadata != null && value != null) {
             let type;
             if (metadata instanceof ColumnMetadata) {
                 type = metadata.type;
+
+                if (!type && metadata.isObjectId) {
+                    type = "ObjectId";
+                }
             } else {
                 type = metadata;
+            }
+
+            if (type == null) {
+                return value;
             }
 
             if ((type == "number" || type == Number) && typeof value != "number") {
@@ -303,9 +321,15 @@ export class EntityService<TEntity> implements IEntityService<TEntity> {
 
             if ((type == "date" || type == "datetime" || type == Date) && !(value instanceof Date)) {
                 if (Helper.isNumberString(value)) {
-
+                    return new Date(parseFloat(value));
+                } else {
+                    return new Date(value);
                 }
-                return (value);
+            }
+
+            if (type == "ObjectId" && value.constructor.name != "ObjectID") {
+                // EntityService is for sql and mongo, this writing is find without mongodb installed
+                return new (require('bson').ObjectId)(value);
             }
         }
 

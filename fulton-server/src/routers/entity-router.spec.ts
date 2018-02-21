@@ -1,20 +1,21 @@
-import { Entity, ObjectIdColumn, Column } from "typeorm";
-import { router, httpGet, entityRouter } from "./route-decorators";
+import * as typeorm from 'typeorm';
+
+import { column, entity, injectable, objectIdColumn } from '../interfaces';
+import { entityRouter, httpGet, router } from "./route-decorators";
+
 import { EntityRouter } from "./entity-router";
 import { EntityService } from "../entities/entity-service";
-import { injectable } from "../index";
 import { FultonApp } from "../fulton-app";
 import { FultonAppOptions } from "../fulton-app-options";
-import * as typeorm from 'typeorm';
 import { Repository } from "typeorm/repository/Repository";
 
-@Entity("foods")
+@entity("foods")
 class Food {
-    @ObjectIdColumn()
+    @objectIdColumn()
     id?: string;
-    @Column()
+    @column()
     name?: String;
-    @Column()
+    @column()
     category?: String;
 }
 
@@ -23,9 +24,6 @@ class FoodRepository extends Repository<Food>{
 
 @injectable()
 class FoodEntityService extends EntityService<Food> {
-    constructor() {
-        super(new FoodRepository());
-    }
 }
 
 @entityRouter("/A", Food)
@@ -33,7 +31,7 @@ class EntityRouterA extends EntityRouter<Food> {
 
 }
 
-@router("/B")
+@entityRouter("/B", Food)
 class EntityRouterB extends EntityRouter<Food> {
     constructor(protected entityService: FoodEntityService) {
         super(entityService);
@@ -54,7 +52,7 @@ describe('Fulton Entity Router', () => {
         spy = spyOn(typeorm, "getRepository").and.returnValue(new FoodRepository());
     });
 
-    afterAll(()=>{
+    afterAll(() => {
         spy.and.callThrough();
     })
 

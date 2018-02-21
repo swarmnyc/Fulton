@@ -1,37 +1,37 @@
-import { entity, objectIdColumn, column } from "../../src/index";
+import { entity, objectIdColumn, column } from "../../src/interfaces";
 
 @entity("customers")
 export class Customer {
-    @objectIdColumn()
+    @objectIdColumn({ type: String })
     customerId: string;
 
     @column()
-    companyName:string;
+    companyName: string;
 
     @column()
-    contactName:string;
+    contactName: string;
 
     @column()
-    contactTitle:string;
+    contactTitle: string;
 
     @column()
-    address:string;
+    address: string;
 
     @column()
-    city:string;
+    city: string;
 
     @column()
-    region:string;
+    region: string;
 
     @column()
-    postalCode:number;
+    postalCode: number;
 
     @column()
-    country:string;
+    country: string;
 
     @column()
-    phone:string;
+    phone: string;
 
     @column()
-    fax:string;
+    fax: string;
 }

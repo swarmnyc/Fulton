@@ -1,4 +1,4 @@
-import { Type, column } from "../index";
+import { Type, column } from "../interfaces";
 import { RelatedToMetadata } from "./related-decorators-helpers";
 import { Keys } from "../constants";
 

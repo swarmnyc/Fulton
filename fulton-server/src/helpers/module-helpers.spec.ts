@@ -1,13 +1,16 @@
-import { loadModules, defaultClassLoader } from "./module-helpers";
 import * as moduleA from "../../spec/helpers/modules/module-a"
 import * as moduleB from "../../spec/helpers/modules/module-b"
 import * as moduleC from "../../spec/helpers/modules/sub-modules/module-c"
 import * as moduleD from "../../spec/helpers/modules/sub-modules/sub-modules/module-d"
-import { Router, Service, moduleExists } from "../index";
+
 import { RouterA, ServiceA } from "../../spec/helpers/classes/classes1/classes-a";
 import { RouterB, RouterC } from "../../spec/helpers/classes/classes1/classes-b";
 import RouterD, { ServiceB } from "../../spec/helpers/classes/classes2/classes-d";
+import { defaultClassLoader, loadModules, moduleExists } from './module-helpers';
+
+import { Router } from '../routers/router';
 import RouterE from "../../spec/helpers/classes/classes2/classes3/classes-e";
+import { Service } from '../services/service';
 
 describe("module helper", () => {
     it("should load moudule not recurrively", async () => {

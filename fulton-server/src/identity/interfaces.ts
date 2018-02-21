@@ -1,6 +1,5 @@
 import * as passport from 'passport';
-import { Request, PathIdentifier, Middleware } from "../interfaces";
-import { Type, HttpMethod } from "../index";
+import { Request, PathIdentifier, Middleware, Type, HttpMethod } from "../interfaces";
 
 export type Strategy = passport.Strategy;
 export type AuthenticateOptions = passport.AuthenticateOptions;
@@ -12,7 +11,7 @@ export interface IUser {
 export interface IProfile {
     email?: string;
     username?: string;
-    portraitUrl?: string;    
+    portraitUrl?: string;
 }
 
 export interface IUserRegister extends IUser {
@@ -95,7 +94,7 @@ export interface StrategyOptions {
     * new LocalStrategy(options.strategyOptions, options.verifier)
     * the default value is null
     */
-    strategyOptions?: {[key: string]: any};
+    strategyOptions?: { [key: string]: any };
 
     /**
      * verify the oauth request.
@@ -131,9 +130,9 @@ export interface StrategyOptions {
 }
 
 export interface OAuthStrategyOptions extends StrategyOptions {
-     /**
-     * the default value is get
-     */
+    /**
+    * the default value is get
+    */
     callbackHttpMethod?: HttpMethod;
 
     /**
@@ -209,7 +208,7 @@ export interface GoogleStrategyOptions extends OAuthStrategyOptions {
 }
 
 export interface CustomStrategySettings {
-    options:  OAuthStrategyOptions;
+    options: OAuthStrategyOptions;
     /**
      * Custom passport-strategy
      */

@@ -4,20 +4,20 @@ import * as lodash from 'lodash';
 import * as path from 'path';
 import * as winston from 'winston';
 
-import { AppMode, ErrorMiddleware, Middleware, PathIdentifier } from './interfaces';
+import { AppMode, ErrorMiddleware, Middleware, PathIdentifier, Type } from './interfaces';
 import { ConnectionOptions, Repository } from 'typeorm';
-import { FultonClassLoader, defaultClassLoader } from './helpers/module-helpers';
+import { FultonClassLoader, Provider, TypeProvider, defaultClassLoader } from './helpers';
 import { FultonLoggerLevel, FultonLoggerOptions } from './fulton-log';
-import { Router, Service, Type } from './index';
-import { Provider, TypeProvider } from './helpers/type-helpers';
-import { default404ErrorHandler, defaultErrorHandler } from './middlewares';
+import { default404ErrorHandler, defaultErrorHandler } from './middlewares/error-handlers';
 
 import { CorsOptions } from 'cors';
 import Env from './helpers/env';
 import Helper from './helpers/helper';
 import { IdentityOptions } from './identity/identity-options';
-import { ServeStaticOptions } from 'serve-static';
 import { InfoObject } from '@loopback/openapi-spec';
+import { Router } from './routers/router';
+import { ServeStaticOptions } from 'serve-static';
+import { Service } from './services/service';
 
 export class FultonAppOptions {
     /**

@@ -1,4 +1,5 @@
 import { entity, objectIdColumn, column } from "../../src/interfaces";
+import { Territory } from './territory';
 
 @entity("customers")
 export class Customer {
@@ -34,4 +35,7 @@ export class Customer {
 
     @column()
     fax: string;
+
+    @column(type => Territory) // embedded documents
+    territories: Territory[]
 }

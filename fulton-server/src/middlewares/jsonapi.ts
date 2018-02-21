@@ -32,7 +32,7 @@ module.exports = function (app: FultonApp) {
             }
         }
 
-        if (req.accepts(MimeTypes.jsonApi)) {
+        if (req.get("accept") == MimeTypes.jsonApi) {
             // json to jsonapi
             res.send = new Proxy(res.send, {
                 apply: (send: Function, thisArg: Response, args: any[]) => {

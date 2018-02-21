@@ -18,7 +18,9 @@ import { Keys } from "../constants";
  */
 export function relatedTo(entity: Type): any {
     return function (target: any, property: string, descriptor: PropertyDescriptor) {
-        column()(target, property, descriptor);
+        let type = Reflect.getMetadata("design:type", target, property) as Function;
+        let isArray = type != null && type.name == "Array";
+        column({ isArray })(target, property, descriptor);
 
         let metadata: RelatedToMetadata;
 

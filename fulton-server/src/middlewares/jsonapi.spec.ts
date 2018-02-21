@@ -168,7 +168,7 @@ class MyApp extends FultonApp {
     }
 }
 
-describe('query parser', () => {
+describe('jsonapi middleware', () => {
     let app: MyApp;
     let httpTester: HttpTester;
 
@@ -325,6 +325,46 @@ describe('query parser', () => {
                                 { "id": 19713, "type": "Territory" }]
                         }
                 }, "links": { "self": "http://localhost:3000/employees/undefined" }
+            }
+        })
+    });
+
+    it('should not serialize employee', async () => {
+        httpTester.setHeaders({
+            "content-type": "application/json",
+            "accept": "application/json"
+        })
+
+        let result = await httpTester.get("/employees/1");
+
+        //console.log(JSON.stringify(result.body));
+        expect(result.body).toEqual({
+            "data": {
+                "_id": 1,
+                "lastName": "Davolio",
+                "firstName": "Nancy",
+                "title": "Sales Representative",
+                "titleOfCourtesy": "Ms.",
+                "birthDate": "1948-12-08T00:00:00.000+0000",
+                "hireDate": "1992-05-01T00:00:00.000+0000",
+                "address": "507 20th Ave. E. Apt. 2A",
+                "city": "Seattle",
+                "region": "WA",
+                "postalCode": 98122,
+                "country": "USA",
+                "homePhone": "(206) 555-9857",
+                "extension": 5467,
+                "notes": "Education includes a BA in psychology from Colorado State University in 1970.  She also completed The Art of the Cold Call.  Nancy is a member of Toastmasters International.",
+                "reportsTo": 2,
+                "photoPath": "http://accweb/emmployees/davolio.bmp",
+                "territories": [
+                    {
+                        "territoryId": 6897
+                    },
+                    {
+                        "territoryId": 19713
+                    }
+                ]
             }
         })
     });

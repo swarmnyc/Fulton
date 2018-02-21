@@ -1,11 +1,11 @@
 import * as assert from "assert";
 import * as lodash from "lodash";
 
-import { ErrorMiddleware, Request, Response, Middleware,TypeIdentifier } from "../interfaces";
-import { FullRouterMetadata, RouterMetadata, getFullRouterMethodMetadata, getRouterMetadata } from "./route-decorators-helpers";
+import { ErrorMiddleware, Request, Response, Middleware, TypeIdentifier } from "../interfaces";
+import { FullRouterMetadata, RouterMetadata, getFullRouterMethodMetadata } from "./route-decorators-helpers";
 import { DiContainer, PathIdentifier, inject, injectable } from "../interfaces";
 import { IRouterMatcher, Router as ExpressRouter } from "express";
-import { FultonApp } from '../fulton-app';
+import { IFultonApp } from '../fulton-app';
 
 /**
  * Express Router Wrap
@@ -35,14 +35,14 @@ export abstract class Router {
     public metadata: FullRouterMetadata
     protected router: Router;
     @inject("FultonApp")
-    protected app: FultonApp;
+    protected app: IFultonApp;
 
     constructor() {
         this.loadMetadata();
     }
 
     protected loadMetadata() {
-        this.metadata = getFullRouterMethodMetadata(this.constructor);
+        this.metadata = getFullRouterMethodMetadata(this.constructor, Router);
     }
 
     init() {

@@ -2,7 +2,7 @@ import { FullEntityRouterMetadata, getFullEntityRouterMethodMetadata } from "./r
 import { httpDelete, httpGet, httpPatch, httpPost } from "./route-decorators";
 import { IEntityService, injectable, NextFunction, OperationOneResult, OperationResult, OperationStatus, Request, Response, EntityServiceFactory } from "../interfaces";
 
-import { EntityService } from "../entities";
+import { EntityService } from "../entities/entity-service";
 import { Router } from "./router";
 
 @injectable()
@@ -14,7 +14,7 @@ export abstract class EntityRouter<TEntity> extends Router {
     }
 
     protected loadMetadata() {
-        this.metadata = getFullEntityRouterMethodMetadata(this.constructor);
+        this.metadata = getFullEntityRouterMethodMetadata(this.constructor, Router);
     }
 
     init() {
@@ -37,7 +37,7 @@ export abstract class EntityRouter<TEntity> extends Router {
     @httpGet("/")
     list(req: Request, res: Response, next: NextFunction) {
         req.queryParams.needAdjust = true;
-        
+
         // by default don't return all entities
         if (req.queryParams.pagination) {
             if (req.queryParams.pagination.index == null)

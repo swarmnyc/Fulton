@@ -20,20 +20,42 @@ import { EventEmitter } from 'events';
 import { Express } from "express";
 import { FultonAppOptions } from "./fulton-app-options";
 import FultonLog from "./fulton-log";
-import { JsonApiConverter } from './helpers/jsonapi-converter';
 import { MimeTypes } from './constants';
 import { Router } from "./routers/router";
 import { Service } from "./services";
 import { defaultHttpLoggerHandler } from "./middlewares/http-logger";
 import { fultonDebug } from "./helpers/debug";
-import { queryParamsParser } from './middlewares/query-params-parser';
+
+export interface IFultonApp {
+    readonly appName: string;
+
+    express: Express;
+
+    container: DiContainer;
+
+    options: FultonAppOptions;
+
+    events: EventEmitter;
+
+    userService: IUserService<IUser>;
+
+    httpServer: http.Server;
+
+    httpsServer: https.Server;
+
+    connections: Connection[];
+
+    entityMetadatas: Map<Type, EntityMetadata>;
+
+    routers: Router[];
+}
 
 /**
  * The app of Fulton Server, it is the main class of Fulton Server
  * 
  * `onInit` is the required function when extends from FultonApp
  */
-export abstract class FultonApp {
+export abstract class FultonApp implements IFultonApp {
     private isInitialized: boolean = false;
 
     /**
@@ -449,33 +471,7 @@ export abstract class FultonApp {
     }
 
     protected initFormatter(): void | Promise<void> {
-        if (this.options.formatter.json) {
-            let types = [MimeTypes.json]
-
-            if (this.options.formatter.jsonApi) {
-                types.push(MimeTypes.jsonApi)
-            }
-
-            this.express.use(express.json({ type: types }));
-        }
-
-        if (this.options.formatter.form) {
-            this.express.use(express.urlencoded({ extended: true }));
-        }
-
-        if (this.options.formatter.jsonApi) {
-            this.express.use(require("./middlewares/jsonapi")(this));
-        }
-
-        if (this.options.formatter.queryParams) {
-            this.express.use(queryParamsParser);
-        }
-
-        if (lodash.some(this.options.formatter.customs)) {
-            this.express.use(...this.options.formatter.customs);
-        }
-
-        this.events.emit("didInitFormatter", this);
+        require("./initializers/formatter-initializer")(this);
     }
 
     protected initIndex(): void | Promise<void> {

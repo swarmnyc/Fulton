@@ -3,7 +3,7 @@ import { MongoRepository, Repository, getMongoRepository, getRepository } from '
 
 import { ColumnMetadata } from 'typeorm/metadata/ColumnMetadata';
 import { EntityMetadata } from 'typeorm/metadata/EntityMetadata';
-import { FultonApp } from "../fulton-app";
+import { IFultonApp } from "../fulton-app";
 import FultonLog from "../fulton-log";
 import Helper from '../helpers/helper';
 import { IUser } from '../identity';
@@ -12,7 +12,7 @@ import { MongoEntityRunner } from "./runner/mongo-entity-runner";
 @injectable()
 export class EntityService<TEntity> implements IEntityService<TEntity> {
     @inject("FultonApp")
-    protected app: FultonApp;
+    protected app: IFultonApp;
     protected mainRepository: Repository<TEntity>
     private _runner: IEntityRunner
 

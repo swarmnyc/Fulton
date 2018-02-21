@@ -8,7 +8,7 @@ import { AccessToken, FultonAccessToken, IFultonUser, IProfile, IUserRegister, I
 import { EntityRepository, MongoRepository, Repository } from "typeorm";
 import { Request, inject, injectable } from "../../interfaces";
 
-import { FultonApp } from "../../fulton-app";
+import { IFultonApp } from "../../fulton-app";
 import { FultonError } from "../../common";
 import { FultonUser } from "./fulton-user";
 import { IdentityOptions } from '../identity-options';
@@ -77,7 +77,7 @@ class SqlRunner implements IRunner {
 @injectable()
 export class FultonUserService implements IUserService<FultonUser> {
     @inject("FultonApp")
-    protected app: FultonApp;
+    protected app: IFultonApp;
 
     private runner: IRunner;
 

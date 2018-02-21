@@ -1,7 +1,6 @@
-import { Middleware, PathIdentifier, RouterActionDocOptions, RouterDocOptions, Type } from '../interfaces';
+import { Middleware, PathIdentifier, RouterActionDocOptions, RouterDocOptions, Type, AbstractType } from '../interfaces';
 
 import { Keys } from "../constants";
-import { Router } from "./router";
 
 export interface RouterMetadata {
     path: PathIdentifier,
@@ -54,27 +53,27 @@ export function getRouterMethodMetadataList(target: any): RouterMethodMetadata[]
     return Reflect.getOwnMetadata(Keys.HttpMethods, target) || [];
 }
 
-export function getFullRouterMethodMetadata(target: any): FullRouterMetadata {
-    let metadata = getAllRouterMethodMetadata(target) as FullRouterMetadata;
+export function getFullRouterMethodMetadata(target: any, type: AbstractType): FullRouterMetadata {
+    let metadata = getAllRouterMethodMetadata(target, type) as FullRouterMetadata;
     metadata.router = getRouterMetadata(target);
 
     return metadata;
 }
 
-export function getFullEntityRouterMethodMetadata(target: any): FullEntityRouterMetadata {
-    let metadata = getAllRouterMethodMetadata(target) as FullEntityRouterMetadata;
+export function getFullEntityRouterMethodMetadata(target: any, type: AbstractType): FullEntityRouterMetadata {
+    let metadata = getAllRouterMethodMetadata(target, type) as FullEntityRouterMetadata;
     metadata.router = getEntityRouterMetadata(target);
 
     return metadata;
 }
 
-function getAllRouterMethodMetadata(target: any): AllRouterMethodMetadata {
+function getAllRouterMethodMetadata(target: any, type: AbstractType): AllRouterMethodMetadata {
     let actions = [];
     let errorhandler;
     let keys = new Map<string, boolean>();
 
     // get metadata from parent class recursively
-    while (target.prototype instanceof Router) {
+    while (target.prototype instanceof type) {
         let metadata = getRouterMethodMetadataList(target);
         for (const method of metadata) {
             // skip if exists

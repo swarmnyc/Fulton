@@ -3,9 +3,10 @@ import { MongoRepository, Repository, getMongoRepository, getRepository } from '
 
 import { ColumnMetadata } from 'typeorm/metadata/ColumnMetadata';
 import { EntityMetadata } from 'typeorm/metadata/EntityMetadata';
-import { IFultonApp } from "../fulton-app";
+import { FultonError } from '../common/fulton-error';
 import FultonLog from "../fulton-log";
 import Helper from '../helpers/helper';
+import { IFultonApp } from "../fulton-app";
 import { IUser } from '../identity';
 import { MongoEntityRunner } from "./runner/mongo-entity-runner";
 
@@ -199,68 +200,60 @@ export class EntityService<TEntity> implements IEntityService<TEntity> {
      */
     private adjustFilter<T>(metadata: EntityMetadata, filter: any, targetColumn: ColumnMetadata) {
         //TODO: make adjustFilter to support embedded objects
+        try {
+            if (typeof filter == "object") {
+                for (const name of Object.getOwnPropertyNames(filter)) {
+                    let value = filter[name];
 
-        if (typeof filter == "object") {
-            for (const name of Object.getOwnPropertyNames(filter)) {
-                let value = filter[name];
-
-                if (name == "$or" || name == "$and" || name == "$not" || name == "$nor") {
-                    // { filter: { $or: [ object, object ]}}
-                    if (value instanceof Array) {
-                        value.forEach((item) => this.adjustFilter(metadata, item, null));
-                    }
-                } else if (name == "$elemMatch") {
-                    // { filter: { tags: { $elemMatch: object }}}
-                    this.adjustFilter(metadata, value, null)
-                } else {
-                    if (name.startsWith("$")) {
-                        if (targetColumn == null) {
-                            // these operators must have target column                        
-                            continue;
+                    if (["$regex", "$where", "$text", "$like", "$option", "$expr"].includes(name)) {
+                        // do nothing
+                    } else if (name == "$or" || name == "$and" || name == "$not" || name == "$nor") {
+                        // { filter: { $or: [ object, object ]}}
+                        if (value instanceof Array) {
+                            value.forEach((item) => this.adjustFilter(metadata, item, null));
                         }
-
-                        if (["$regex", "$where", "$text", "$like", "$option", "$expr"].includes(name)) {
-                            // do nothing
-                        } else if (["$size", "$minDistance", "$maxDistance"].includes(name)) {
-                            // { filter: { tags: { $size: number }}}
-                            filter[name] = this.convertType("number", value);
-                            continue;
-                        } else if (["$in", "$nin"].includes(name)) {
-                            // { filter: { name: { $in: [ value, value, value] }}}
-                            if (value instanceof Array) {
+                    } else if (name == "$elemMatch") {
+                        // { filter: { tags: { $elemMatch: object }}}
+                        this.adjustFilter(metadata, value, null)
+                    } else if (["$size", "$minDistance", "$maxDistance"].includes(name)) {
+                        // { filter: { tags: { $size: number }}}
+                        filter[name] = this.convertType("number", value);
+                        continue;
+                    } else if (name == "$exists") {
+                        // { filter: { tags: { $exists: boolean }}}
+                        filter[name] = this.convertType("boolean", value);
+                    } else if (name == "$all") {
+                        if (value instanceof Array && value.length > 0) {
+                            if (typeof value[0] == "object") {
+                                // { filter: { tags: { $all: [ object, object, object] }}}
+                                // might not work because embedded document don't have metadata.
+                                value.forEach((item) => this.adjustFilter(metadata, item, targetColumn));
+                            } else {
+                                // { filter: { tags: { $all: [ value, value, value] }}}
                                 filter[name] = value.map((item) => this.convertType(targetColumn, item));
                             }
-                        } else if (["$eq", "$gt", "$gte", "$lt", "$lte", "$ne"].includes(name)) {
-                            // { filter: { price: { $gte: value }}}
-                            filter[name] = this.convertType(targetColumn, value);
-                        } else if (["$near", "$nearSphere", "$center", "$centerSphere", "$box", "$polygon", "$mod"].includes(name)) {
-                            // { filter: { location : { $near : [ number, number ]}}}
-                            // { filter: { location : { $box : [[ number, number ], [ number, number ]]}}}
-                            let convert = (v: any): any => {
-                                if (v instanceof Array) {
-                                    return v.map(convert);
-                                } else {
-                                    return this.convertType("number", v)
-                                }
+                        }
+                    } else if (["$in", "$nin"].includes(name)) {
+                        // { filter: { name: { $in: [ value, value, value] }}}
+                        if (value instanceof Array) {
+                            filter[name] = value.map((item) => this.convertType(targetColumn, item));
+                        }
+                    } else if (["$eq", "$gt", "$gte", "$lt", "$lte", "$ne"].includes(name)) {
+                        // { filter: { price: { $gte: value }}}
+                        filter[name] = this.convertType(targetColumn, value);
+                    } else if (["$near", "$nearSphere", "$center", "$centerSphere", "$box", "$polygon", "$mod"].includes(name)) {
+                        // { filter: { location : { $near : [ number, number ]}}}
+                        // { filter: { location : { $box : [[ number, number ], [ number, number ]]}}}
+                        let convert = (v: any): any => {
+                            if (v instanceof Array) {
+                                return v.map(convert);
+                            } else {
+                                return this.convertType("number", v)
                             }
+                        }
 
-                            if (value instanceof Array) {
-                                filter[name] = value.map(convert);
-                            }
-                        } else if (name == "$exists") {
-                            // { filter: { tags: { $exists: boolean }}}
-                            filter[name] = this.convertType("boolean", value);
-                        } else if (name == "$all") {
-                            if (value instanceof Array && value.length > 0) {
-                                if (typeof value[0] == "object") {
-                                    // { filter: { tags: { $all: [ object, object, object] }}}
-                                    // might not work because embedded document don't have metadata.
-                                    value.forEach((item) => this.adjustFilter(metadata, item, targetColumn));
-                                } else {
-                                    // { filter: { tags: { $all: [ value, value, value] }}}
-                                    filter[name] = value.map((item) => this.convertType(targetColumn, item));
-                                }
-                            }
+                        if (value instanceof Array) {
+                            filter[name] = value.map(convert);
                         }
                     } else {
                         let columnMetadata = this.getColumnMetadata(metadata, name);
@@ -284,6 +277,8 @@ export class EntityService<TEntity> implements IEntityService<TEntity> {
                     }
                 }
             }
+        } catch (error) {
+            throw new FultonError({ message: ["invalid query parameters", error.message] });
         }
     }
 

@@ -48,6 +48,10 @@ export interface IFultonApp {
     entityMetadatas: Map<Type, EntityMetadata>;
 
     routers: Router[];
+
+    getLocalData(key: string): any;
+
+    setLocalData(key: string, value: any): void;
 }
 
 /**

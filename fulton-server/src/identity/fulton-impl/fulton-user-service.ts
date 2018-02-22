@@ -90,12 +90,12 @@ export class FultonUserService implements IUserService<FultonUser> {
         }
     }
 
-    private get options(): IdentityOptions{
+    private get options(): IdentityOptions {
         return this.app.options.identity;
     }
-    
+
     get currentUser(): FultonUser {
-        if(this.app.options.settings.zoneEnabled){
+        if (this.app.options.settings.zoneEnabled) {
             let res: Request = Zone.current.get("res");
             if (res) {
                 return res.user;
@@ -145,6 +145,7 @@ export class FultonUserService implements IUserService<FultonUser> {
         }
 
         if (errors.hasErrors()) {
+            errors.setMessage("register failed");
             throw errors;
         }
 
@@ -172,6 +173,7 @@ export class FultonUserService implements IUserService<FultonUser> {
         }
 
         if (errors.hasErrors()) {
+            errors.setMessage("register failed");
             throw errors;
         }
 
@@ -205,6 +207,7 @@ export class FultonUserService implements IUserService<FultonUser> {
         }
 
         if (errors.hasErrors()) {
+            errors.setMessage("login failed");
             throw errors;
         }
 
@@ -215,7 +218,7 @@ export class FultonUserService implements IUserService<FultonUser> {
         if (user.hashedPassword && passwordHash.verify(password, user.hashedPassword)) {
             return user;
         } else {
-            throw errors.addError("$", "username or password isn't correct");
+            throw errors.setMessage("username or password isn't correct");
         }
     }
 

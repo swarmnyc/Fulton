@@ -1,11 +1,13 @@
 import { entity, objectIdColumn, column } from "../../src/interfaces";
 import { Territory } from './territory';
+import { IsInt, Min, Max, IsEmail, IsNotEmpty } from "class-validator";
 
 @entity("customers")
 export class Customer {
     @objectIdColumn({ type: String })
     customerId: string;
 
+    @IsNotEmpty()
     @column()
     companyName: string;
 
@@ -35,6 +37,16 @@ export class Customer {
 
     @column()
     fax: string;
+
+    @IsInt()
+    @Min(0)
+    @Max(10)
+    @column()
+    rating: number;
+
+    @IsEmail()
+    @column()
+    email: string;
 
     @column(type => Territory) // embedded documents
     territories: Territory[]

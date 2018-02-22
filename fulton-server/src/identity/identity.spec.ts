@@ -181,9 +181,9 @@ describe('Identity local and bearer on UserServiceMock', () => {
 
         let errors = result.body.errors;
         expect(result.response.statusCode).toEqual(400);
-        expect(errors.username).toEqual(["username is required"]);
-        expect(errors.password).toEqual(["password is required"]);
-        expect(errors.email).toEqual(["email is required"]);
+        expect(errors.detail.username.message).toEqual("username is required");
+        expect(errors.detail.password.message).toEqual("password is required");
+        expect(errors.detail.email.message).toEqual("email is required");
     });
 
     it('should authorize by role success', async () => {

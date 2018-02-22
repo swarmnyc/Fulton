@@ -2,6 +2,7 @@ import { FultonErrorObject, IEntityRunner, IEntityService, OperationOneResult, O
 import { MongoRepository, Repository, getMongoRepository, getRepository } from 'typeorm';
 
 import { ColumnMetadata } from 'typeorm/metadata/ColumnMetadata';
+import { EmbeddedMetadata } from 'typeorm/metadata/EmbeddedMetadata';
 import { EntityMetadata } from 'typeorm/metadata/EntityMetadata';
 import { FultonError } from '../common/fulton-error';
 import FultonLog from "../fulton-log";
@@ -9,7 +10,7 @@ import Helper from '../helpers/helper';
 import { IFultonApp } from "../fulton-app";
 import { IUser } from '../identity';
 import { MongoEntityRunner } from "./runner/mongo-entity-runner";
-import { EmbeddedMetadata } from 'typeorm/metadata/EmbeddedMetadata';
+import { validate } from "class-validator";
 
 @injectable()
 export class EntityService<TEntity> implements IEntityService<TEntity> {
@@ -96,32 +97,38 @@ export class EntityService<TEntity> implements IEntityService<TEntity> {
             .catch(this.errorHandler);
     }
 
-    create(input: TEntity): Promise<OperationOneResult<TEntity>> {
-        let entity = this.convertAndVerifyEntity(this.mainRepository.metadata, input);
+    async create(input: TEntity): Promise<OperationOneResult<TEntity>> {
+        try {
+            let entity = await this.convertAndVerifyEntity(this.mainRepository.metadata, input);
 
-        return this.runner
-            .create(this.mainRepository, entity)
-            .then((newEntity) => {
-                return {
-                    data: newEntity
-                }
-            })
-            .catch(this.errorHandler);
+            return this.runner
+                .create(this.mainRepository, entity)
+                .then((newEntity) => {
+                    return {
+                        data: newEntity
+                    }
+                })
+                .catch(this.errorHandler);
+        } catch (error) {
+            return this.errorHandler(error);
+        }
     }
 
-    update(id: any, input: TEntity): Promise<OperationStatus> {
-        let entity = this.convertAndVerifyEntity(this.mainRepository.metadata, input);
+    async update(id: any, input: TEntity): Promise<OperationStatus> {
+        try {
+            id = this.convertId(this.mainRepository.metadata, id);
 
-        id = this.convertId(this.mainRepository.metadata, id);
+            let entity = await this.convertAndVerifyEntity(this.mainRepository.metadata, input);
 
-        return this.runner
-            .update(this.mainRepository, id, entity)
-            .then((newEntity) => {
-                return {
-                    status: 202
-                }
-            })
-            .catch(this.errorHandler);
+            return this.runner
+                .update(this.mainRepository, id, entity)
+                .then((newEntity) => {
+                    return { status: 202 }
+                })
+                .catch(this.errorHandler);
+        } catch (error) {
+            return this.errorHandler(error);
+        }
     }
 
     delete(id: any): Promise<OperationStatus> {
@@ -182,7 +189,7 @@ export class EntityService<TEntity> implements IEntityService<TEntity> {
     /** 
      * adjust entity, because some properties are miss type like date is string after JSON.parse
      */
-    protected convertAndVerifyEntity(em: EntityMetadata | Type, input: any): any {
+    protected convertAndVerifyEntity(em: EntityMetadata | Type, input: any): Promise<any> {
         let metadata: EntityMetadata;
 
         if (em instanceof Function) {
@@ -193,9 +200,23 @@ export class EntityService<TEntity> implements IEntityService<TEntity> {
 
         let entity = this.convertEntity(metadata, input);
 
-        this.verifyEntity(metadata, input);
+        return validate(entity)
+            .then((errors) => {
+                if (errors.length == 0) {
+                    return entity;
+                } else {
+                    let detail: any = {};
 
-        return entity;
+                    for (const error of errors) {
+                        detail[error.property] = error.constraints;
+                    }
+
+                    throw new FultonError({
+                        message: "invalid input",
+                        detail: detail
+                    });
+                }
+            });
     }
 
     protected convertType(metadata: string | ColumnMetadata, value: any): any {
@@ -245,11 +266,15 @@ export class EntityService<TEntity> implements IEntityService<TEntity> {
      * @param error 
      */
     protected errorHandler(error: any): OperationResult & OperationOneResult {
-        FultonLog.error("MongoEntityService operation failed with error:\n", error);
+        FultonLog.error("EntityService operation failed with error:\n%O", error);
 
-        return {
-            errors: {
-                "message": [error.message as string]
+        if (error instanceof FultonError) {
+            return error
+        } else {
+            return {
+                errors: {
+                    "message": error.message
+                }
             }
         }
     }
@@ -335,7 +360,7 @@ export class EntityService<TEntity> implements IEntityService<TEntity> {
                         if (targetMetadata) {
                             this.adjustFilter(targetMetadata, value, null);
                         }
-                        
+
                         continue;
                     }
 
@@ -362,7 +387,7 @@ export class EntityService<TEntity> implements IEntityService<TEntity> {
                 }
             }
         } catch (error) {
-            throw new FultonError({ message: ["invalid query parameters", error.message] });
+            throw new FultonError({ message: "invalid query parameters", detail: error.message });
         }
     }
 
@@ -426,9 +451,5 @@ export class EntityService<TEntity> implements IEntityService<TEntity> {
         }
 
         return rel
-    }
-
-    private verifyEntity(metadata: EntityMetadata, input: any): any {
-
     }
 }

@@ -31,9 +31,22 @@ export interface RouterActionDocOptions {
     description?: string;
 }
 
+export interface FultonErrorConstraints {
+    [key: string]: string;
+}
+
+export interface FultonErrorItem {
+    message?: string;
+    constraints?: FultonErrorConstraints;
+}
+
+export interface FultonErrorDetail {
+    [key: string]: FultonErrorItem;
+}
+
 export interface FultonErrorObject {
-    message?: string[];
-    [key: string]: string[];
+    message?: string;
+    detail?: FultonErrorDetail;
 }
 
 /**

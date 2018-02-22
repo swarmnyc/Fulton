@@ -85,8 +85,8 @@ describe('Identity Integration Test', () => {
         });
         expect(result.response.statusCode).toEqual(400);
 
-        expect(result.body.errors.username).toEqual(["the username is existed"]);
-        expect(result.body.errors.email).toEqual(["the email is existed"]);
+        expect(result.body.errors.detail.username.message).toEqual("the username is existed");
+        expect(result.body.errors.detail.email.message).toEqual("the email is existed");
     });
 
     it('should login successfully', async () => {
@@ -110,7 +110,7 @@ describe('Identity Integration Test', () => {
         });
 
         expect(result.response.statusCode).toEqual(400);
-        expect(result.body.errors.$).toEqual(["username or password isn't correct"]);
+        expect(result.body.errors.message).toEqual("username or password isn't correct");
     });
 
     it('should access with token', async () => {

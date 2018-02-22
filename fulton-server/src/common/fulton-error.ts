@@ -1,5 +1,5 @@
 import * as lodash from 'lodash';
-import { FultonErrorObject } from '../interfaces';
+import { FultonErrorObject, FultonErrorConstraints } from '../interfaces';
 
 /**
  * The error that returns to client
@@ -15,26 +15,22 @@ export class FultonError {
 
     constructor(errors?: FultonErrorObject) {
         this.errors = errors || {};
+
+        if (this.errors.detail == null) {
+            this.errors.detail = {};
+        }
     }
 
+    setMessage(msg: string) {
+        this.errors.message = msg;
+        return this;
+    }
 
-    addError(errorMessage: string): FultonError;
-    addError(propertyName: string, errorMessage: string): FultonError;
-    addError(...args: string[]): FultonError {
-        let propertyName: string;
-        let errorMessage: string;
-        if (args.length == 2) {
-            propertyName = args[0];
-            errorMessage = args[1];
+    addError(propertyName: string, errorMessage: string, constraints?: FultonErrorConstraints): FultonError {
+        if (this.errors.detail[propertyName]) {
+            Object.assign(this.errors.detail[propertyName].constraints, constraints);
         } else {
-            propertyName = "message";
-            errorMessage = args[0];
-        }
-
-        if (this.errors[propertyName]) {
-            this.errors[propertyName].push(errorMessage);
-        } else {
-            this.errors[propertyName] = [errorMessage];
+            this.errors.detail[propertyName] = { message: errorMessage, constraints };
         }
 
         return this;
@@ -65,6 +61,6 @@ export class FultonError {
     }
 
     hasErrors(): boolean {
-        return Object.getOwnPropertyNames(this.errors).length > 0;
+        return this.errors.message != null || Object.getOwnPropertyNames(this.errors.detail).length > 0;
     }
 }

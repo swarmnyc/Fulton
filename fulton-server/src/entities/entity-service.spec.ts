@@ -11,6 +11,7 @@ import { Territory } from '../../spec/entities/territory';
 import { createFakeConnection } from '../../spec/helpers/entity-helper';
 import { ObjectId } from 'bson';
 import { Customer } from '../../spec/entities/customer';
+import { FultonError } from '../common/fulton-error';
 
 class MyApp extends FultonApp {
     protected onInit(options: FultonAppOptions): void | Promise<void> { }
@@ -324,7 +325,7 @@ describe('entity service', () => {
             "description": "Soft drinks coffees teas beers and ales"
         };
 
-        let output = service["convertAndVerifyEntity"](categoryMetadata, input);
+        let output = service["convertEntity"](categoryMetadata, input);
 
         expect(output instanceof Category).toBeTruthy();
         expect(Object.assign({}, output)).toEqual({
@@ -342,7 +343,7 @@ describe('entity service', () => {
             "extra": "extra columns should be removed"
         };
 
-        let output = service["convertAndVerifyEntity"](categoryMetadata, input);
+        let output = service["convertEntity"](categoryMetadata, input);
 
         expect(output instanceof Category).toBeTruthy();
         expect({ ...output }).toEqual({
@@ -380,7 +381,7 @@ describe('entity service', () => {
             ]
         };
 
-        let output: Customer = service["convertAndVerifyEntity"](customerMetadata, input);
+        let output: Customer = service["convertEntity"](customerMetadata, input);
 
         expect(output instanceof Customer).toBeTruthy();
 
@@ -438,9 +439,9 @@ describe('entity service', () => {
                             "categoryName": "Beverages",
 
                         },
-                        { 
+                        {
                             "categoryId": "000000000000000000000002",
-                            "categoryName" : "Confections",
+                            "categoryName": "Confections",
                         }
                     ]
                 }
@@ -448,7 +449,7 @@ describe('entity service', () => {
             ]
         };
 
-        let output: Customer = service["convertAndVerifyEntity"](customerMetadata, input);
+        let output: Customer = service["convertEntity"](customerMetadata, input);
 
         expect(output instanceof Customer).toBeTruthy();
 
@@ -474,7 +475,7 @@ describe('entity service', () => {
                         {
                             "categoryId": new ObjectId("000000000000000000000001"),
                         },
-                        { 
+                        {
                             "categoryId": new ObjectId("000000000000000000000002"),
                         }
                     ]
@@ -482,4 +483,19 @@ describe('entity service', () => {
             ]
         });
     });
+
+    it('should validate input fail', () => {
+        let input = {
+            "rating": 100,
+            "email": "test"
+        };
+
+        return service["convertAndVerifyEntity"](customerMetadata, input)
+            .then(() => {
+                fail("should not pass");
+            })
+            .catch((errors: FultonError) => {
+                expect(errors.errors.detail).toBeTruthy();
+            });
+    })
 });

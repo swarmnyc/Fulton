@@ -1,6 +1,7 @@
 import { entity, objectIdColumn, column } from "../../src/interfaces";
 import { Category } from './category';
 import { relatedTo } from '../../src/entities/related-decorators';
+import { IsNumber } from "class-validator";
 
 @entity("territories")
 export class Territory {
@@ -10,6 +11,7 @@ export class Territory {
     @column()
     territoryDescription: string;
 
+    @IsNumber()
     @column()
     regionId: number;
 

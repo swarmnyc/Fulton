@@ -484,6 +484,23 @@ describe('entity service', () => {
         });
     });
 
+    it('should validate input success', () => {
+        let input = {
+            "customerId": "ALFKI",
+            "companyName": "Alfreds Futterkiste",
+            "contactName": "Maria Anders",
+            "contactTitle": "Sales Representative",
+            "address": "Obere Str. 57",
+            "rating": 5,
+            "email": "test@test.com"
+        };
+
+        return service["convertAndVerifyEntity"](customerMetadata, input)
+            .catch((result: FultonError) => {
+                fail("should pass");
+            });
+    })
+
     it('should validate input fail', () => {
         let input = {
             "rating": 100,
@@ -494,8 +511,39 @@ describe('entity service', () => {
             .then(() => {
                 fail("should not pass");
             })
-            .catch((errors: FultonError) => {
-                expect(errors.errors.detail).toBeTruthy();
+            .catch((result: FultonError) => {
+                expect(result.errors).toEqual({
+                    message: "invalid input",
+                    detail: {
+                        companyName: { isNotEmpty: 'companyName should not be empty' },
+                        rating: { max: 'rating must be less than 10' },
+                        email: { isEmail: 'email must be an email' }
+                    }
+                });
+            });
+    })
+
+    fit('should validate input fail deeply', () => {
+        let input = {
+            "companyName": "Alfreds Futterkiste",
+            "territories": [
+                {
+                    "regionId": "test"
+                }
+            ]
+        };
+
+        return service["convertAndVerifyEntity"](customerMetadata, input)
+            .then(() => {
+                fail("should not pass");
+            })
+            .catch((result: FultonError) => {
+                expect(result.errors).toEqual({
+                    message: "invalid input",
+                    detail: {
+                        "territories.0.regionId": { isNumber: 'regionId must be a number' }
+                    }
+                });
             });
     })
 });

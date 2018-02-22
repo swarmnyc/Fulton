@@ -1,13 +1,13 @@
 import { entity, objectIdColumn, column } from "../../src/interfaces";
 import { Territory } from './territory';
-import { IsInt, Min, Max, IsEmail, IsNotEmpty } from "class-validator";
+import { IsInt, Min, Max, IsEmail, IsNotEmpty, ValidateNested, IsDefined } from "class-validator";
 
 @entity("customers")
 export class Customer {
     @objectIdColumn({ type: String })
     customerId: string;
 
-    @IsNotEmpty()
+    @IsDefined()
     @column()
     companyName: string;
 
@@ -48,6 +48,7 @@ export class Customer {
     @column()
     email: string;
 
+    @ValidateNested() // children must have this
     @column(type => Territory) // embedded documents
     territories: Territory[]
 }

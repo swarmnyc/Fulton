@@ -10,7 +10,7 @@ import Helper from '../helpers/helper';
 import { IFultonApp } from "../fulton-app";
 import { IUser } from '../identity';
 import { MongoEntityRunner } from "./runner/mongo-entity-runner";
-import { validate } from "class-validator";
+import { validate, ValidationError } from "class-validator";
 
 @injectable()
 export class EntityService<TEntity> implements IEntityService<TEntity> {
@@ -200,21 +200,20 @@ export class EntityService<TEntity> implements IEntityService<TEntity> {
 
         let entity = this.convertEntity(metadata, input);
 
-        return validate(entity)
+        return this.verifyEntity(entity);
+    }
+
+    private verifyEntity(entity: any): Promise<any> {
+        return validate(entity, { skipMissingProperties: true })
             .then((errors) => {
                 if (errors.length == 0) {
                     return entity;
                 } else {
-                    let detail: any = {};
+                    let result = new FultonError({ message: "invalid input" });
 
-                    for (const error of errors) {
-                        detail[error.property] = error.constraints;
-                    }
+                    this.convertValidationError(result, errors, null);
 
-                    throw new FultonError({
-                        message: "invalid input",
-                        detail: detail
-                    });
+                    throw result;
                 }
             });
     }
@@ -443,6 +442,7 @@ export class EntityService<TEntity> implements IEntityService<TEntity> {
     }
 
     private pickId(metadata: EntityMetadata, input: any): any {
+        // might it should throw error if there is no id
         let rel: any = {};
 
         for (const keyColumn of metadata.primaryColumns) {
@@ -451,5 +451,19 @@ export class EntityService<TEntity> implements IEntityService<TEntity> {
         }
 
         return rel
+    }
+
+    private convertValidationError(result: FultonError, errors: ValidationError[], parent: string) {
+        for (const error of errors) {
+            let property = parent ? `${parent}.${error.property}` : error.property
+            
+            if (error.children && error.children.length > 0) {
+                this.convertValidationError(result, error.children, property);
+            }
+
+            if (error.constraints) {
+                result.addErrors(property, error.constraints);
+            }
+        }
     }
 }

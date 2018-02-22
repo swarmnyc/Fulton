@@ -1,5 +1,5 @@
 import * as lodash from 'lodash';
-import { FultonErrorObject, FultonErrorConstraints } from '../interfaces';
+import { FultonErrorObject, FultonErrorConstraints, FultonErrorDetail, FultonErrorItem } from '../interfaces';
 
 /**
  * The error that returns to client
@@ -27,10 +27,22 @@ export class FultonError {
     }
 
     addError(propertyName: string, errorMessage: string, constraints?: FultonErrorConstraints): FultonError {
-        if (this.errors.detail[propertyName]) {
-            Object.assign(this.errors.detail[propertyName].constraints, constraints);
+        let error = this.errors.detail[propertyName] as FultonErrorItem
+        if (error && "constraints" in error) {
+            Object.assign(error.constraints, constraints);
         } else {
             this.errors.detail[propertyName] = { message: errorMessage, constraints };
+        }
+
+        return this;
+    }
+
+    addErrors(propertyName: string, constraints?: FultonErrorConstraints): FultonError {
+        let error = this.errors.detail[propertyName] as FultonErrorConstraints
+        if (error) {
+            Object.assign(error, constraints);
+        } else {
+            this.errors.detail[propertyName] = constraints;
         }
 
         return this;

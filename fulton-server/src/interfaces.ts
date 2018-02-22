@@ -41,7 +41,7 @@ export interface FultonErrorItem {
 }
 
 export interface FultonErrorDetail {
-    [key: string]: FultonErrorItem;
+    [key: string]: string | FultonErrorItem | FultonErrorConstraints;
 }
 
 export interface FultonErrorObject {

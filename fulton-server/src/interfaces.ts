@@ -81,6 +81,10 @@ export interface IEntityRunner {
     delete<TEntity>(repository: Repository<TEntity>, id: any): Promise<void>;
 }
 
+export interface IMongoEntityRunner extends IEntityRunner {
+    convertToObjectId(id: any): any;
+}
+
 /**
  * for sorting and select, for example sort = {column1:1 , column2:-1 }
  */

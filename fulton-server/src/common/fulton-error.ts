@@ -13,11 +13,13 @@ import { FultonErrorObject, FultonErrorConstraints, FultonErrorDetail, FultonErr
 export class FultonError {
     errors: FultonErrorObject;
 
-    constructor(errors?: FultonErrorObject) {
-        this.errors = errors || {};
-
-        if (this.errors.detail == null) {
-            this.errors.detail = {};
+    constructor(input?: FultonErrorObject | string) {
+        if (typeof input == "string") {
+            this.errors = {
+                message: input
+            }
+        } else {
+            this.errors = input || {};
         }
     }
 
@@ -27,6 +29,10 @@ export class FultonError {
     }
 
     addError(propertyName: string, errorMessage: string, constraints?: FultonErrorConstraints): FultonError {
+        if (this.errors.detail == null) {
+            this.errors.detail = {};
+        }
+
         let error = this.errors.detail[propertyName] as FultonErrorItem
         if (error && "constraints" in error) {
             Object.assign(error.constraints, constraints);
@@ -38,6 +44,10 @@ export class FultonError {
     }
 
     addErrors(propertyName: string, constraints?: FultonErrorConstraints): FultonError {
+        if (this.errors.detail == null) {
+            this.errors.detail = {};
+        }
+
         let error = this.errors.detail[propertyName] as FultonErrorConstraints
         if (error) {
             Object.assign(error, constraints);
@@ -73,6 +83,69 @@ export class FultonError {
     }
 
     hasErrors(): boolean {
-        return this.errors.message != null || Object.getOwnPropertyNames(this.errors.detail).length > 0;
+        return this.errors.message != null || this.errors.detail != null;
+    }
+}
+
+/**
+ * Record Error for recursive operation;
+ */
+export class FultonStackError extends FultonError {
+    errors: FultonErrorObject;
+    properties: string[];
+    constructor(message: string) {
+        super(message);
+
+        this.properties = [];
+    }
+
+    push(propertyName: string): FultonStackError {
+        this.properties.push(propertyName);
+        return this;
+    }
+
+    pop(): FultonStackError {
+        this.properties.pop();
+        return this;
+    }
+
+    /** the wrapper for forEach in order to add i into stack */
+    forEach<T>(value: Array<T>, func: (value: T, index: number) => void): void {
+        value.forEach((item: any, i: number) => {
+            this.push(i.toString())
+            func(item, i);
+            this.pop();
+        })
+    }
+
+    /** the wrapper for map in order to add i into stack */
+    map<T>(value: Array<T>, func: (value: T, index: number) => T): T[] {
+        return value.map((item: any, i: number) => {
+            this.push(i.toString())
+            let result = func(item, i);
+            this.pop();
+
+            return result;
+        });
+    }
+
+    add(errorMessage: string, addNameToMessage?: boolean): FultonStackError {
+        if (this.errors.detail == null) {
+            this.errors.detail = {};
+        }
+
+        let propertyName = this.properties.join(".");
+
+        if (addNameToMessage && this.properties.length > 0) {
+            errorMessage = `${this.properties[this.properties.length - 1]} ${errorMessage}`
+        }
+
+        this.errors.detail[propertyName] = errorMessage;
+
+        return this;
+    }
+
+    hasErrors(): boolean {
+        return this.errors.detail != null;
     }
 }

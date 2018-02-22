@@ -1,23 +1,23 @@
-import { FultonErrorObject, IEntityRunner, IEntityService, OperationOneResult, OperationResult, OperationStatus, QueryParams, Type, entity, inject, injectable } from '../interfaces';
+import { FultonError, FultonStackError } from '../common/fulton-error';
+import { FultonErrorObject, IEntityRunner, IEntityService, IMongoEntityRunner, OperationOneResult, OperationResult, OperationStatus, QueryParams, Type, entity, inject, injectable } from '../interfaces';
 import { MongoRepository, Repository, getMongoRepository, getRepository } from 'typeorm';
+import { ValidationError, validate } from "class-validator";
 
 import { ColumnMetadata } from 'typeorm/metadata/ColumnMetadata';
 import { EmbeddedMetadata } from 'typeorm/metadata/EmbeddedMetadata';
 import { EntityMetadata } from 'typeorm/metadata/EntityMetadata';
-import { FultonError } from '../common/fulton-error';
 import FultonLog from "../fulton-log";
 import Helper from '../helpers/helper';
 import { IFultonApp } from "../fulton-app";
 import { IUser } from '../identity';
 import { MongoEntityRunner } from "./runner/mongo-entity-runner";
-import { validate, ValidationError } from "class-validator";
 
 @injectable()
 export class EntityService<TEntity> implements IEntityService<TEntity> {
     @inject("FultonApp")
     protected app: IFultonApp;
     protected mainRepository: Repository<TEntity>
-    private _runner: IEntityRunner
+    private _runner: IEntityRunner | IMongoEntityRunner;
 
     constructor(entity: Type<TEntity>)
     constructor(mainRepository: Repository<TEntity>)
@@ -29,7 +29,7 @@ export class EntityService<TEntity> implements IEntityService<TEntity> {
         }
     }
 
-    protected get runner(): IEntityRunner {
+    protected get runner(): IEntityRunner | IMongoEntityRunner {
         if (this._runner == null) {
             if (this.mainRepository instanceof MongoRepository) {
                 this._runner = this.app.container.get(MongoEntityRunner);
@@ -54,7 +54,10 @@ export class EntityService<TEntity> implements IEntityService<TEntity> {
     }
 
     find(queryParams?: QueryParams): Promise<OperationResult<TEntity>> {
-        this.adjustParams(this.mainRepository.metadata, queryParams);
+        let errors = this.adjustParams(this.mainRepository.metadata, queryParams);
+        if (errors) {
+            return Promise.resolve(errors);
+        }
 
         return this.runner
             .find(this.mainRepository, queryParams)
@@ -72,6 +75,11 @@ export class EntityService<TEntity> implements IEntityService<TEntity> {
     }
 
     findOne(queryParams?: QueryParams): Promise<OperationOneResult<TEntity>> {
+        let errors = this.adjustParams(this.mainRepository.metadata, queryParams);
+        if (errors) {
+            return Promise.resolve(errors);
+        }
+
         return this.runner
             .findOne(this.mainRepository, queryParams)
             .then((data) => {
@@ -83,9 +91,16 @@ export class EntityService<TEntity> implements IEntityService<TEntity> {
     }
 
     findById(id: any, queryParams?: QueryParams): Promise<OperationOneResult<TEntity>> {
-        this.adjustParams(this.mainRepository.metadata, queryParams);
+        let errors = this.adjustParams(this.mainRepository.metadata, queryParams);
+        if (errors) {
+            return Promise.resolve(errors);
+        }
 
         id = this.convertId(this.mainRepository.metadata, id);
+
+        if (!id) {
+            return Promise.resolve(new FultonError("invalid id"));
+        }
 
         return this.runner
             .findById(this.mainRepository, id, queryParams)
@@ -97,42 +112,45 @@ export class EntityService<TEntity> implements IEntityService<TEntity> {
             .catch(this.errorHandler);
     }
 
-    async create(input: TEntity): Promise<OperationOneResult<TEntity>> {
-        try {
-            let entity = await this.convertAndVerifyEntity(this.mainRepository.metadata, input);
-
-            return this.runner
-                .create(this.mainRepository, entity)
-                .then((newEntity) => {
-                    return {
-                        data: newEntity
-                    }
-                })
-                .catch(this.errorHandler);
-        } catch (error) {
-            return this.errorHandler(error);
-        }
+    create(input: TEntity): Promise<OperationOneResult<TEntity>> {
+        return this.convertAndVerifyEntity(this.mainRepository.metadata, input)
+            .then((entity) => {
+                return this.runner
+                    .create(this.mainRepository, entity)
+                    .then((newEntity) => {
+                        return {
+                            data: newEntity
+                        }
+                    })
+            })
+            .catch(this.errorHandler);
     }
 
-    async update(id: any, input: TEntity): Promise<OperationStatus> {
-        try {
-            id = this.convertId(this.mainRepository.metadata, id);
+    update(id: any, input: TEntity): Promise<OperationStatus> {
+        id = this.convertId(this.mainRepository.metadata, id);
 
-            let entity = await this.convertAndVerifyEntity(this.mainRepository.metadata, input);
-
-            return this.runner
-                .update(this.mainRepository, id, entity)
-                .then((newEntity) => {
-                    return { status: 202 }
-                })
-                .catch(this.errorHandler);
-        } catch (error) {
-            return this.errorHandler(error);
+        if (!id) {
+            return Promise.resolve(new FultonError("invalid id"));
         }
+
+        return this
+            .convertAndVerifyEntity(this.mainRepository.metadata, input)
+            .then((entity) => {
+                return this.runner
+                    .update(this.mainRepository, id, entity)
+                    .then((newEntity) => {
+                        return { status: 202 }
+                    })
+            })
+            .catch(this.errorHandler);
     }
 
     delete(id: any): Promise<OperationStatus> {
         id = this.convertId(this.mainRepository.metadata, id);
+
+        if (!id) {
+            return Promise.resolve(new FultonError("invalid id"));
+        }
 
         return this.runner
             .delete(this.mainRepository, id)
@@ -156,8 +174,7 @@ export class EntityService<TEntity> implements IEntityService<TEntity> {
             metadata = em;
         }
 
-        if (metadata.primaryColumns.length == 1) {
-            // only supports the entity has one primary key.            
+        if (metadata.primaryColumns.length > 0) {
             return this.convertType(metadata.primaryColumns[0], id);
         }
 
@@ -167,9 +184,10 @@ export class EntityService<TEntity> implements IEntityService<TEntity> {
     /** 
      * adjust filter, because some properties are miss type QueryString is always string, but some params int or date
      */
-    protected adjustParams<T>(em: EntityMetadata | Type, params: QueryParams) {
+    protected adjustParams<T>(em: EntityMetadata | Type, params: QueryParams): FultonError {
         // only adjust if it needs
         if (params.needAdjust) {
+            let errorTracker = new FultonStackError("invalid query parameters");
             let metadata: EntityMetadata;
 
             if (em instanceof Function) {
@@ -179,10 +197,16 @@ export class EntityService<TEntity> implements IEntityService<TEntity> {
             }
 
             if (params.filter) {
-                this.adjustFilter(metadata, params.filter, null);
+                errorTracker.push("filter");
+                this.adjustFilter(metadata, params.filter, null, errorTracker);
+                errorTracker.pop();
             }
 
             delete params.needAdjust;
+
+            if (errorTracker.hasErrors()) {
+                return errorTracker;
+            }
         }
     }
 
@@ -191,6 +215,7 @@ export class EntityService<TEntity> implements IEntityService<TEntity> {
      */
     protected convertAndVerifyEntity(em: EntityMetadata | Type, input: any): Promise<any> {
         let metadata: EntityMetadata;
+        let errorTracker = new FultonStackError("invalid input");
 
         if (em instanceof Function) {
             metadata = this.app.entityMetadatas.get(em);
@@ -198,66 +223,32 @@ export class EntityService<TEntity> implements IEntityService<TEntity> {
             metadata = em;
         }
 
-        let entity = this.convertEntity(metadata, input);
+        let entity = this.convertEntity(metadata, input, errorTracker);
 
-        return this.verifyEntity(entity);
+        if (errorTracker.hasErrors()) {
+            return Promise.reject(errorTracker);
+        }
+
+        return this.verifyEntity(entity, errorTracker);
     }
 
-    private verifyEntity(entity: any): Promise<any> {
+    private verifyEntity(entity: any, errorTracker: FultonStackError): Promise<any> {
         return validate(entity, { skipMissingProperties: true })
             .then((errors) => {
                 if (errors.length == 0) {
-                    return entity;
+                    if (errorTracker.hasErrors()) {
+                        return Promise.reject(errorTracker);
+                    } else {
+                        return entity;
+                    }
                 } else {
-                    let result = new FultonError({ message: "invalid input" });
-
-                    this.convertValidationError(result, errors, null);
-
-                    throw result;
+                    return Promise.reject(this.convertValidationError(errorTracker, errors, null));
                 }
             });
     }
 
     protected convertType(metadata: string | ColumnMetadata, value: any): any {
-        if (metadata != null && value != null) {
-            let type;
-            if (metadata instanceof ColumnMetadata) {
-                type = metadata.type;
-
-                if (!type && metadata.isObjectId) {
-                    type = "ObjectId";
-                }
-            } else {
-                type = metadata;
-            }
-
-            if (type == null) {
-                return value;
-            }
-
-            if ((type == "number" || type == Number) && typeof value != "number") {
-                return parseFloat(value);
-            }
-
-            if ((type == "boolean" || type == Boolean) && typeof value != "boolean") {
-                return Helper.getBoolean(value);
-            }
-
-            if ((type == "date" || type == "datetime" || type == Date) && !(value instanceof Date)) {
-                if (Helper.isNumberString(value)) {
-                    return new Date(parseFloat(value));
-                } else {
-                    return new Date(value);
-                }
-            }
-
-            if (type == "ObjectId" && value.constructor.name != "ObjectID") {
-                // EntityService is for sql and mongo, this writing is find without mongodb installed
-                return new (require('bson').ObjectId)(value);
-            }
-        }
-
-        return value;
+        return this.convertTypeCore(metadata, value, null);
     }
 
     /**
@@ -265,14 +256,14 @@ export class EntityService<TEntity> implements IEntityService<TEntity> {
      * @param error 
      */
     protected errorHandler(error: any): OperationResult & OperationOneResult {
-        FultonLog.error("EntityService operation failed with error:\n%O", error);
+        FultonLog.warn("EntityService operation failed with error:\n%O", error);
 
         if (error instanceof FultonError) {
             return error
         } else {
             return {
                 errors: {
-                    "message": error.message
+                    message: error.message
                 }
             }
         }
@@ -280,7 +271,7 @@ export class EntityService<TEntity> implements IEntityService<TEntity> {
 
     private getColumnMetadata(metadata: EntityMetadata, name: string): ColumnMetadata {
         if (name) {
-            if ((name == "id" || name == "_id") && metadata.primaryColumns.length == 1) {
+            if ((name == "id" || name == "_id")) {
                 return metadata.primaryColumns[0];
             } else {
                 return metadata.ownColumns.find((col) => col.propertyName == name);
@@ -292,77 +283,79 @@ export class EntityService<TEntity> implements IEntityService<TEntity> {
      * adjust filter, because some properties are miss type QueryString is always string, but some params int or date
      * support some mongo query operators https://docs.mongodb.com/manual/reference/operator/query/
      */
-    private adjustFilter<T>(metadata: EntityMetadata, filter: any, targetColumn: ColumnMetadata) {
-        try {
-            if (typeof filter != "object") {
-                return;
+    private adjustFilter<T>(metadata: EntityMetadata, filter: any, targetColumn: ColumnMetadata, errorTracker: FultonStackError): void {
+        if (typeof filter != "object") {
+            return;
+        }
+
+        for (const name of Object.getOwnPropertyNames(filter)) {
+            let value = filter[name];
+            if (value == null) {
+                continue;
             }
 
-            for (const name of Object.getOwnPropertyNames(filter)) {
-                let value = filter[name];
+            errorTracker.push(name);
 
-                if (["$regex", "$where", "$text", "$like", "$option", "$expr"].includes(name)) {
-                    // do nothing
-                } else if (name == "$or" || name == "$and" || name == "$not" || name == "$nor") {
-                    // { filter: { $or: [ object, object ]}}
-                    if (value instanceof Array) {
-                        value.forEach((item) => this.adjustFilter(metadata, item, null));
+            if (["$regex", "$where", "$text", "$like", "$option", "$expr"].includes(name)) {
+                // do nothing
+            } else if (name == "$or" || name == "$and" || name == "$not" || name == "$nor") {
+                // { filter: { $or: [ object, object ]}}
+                if (value instanceof Array) {
+                    errorTracker.forEach(value, (item) => {
+                        this.adjustFilter(metadata, item, null, errorTracker);
+                    });
+                }
+            } else if (name == "$elemMatch") {
+                // { filter: { tags: { $elemMatch: object }}}
+                this.adjustFilter(metadata, value, null, errorTracker)
+            } else if (["$size", "$minDistance", "$maxDistance"].includes(name)) {
+                // { filter: { tags: { $size: number }}}
+                filter[name] = this.convertTypeCore("number", value, errorTracker);
+            } else if (name == "$exists") {
+                // { filter: { tags: { $exists: boolean }}}
+                filter[name] = this.convertTypeCore("boolean", value, errorTracker);
+            } else if (name == "$all") {
+                if (value instanceof Array && value.length > 0) {
+                    if (typeof value[0] == "object") {
+                        // { filter: { tags: { $all: [ object, object, object] }}}
+                        // might not work because embedded document don't have metadata.
+                        errorTracker.forEach(value, (item, i) => this.adjustFilter(metadata, item, targetColumn, errorTracker));
+                    } else {
+                        // { filter: { tags: { $all: [ value, value, value] }}}
+                        filter[name] = errorTracker.map(value, (item) => this.convertTypeCore(targetColumn, item, errorTracker));
                     }
-                } else if (name == "$elemMatch") {
-                    // { filter: { tags: { $elemMatch: object }}}
-                    this.adjustFilter(metadata, value, null)
-                } else if (["$size", "$minDistance", "$maxDistance"].includes(name)) {
-                    // { filter: { tags: { $size: number }}}
-                    filter[name] = this.convertType("number", value);
-                    continue;
-                } else if (name == "$exists") {
-                    // { filter: { tags: { $exists: boolean }}}
-                    filter[name] = this.convertType("boolean", value);
-                } else if (name == "$all") {
-                    if (value instanceof Array && value.length > 0) {
-                        if (typeof value[0] == "object") {
-                            // { filter: { tags: { $all: [ object, object, object] }}}
-                            // might not work because embedded document don't have metadata.
-                            value.forEach((item) => this.adjustFilter(metadata, item, targetColumn));
-                        } else {
-                            // { filter: { tags: { $all: [ value, value, value] }}}
-                            filter[name] = value.map((item) => this.convertType(targetColumn, item));
-                        }
+                }
+            } else if (["$in", "$nin"].includes(name)) {
+                // { filter: { name: { $in: [ value, value, value] }}}
+                if (value instanceof Array) {
+                    filter[name] = errorTracker.map(value, (item) => this.convertTypeCore(targetColumn, item, errorTracker));
+                }
+            } else if (["$eq", "$gt", "$gte", "$lt", "$lte", "$ne"].includes(name)) {
+                // { filter: { price: { $gte: value }}}
+                filter[name] = this.convertTypeCore(targetColumn, value, errorTracker);
+            } else if (["$near", "$nearSphere", "$center", "$centerSphere", "$box", "$polygon", "$mod"].includes(name)) {
+                // { filter: { location : { $near : [ number, number ]}}}
+                // { filter: { location : { $box : [[ number, number ], [ number, number ]]}}}
+                let convert = (v: any): any => {
+                    if (v instanceof Array) {
+                        return errorTracker.map(v, convert);
+                    } else {
+                        return this.convertTypeCore("number", v, errorTracker)
                     }
-                } else if (["$in", "$nin"].includes(name)) {
-                    // { filter: { name: { $in: [ value, value, value] }}}
-                    if (value instanceof Array) {
-                        filter[name] = value.map((item) => this.convertType(targetColumn, item));
-                    }
-                } else if (["$eq", "$gt", "$gte", "$lt", "$lte", "$ne"].includes(name)) {
-                    // { filter: { price: { $gte: value }}}
-                    filter[name] = this.convertType(targetColumn, value);
-                } else if (["$near", "$nearSphere", "$center", "$centerSphere", "$box", "$polygon", "$mod"].includes(name)) {
-                    // { filter: { location : { $near : [ number, number ]}}}
-                    // { filter: { location : { $box : [[ number, number ], [ number, number ]]}}}
-                    let convert = (v: any): any => {
-                        if (v instanceof Array) {
-                            return v.map(convert);
-                        } else {
-                            return this.convertType("number", v)
-                        }
-                    }
+                }
 
-                    if (value instanceof Array) {
-                        filter[name] = value.map(convert);
+                if (value instanceof Array) {
+                    filter[name] = errorTracker.map(value, convert);
+                }
+            } else {
+                let embeddedMetadata = metadata.findEmbeddedWithPropertyPath(name);
+
+                if (embeddedMetadata) {
+                    let targetMetadata = this.app.entityMetadatas.get(embeddedMetadata.type as Type);
+                    if (targetMetadata) {
+                        this.adjustFilter(targetMetadata, value, null, errorTracker);
                     }
                 } else {
-                    let embeddedMetadata = metadata.findEmbeddedWithPropertyPath(name);
-
-                    if (embeddedMetadata) {
-                        let targetMetadata = this.app.entityMetadatas.get(embeddedMetadata.type as Type);
-                        if (targetMetadata) {
-                            this.adjustFilter(targetMetadata, value, null);
-                        }
-
-                        continue;
-                    }
-
                     let columnMetadata = this.getColumnMetadata(metadata, name);
                     if (columnMetadata) {
                         // { filter: { name: object }}
@@ -377,42 +370,44 @@ export class EntityService<TEntity> implements IEntityService<TEntity> {
                                 columnMetadata = null;
                             }
 
-                            this.adjustFilter(targetMetadata, value, columnMetadata);
+                            this.adjustFilter(targetMetadata, value, columnMetadata, errorTracker);
                         } else {
                             // { filter: { name: value }}
-                            filter[name] = this.convertType(columnMetadata, value);
+                            filter[name] = this.convertTypeCore(columnMetadata, value, errorTracker);
                         }
                     }
                 }
             }
-        } catch (error) {
-            throw new FultonError({ message: "invalid query parameters", detail: error.message });
+
+            errorTracker.pop();
         }
     }
 
-    private convertEntity(metadata: EntityMetadata, input: any): any {
+    private convertEntity(metadata: EntityMetadata, input: any, errorTracker: FultonStackError): any {
         let entity: any = new (metadata.target as Type)();
 
         for (const column of metadata.ownColumns) {
             let value = input[column.propertyName];
 
-            if (value == null) {
-                continue;
-            }
+            if (value != null) {
+                errorTracker.push(column.propertyName);
 
-            if (metadata.relatedToMetadata[column.propertyName]) {
-                // related to property, only id
-                let relatedMetadata = this.app.entityMetadatas.get(metadata.relatedToMetadata[column.propertyName]);
+                if (metadata.relatedToMetadata[column.propertyName]) {
+                    // related to property, only id
+                    let relatedMetadata = this.app.entityMetadatas.get(metadata.relatedToMetadata[column.propertyName]);
 
-                if (column.isArray) {
-                    entity[column.propertyName] = (<any[]>value).map((rel) => {
-                        return this.pickId(relatedMetadata, rel);
-                    });
+                    if (column.isArray) {
+                        entity[column.propertyName] = errorTracker.map(value, (rel, i) => {
+                            return this.pickId(relatedMetadata, rel, errorTracker);
+                        });
+                    } else {
+                        entity[column.propertyName] = this.pickId(relatedMetadata, value, errorTracker);
+                    }
                 } else {
-                    entity[column.propertyName] = this.pickId(relatedMetadata, value);
+                    entity[column.propertyName] = this.convertTypeCore(column, value, errorTracker);
                 }
-            } else {
-                entity[column.propertyName] = this.convertType(column, value);
+
+                errorTracker.pop();
             }
         }
 
@@ -424,46 +419,129 @@ export class EntityService<TEntity> implements IEntityService<TEntity> {
                 continue;
             }
 
+            // if cannot find the type, do nothing.
             let targetMetadata = this.app.entityMetadatas.get(embeddedMetadata.type as Type);
             if (targetMetadata) {
+                errorTracker.push(embeddedMetadata.propertyName);
                 if (embeddedMetadata.isArray) {
-                    entity[embeddedMetadata.propertyName] = (<any[]>value).map((rel) => {
-                        return this.convertEntity(targetMetadata, rel);
+                    entity[embeddedMetadata.propertyName] = errorTracker.map(value, (rel, i) => {
+                        return this.convertEntity(targetMetadata, rel, errorTracker);
                     });
                 } else {
-                    entity[embeddedMetadata.propertyName] = this.convertEntity(targetMetadata, value);
+                    entity[embeddedMetadata.propertyName] = this.convertEntity(targetMetadata, value, errorTracker);
                 }
-            } else {
-                // if cannot find the type, do nothing.
+
+                errorTracker.pop();
             }
         }
 
         return entity
     }
 
-    private pickId(metadata: EntityMetadata, input: any): any {
-        // might it should throw error if there is no id
+    private convertTypeCore(metadata: string | ColumnMetadata, value: any, errorTracker: FultonStackError): any {
+        let newValue = value;
+        if (metadata != null && value != null) {
+            let type;
+            if (metadata instanceof ColumnMetadata) {
+                type = metadata.type;
+
+                if (!type && metadata.isObjectId) {
+                    type = "ObjectId";
+                }
+            } else {
+                type = metadata;
+            }
+
+            if (type != null) {
+                if ((type == "number" || type == Number) && typeof value != "number") {
+                    newValue = parseFloat(value);
+                    if (isNaN(newValue)) {
+                        if (errorTracker) {
+                            errorTracker.add(`must be a number`, true);
+                        }
+
+                        newValue = null;
+                    }
+                }
+
+                if ((type == "boolean" || type == Boolean) && typeof value != "boolean") {
+                    newValue = Helper.getBoolean(value);
+
+                    if (newValue == null && errorTracker) {
+                        errorTracker.add(`must be a boolean`, true);
+                    }
+                }
+
+                if ((type == "date" || type == "datetime" || type == Date) && !(value instanceof Date)) {
+                    if (Helper.isNumberString(value)) {
+                        newValue = new Date(parseFloat(value));
+                    } else {
+                        newValue = new Date(value);
+                    }
+
+                    if (isNaN(newValue.valueOf())) {
+                        if (errorTracker) {
+                            errorTracker.add(`must be a date`, true);
+                        }
+
+                        newValue = null;
+                    }
+                }
+
+                if (type == "ObjectId" && value.constructor.name != "ObjectID") {
+                    if ("convertToObjectId" in this.runner) {
+                        // ignore if runner isn't mongo-entity-runner
+                        newValue = (<IMongoEntityRunner>this.runner).convertToObjectId(value);
+                        if (newValue == null && errorTracker) {
+                            errorTracker.add(`must be an object id`, true);
+                        }
+                    }
+                }
+            }
+        }
+
+        return newValue;
+    }
+
+    private pickId(metadata: EntityMetadata, input: any, errorTracker: FultonStackError): any {
         let rel: any = {};
 
         for (const keyColumn of metadata.primaryColumns) {
-            let id = this.convertType(keyColumn, input[keyColumn.propertyName]);
-            rel[keyColumn.propertyName] = id;
+            if (keyColumn.embeddedMetadata) {
+                continue;
+            }
+
+            errorTracker.push(keyColumn.propertyName);
+
+            let id = input[keyColumn.propertyName];
+            if (id) {
+                rel[keyColumn.propertyName] = this.convertTypeCore(keyColumn, input[keyColumn.propertyName], errorTracker);
+            } else {
+                errorTracker.add(`should not be null or undefined`, true)
+            }
+
+            errorTracker.pop();
         }
 
         return rel
     }
 
-    private convertValidationError(result: FultonError, errors: ValidationError[], parent: string) {
+    /**
+     * convert ValidationError from package class-validator to FultonError
+     */
+    private convertValidationError(fultonError: FultonError, errors: ValidationError[], parent: string): FultonError {
         for (const error of errors) {
             let property = parent ? `${parent}.${error.property}` : error.property
-            
+
             if (error.children && error.children.length > 0) {
-                this.convertValidationError(result, error.children, property);
+                this.convertValidationError(fultonError, error.children, property);
             }
 
             if (error.constraints) {
-                result.addErrors(property, error.constraints);
+                fultonError.addErrors(property, error.constraints);
             }
         }
+
+        return fultonError;
     }
 }

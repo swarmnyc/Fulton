@@ -1,4 +1,4 @@
-import { IEntityRunner, QueryColumnOptions, QueryParams, injectable } from "../../interfaces";
+import { IMongoEntityRunner, QueryColumnOptions, QueryParams, injectable } from "../../interfaces";
 import { MongoRepository, Repository, getMongoRepository } from "typeorm";
 
 import { ObjectId } from 'bson';
@@ -9,7 +9,7 @@ interface IncludeOptions {
 }
 
 @injectable()
-export class MongoEntityRunner implements IEntityRunner {
+export class MongoEntityRunner implements IMongoEntityRunner {
     /**
      * use provided repository to find entities
      * @param repository 
@@ -107,6 +107,16 @@ export class MongoEntityRunner implements IEntityRunner {
     delete<T>(repository: Repository<T>, id: any): Promise<any> {
         return (<any>repository as MongoRepository<T>)
             .deleteOne({ _id: id })
+    }
+
+    convertToObjectId(id: any): ObjectId {
+        if (id) {
+            try {
+                return new ObjectId(id);
+            } catch (error) {
+                return null;
+            }
+        }
     }
 
     protected processIncludes<T>(repository: MongoRepository<T>, data: T | T[], includes: string[]): Promise<any> {

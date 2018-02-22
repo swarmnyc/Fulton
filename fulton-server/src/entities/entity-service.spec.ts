@@ -11,14 +11,15 @@ import { Territory } from '../../spec/entities/territory';
 import { createFakeConnection } from '../../spec/helpers/entity-helper';
 import { ObjectId } from 'bson';
 import { Customer } from '../../spec/entities/customer';
-import { FultonError } from '../common/fulton-error';
+import { FultonError, FultonStackError } from '../common/fulton-error';
+import { MongoEntityRunner } from './runner/mongo-entity-runner';
 
 class MyApp extends FultonApp {
     protected onInit(options: FultonAppOptions): void | Promise<void> { }
 }
 
 
-describe('entity service', () => {
+fdescribe('entity service', () => {
     let service: EntityService<any>;
     let employeeMetadata: EntityMetadata;
     let categoryMetadata: EntityMetadata;
@@ -32,6 +33,7 @@ describe('entity service', () => {
 
         service = new EntityService<Employee>(new Repository<Employee>())
         service["app"] = app;
+        service["_runner"] = new MongoEntityRunner();
         employeeMetadata = app.entityMetadatas.get(Employee);
         categoryMetadata = app.entityMetadatas.get(Category);
         customerMetadata = app.entityMetadatas.get(Customer);
@@ -325,7 +327,7 @@ describe('entity service', () => {
             "description": "Soft drinks coffees teas beers and ales"
         };
 
-        let output = service["convertEntity"](categoryMetadata, input);
+        let output = service["convertEntity"](categoryMetadata, input, new FultonStackError(""));
 
         expect(output instanceof Category).toBeTruthy();
         expect(Object.assign({}, output)).toEqual({
@@ -343,7 +345,7 @@ describe('entity service', () => {
             "extra": "extra columns should be removed"
         };
 
-        let output = service["convertEntity"](categoryMetadata, input);
+        let output = service["convertEntity"](categoryMetadata, input, new FultonStackError(""));
 
         expect(output instanceof Category).toBeTruthy();
         expect({ ...output }).toEqual({
@@ -381,7 +383,7 @@ describe('entity service', () => {
             ]
         };
 
-        let output: Customer = service["convertEntity"](customerMetadata, input);
+        let output: Customer = service["convertEntity"](customerMetadata, input, new FultonStackError(""));
 
         expect(output instanceof Customer).toBeTruthy();
 
@@ -449,7 +451,7 @@ describe('entity service', () => {
             ]
         };
 
-        let output: Customer = service["convertEntity"](customerMetadata, input);
+        let output: Customer = service["convertEntity"](customerMetadata, input, new FultonStackError(""));
 
         expect(output instanceof Customer).toBeTruthy();
 
@@ -515,7 +517,7 @@ describe('entity service', () => {
                 expect(result.errors).toEqual({
                     message: "invalid input",
                     detail: {
-                        companyName: { isNotEmpty: 'companyName should not be empty' },
+                        companyName: { isDefined: 'companyName should not be null or undefined' },
                         rating: { max: 'rating must be less than 10' },
                         email: { isEmail: 'email must be an email' }
                     }
@@ -523,7 +525,7 @@ describe('entity service', () => {
             });
     })
 
-    fit('should validate input fail deeply', () => {
+    it('should validate input fail deeply', () => {
         let input = {
             "companyName": "Alfreds Futterkiste",
             "territories": [
@@ -541,9 +543,61 @@ describe('entity service', () => {
                 expect(result.errors).toEqual({
                     message: "invalid input",
                     detail: {
-                        "territories.0.regionId": { isNumber: 'regionId must be a number' }
+                        "territories.0.regionId": "regionId must be a number"
                     }
                 });
             });
     })
+
+    it('should convert input fail', async () => {
+        let input = {
+            "hireDate": "test",
+            "territories": [
+                {},
+                {
+                    "territoryId": "test"
+                }
+            ]
+        };
+
+        let errorTracker = new FultonStackError("invalid input");
+        service["convertEntity"](employeeMetadata, input, errorTracker);
+
+        expect(errorTracker.errors).toEqual({
+            message: "invalid input",
+            detail: {
+                "hireDate": "hireDate must be a date",
+                "territories.0.territoryId": "territoryId should not be null or undefined",
+                "territories.1.territoryId": "territoryId must be a number"
+            }
+        });
+    });
+
+    it('should convert query params fail', async () => {
+        let queryParams: QueryParams = {
+            needAdjust: true,
+            filter: {
+                territories: {
+                    categories: {
+                        categoryId: "test"
+                    }
+                },
+                $or: [
+                    { _id: "test" },
+                    { hireDate: "test" }
+                ]
+            }
+        };
+
+        let errorTracker = service["adjustParams"](employeeMetadata, queryParams);
+
+        expect(errorTracker.errors).toEqual({
+            message: "invalid query parameters",
+            detail: {
+                "filter.territories.categories.categoryId": "categoryId must be an object id",
+                "filter.$or.0._id": "_id must be a number",
+                "filter.$or.1.hireDate": "hireDate must be a date"
+            }
+        });
+    });
 });

@@ -156,12 +156,12 @@ describe('EntityRouter Integration Test', () => {
 
     it('should insert a employee', async () => {
         let data = {
-			"employeeId": 101,
-			"lastName": "Davolio",
-			"firstName": "Nancy",
-			"title": "Sales Representative",
-			"titleOfCourtesy": "Ms."
-		} as Employee;
+            "employeeId": 101,
+            "lastName": "Davolio",
+            "firstName": "Nancy",
+            "title": "Sales Representative",
+            "titleOfCourtesy": "Ms."
+        } as Employee;
 
         let result = await httpTester.post("/employees", {
             data: data
@@ -175,12 +175,12 @@ describe('EntityRouter Integration Test', () => {
 
     it('should update a employee', async () => {
         let data = {
-			"employeeId": 2,
-			"lastName": "Davolio",
-			"firstName": "Nancy",
-			"title": "Sales Representative",
-			"titleOfCourtesy": "Ms."
-		} as Employee;
+            "employeeId": 2,
+            "lastName": "Davolio",
+            "firstName": "Nancy",
+            "title": "Sales Representative",
+            "titleOfCourtesy": "Ms."
+        } as Employee;
 
         let result = await httpTester.patch("/employees/3", {
             data: data
@@ -225,5 +225,22 @@ describe('EntityRouter Integration Test', () => {
         let category = territory.categories[0];
         expect(<any>category.categoryId as string).toEqual("000000000000000000000003");
         expect(category.categoryName).toEqual("Condiments");
+    });
+
+    it('should query employees by gte hireDate', async () => {
+        let result = await httpTester.get("/employees", {
+            filter: {
+                hireDate: {
+                    $gte: "1993-01-01T00:00:00Z"
+                }
+            }
+        })
+
+        let queryResult: OperationResult<Employee> = result.body;
+        let date = new Date("1993-01-01");
+        expect(queryResult.data.length).toEqual(6);
+        expect(queryResult.data.filter((employee) => {
+            return new Date(employee.hireDate) <= date
+        }).length).toEqual(0);
     });
 });

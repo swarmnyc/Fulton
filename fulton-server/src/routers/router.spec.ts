@@ -1,7 +1,7 @@
 import * as express from 'express';
 
 import { Request, Response, Middleware } from "../interfaces";
-import { getFullRouterMethodMetadata, getRouterMethodMetadataList } from "./route-decorators-helpers";
+import { getFullRouterActionMetadata, getRouterActionMetadataList } from "./route-decorators-helpers";
 
 import { Router } from "./router";
 import { router, httpPost, httpDelete, httpGet, httpPut, errorHandler } from './route-decorators';
@@ -81,11 +81,11 @@ describe('Fulton Router', () => {
         expect(metadata.router.doc.title).toEqual("RouterA");
         expect(metadata.router.middlewares.length).toEqual(0);
 
-        expect(metadata.actions.length).toEqual(2);
-        expect(metadata.actions[0].path).toEqual("/");
+        expect(metadata.actions.size).toEqual(2);
+        expect(metadata.actions.get("list").path).toEqual("/");
 
-        expect(metadata.actions[1].path).toEqual("/:id");
-        expect(metadata.actions[1].doc.title).toEqual("Get");
+        expect(metadata.actions.get("get").path).toEqual("/:id");
+        expect(metadata.actions.get("get").doc.title).toEqual("Get");
 
         expect(metadata.errorhandler).not.toBeUndefined();
     });
@@ -105,15 +105,15 @@ describe('Fulton Router', () => {
         expect(metadata.router.path).toEqual("/C");
         expect(metadata.router.doc).toEqual({});
         expect(metadata.router.middlewares.length).toEqual(1);
-        expect(metadata.actions.length).toEqual(2);
+        expect(metadata.actions.size).toEqual(2);
 
-        expect(metadata.actions[0].path).toEqual("/list");
-        expect(metadata.actions[0].doc).toEqual({});
-        expect(metadata.actions[0].middlewares.length).toEqual(2);
+        expect(metadata.actions.get("list").path).toEqual("/list");
+        expect(metadata.actions.get("list").doc).toEqual({});
+        expect(metadata.actions.get("list").middlewares.length).toEqual(2);
 
-        expect(metadata.actions[1].path).toEqual("/:key");
-        expect(metadata.actions[1].doc.title).toEqual("get");
-        expect(metadata.actions[1].middlewares.length).toEqual(3);
+        expect(metadata.actions.get("get").path).toEqual("/:key");
+        expect(metadata.actions.get("get").doc.title).toEqual("get");
+        expect(metadata.actions.get("get").middlewares.length).toEqual(3);
 
         expect(metadata.errorhandler).not.toBeUndefined();
     });
@@ -124,13 +124,13 @@ describe('Fulton Router', () => {
         expect(metadata.router.path).toEqual("/D");
         expect(metadata.router.doc).toEqual({});
         expect(metadata.router.middlewares.length).toEqual(2);
-        expect(metadata.actions.length).toEqual(4);
-        expect(metadata.actions[2].path).toEqual("/");
-        expect(metadata.actions[3].path).toEqual("/:id");
+        expect(metadata.actions.size).toEqual(4);
+        expect(metadata.actions.get("list").path).toEqual("/");
+        expect(metadata.actions.get("get").path).toEqual("/:id");
 
-        expect(metadata.actions[0].method).toEqual("put");
-        expect(metadata.actions[0].middlewares.length).toEqual(3);
-        expect(metadata.actions[1].method).toEqual("delete");
+        expect(metadata.actions.get("update").method).toEqual("put");
+        expect(metadata.actions.get("update").middlewares.length).toEqual(3);
+        expect(metadata.actions.get("delete").method).toEqual("delete");
     });
 
     it('should init router', async () => {

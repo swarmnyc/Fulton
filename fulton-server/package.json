@@ -9,8 +9,8 @@
     "build": "npm run clean && tsc -p tsconfig-prod.json && circular-require ./build/main.js",
     "build:test": "npm run clean && tsc -p tsconfig.json",
     "build:live": "npm run clean && tsc -w -p tsconfig-prod.json",
-    "test": "jasmine-ts",
-    "test:it": "jasmine-ts --config=./spec/support/jasmine.it.json",
+    "test": "ts-node --typeCheck=true ./spec/test.ts",
+    "test:it": "ts-node --typeCheck=true ./spec/test.ts --it",
     "test:all": "npm run test && npm run test:it",
     "test:debug": "ts-node --inspect-brk=9229 --typeCheck=true ./spec/test.ts",
     "test:debug:it": "ts-node --inspect-brk=9229 --typeCheck=true ./spec/test.ts --it"
@@ -50,7 +50,6 @@
     "debug": "^3.1.0",
     "google-auth-library": "^1.1.0",
     "jasmine": "^2.9.0",
-    "jasmine-ts": "^0.2.1",
     "mongodb": "^2.2.34",
     "passport-github": "^1.1.0",
     "qs": "^6.5.1",

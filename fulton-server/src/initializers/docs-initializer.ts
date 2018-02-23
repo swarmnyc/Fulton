@@ -144,13 +144,13 @@ function generatePath(app: FultonApp, docs: OpenApiSpec) {
             description: router.metadata.router.doc.description
         });
 
-        let entity;
+        let entity: Type;
         if (router instanceof EntityRouter) {
             entity = router.metadata.router.entity;
         }
 
         let root = toPath(router.metadata.router.path);
-        for (const action of router.metadata.actions) {
+        router.metadata.actions.forEach((action) => {
             let path = toPath(root, action.path);
             let doc = docs.paths[path];
 
@@ -216,7 +216,7 @@ function generatePath(app: FultonApp, docs: OpenApiSpec) {
             }
 
             doc[action.method] = actionDoc;
-        }
+        })
     }
 }
 

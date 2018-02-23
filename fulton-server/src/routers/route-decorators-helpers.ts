@@ -12,7 +12,7 @@ export interface EntityRouterMetadata extends RouterMetadata {
     entity: Type;
 }
 
-export interface RouterMethodMetadata {
+export interface RouterActionMetadata {
     path: PathIdentifier,
     method: string,
     property: string,
@@ -20,16 +20,16 @@ export interface RouterMethodMetadata {
     middlewares: Middleware[]
 }
 
-export interface AllRouterMethodMetadata {
-    actions: RouterMethodMetadata[],
+export interface AllRouterActionMetadata {
+    actions: Map<string, RouterActionMetadata>,
     errorhandler: string;
 }
 
-export interface FullRouterMetadata extends AllRouterMethodMetadata {
+export interface FullRouterMetadata extends AllRouterActionMetadata {
     router: RouterMetadata
 }
 
-export interface FullEntityRouterMetadata extends AllRouterMethodMetadata {
+export interface FullEntityRouterMetadata extends AllRouterActionMetadata {
     router: EntityRouterMetadata,
 }
 
@@ -49,37 +49,35 @@ export function getRouterErrorHandler(target: any): string {
  * get Router Method Metadata List only for the type
  * @param target 
  */
-export function getRouterMethodMetadataList(target: any): RouterMethodMetadata[] {
+export function getRouterActionMetadataList(target: any): RouterActionMetadata[] {
     return Reflect.getOwnMetadata(Keys.HttpMethods, target) || [];
 }
 
-export function getFullRouterMethodMetadata(target: any, type: AbstractType): FullRouterMetadata {
-    let metadata = getAllRouterMethodMetadata(target, type) as FullRouterMetadata;
+export function getFullRouterActionMetadata(target: any, type: AbstractType): FullRouterMetadata {
+    let metadata = getAllRouterActionMetadata(target, type) as FullRouterMetadata;
     metadata.router = getRouterMetadata(target);
 
     return metadata;
 }
 
-export function getFullEntityRouterMethodMetadata(target: any, type: AbstractType): FullEntityRouterMetadata {
-    let metadata = getAllRouterMethodMetadata(target, type) as FullEntityRouterMetadata;
+export function getFullEntityRouterActionMetadata(target: any, type: AbstractType): FullEntityRouterMetadata {
+    let metadata = getAllRouterActionMetadata(target, type) as FullEntityRouterMetadata;
     metadata.router = getEntityRouterMetadata(target);
 
     return metadata;
 }
 
-function getAllRouterMethodMetadata(target: any, type: AbstractType): AllRouterMethodMetadata {
-    let actions = [];
+function getAllRouterActionMetadata(target: any, type: AbstractType): AllRouterActionMetadata {
+    let actions = new Map<string, RouterActionMetadata>();
     let errorhandler;
-    let keys = new Map<string, boolean>();
 
     // get metadata from parent class recursively
     while (target.prototype instanceof type) {
-        let metadata = getRouterMethodMetadataList(target);
+        let metadata = getRouterActionMetadataList(target);
         for (const method of metadata) {
             // skip if exists
-            if (!keys.has(method.property)) {
-                actions.push(method);
-                keys.set(method.property, true);
+            if (!actions.has(method.property)) {
+                actions.set(method.property, method);
             }
         }
 

@@ -1,4 +1,4 @@
-import { FullEntityRouterMetadata, getFullEntityRouterMethodMetadata } from "./route-decorators-helpers";
+import { FullEntityRouterMetadata, getFullEntityRouterActionMetadata } from "./route-decorators-helpers";
 import { httpDelete, httpGet, httpPatch, httpPost } from "./route-decorators";
 import { IEntityService, injectable, NextFunction, OperationOneResult, OperationResult, OperationStatus, Request, Response, EntityServiceFactory } from "../interfaces";
 
@@ -14,7 +14,7 @@ export abstract class EntityRouter<TEntity> extends Router {
     }
 
     protected loadMetadata() {
-        this.metadata = getFullEntityRouterMethodMetadata(this.constructor, Router);
+        this.metadata = getFullEntityRouterActionMetadata(this.constructor, Router);
     }
 
     init() {

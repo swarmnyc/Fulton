@@ -2,7 +2,7 @@ import * as assert from "assert";
 import * as lodash from "lodash";
 
 import { ErrorMiddleware, Request, Response, Middleware, TypeIdentifier } from "../interfaces";
-import { FullRouterMetadata, RouterMetadata, getFullRouterMethodMetadata } from "./route-decorators-helpers";
+import { FullRouterMetadata, RouterMetadata, getFullRouterActionMetadata } from "./route-decorators-helpers";
 import { DiContainer, PathIdentifier, inject, injectable } from "../interfaces";
 import { IRouterMatcher, Router as ExpressRouter } from "express";
 import { IFultonApp } from '../fulton-app';
@@ -42,7 +42,7 @@ export abstract class Router {
     }
 
     protected loadMetadata() {
-        this.metadata = getFullRouterMethodMetadata(this.constructor, Router);
+        this.metadata = getFullRouterActionMetadata(this.constructor, Router);
     }
 
     init() {
@@ -58,7 +58,7 @@ export abstract class Router {
             router.use(...this.metadata.router.middlewares);
         }
 
-        for (const action of this.metadata.actions) {
+        this.metadata.actions.forEach((action) => {
             let routeMethod: IRouterMatcher<any> = lodash.get(router, action.method);
             let middlewares: Middleware[] = [];
 
@@ -71,7 +71,7 @@ export abstract class Router {
             middlewares.push(method);
 
             routeMethod.call(router, action.path, middlewares)
-        }
+        })
 
         if (this.metadata.errorhandler) {
             router.use(lodash.get(router, this.metadata.errorhandler));

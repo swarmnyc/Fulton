@@ -1,4 +1,4 @@
-import { EntityRouterMetadata, RouterMetadata, RouterMethodMetadata } from "./route-decorators-helpers";
+import { EntityRouterMetadata, RouterMetadata, RouterActionMetadata } from "./route-decorators-helpers";
 import { HttpMethod, Middleware, PathIdentifier, RouterActionDocOptions, RouterDocOptions, injectable, Type } from "../interfaces";
 
 import { Keys } from "../constants";
@@ -156,7 +156,7 @@ export function httpAction(method: HttpMethod, path: PathIdentifier = "/", ...ar
 
         path = ensurePath(path);
 
-        let metadata: RouterMethodMetadata = {
+        let metadata: RouterActionMetadata = {
             path,
             method,
             property,
@@ -164,7 +164,7 @@ export function httpAction(method: HttpMethod, path: PathIdentifier = "/", ...ar
             middlewares
         };
 
-        let metadataList: RouterMethodMetadata[];
+        let metadataList: RouterActionMetadata[];
 
         if (Reflect.hasOwnMetadata(Keys.HttpMethods, target.constructor)) {
             metadataList = Reflect.getOwnMetadata(Keys.HttpMethods, target.constructor);

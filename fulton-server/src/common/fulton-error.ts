@@ -85,14 +85,20 @@ export class FultonError {
     hasErrors(): boolean {
         return this.errors.message != null || this.errors.detail != null;
     }
+
+    public toJSON() {
+        return {
+            errors: this.errors
+        };
+    }
 }
 
 /**
  * Record Error for recursive operation;
  */
 export class FultonStackError extends FultonError {
-    errors: FultonErrorObject;
-    properties: string[];
+    private properties: string[];
+
     constructor(message: string) {
         super(message);
 

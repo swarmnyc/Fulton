@@ -8,7 +8,7 @@ import * as winston from 'winston';
 
 // don't load too modules classes here, it will cause cyclical dependencies and cause very hard to debug and wired Error.
 
-import { AppMode, DiContainer, ErrorMiddleware, Middleware, RepositoryFactory, Request, Response, Type, TypeIdentifier, DiKeys } from "./interfaces";
+import { AppMode, DiContainer, ErrorMiddleware, Middleware, RepositoryFactory, Request, Response, Type, TypeIdentifier, DiKeys, EventKeys } from './interfaces';
 import { ClassProvider, FactoryProvider, FunctionProvider, Provider, TypeProvider, ValueProvider } from "./helpers/type-helpers";
 import { Connection, Repository } from 'typeorm';
 import { IUser, IUserService } from "./identity/interfaces";
@@ -203,7 +203,7 @@ export abstract class FultonApp implements IFultonApp {
         /* end express middlewares */
 
         this.isInitialized = true;
-        this.events.emit("didInit", this);
+        this.events.emit(EventKeys.didInit, this);
 
         fultonDebug("Options: %O", this.options);
     }
@@ -311,7 +311,7 @@ export abstract class FultonApp implements IFultonApp {
 
         this.express.disable('x-powered-by');
 
-        this.events.emit("didInitServer", this);
+        this.events.emit(EventKeys.didInitServer, this);
     }
 
     protected initDiContainer(): void | Promise<void> {
@@ -333,13 +333,13 @@ export abstract class FultonApp implements IFultonApp {
             }
         }
 
-        this.events.emit("didInitLogging", this);
+        this.events.emit(EventKeys.didInitLogging, this);
     }
 
     protected initProviders(): void | Promise<void> {
         this.registerTypes(this.options.providers || []);
 
-        this.events.emit("didInitProviders", this);
+        this.events.emit(EventKeys.didInitProviders, this);
     }
 
     /**
@@ -368,7 +368,7 @@ export abstract class FultonApp implements IFultonApp {
 
         this.registerTypes(newProviders);
 
-        this.events.emit("didInitRepositories", this);
+        this.events.emit(EventKeys.didInitRepositories, this);
     }
 
     protected async initServices(): Promise<void> {
@@ -381,7 +381,7 @@ export abstract class FultonApp implements IFultonApp {
 
         this.registerTypes(providers);
 
-        this.events.emit("didInitServices", this);
+        this.events.emit(EventKeys.didInitServices, this);
     }
 
     protected initIdentity(): void | Promise<void> {
@@ -390,7 +390,7 @@ export abstract class FultonApp implements IFultonApp {
             let promise: Promise<any> = (require("./identity/identity-initializer")(this));
 
             return promise.then(() => {
-                this.events.emit("didInitIdentity", this);
+                this.events.emit(EventKeys.didInitIdentity, this);
             })
         } else {
             return;
@@ -415,7 +415,7 @@ export abstract class FultonApp implements IFultonApp {
             return router;
         });
 
-        this.events.emit("didInitRouters", this);
+        this.events.emit(EventKeys.didInitRouters, this);
     }
 
     protected initHttpLogging(): void | Promise<void> {
@@ -426,7 +426,7 @@ export abstract class FultonApp implements IFultonApp {
                 this.express.use(defaultHttpLoggerHandler(this.options.logging.httpLoggerOptions));
             }
 
-            this.events.emit("didInitHttpLogging", this);
+            this.events.emit(EventKeys.didInitHttpLogging, this);
         }
     }
 
@@ -450,7 +450,7 @@ export abstract class FultonApp implements IFultonApp {
                 })
             }
 
-            this.events.emit("didInitStaticFile", this);
+            this.events.emit(EventKeys.didInitStaticFile, this);
         }
     }
 
@@ -462,7 +462,7 @@ export abstract class FultonApp implements IFultonApp {
                 this.express.use(cors(this.options.cors.options));
             }
 
-            this.events.emit("didInitCors", this);
+            this.events.emit(EventKeys.didInitCors, this);
         }
     }
 
@@ -470,7 +470,7 @@ export abstract class FultonApp implements IFultonApp {
         if (lodash.some(this.options.middlewares)) {
             this.express.use(...this.options.middlewares);
 
-            this.events.emit("didInitMiddlewares", this);
+            this.events.emit(EventKeys.didInitMiddlewares, this);
         }
     }
 
@@ -495,7 +495,7 @@ export abstract class FultonApp implements IFultonApp {
             });
         }
 
-        this.events.emit("didInitIndex", this);
+        this.events.emit(EventKeys.didInitIndex, this);
     }
 
     protected initErrorHandler(): void | Promise<void> {
@@ -508,7 +508,7 @@ export abstract class FultonApp implements IFultonApp {
                 this.express.use(...this.options.errorHandler.errorMiddlewares);
             }
 
-            this.events.emit("didInitErrorHandler", this);
+            this.events.emit(EventKeys.didInitErrorHandler, this);
         }
     }
 

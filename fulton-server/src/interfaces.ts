@@ -13,6 +13,29 @@ export enum DiKeys {
     UserRepository = "__UserRepository__",
 }
 
+export enum EventKeys {
+    didInit = "didInit",
+    didInitCors = "didInitCors",
+    didInitDatabases = "didInitDatabases",
+    didInitDiContainer = "didInitDiContainer",
+    didInitDocs = "didInitDocs",
+    didInitErrorHandler = "didInitErrorHandler",
+    didInitFormatter = "didInitFormatter",
+    didInitHttpLogging = "didInitHttpLogging",
+    didInitIdentity = "didInitIdentity",
+    didInitIndex = "didInitIndex",
+    didInitJsonApi = "didInitJsonApi",
+    didInitLogging = "didInitLogging",
+    didInitMiddlewares = "didInitMiddlewares",
+    didInitProviders = "didInitProviders",
+    didInitRepositories = "didInitRepositories",
+    didInitRouters = "didInitRouters",
+    didInitServer = "didInitServer",
+    didInitServices = "didInitServices",
+    didInitStaticFile = "didInitStaticFile",
+    onInitJsonApi = "onInitJsonApi",
+}
+
 export interface AbstractType<T=any> extends Function {
 }
 

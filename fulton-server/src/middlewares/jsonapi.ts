@@ -2,7 +2,7 @@ import * as qs from "qs";
 import * as url from "url";
 
 import { JsonApiConverter, JsonApiData, JsonApiLinks, JsonApiRootLinks, JsonApiSerializeOptions, JsonApiTypeOptions } from "../helpers/jsonapi-converter";
-import { NextFunction, OperationOneResult, OperationResult, QueryParams, Request, Response, Type } from "../interfaces";
+import { NextFunction, OperationOneResult, OperationResult, QueryParams, Request, Response, Type, EventKeys } from '../interfaces';
 
 import { EntityRouter } from '../routers/entity-router';
 import { FultonApp } from "../fulton-app";
@@ -84,7 +84,7 @@ module.exports = function (app: FultonApp) {
 function initConverter(app: FultonApp): JsonApiConverter {
     let converter: JsonApiConverter = new JsonApiConverter();
 
-    app.events.emit("onInitJsonApi", app, converter);
+    app.events.emit(EventKeys.onInitJsonApi, app, converter);
 
     app.entityMetadatas.forEach((metadata, type) => {
         let relatedToMetadata = metadata.relatedToMetadata;
@@ -145,7 +145,7 @@ function initConverter(app: FultonApp): JsonApiConverter {
         converter.register(type.name, options);
     })
 
-    app.events.emit("didInitJsonApi", app, converter);
+    app.events.emit(EventKeys.didInitJsonApi, app, converter);
 
     return converter;
 }

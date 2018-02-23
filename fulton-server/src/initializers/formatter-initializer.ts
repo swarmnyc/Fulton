@@ -4,7 +4,7 @@ import * as lodash from 'lodash';
 import { EntityService } from '../entities';
 import { FultonApp } from "../fulton-app";
 import { MimeTypes } from '../constants';
-import { Type } from '../interfaces';
+import { Type, EventKeys } from '../interfaces';
 import { queryParamsParser } from '../middlewares/query-params-parser';
 
 module.exports = function (app: FultonApp) {
@@ -34,5 +34,5 @@ module.exports = function (app: FultonApp) {
         app.express.use(...app.options.formatter.customs);
     }
 
-    app.events.emit("didInitFormatter", app);
+    app.events.emit(EventKeys.didInitFormatter, app);
 }

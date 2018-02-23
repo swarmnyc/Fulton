@@ -4,7 +4,7 @@ import { Connection, ConnectionOptions, createConnections } from "typeorm";
 
 import { FultonApp } from '../fulton-app';
 import FultonLog from "../fulton-log";
-import { Type } from '../interfaces';
+import { Type, EventKeys } from '../interfaces';
 import { getRelatedToMetadata } from '../entities/entity-decorators-helpers';
 
 module.exports = async function (app: FultonApp): Promise<any> {
@@ -51,5 +51,5 @@ module.exports = async function (app: FultonApp): Promise<any> {
         }
     }
 
-    app.events.emit("didInitDatabases", app);
+    app.events.emit(EventKeys.didInitDatabases, app);
 }

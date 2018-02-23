@@ -1,5 +1,5 @@
 import { Container, interfaces } from "inversify";
-import { DiKeys, EntityServiceFactory, RepositoryFactory, Type } from '../interfaces';
+import { DiKeys, EntityServiceFactory, RepositoryFactory, Type, EventKeys } from '../interfaces';
 import { MongoRepository, Repository, getConnection, getRepository } from "typeorm";
 
 import { EntityService } from '../entities';
@@ -25,7 +25,7 @@ module.exports = function (app: FultonApp) {
         return ctx.container.resolve(runner);
     }).inSingletonScope();
 
-    app.events.emit("didInitDiContainer", app);
+    app.events.emit(EventKeys.didInitDiContainer, app);
 }
 
 /**

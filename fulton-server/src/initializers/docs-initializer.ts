@@ -2,7 +2,7 @@ import * as fs from 'fs';
 import * as lodash from 'lodash';
 
 import { DefinitionsObject, OpenApiSpec, OperationObject, ParameterObject, ParametersDefinitionsObject, PathItemObject, PathsObject, ResponseObject, SchemaObject } from '@loopback/openapi-spec';
-import { Middleware, NextFunction, PathIdentifier, Request, Response, Type } from "../interfaces";
+import { Middleware, NextFunction, PathIdentifier, Request, Response, Type, EventKeys } from '../interfaces';
 import { column, entity, manyToMany } from '../re-export';
 
 import { FultonApp } from "../fulton-app";
@@ -22,7 +22,7 @@ module.exports = function (app: FultonApp) {
         docs = generateDocs(app);
     }
 
-    app.events.emit("didInitDocs", app);
+    app.events.emit(EventKeys.didInitDocs, app);
 
     let docsMiddlewares: Middleware[] = [];
     let jsonMiddlewares: Middleware[] = [];

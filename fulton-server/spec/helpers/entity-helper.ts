@@ -1,7 +1,7 @@
 import { Connection } from 'typeorm';
 import { Type } from '../../src/interfaces';
 import { IFultonApp } from '../../src/fulton-app';
-import { getRelatedToMetadata } from '../../src/entities/related-decorators-helpers';
+import { getRelatedToMetadata } from '../../src/entities/entity-decorators-helpers';
 
 export function createFakeConnection(app: IFultonApp) {
     let conn = new Connection({

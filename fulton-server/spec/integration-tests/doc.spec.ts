@@ -4,7 +4,7 @@ import { HttpTester, HttpResult } from "../helpers/http-tester";
 import { MongoHelper } from "../helpers/mongo-helper";
 import { sampleData } from "../support/sample-data";
 import { Connection } from "typeorm";
-import { getRelatedToMetadata } from '../../src/entities/related-decorators-helpers';
+import { getRelatedToMetadata } from '../../src/entities/entity-decorators-helpers';
 import { Employee } from '../entities/employee';
 import { Territory } from '../entities/territory';
 import { Category } from '../entities/category';

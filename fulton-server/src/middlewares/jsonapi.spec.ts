@@ -8,7 +8,7 @@ import { FultonApp } from '../fulton-app';
 import { FultonAppOptions } from '../fulton-app-options';
 import { HttpTester } from "../../spec/helpers/http-tester";
 import { Territory } from '../../spec/entities/territory';
-import { getRelatedToMetadata } from "../entities/related-decorators-helpers";
+import { getRelatedToMetadata } from "../entities/entity-decorators-helpers";
 import { queryParamsParser } from "./query-params-parser";
 import { sampleData } from "../../spec/support/sample-data";
 

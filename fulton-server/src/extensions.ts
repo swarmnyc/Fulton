@@ -1,7 +1,7 @@
 import { IFultonApp } from "./fulton-app";
 import { IUserService, IUser } from "./identity";
 import { DiContainer, QueryParams } from "./interfaces";
-import { RelatedToMetadata } from './entities/related-decorators-helpers';
+import { RelatedToMetadata } from './entities/entity-decorators-helpers';
 
 // custom types for helping development;
 declare global {

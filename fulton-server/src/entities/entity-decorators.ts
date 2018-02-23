@@ -1,11 +1,12 @@
-import { Type, column } from "../interfaces";
-import { RelatedToMetadata } from "./related-decorators-helpers";
+import { Type, column, objectIdColumn } from "../interfaces";
+import { RelatedToMetadata } from "./entity-decorators-helpers";
 import { Keys } from "../constants";
+import { ColumnOptions } from "typeorm";
 
 /**
  * the relation decorator for mongodb.
  * 
- * the data stucture have to be like 
+ * the data structure have to be like 
  * 
  * let book = {
  *    ...
@@ -32,5 +33,21 @@ export function relatedTo(entity: Type): any {
         }
 
         metadata[property] = entity;
+    };
+}
+
+/**
+ * for mongodb and the _id column isn't use ObjectId.
+ */
+export function idColumn(options: ColumnOptions = {}): any {
+    return function (target: any, property: string, descriptor: PropertyDescriptor) {
+        let type = Reflect.getMetadata("design:type", target, property);
+
+        if (!options.type) {
+            options.type = type;
+        }
+        
+        // just a wrapper
+        objectIdColumn(options)(target, property, descriptor);
     };
 }

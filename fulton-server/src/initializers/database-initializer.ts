@@ -5,7 +5,7 @@ import { Connection, ConnectionOptions, createConnections } from "typeorm";
 import { FultonApp } from '../fulton-app';
 import FultonLog from "../fulton-log";
 import { Type } from '../interfaces';
-import { getRelatedToMetadata } from '../entities/related-decorators-helpers';
+import { getRelatedToMetadata } from '../entities/entity-decorators-helpers';
 
 module.exports = async function (app: FultonApp): Promise<any> {
     if (app.options.identity.isUseDefaultImplement) {

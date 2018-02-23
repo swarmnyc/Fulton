@@ -1,11 +1,11 @@
 import { column, entity, objectIdColumn } from "../../src/interfaces";
 
 import { Territory } from './territory';
-import { relatedTo } from '../../src/entities/related-decorators';
+import { relatedTo, idColumn } from '../../src/entities/entity-decorators';
 
 @entity("employees")
 export class Employee {
-    @objectIdColumn({ type: Number }) // if the type isn't ObjectId, you needs give the type
+    @idColumn() // if the type isn't ObjectId, use idColumn
     employeeId: number;
 
     @column()

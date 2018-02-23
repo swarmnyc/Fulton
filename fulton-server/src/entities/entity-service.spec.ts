@@ -19,7 +19,7 @@ class MyApp extends FultonApp {
 }
 
 
-fdescribe('entity service', () => {
+describe('entity service', () => {
     let service: EntityService<any>;
     let employeeMetadata: EntityMetadata;
     let categoryMetadata: EntityMetadata;

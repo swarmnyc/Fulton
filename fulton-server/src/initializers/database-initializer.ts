@@ -1,10 +1,10 @@
 import * as lodash from 'lodash';
 
 import { Connection, ConnectionOptions, createConnections } from "typeorm";
+import { EventKeys, Type } from '../interfaces';
 
 import { FultonApp } from '../fulton-app';
-import FultonLog from "../fulton-log";
-import { Type, EventKeys } from '../interfaces';
+import { FultonLog } from "../fulton-log";
 import { getRelatedToMetadata } from '../entities/entity-decorators-helpers';
 
 module.exports = async function (app: FultonApp): Promise<any> {

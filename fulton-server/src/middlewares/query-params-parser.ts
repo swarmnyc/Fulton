@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction, QueryParams, QueryColumnOptions } from "../interfaces";
-import Helper from "../helpers/helper";
+import { Helper } from "../helpers/helper";
 
 let optReg = /^([+-]?)(.+?)([+-]?)$/;
 function parseOptionsString(arrStr: string): QueryColumnOptions {

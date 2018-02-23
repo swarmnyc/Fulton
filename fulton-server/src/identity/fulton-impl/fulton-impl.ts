@@ -7,7 +7,7 @@ import { Middleware, NextFunction, Request, Response } from "../../interfaces";
 
 import { FultonApp } from '../../fulton-app';
 import { FultonError } from '../../common/fulton-error';
-import FultonLog from '../../fulton-log';
+import { FultonLog } from '../../fulton-log';
 import { FultonUser } from "./fulton-user";
 
 /**

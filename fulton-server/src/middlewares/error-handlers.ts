@@ -1,4 +1,4 @@
-import FultonLog from "../fulton-log";
+import { FultonLog } from "../fulton-log";
 import { Request, Response, Middleware, NextFunction } from "../interfaces";
 import { FultonError } from '../common/fulton-error';
 
@@ -9,7 +9,7 @@ export function defaultErrorHandler(err: any, req: Request, res: Response, next:
         FultonLog.error(`${req.method} ${req.url}\nrequest: %O\nerror: %s`,
             { httpHeaders: req.headers, httpBody: req.body },
             err.stack || err);
-            
+
         res.sendStatus(500).end();
     }
 }

@@ -11,8 +11,8 @@ import { FultonLoggerLevel, FultonLoggerOptions } from './fulton-log';
 import { default404ErrorHandler, defaultErrorHandler } from './middlewares/error-handlers';
 
 import { CorsOptions } from 'cors';
-import Env from './helpers/env';
-import Helper from './helpers/helper';
+import { Env } from './helpers/env';
+import { Helper } from './helpers/helper';
 import { IdentityOptions } from './identity/identity-options';
 import { InfoObject } from '@loopback/openapi-spec';
 import { Router } from './routers/router';

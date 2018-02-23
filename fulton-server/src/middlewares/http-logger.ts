@@ -1,4 +1,4 @@
-import FultonLog from "../fulton-log";
+import { FultonLog } from "../fulton-log";
 import { Request, Response, Middleware, NextFunction } from "../interfaces";
 
 import { LoggerOptions } from "winston";

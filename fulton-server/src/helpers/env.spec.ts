@@ -1,4 +1,4 @@
-import Env from "./env";
+import { Env } from "./env";
 
 describe('env', () => {
     let env = process.env;
@@ -61,7 +61,7 @@ describe('env', () => {
 
         expect(Env.getFloat("test.value4-2")).toEqual(100.0);
 
-        expect(Env.getFloat("test.value4-3")).toBeUndefined();        
+        expect(Env.getFloat("test.value4-3")).toBeUndefined();
         expect(Env.getFloat("test.value4-3", NaN)).toEqual(NaN);
         expect(Env.getFloat("test.value4-3", 100)).toEqual(100);
     });

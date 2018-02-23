@@ -10,7 +10,7 @@ import { Strategy as BearerStrategy } from 'passport-http-bearer';
 import { FultonApp } from "../fulton-app";
 import { getRepository } from 'typeorm';
 import { GoogleStrategy } from './strategies/google-strategy';
-import Helper from '../helpers/helper';
+import { Helper } from '../helpers/helper';
 
 module.exports = async function identityInitializer(app: FultonApp) {
     let idOptions = app.options.identity;

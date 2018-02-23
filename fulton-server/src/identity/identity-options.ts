@@ -5,7 +5,7 @@ import { CustomStrategySettings, GoogleStrategyOptions, IUser, IUserService, Loc
 
 import { AuthenticateOptions } from "passport";
 import { AuthorizeOptions } from "./authorizes-middlewares";
-import Env from "../helpers/env";
+import { Env } from "../helpers/env";
 import { FultonImpl } from "./fulton-impl/fulton-impl";
 import { FultonUser } from './fulton-impl/fulton-user';
 import { FultonUserService } from './fulton-impl/fulton-user-service';

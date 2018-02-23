@@ -1,12 +1,12 @@
+// values in this file are for internal
 export const None = {};
-
-export const KEY_REPOSITORY_METADATA = "FultonDecorator.Repository";
 
 export const Keys = {
     RelatedToMetadata: "FultonDecorator.RelatedToMetadata",
     RouterMetadata: "FultonDecorator.Router",
     RouterErrorHandlerMetadata: "FultonDecorator.RouterErrorHandler",
-    HttpMethods: "FultonDecorator.HttpMethods"
+    HttpMethods: "FultonDecorator.HttpMethods",
+    RepositoryMetadata: "FultonDecorator.Repository"
 }
 
 export const MimeTypes = {

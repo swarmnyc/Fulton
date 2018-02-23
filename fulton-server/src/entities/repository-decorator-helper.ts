@@ -1,4 +1,4 @@
-import { KEY_REPOSITORY_METADATA } from "../constants";
+import { Keys } from "../constants";
 import { Type } from "../interfaces";
 
 export interface RepositoryMetadata {
@@ -7,5 +7,5 @@ export interface RepositoryMetadata {
 }
 
 export function getRepositoryMetadata(target: any): RepositoryMetadata {
-    return Reflect.getOwnMetadata(KEY_REPOSITORY_METADATA, target);
+    return Reflect.getOwnMetadata(Keys.RepositoryMetadata, target);
 }

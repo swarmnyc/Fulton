@@ -57,7 +57,8 @@
     "request": "^2.83.0",
     "rimraf": "^2.6.2",
     "swagger-ui-express": "^2.0.15",
-    "typescript": "^2.6.2"
+    "ts-node": "^5.0.0",
+    "typescript": "^2.7.2"
   },
   "dependencies": {
     "@loopback/openapi-spec": "^4.0.0-alpha.25",

@@ -1,4 +1,4 @@
-import { IMongoEntityRunner, QueryColumnOptions, QueryParams, injectable } from "../../interfaces";
+import { IMongoEntityRunner, QueryColumnOptions, QueryParams, injectable, FindResult } from '../../interfaces';
 import { MongoRepository, Repository, getMongoRepository } from "typeorm";
 
 import { ObjectId } from 'bson';
@@ -15,7 +15,7 @@ export class MongoEntityRunner implements IMongoEntityRunner {
      * @param repository 
      * @param queryParams 
      */
-    async find<T>(repository: Repository<T>, queryParams: QueryParams = {}): Promise<[T[], number]> {
+    async find<T>(repository: Repository<T>, queryParams: QueryParams = {}): Promise<FindResult<T>> {
         let repo = (<any>repository as MongoRepository<T>);
         this.adjustQueryParams(repo, queryParams);
 
@@ -40,7 +40,7 @@ export class MongoEntityRunner implements IMongoEntityRunner {
             await this.processIncludes(repo, data[0], queryParams.includes);
         }
 
-        return data;
+        return { data: data[0], total: data[1] };
     }
 
     /**
@@ -281,7 +281,7 @@ export class MongoEntityRunner implements IMongoEntityRunner {
                 let ids = relItems.map((item) => item[relRepo.metadata.objectIdColumn.propertyName]);
 
                 fetchTask = this.find(relRepo, { filter: { "_id": { "$in": ids } } }).then((result) => {
-                    let refs = result[0];
+                    let refs = result.data;
                     if (refs.length == 0) {
                         return [];
                     } else {

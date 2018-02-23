@@ -28,9 +28,9 @@ class TerritoryService extends EntityService<Territory>{
         return this.runner.find(this.categoryRepository, queryParams)
             .then((result) => {
                 return {
-                    data: result[0],
+                    data: result.data,
                     pagination: {
-                        total: result[1]
+                        total: result.total
                     }
                 }
             })

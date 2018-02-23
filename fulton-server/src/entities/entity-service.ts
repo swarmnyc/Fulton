@@ -1,3 +1,5 @@
+import * as lodash from 'lodash';
+
 import { DiKeys, FultonErrorObject, IEntityRunner, IEntityService, IMongoEntityRunner, OperationOneResult, OperationResult, OperationStatus, QueryParams, Type, entity, inject, injectable } from '../interfaces';
 import { FultonError, FultonStackError } from '../common/fulton-error';
 import { MongoRepository, Repository, getMongoRepository, getRepository } from 'typeorm';
@@ -61,13 +63,13 @@ export class EntityService<TEntity> implements IEntityService<TEntity> {
 
         return this.runner
             .find(this.mainRepository, queryParams)
-            .then((data) => {
+            .then((result) => {
                 return {
-                    data: data[0],
+                    data: result.data,
                     pagination: {
-                        total: data[1],
-                        index: queryParams.pagination.index,
-                        size: queryParams.pagination.size
+                        total: result.total,
+                        index: lodash.get(queryParams, "pagination.index") || 0,
+                        size: lodash.get(queryParams, "pagination.index") || result.total
                     }
                 }
             })
@@ -186,7 +188,7 @@ export class EntityService<TEntity> implements IEntityService<TEntity> {
      */
     protected adjustParams<T>(em: EntityMetadata | Type, params: QueryParams): FultonError {
         // only adjust if it needs
-        if (params.needAdjust) {
+        if (params && params.needAdjust) {
             let errorTracker = new FultonStackError("invalid query parameters");
             let metadata: EntityMetadata;
 
@@ -256,7 +258,7 @@ export class EntityService<TEntity> implements IEntityService<TEntity> {
      * @param error 
      */
     protected errorHandler(error: any): OperationResult & OperationOneResult {
-        FultonLog.warn("EntityService operation failed with error:\n%O", error);
+        FultonLog.warn("EntityService operation failed with error:\n", error);
 
         if (error instanceof FultonError) {
             return error

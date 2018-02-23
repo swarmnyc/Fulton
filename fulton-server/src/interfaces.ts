@@ -80,6 +80,13 @@ export interface FultonErrorObject {
     detail?: FultonErrorDetail;
 }
 
+export interface FindResult<TEntity> {
+    /** the data of the result */
+    data: TEntity[],
+    /** the real total before pagination */
+    total: number
+}
+
 /**
  * Entity Service provides basic CRUD
  */
@@ -99,7 +106,7 @@ export interface IEntityService<TEntity> {
 
 /** the real runner of entity service, it can be Mongo runner or Sql Runner */
 export interface IEntityRunner {
-    find<TEntity>(repository: Repository<TEntity>, queryParams?: QueryParams): Promise<[TEntity[], number]>;
+    find<TEntity>(repository: Repository<TEntity>, queryParams?: QueryParams): Promise<FindResult<TEntity>>;
 
     findOne<TEntity>(repository: Repository<TEntity>, queryParams?: QueryParams): Promise<TEntity>;
 

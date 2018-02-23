@@ -12,8 +12,8 @@
     "test": "jasmine-ts",
     "test:it": "jasmine-ts --config=./spec/support/jasmine.it.json",
     "test:all": "npm run test && npm run test:it",
-    "test:debug": "ts-node --inspect-brk=9229 ./spec/test.ts",
-    "test:debug:it": "ts-node --inspect-brk=9229 ./spec/test.ts --it"
+    "test:debug": "ts-node --inspect-brk=9229 --typeCheck=true ./spec/test.ts",
+    "test:debug:it": "ts-node --inspect-brk=9229 --typeCheck=true ./spec/test.ts --it"
   },
   "author": {
     "name": "SWARM",

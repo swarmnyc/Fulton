@@ -8,7 +8,7 @@ import * as winston from 'winston';
 
 // don't load too modules classes here, it will cause cyclical dependencies and cause very hard to debug and wired Error.
 
-import { AppMode, DiContainer, ErrorMiddleware, Middleware, RepositoryFactory, Request, Response, Type, TypeIdentifier } from "./interfaces";
+import { AppMode, DiContainer, ErrorMiddleware, Middleware, RepositoryFactory, Request, Response, Type, TypeIdentifier, DiKeys } from "./interfaces";
 import { ClassProvider, FactoryProvider, FunctionProvider, Provider, TypeProvider, ValueProvider } from "./helpers/type-helpers";
 import { Connection, Repository } from 'typeorm';
 import { IUser, IUserService } from "./identity/interfaces";
@@ -358,7 +358,7 @@ export abstract class FultonApp implements IFultonApp {
         }
 
         // repositories needs to be singleton to integrate typeorm and inversify
-        let factory: RepositoryFactory = this.container.get<any>(Repository);
+        let factory = this.container.get<RepositoryFactory>(DiKeys.RepositoryFactory);
         let newProviders: ValueProvider[] = providers.map((provider) => {
             return {
                 provide: provider,

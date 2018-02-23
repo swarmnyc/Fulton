@@ -1,26 +1,29 @@
 import { Container, interfaces } from "inversify";
-import { EntityServiceFactory, RepositoryFactory, Type } from '../interfaces';
+import { DiKeys, EntityServiceFactory, RepositoryFactory, Type } from '../interfaces';
 import { MongoRepository, Repository, getConnection, getRepository } from "typeorm";
 
 import { EntityService } from '../entities';
 import { FultonApp } from "../fulton-app";
-import { MongoEntityRunner } from "../entities/runner/mongo-entity-runner";
 import { getRepositoryMetadata } from "../entities/repository-decorator-helper";
 
 module.exports = function (app: FultonApp) {
     app.container = new Container();
 
     // for FultonApp
-    app.container.bind("FultonApp").toConstantValue(app);
+    app.container.bind(DiKeys.FultonApp).toConstantValue(app);
 
     // for EntityService
-    app.container.bind(EntityService).toFactory(entityServiceFactory);
+    app.container.bind(DiKeys.EntityServiceFactory).toFactory(entityServiceFactory);
 
     // for Repository
-    app.container.bind(Repository).toFactory(repositoryFactory);
+    app.container.bind(DiKeys.RepositoryFactory).toFactory(repositoryFactory);
 
     // for EntityRunner
-    app.container.bind(MongoEntityRunner).toSelf();
+    app.container.bind(DiKeys.MongoEntityRunner).toDynamicValue((ctx) => {
+        // lazy require
+        let runner = require("../entities/runner/mongo-entity-runner").MongoEntityRunner;
+        return ctx.container.resolve(runner);
+    }).inSingletonScope();
 
     app.events.emit("didInitDiContainer", app);
 }
@@ -31,7 +34,7 @@ module.exports = function (app: FultonApp) {
 function entityServiceFactory<T>(ctx: interfaces.Context): EntityServiceFactory<T> {
     return (entity: Type<T>) => {
         let service = new EntityService(entity);
-        service["app"] = ctx.container.get("FultonApp");
+        service["app"] = ctx.container.get(DiKeys.FultonApp);
 
         return service;
     }

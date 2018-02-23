@@ -1,7 +1,7 @@
 import * as assert from "assert";
 import * as lodash from "lodash";
 
-import { ErrorMiddleware, Request, Response, Middleware, TypeIdentifier } from "../interfaces";
+import { ErrorMiddleware, Request, Response, Middleware, TypeIdentifier, DiKeys } from "../interfaces";
 import { FullRouterMetadata, RouterMetadata, getFullRouterActionMetadata } from "./route-decorators-helpers";
 import { DiContainer, PathIdentifier, inject, injectable } from "../interfaces";
 import { IRouterMatcher, Router as ExpressRouter } from "express";
@@ -34,7 +34,8 @@ import { IFultonApp } from '../fulton-app';
 export abstract class Router {
     public metadata: FullRouterMetadata
     protected router: Router;
-    @inject("FultonApp")
+    
+    @inject(DiKeys.FultonApp)
     protected app: IFultonApp;
 
     constructor() {

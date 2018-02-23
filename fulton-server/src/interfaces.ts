@@ -5,6 +5,14 @@ import { Repository } from "typeorm";
 
 export * from "./re-export"
 
+export enum DiKeys {
+    EntityServiceFactory = "__EntityServiceFactory__",
+    FultonApp = "__FultonApp__",
+    MongoEntityRunner = "__MongoEntityRunner__",
+    RepositoryFactory = "__RepositoryFactory__",
+    UserRepository = "__UserRepository__",
+}
+
 export interface AbstractType<T=any> extends Function {
 }
 

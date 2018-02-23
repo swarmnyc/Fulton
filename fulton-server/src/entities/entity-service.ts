@@ -1,5 +1,5 @@
+import { DiKeys, FultonErrorObject, IEntityRunner, IEntityService, IMongoEntityRunner, OperationOneResult, OperationResult, OperationStatus, QueryParams, Type, entity, inject, injectable } from '../interfaces';
 import { FultonError, FultonStackError } from '../common/fulton-error';
-import { FultonErrorObject, IEntityRunner, IEntityService, IMongoEntityRunner, OperationOneResult, OperationResult, OperationStatus, QueryParams, Type, entity, inject, injectable } from '../interfaces';
 import { MongoRepository, Repository, getMongoRepository, getRepository } from 'typeorm';
 import { ValidationError, validate } from "class-validator";
 
@@ -14,7 +14,7 @@ import { MongoEntityRunner } from "./runner/mongo-entity-runner";
 
 @injectable()
 export class EntityService<TEntity> implements IEntityService<TEntity> {
-    @inject("FultonApp")
+    @inject(DiKeys.FultonApp)
     protected app: IFultonApp;
     protected mainRepository: Repository<TEntity>
     private _runner: IEntityRunner | IMongoEntityRunner;
@@ -32,7 +32,7 @@ export class EntityService<TEntity> implements IEntityService<TEntity> {
     protected get runner(): IEntityRunner | IMongoEntityRunner {
         if (this._runner == null) {
             if (this.mainRepository instanceof MongoRepository) {
-                this._runner = this.app.container.get(MongoEntityRunner);
+                this._runner = this.app.container.get(DiKeys.MongoEntityRunner);
             } else {
                 //TODO: Sql Entity Runner
             }

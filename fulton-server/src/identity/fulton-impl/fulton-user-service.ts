@@ -5,12 +5,12 @@ import * as passwordHash from 'password-hash';
 import * as validator from 'validator';
 
 import { AccessToken, FultonAccessToken, IFultonUser, IProfile, IUserRegister, IUserService } from "../interfaces";
+import { DiKeys, Request, inject, injectable } from "../../interfaces";
 import { EntityRepository, MongoRepository, Repository } from "typeorm";
-import { Request, inject, injectable } from "../../interfaces";
 
-import { IFultonApp } from "../../fulton-app";
 import { FultonError } from "../../common";
 import { FultonUser } from "./fulton-user";
+import { IFultonApp } from "../../fulton-app";
 import { IdentityOptions } from '../identity-options';
 
 interface TokenPayload {
@@ -76,12 +76,12 @@ class SqlRunner implements IRunner {
 
 @injectable()
 export class FultonUserService implements IUserService<FultonUser> {
-    @inject("FultonApp")
+    @inject(DiKeys.FultonApp)
     protected app: IFultonApp;
 
     private runner: IRunner;
 
-    constructor(@inject("UserRepository") private userRepository: Repository<FultonUser>) {
+    constructor(@inject(DiKeys.UserRepository) private userRepository: Repository<FultonUser>) {
 
         if (userRepository instanceof MongoRepository) {
             this.runner = new MongoRunner(this.userRepository as MongoRepository<FultonUser>)

@@ -1,6 +1,6 @@
 import { FullEntityRouterMetadata, getFullEntityRouterActionMetadata } from "./route-decorators-helpers";
 import { httpDelete, httpGet, httpPatch, httpPost } from "./route-decorators";
-import { IEntityService, injectable, NextFunction, OperationOneResult, OperationResult, OperationStatus, Request, Response, EntityServiceFactory } from "../interfaces";
+import { IEntityService, injectable, NextFunction, OperationOneResult, OperationResult, OperationStatus, Request, Response, EntityServiceFactory, DiKeys } from "../interfaces";
 
 import { EntityService } from "../entities/entity-service";
 import { Router } from "./router";
@@ -20,14 +20,13 @@ export abstract class EntityRouter<TEntity> extends Router {
     init() {
         if (this.entityService == null) {
             // use default implementation
-            let di = this.app.container.get<any>(EntityService);
-            if (di instanceof Function) {
+            let factory = this.app.container.get<EntityServiceFactory>(DiKeys.EntityServiceFactory);
+            if (factory instanceof Function) {
                 // factory
-                let factory: EntityServiceFactory<TEntity> = di;
                 this.entityService = factory(this.metadata.router.entity);
             } else {
                 // instance
-                this.entityService = di;
+                this.entityService = factory;
             }
         }
 

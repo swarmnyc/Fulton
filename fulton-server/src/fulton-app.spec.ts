@@ -1,5 +1,5 @@
 import { Service } from './services/service';
-import { inject, injectable, DiContainer } from './interfaces';
+import { inject, injectable, DiContainer, DiKeys } from './interfaces';
 import { Router, router } from './routers';
 import { FultonApp } from './fulton-app';
 import { FultonAppOptions } from './fulton-app-options';
@@ -71,7 +71,7 @@ class MyFultonApp extends FultonApp {
     protected onInit(options: FultonAppOptions): void | Promise<void> {
         options.providers = [
             { provide: "api_key", useValue: "abcd" },
-            { provide: EntityService, useValue: "abcd" }
+            { provide: DiKeys.EntityServiceFactory, useValue: "abcd" }
         ];
 
         options.services = [
@@ -226,6 +226,6 @@ describe('Fulton App', () => {
     });
 
     it('should override EntityServiceFactory', async () => {
-        expect(app.container.get<any>(EntityService)).toEqual("abcd");
+        expect(app.container.get(DiKeys.EntityServiceFactory)).toEqual("abcd");
     });
 });

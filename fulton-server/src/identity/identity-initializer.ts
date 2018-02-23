@@ -1,7 +1,7 @@
 import * as passport from 'passport';
 import * as lodash from 'lodash';
 
-import { Type } from '../interfaces';
+import { Type, DiKeys } from '../interfaces';
 import { IStrategyOptionsWithRequest, Strategy as LocalStrategy } from 'passport-local';
 import { Strategy } from 'passport';
 import { IUser, IUserService, IFultonUser } from './interfaces';
@@ -25,15 +25,15 @@ module.exports = async function identityInitializer(app: FultonApp) {
             if (idOptions.userRepository) {
                 // use special repository
                 if (idOptions.userRepository instanceof Function) {
-                    app.container.bind("UserRepository").to(idOptions.userRepository);
+                    app.container.bind(DiKeys.UserRepository).to(idOptions.userRepository);
                 } else {
-                    app.container.bind("UserRepository").toConstantValue(idOptions.userRepository);
+                    app.container.bind(DiKeys.UserRepository).toConstantValue(idOptions.userRepository);
                 }
             } else {
                 // use typeorm repository
                 let userRepository = getRepository(idOptions.userType);
 
-                app.container.bind("UserRepository").toConstantValue(userRepository);
+                app.container.bind(DiKeys.UserRepository).toConstantValue(userRepository);
             }
 
             userService = app.container.resolve(idOptions.userService as Type);

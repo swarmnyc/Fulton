@@ -1,4 +1,4 @@
-import { DiContainer, Type, inject, injectable } from "../interfaces";
+import { DiContainer, DiKeys, Type, inject, injectable } from "../interfaces";
 
 import { IFultonApp } from "../fulton-app";
 
@@ -7,6 +7,6 @@ import { IFultonApp } from "../fulton-app";
  */
 @injectable()
 export abstract class Service {
-    @inject("FultonApp")
+    @inject(DiKeys.FultonApp)
     protected app: IFultonApp;
 }

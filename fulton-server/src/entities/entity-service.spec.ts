@@ -50,7 +50,7 @@ describe('entity service', () => {
 
         expect(queryParams).toEqual({
             filter: {
-                employeeId: 1
+                _id: 1
             }
         })
     });
@@ -60,7 +60,7 @@ describe('entity service', () => {
             needAdjust: true,
             filter: {
                 $or: [
-                    { _id: 1 },
+                    { employeeId: 1 },
                     { hireDate: new Date("1992-05-01T00:00:00.000+0000") }
                 ]
             }
@@ -119,7 +119,7 @@ describe('entity service', () => {
             filter: {
                 territories: {
                     $elemMatch: {
-                        territoryId: 1
+                        _id: 1
                     }
                 }
             }
@@ -217,8 +217,8 @@ describe('entity service', () => {
             filter: {
                 territories: {
                     $all: [
-                        { territoryId: 1 },
-                        { territoryId: 2 }
+                        { _id: 1 },
+                        { _id: 2 }
                     ]
                 },
                 reportsTo: {

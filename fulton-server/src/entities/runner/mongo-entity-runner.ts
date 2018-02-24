@@ -1,15 +1,18 @@
-import { IMongoEntityRunner, QueryColumnOptions, QueryParams, injectable, FindResult } from '../../interfaces';
+import { QueryColumnOptions, QueryParams, injectable, FindResult, IEntityRunner } from '../../interfaces';
 import { MongoRepository, Repository, getMongoRepository } from "typeorm";
 
 import { ObjectId } from 'bson';
 import { Type } from "../../interfaces";
+import { EntityMetadata } from 'typeorm/metadata/EntityMetadata';
+import { ColumnMetadata } from 'typeorm/metadata/ColumnMetadata';
+import { FultonStackError } from '../../common/fulton-error';
 
 interface IncludeOptions {
     [key: string]: IncludeOptions | false
 }
 
 @injectable()
-export class MongoEntityRunner implements IMongoEntityRunner {
+export class MongoEntityRunner implements IEntityRunner {
     /**
      * use provided repository to find entities
      * @param repository 
@@ -109,13 +112,48 @@ export class MongoEntityRunner implements IMongoEntityRunner {
             .deleteOne({ _id: id })
     }
 
-    convertToObjectId(id: any): ObjectId {
-        if (id) {
-            try {
-                return new ObjectId(id);
-            } catch (error) {
-                return null;
+    convertValue(metadata: string | ColumnMetadata, value: any, errorTracker: FultonStackError): any {
+        if (metadata != null && value != null) {
+            let type;
+            if (metadata instanceof ColumnMetadata) {
+                type = metadata.type;
+
+                if (!type && metadata.isObjectId) {
+                    type = "ObjectId"
+                }
+            } else {
+                type = metadata;
             }
+
+            if (type == "ObjectId" && value.constructor.name != "ObjectID") {
+                try {
+                    return new ObjectId(value);
+                } catch  {
+                    errorTracker.add("must be an object id", true);
+                }
+            }
+        }
+
+        return value;
+    }
+
+    /**
+     * adjust filter like change id to _id, change $like to {$regex, $options} 
+     */
+    adjustFilter<T>(filter: any, name: string, value: string, targetColumn: ColumnMetadata, errorTracker: FultonStackError): void {
+        if (name == "$like") {
+            filter["$regex"] = value;
+            filter["$options"] = "i";
+            delete filter["$like"]
+
+            return;
+        }
+
+        if (targetColumn && targetColumn.isObjectId && name != "_id") {
+            filter._id = value;
+            delete filter[name];
+
+            return;
         }
     }
 
@@ -137,14 +175,9 @@ export class MongoEntityRunner implements IMongoEntityRunner {
      * adjust like change id to _id, change $like to {$regex, $options} 
      */
     protected adjustQueryParams<T>(repository: MongoRepository<T>, queryParams: QueryParams): void {
-        if (queryParams.filter) {
-            this.adjustFilter(repository, queryParams.filter);
-        }
-
         if (queryParams.select) {
             queryParams.projection = this.transformSelect(queryParams.select);
         }
-
 
         if (queryParams.sort) {
             this.adjustIdInOptions(repository, queryParams.sort);
@@ -152,36 +185,6 @@ export class MongoEntityRunner implements IMongoEntityRunner {
 
         if (queryParams.projection) {
             this.adjustIdInOptions(repository, queryParams.projection);
-        }
-    }
-
-    /**
-     * adjust filter like change id to _id, change $like to {$regex, $options} 
-     */
-    private adjustFilter<T>(repository: MongoRepository<T>, filter: any) {
-        let idName = repository.metadata.objectIdColumn.propertyName;
-
-        for (const name of Object.getOwnPropertyNames(filter)) {
-            let value = filter[name];
-
-            if (value instanceof ObjectId) {
-                continue;
-            }
-
-            if (name == idName) {
-                // TODO: should move this code to typeorm
-                filter._id = value;
-                delete filter[idName]
-            } else if (name == "id") {
-                filter._id = value;
-                delete filter["id"]
-            } else if (name == "$like") {
-                filter["$regex"] = value;
-                filter["$options"] = "i";
-                delete filter["$like"]
-            } else if (typeof value == "object") {
-                this.adjustFilter(repository, value);
-            }
         }
     }
 
@@ -278,7 +281,7 @@ export class MongoEntityRunner implements IMongoEntityRunner {
                     return;
                 }
 
-                let ids = relItems.map((item) => item[relRepo.metadata.objectIdColumn.propertyName]);
+                let ids = relItems.map((item) => item[relRepo.metadata.objectIdColumn.propertyName] || item._id);
 
                 fetchTask = this.find(relRepo, { filter: { "_id": { "$in": ids } } }).then((result) => {
                     let refs = result.data;
@@ -291,7 +294,7 @@ export class MongoEntityRunner implements IMongoEntityRunner {
                     }
                 });
             } else {
-                let id = relItems[relRepo.metadata.objectIdColumn.propertyName];
+                let id = relItems[relRepo.metadata.objectIdColumn.propertyName] || relItems._id;
 
                 fetchTask = this.findOne(relRepo, { filter: { "_id": id } }).then(fetchSubInclude);
             }

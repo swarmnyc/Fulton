@@ -54,7 +54,7 @@ export let Helper = {
         }
     },
 
-    escapeRegexp(input: string, flags?: string): RegExp {
+    escapedRegexp(input: string, flags?: string): RegExp {
         return new RegExp(escapeStringRegexp(input), flags);
     }
 }

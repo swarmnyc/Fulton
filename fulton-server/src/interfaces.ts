@@ -2,6 +2,9 @@ import "reflect-metadata";
 import "./extensions"
 
 import { Repository } from "typeorm";
+import { EntityMetadata } from 'typeorm/metadata/EntityMetadata';
+import { ColumnMetadata } from 'typeorm/metadata/ColumnMetadata';
+import { FultonStackError } from './common/fulton-error';
 
 export * from "./re-export"
 
@@ -117,10 +120,10 @@ export interface IEntityRunner {
     update<TEntity>(repository: Repository<TEntity>, id: any, entity: TEntity): Promise<void>;
 
     delete<TEntity>(repository: Repository<TEntity>, id: any): Promise<void>;
-}
 
-export interface IMongoEntityRunner extends IEntityRunner {
-    convertToObjectId(id: any): any;
+    adjustFilter<T>(filter: any, name: string, value: string, targetColumn: ColumnMetadata, errorTracker: FultonStackError): void
+
+    convertValue(type: any, value: any, errorTracker: FultonStackError): any;
 }
 
 /**

@@ -57,7 +57,7 @@
     "request": "^2.83.0",
     "rimraf": "^2.6.2",
     "swagger-ui-express": "^2.0.15",
-    "ts-node": "^5.0.0",
+    "ts-node": "^3.3.0",
     "typescript": "^2.7.2"
   },
   "dependencies": {

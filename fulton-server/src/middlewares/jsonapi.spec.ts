@@ -17,7 +17,7 @@ class EmployeeEntityService implements IEntityService<Employee> {
         let data: Employee[] = [];
 
         data.push(Object.assign(new Employee(), {
-            "_id": 1,
+            "employeeId": 1,
             "lastName": "Davolio",
             "firstName": "Nancy",
             "title": "Sales Representative",
@@ -45,7 +45,7 @@ class EmployeeEntityService implements IEntityService<Employee> {
         }));
 
         data.push(Object.assign(new Employee(), {
-            "_id": 3,
+            "employeeId": 3,
             "lastName": "Leverling",
             "firstName": "Janet",
             "title": "Sales Representative",
@@ -90,7 +90,7 @@ class EmployeeEntityService implements IEntityService<Employee> {
 
     findById(id: any, QueryParams?: QueryParams): Promise<OperationOneResult<Employee>> {
         let data: Employee = Object.assign(new Employee(), {
-            "_id": 1,
+            "employeeId": 1,
             "lastName": "Davolio",
             "firstName": "Nancy",
             "title": "Sales Representative",
@@ -302,6 +302,7 @@ describe('jsonapi middleware', () => {
         expect(result.body).toEqual({
             "data": {
                 "type": "Employee",
+                "id": 1,
                 "attributes": {
                     "lastName": "Davolio",
                     "firstName": "Nancy",
@@ -324,7 +325,8 @@ describe('jsonapi middleware', () => {
                                 { "id": 6897, "type": "Territory" },
                                 { "id": 19713, "type": "Territory" }]
                         }
-                }, "links": { "self": "http://localhost:3000/employees/undefined" }
+                },
+                "links": { "self": "http://localhost:5000/employees/1" }
             }
         })
     });
@@ -340,7 +342,7 @@ describe('jsonapi middleware', () => {
         //console.log(JSON.stringify(result.body));
         expect(result.body).toEqual({
             "data": {
-                "_id": 1,
+                "employeeId": 1,
                 "lastName": "Davolio",
                 "firstName": "Nancy",
                 "title": "Sales Representative",
@@ -382,6 +384,7 @@ describe('jsonapi middleware', () => {
             "data": [
                 {
                     "type": "Employee",
+                    "id": 1,
                     "attributes": {
                         "lastName": "Davolio",
                         "firstName": "Nancy",
@@ -415,11 +418,12 @@ describe('jsonapi middleware', () => {
                         }
                     },
                     "links": {
-                        "self": "http://localhost:3000/employees/undefined"
+                        "self": "http://localhost:5000/employees/1"
                     }
                 },
                 {
                     "type": "Employee",
+                    "id": 3,
                     "attributes": {
                         "lastName": "Leverling",
                         "firstName": "Janet",
@@ -461,15 +465,15 @@ describe('jsonapi middleware', () => {
                         }
                     },
                     "links": {
-                        "self": "http://localhost:3000/employees/undefined"
+                        "self": "http://localhost:5000/employees/3"
                     }
                 }
             ],
             "links": {
-                "first": "http://localhost:3000/employees?pagination%5Bindex%5D=0&pagination%5Bsize%5D=2",
-                "last": "http://localhost:3000/employees?pagination%5Bindex%5D=4&pagination%5Bsize%5D=2",
-                "prev": "http://localhost:3000/employees?pagination%5Bindex%5D=0&pagination%5Bsize%5D=2",
-                "next": "http://localhost:3000/employees?pagination%5Bindex%5D=2&pagination%5Bsize%5D=2",
+                "first": "http://localhost:5000/employees?pagination%5Bindex%5D=0&pagination%5Bsize%5D=2",
+                "last": "http://localhost:5000/employees?pagination%5Bindex%5D=4&pagination%5Bsize%5D=2",
+                "prev": "http://localhost:5000/employees?pagination%5Bindex%5D=0&pagination%5Bsize%5D=2",
+                "next": "http://localhost:5000/employees?pagination%5Bindex%5D=2&pagination%5Bsize%5D=2",
                 "meta": {
                     "index": 1,
                     "size": 2,

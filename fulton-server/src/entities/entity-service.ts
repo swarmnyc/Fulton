@@ -1,6 +1,6 @@
 import * as lodash from 'lodash';
 
-import { DiKeys, FultonErrorObject, IEntityRunner, IEntityService, IMongoEntityRunner, OperationOneResult, OperationResult, OperationStatus, QueryParams, Type, entity, inject, injectable } from '../interfaces';
+import { DiKeys, FultonErrorObject, IEntityRunner, IEntityService, OperationOneResult, OperationResult, OperationStatus, QueryParams, Type, entity, inject, injectable } from '../interfaces';
 import { FultonError, FultonStackError } from '../common/fulton-error';
 import { MongoRepository, Repository, getMongoRepository, getRepository } from 'typeorm';
 import { ValidationError, validate } from "class-validator";
@@ -19,7 +19,7 @@ export class EntityService<TEntity> implements IEntityService<TEntity> {
     @inject(DiKeys.FultonApp)
     protected app: IFultonApp;
     protected mainRepository: Repository<TEntity>
-    private _runner: IEntityRunner | IMongoEntityRunner;
+    private _runner: IEntityRunner;
 
     constructor(entity: Type<TEntity>)
     constructor(mainRepository: Repository<TEntity>)
@@ -31,7 +31,7 @@ export class EntityService<TEntity> implements IEntityService<TEntity> {
         }
     }
 
-    protected get runner(): IEntityRunner | IMongoEntityRunner {
+    protected get runner(): IEntityRunner {
         if (this._runner == null) {
             if (this.mainRepository instanceof MongoRepository) {
                 this._runner = this.app.container.get(DiKeys.MongoEntityRunner);
@@ -177,7 +177,7 @@ export class EntityService<TEntity> implements IEntityService<TEntity> {
         }
 
         if (metadata.primaryColumns.length > 0) {
-            return this.convertType(metadata.primaryColumns[0], id);
+            return this.convertValue(metadata.primaryColumns[0], id);
         }
 
         return id;
@@ -249,8 +249,8 @@ export class EntityService<TEntity> implements IEntityService<TEntity> {
             });
     }
 
-    protected convertType(metadata: string | ColumnMetadata, value: any): any {
-        return this.convertTypeCore(metadata, value, null);
+    protected convertValue(metadata: string | ColumnMetadata, value: any): any {
+        return this.convertValueCore(metadata, value, null);
     }
 
     /**
@@ -285,7 +285,7 @@ export class EntityService<TEntity> implements IEntityService<TEntity> {
      * adjust filter, because some properties are miss type QueryString is always string, but some params int or date
      * support some mongo query operators https://docs.mongodb.com/manual/reference/operator/query/
      */
-    private adjustFilter<T>(metadata: EntityMetadata, filter: any, targetColumn: ColumnMetadata, errorTracker: FultonStackError): void {
+    private adjustFilter<T>(metadata: EntityMetadata, filter: any, targetColumn: ColumnMetadata, errorTracker: FultonStackError, level: number = 0): void {
         if (typeof filter != "object") {
             return;
         }
@@ -299,7 +299,8 @@ export class EntityService<TEntity> implements IEntityService<TEntity> {
             errorTracker.push(name);
 
             if (["$regex", "$where", "$text", "$like", "$option", "$expr"].includes(name)) {
-                // do nothing
+                // entity service do nothing, but runner might have
+                this.runner.adjustFilter(filter, name, value, targetColumn, errorTracker);
             } else if (name == "$or" || name == "$and" || name == "$not" || name == "$nor") {
                 // { filter: { $or: [ object, object ]}}
                 if (value instanceof Array) {
@@ -312,10 +313,10 @@ export class EntityService<TEntity> implements IEntityService<TEntity> {
                 this.adjustFilter(metadata, value, null, errorTracker)
             } else if (["$size", "$minDistance", "$maxDistance"].includes(name)) {
                 // { filter: { tags: { $size: number }}}
-                filter[name] = this.convertTypeCore("number", value, errorTracker);
+                filter[name] = this.convertValueCore("number", value, errorTracker);
             } else if (name == "$exists") {
                 // { filter: { tags: { $exists: boolean }}}
-                filter[name] = this.convertTypeCore("boolean", value, errorTracker);
+                filter[name] = this.convertValueCore("boolean", value, errorTracker);
             } else if (name == "$all") {
                 if (value instanceof Array && value.length > 0) {
                     if (typeof value[0] == "object") {
@@ -324,17 +325,17 @@ export class EntityService<TEntity> implements IEntityService<TEntity> {
                         errorTracker.forEach(value, (item, i) => this.adjustFilter(metadata, item, targetColumn, errorTracker));
                     } else {
                         // { filter: { tags: { $all: [ value, value, value] }}}
-                        filter[name] = errorTracker.map(value, (item) => this.convertTypeCore(targetColumn, item, errorTracker));
+                        filter[name] = errorTracker.map(value, (item) => this.convertValueCore(targetColumn, item, errorTracker));
                     }
                 }
             } else if (["$in", "$nin"].includes(name)) {
                 // { filter: { name: { $in: [ value, value, value] }}}
                 if (value instanceof Array) {
-                    filter[name] = errorTracker.map(value, (item) => this.convertTypeCore(targetColumn, item, errorTracker));
+                    filter[name] = errorTracker.map(value, (item) => this.convertValueCore(targetColumn, item, errorTracker));
                 }
             } else if (["$eq", "$gt", "$gte", "$lt", "$lte", "$ne"].includes(name)) {
                 // { filter: { price: { $gte: value }}}
-                filter[name] = this.convertTypeCore(targetColumn, value, errorTracker);
+                filter[name] = this.convertValueCore(targetColumn, value, errorTracker);
             } else if (["$near", "$nearSphere", "$center", "$centerSphere", "$box", "$polygon", "$mod"].includes(name)) {
                 // { filter: { location : { $near : [ number, number ]}}}
                 // { filter: { location : { $box : [[ number, number ], [ number, number ]]}}}
@@ -342,7 +343,7 @@ export class EntityService<TEntity> implements IEntityService<TEntity> {
                     if (v instanceof Array) {
                         return errorTracker.map(v, convert);
                     } else {
-                        return this.convertTypeCore("number", v, errorTracker)
+                        return this.convertValueCore("number", v, errorTracker)
                     }
                 }
 
@@ -366,16 +367,23 @@ export class EntityService<TEntity> implements IEntityService<TEntity> {
                             if (columnMetadata.relationMetadata) {
                                 // for sql relationships
                                 targetMetadata = columnMetadata.relationMetadata.inverseEntityMetadata;
+                                level = level + 1;
                             } else if (metadata.relatedToMetadata[name]) {
                                 // for mongo relationships
                                 targetMetadata = this.app.entityMetadatas.get(metadata.relatedToMetadata[name]);
                                 columnMetadata = null;
+                                level = level + 1;
                             }
 
-                            this.adjustFilter(targetMetadata, value, columnMetadata, errorTracker);
+                            this.adjustFilter(targetMetadata, value, columnMetadata, errorTracker, level);
                         } else {
                             // { filter: { name: value }}
-                            filter[name] = this.convertTypeCore(columnMetadata, value, errorTracker);
+                            filter[name] = this.convertValueCore(columnMetadata, value, errorTracker);
+                        }
+
+                        if (level == 0) {
+                            // call runner in case it have to do some things
+                            this.runner.adjustFilter(filter, name, filter[name], columnMetadata, errorTracker);
                         }
                     }
                 }
@@ -406,7 +414,7 @@ export class EntityService<TEntity> implements IEntityService<TEntity> {
                         entity[column.propertyName] = this.pickId(relatedMetadata, value, errorTracker);
                     }
                 } else {
-                    entity[column.propertyName] = this.convertTypeCore(column, value, errorTracker);
+                    entity[column.propertyName] = this.convertValueCore(column, value, errorTracker);
                 }
 
                 errorTracker.pop();
@@ -440,66 +448,53 @@ export class EntityService<TEntity> implements IEntityService<TEntity> {
         return entity
     }
 
-    private convertTypeCore(metadata: string | ColumnMetadata, value: any, errorTracker: FultonStackError): any {
+    private convertValueCore(metadata: string | ColumnMetadata, value: any, errorTracker: FultonStackError): any {
         let newValue = value;
         if (metadata != null && value != null) {
             let type;
             if (metadata instanceof ColumnMetadata) {
                 type = metadata.type;
-
-                if (!type && metadata.isObjectId) {
-                    type = "ObjectId";
-                }
             } else {
                 type = metadata;
             }
 
-            if (type != null) {
-                if ((type == "number" || type == Number) && typeof value != "number") {
-                    newValue = parseFloat(value);
-                    if (isNaN(newValue)) {
-                        if (errorTracker) {
-                            errorTracker.add(`must be a number`, true);
-                        }
-
-                        newValue = null;
+            if (type == null) {
+                // try use runner to convertValue
+                newValue = this.runner.convertValue(metadata, value, errorTracker);
+            } else if ((type == "number" || type == Number) && typeof value != "number") {
+                newValue = parseFloat(value);
+                if (isNaN(newValue)) {
+                    if (errorTracker) {
+                        errorTracker.add(`must be a number`, true);
                     }
+
+                    newValue = null;
+                }
+            } else if ((type == "boolean" || type == Boolean) && typeof value != "boolean") {
+                newValue = Helper.getBoolean(value);
+
+                if (newValue == null && errorTracker) {
+                    errorTracker.add(`must be a boolean`, true);
+                }
+            } else if ((type == "date" || type == "datetime" || type == Date) && !(value instanceof Date)) {
+                if (Helper.isNumberString(value)) {
+                    newValue = new Date(parseFloat(value));
+                } else {
+                    newValue = new Date(value);
                 }
 
-                if ((type == "boolean" || type == Boolean) && typeof value != "boolean") {
-                    newValue = Helper.getBoolean(value);
-
-                    if (newValue == null && errorTracker) {
-                        errorTracker.add(`must be a boolean`, true);
+                if (isNaN(newValue.valueOf())) {
+                    if (errorTracker) {
+                        errorTracker.add(`must be a date`, true);
                     }
+
+                    newValue = null;
                 }
-
-                if ((type == "date" || type == "datetime" || type == Date) && !(value instanceof Date)) {
-                    if (Helper.isNumberString(value)) {
-                        newValue = new Date(parseFloat(value));
-                    } else {
-                        newValue = new Date(value);
-                    }
-
-                    if (isNaN(newValue.valueOf())) {
-                        if (errorTracker) {
-                            errorTracker.add(`must be a date`, true);
-                        }
-
-                        newValue = null;
-                    }
-                }
-
-                if (type == "ObjectId" && value.constructor.name != "ObjectID") {
-                    if ("convertToObjectId" in this.runner) {
-                        // ignore if runner isn't mongo-entity-runner
-                        newValue = (<IMongoEntityRunner>this.runner).convertToObjectId(value);
-                        if (newValue == null && errorTracker) {
-                            errorTracker.add(`must be an object id`, true);
-                        }
-                    }
-                }
+            } else {
+                // try use runner to convertValue
+                newValue = this.runner.convertValue(metadata, value, errorTracker);
             }
+
         }
 
         return newValue;
@@ -515,9 +510,9 @@ export class EntityService<TEntity> implements IEntityService<TEntity> {
 
             errorTracker.push(keyColumn.propertyName);
 
-            let id = input[keyColumn.propertyName];
+            let id = input[keyColumn.propertyName] || input[keyColumn.databaseName];
             if (id) {
-                rel[keyColumn.propertyName] = this.convertTypeCore(keyColumn, input[keyColumn.propertyName], errorTracker);
+                rel[keyColumn.propertyName] = this.convertValueCore(keyColumn, input[keyColumn.propertyName], errorTracker);
             } else {
                 errorTracker.add(`should not be null or undefined`, true)
             }

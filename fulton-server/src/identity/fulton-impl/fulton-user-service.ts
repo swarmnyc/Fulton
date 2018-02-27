@@ -272,7 +272,7 @@ export class FultonUserService implements IUserService<FultonUser> {
             let jwt = jws.decode(token);
             let payload: TokenPayload;
             if (level == "medium") {
-                let decipher = crypto.createDecipher("aes256", this.cipherPassword)
+                let decipher = crypto.createDecipher("aes-128-ecb", this.cipherPassword)
                 let json = decipher.update(jwt.payload, "base64", "utf8");
                 json += decipher.final();
 
@@ -322,7 +322,8 @@ export class FultonUserService implements IUserService<FultonUser> {
 
         if (level != "low") {
             // if level greater than low, encrypt the payload 
-            let cipher = crypto.createCipher("aes256", this.cipherPassword)
+            // java only support aes 128
+            let cipher = crypto.createCipher("aes-128-ecb", this.cipherPassword)
             payload = cipher.update(JSON.stringify(payload), "utf8", "base64");
             payload += cipher.final("base64");
         }

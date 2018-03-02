@@ -40,7 +40,7 @@ export class MongoEntityRunner implements IEntityRunner {
         if (queryParams.sort) cursor.sort(queryParams.sort)
         if (queryParams.projection) cursor.project(queryParams.projection)
 
-        const [data, count] = await Promise.all<any>([
+        const[data, count] = await Promise.all<any>([
             cursor.toArray(),
             repo.count(queryParams.filter),
         ]);
@@ -61,11 +61,12 @@ export class MongoEntityRunner implements IEntityRunner {
         let repo = (<any>repository as MongoRepository<T>);
         this.adjustQueryParams(repo, queryParams);
 
-        // TODO: typeorm has bug on projection on mongodb        
-        let data = await repo.findOne({
-            where: queryParams.filter,
-            order: queryParams.sort as any
-        });
+        let cursor = repo.createEntityCursor(queryParams.filter)
+        if (queryParams.sort) cursor.sort(queryParams.sort)
+        if (queryParams.projection) cursor.project(queryParams.projection)
+
+        const result = await cursor.limit(1).toArray()
+        const data = result.length > 0 ? result[0] : null
 
         if (data && queryParams.includes) {
             await this.processIncludes(repo, data, queryParams.includes);
@@ -235,8 +236,6 @@ export class MongoEntityRunner implements IEntityRunner {
      */
     private mergeProjection<T>(repository: MongoRepository<T>, projection: QueryColumnOptions): QueryColumnOptions {
         let newProjection: any = projection || {}
-
-        console.log("newProjection", newProjection)
 
         repository.metadata.columns.forEach((c) => {
             if (!c.isSelect) {

@@ -32,7 +32,7 @@ export let Helper = {
         if (str == null)
             return defaultValue;
 
-        let value = parseInt(str)
+        let value = parseFloat(str)
         return isNaN(value) ? defaultValue : value;
     },
 

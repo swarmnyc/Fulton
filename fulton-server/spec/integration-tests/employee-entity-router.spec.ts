@@ -253,7 +253,7 @@ describe('EntityRouter Integration Test', () => {
         expect(queryResult.data.filter(c=>c.address).length).toEqual(0);
     });
 
-    fit('should query employees with projection', async () => {
+    it('should query employees with projection', async () => {
         let result = await httpTester.get("/employees", {
             projection:{
                 lastName:0
@@ -263,5 +263,27 @@ describe('EntityRouter Integration Test', () => {
         let queryResult: OperationManyResult<Employee> = result.body;
 
         expect(queryResult.data.filter(c=>c.lastName).length).toEqual(0);
+    });
+
+    it('should query employee with projection', async () => {
+        let result = await httpTester.get("/employees/1")
+
+        let queryResult: OperationOneResult<Employee> = result.body;
+
+        expect(queryResult.data.address).toBeUndefined();
+        expect(queryResult.data.lastName).toBeDefined();
+        
+    });
+
+    it('should query employee with projection', async () => {
+        let result = await httpTester.get("/employees/1", {
+            projection:{
+                lastName:0
+            }
+        })
+
+        let queryResult: OperationOneResult<Employee> = result.body;
+
+        expect(queryResult.data.lastName).toBeUndefined();
     });
 });

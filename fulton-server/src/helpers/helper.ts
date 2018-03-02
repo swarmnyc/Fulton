@@ -24,14 +24,16 @@ export let Helper = {
         if (str == null)
             return defaultValue;
 
-        return parseInt(str) || defaultValue;
+        let value = parseInt(str)
+        return isNaN(value) ? defaultValue : value;
     },
 
     getFloat(str: string, defaultValue?: number): number {
         if (str == null)
             return defaultValue;
 
-        return parseFloat(str) || defaultValue;
+        let value = parseInt(str)
+        return isNaN(value) ? defaultValue : value;
     },
 
     /**

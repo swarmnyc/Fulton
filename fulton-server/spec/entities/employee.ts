@@ -26,7 +26,7 @@ export class Employee {
     @column()
     hireDate: Date;
 
-    @column()
+    @column({ select: false })
     address: string;
 
     @column()

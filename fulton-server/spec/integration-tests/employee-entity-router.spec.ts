@@ -244,4 +244,24 @@ describe('EntityRouter Integration Test', () => {
             return new Date(employee.hireDate) <= date
         }).length).toEqual(0);
     });
+
+    it('should query employees with projection', async () => {
+        let result = await httpTester.get("/employees")
+
+        let queryResult: OperationManyResult<Employee> = result.body;
+
+        expect(queryResult.data.filter(c=>c.address).length).toEqual(0);
+    });
+
+    fit('should query employees with projection', async () => {
+        let result = await httpTester.get("/employees", {
+            projection:{
+                lastName:0
+            }
+        })
+
+        let queryResult: OperationManyResult<Employee> = result.body;
+
+        expect(queryResult.data.filter(c=>c.lastName).length).toEqual(0);
+    });
 });

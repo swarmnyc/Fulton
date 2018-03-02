@@ -6,6 +6,7 @@ import { Type } from "../../interfaces";
 import { EntityMetadata } from 'typeorm/metadata/EntityMetadata';
 import { ColumnMetadata } from 'typeorm/metadata/ColumnMetadata';
 import { FultonStackError } from '../../common/fulton-error';
+import { fultonDebug } from '../../helpers/debug';
 
 interface IncludeOptions {
     [key: string]: IncludeOptions | false
@@ -31,19 +32,24 @@ export class MongoEntityRunner implements IEntityRunner {
             }
         }
 
-        // TODO: typeorm has bug on projection on mongodb        
-        let data = await repo.findAndCount({
-            where: queryParams.filter,
-            skip: skip,
-            take: size,
-            order: queryParams.sort as any
-        });
+        fultonDebug("Query on %s QueryParams %O", repository.metadata.name, queryParams)
 
-        if (data[0].length > 0 && queryParams.includes) {
+        let cursor = repo.createEntityCursor(queryParams.filter)
+        if (skip) cursor.skip(skip)
+        if (size) cursor.limit(size)
+        if (queryParams.sort) cursor.sort(queryParams.sort)
+        if (queryParams.projection) cursor.project(queryParams.projection)
+
+        const [data, count] = await Promise.all<any>([
+            cursor.toArray(),
+            repo.count(queryParams.filter),
+        ]);
+
+        if (data.length > 0 && queryParams.includes) {
             await this.processIncludes(repo, data[0], queryParams.includes);
         }
 
-        return { data: data[0], total: data[1] };
+        return { data: data, total: count };
     }
 
     /**
@@ -186,6 +192,8 @@ export class MongoEntityRunner implements IEntityRunner {
         if (queryParams.projection) {
             this.adjustIdInOptions(repository, queryParams.projection);
         }
+
+        queryParams.projection = this.mergeProjection(repository, queryParams.projection)
     }
 
     /**
@@ -213,11 +221,34 @@ export class MongoEntityRunner implements IEntityRunner {
      */
     private transformSelect(select: string[]): QueryColumnOptions {
         let options: QueryColumnOptions = {};
+
         for (const s of select) {
             options[s] = 1;
         }
 
         return options
+    }
+
+    /**
+     * merge metadata to projection
+     * @param queryParams 
+     */
+    private mergeProjection<T>(repository: MongoRepository<T>, projection: QueryColumnOptions): QueryColumnOptions {
+        let newProjection: any = projection || {}
+
+        console.log("newProjection", newProjection)
+
+        repository.metadata.columns.forEach((c) => {
+            if (!c.isSelect) {
+                newProjection[c.propertyPath] = newProjection[c.propertyPath] || 0
+            }
+        })
+
+        if (Object.getOwnPropertyNames(newProjection).length == 0) {
+            return null
+        } else {
+            return newProjection
+        }
     }
 
     /**

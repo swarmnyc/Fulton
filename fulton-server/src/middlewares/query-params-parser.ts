@@ -2,7 +2,7 @@ import { Request, Response, NextFunction, QueryParams, QueryColumnOptions } from
 import { Helper } from "../helpers/helper";
 
 let optReg = /^([+-]?)(.+?)([+-]?)$/;
-function parseOptionsString(arrStr: string): QueryColumnOptions {
+function parseOptionsString(arrStr: string, positive:number, negative:number): QueryColumnOptions {
     let options: QueryColumnOptions;
 
     let arr = arrStr.split(",");
@@ -16,7 +16,7 @@ function parseOptionsString(arrStr: string): QueryColumnOptions {
             if (match == null) continue;
 
             let name = match[2];
-            let way = (match[1] == "-" || match[3] == "-") ? -1 : 1;
+            let way = (match[1] == "-" || match[3] == "-") ? negative : positive;
             options[name] = way;
         }
     }
@@ -25,20 +25,20 @@ function parseOptionsString(arrStr: string): QueryColumnOptions {
 }
 
 function parseOptionsObject(input: any): QueryColumnOptions {
-    let sort: QueryColumnOptions = {};
+    let options: QueryColumnOptions = {};
     for (const name of Object.getOwnPropertyNames(input)) {
         let value = input[name];
 
         if (typeof value == "string") {
             let direction = Helper.getInt(value);
             if (direction != null) {
-                sort[name] = direction;
+                options[name] = direction;
             }
 
         }
     }
 
-    return sort;
+    return options;
 }
 
 function parseString(arrStr: string): string[] {
@@ -104,14 +104,14 @@ export function queryParamsParser(req: Request, res: Response, next: NextFunctio
                     continue;
                 case "sort":
                     if (typeof value == "string") {
-                        params.sort = parseOptionsString(value);
+                        params.sort = parseOptionsString(value, 1, -1);
                     } else if (typeof value == "object") {
                         params.sort = parseOptionsObject(value);
                     }
                     continue;
                 case "projection":
                     if (typeof value == "string") {
-                        params.projection = parseOptionsString(value);
+                        params.projection = parseOptionsString(value, 1, 0);
                     } else if (typeof value == "object") {
                         params.projection = parseOptionsObject(value);
                     }

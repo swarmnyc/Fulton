@@ -1,5 +1,5 @@
 import { HttpResult, HttpTester } from "../helpers/http-tester";
-import { OperationOneResult, OperationResult, OperationStatus, QueryParams, Request, Response } from "../../src/interfaces";
+import { OperationOneResult, OperationManyResult, OperationResult, QueryParams, Request, Response } from "../../src/interfaces";
 
 import { Category } from "../entities/category";
 import { Customer } from '../entities/customer';
@@ -51,7 +51,7 @@ describe('EntityRouter Integration Test', () => {
 
         expect(result.response.statusCode).toEqual(200);
 
-        let queryResult: OperationResult = result.body;
+        let queryResult: OperationManyResult = result.body;
         expect(queryResult.data.length).toEqual(9);
         expect(queryResult.pagination.total).toEqual(9);
     });
@@ -67,9 +67,10 @@ describe('EntityRouter Integration Test', () => {
 
         expect(result.response.statusCode).toEqual(200);
 
-        let queryResult: OperationResult = result.body;
+        let queryResult: OperationManyResult = result.body;
         expect(queryResult.data.length).toEqual(5);
         expect(queryResult.pagination.total).toEqual(9);
+        expect(queryResult.pagination.size).toEqual(5);
     });
 
     it('should return the last 4 employees', async () => {
@@ -84,7 +85,7 @@ describe('EntityRouter Integration Test', () => {
 
         expect(result.response.statusCode).toEqual(200);
 
-        let queryResult: OperationResult = result.body;
+        let queryResult: OperationManyResult = result.body;
         expect(queryResult.data.length).toEqual(4);
         expect(queryResult.pagination.total).toEqual(9);
     });
@@ -103,7 +104,7 @@ describe('EntityRouter Integration Test', () => {
 
         expect(result.response.statusCode).toEqual(200);
 
-        let queryResult: OperationResult<Employee> = result.body;
+        let queryResult: OperationManyResult<Employee> = result.body;
         expect(queryResult.data[0].employeeId).toEqual(9);
         expect(queryResult.data[1].employeeId).toEqual(8);
         expect(queryResult.data[2].employeeId).toEqual(7);
@@ -123,7 +124,7 @@ describe('EntityRouter Integration Test', () => {
 
         expect(result.response.statusCode).toEqual(200);
 
-        let queryResult: OperationResult<Employee> = result.body;
+        let queryResult: OperationManyResult<Employee> = result.body;
         expect(queryResult.data.length).toEqual(1);
     });
 
@@ -141,7 +142,7 @@ describe('EntityRouter Integration Test', () => {
 
         expect(result.response.statusCode).toEqual(200);
 
-        let queryResult: OperationResult<Employee> = result.body;
+        let queryResult: OperationManyResult<Employee> = result.body;
         expect(queryResult.data.length).toEqual(2);
     })
 
@@ -236,7 +237,7 @@ describe('EntityRouter Integration Test', () => {
             }
         })
 
-        let queryResult: OperationResult<Employee> = result.body;
+        let queryResult: OperationManyResult<Employee> = result.body;
         let date = new Date("1993-01-01");
         expect(queryResult.data.length).toEqual(6);
         expect(queryResult.data.filter((employee) => {

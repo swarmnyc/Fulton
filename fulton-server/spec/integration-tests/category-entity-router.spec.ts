@@ -1,6 +1,6 @@
 import * as lodash from 'lodash';
 
-import { OperationOneResult, OperationResult, OperationStatus, QueryParams, Request, Response, injectable } from "../../src/interfaces";
+import { OperationOneResult, OperationManyResult, OperationResult, QueryParams, Request, Response, injectable } from "../../src/interfaces";
 import { HttpResult, HttpTester } from "../helpers/http-tester";
 
 import { Category } from '../entities/category';
@@ -56,7 +56,7 @@ describe('EntityRouter Integration Test with Category', () => {
 
         expect(result.response.statusCode).toEqual(200);
 
-        let queryResult: OperationResult = result.body;
+        let queryResult: OperationManyResult = result.body;
         expect(queryResult.data.length).toEqual(2);
         expect(queryResult.data).toEqual([
             {

@@ -1,7 +1,7 @@
 import * as lodash from 'lodash';
 
 import { HttpResult, HttpTester } from "../helpers/http-tester";
-import { OperationOneResult, OperationResult, OperationStatus, QueryParams, Request, Response, injectable } from "../../src/interfaces";
+import { OperationOneResult, OperationManyResult, OperationResult, QueryParams, Request, Response, injectable } from "../../src/interfaces";
 import { httpGet, router } from '../../src/routers/route-decorators';
 
 import { Category } from '../entities/category';
@@ -24,7 +24,7 @@ class TerritoryService extends EntityService<Territory>{
         this.categoryRepository = this.getRepository(Category);
     }
 
-    getCategories(queryParams: QueryParams): Promise<OperationResult<Category>> {
+    getCategories(queryParams: QueryParams): Promise<OperationManyResult<Category>> {
         return this.runner.find(this.categoryRepository, queryParams)
             .then((result) => {
                 return {
@@ -117,7 +117,7 @@ describe('EntityRouter Integration Test with Territory', () => {
 
         expect(result.response.statusCode).toEqual(200);
 
-        let queryResult: OperationResult = result.body;
+        let queryResult: OperationManyResult = result.body;
         expect(queryResult.data.length).toEqual(53);
     });
 
@@ -126,7 +126,7 @@ describe('EntityRouter Integration Test with Territory', () => {
 
         expect(result.response.statusCode).toEqual(200);
 
-        let queryResult: OperationResult = result.body;
+        let queryResult: OperationManyResult = result.body;
         expect(queryResult.data.length).toEqual(20);
     });
 
@@ -135,7 +135,7 @@ describe('EntityRouter Integration Test with Territory', () => {
 
         expect(result.response.statusCode).toEqual(200);
 
-        let queryResult: OperationResult = result.body;
+        let queryResult: OperationManyResult = result.body;
         expect(queryResult.data.length).toEqual(2);
         expect(queryResult.data).toEqual([
             {
@@ -160,7 +160,7 @@ describe('EntityRouter Integration Test with Territory', () => {
 
         expect(result.response.statusCode).toEqual(200);
 
-        let queryResult: OperationResult = result.body;
+        let queryResult: OperationManyResult = result.body;
         expect(queryResult.data.length).toEqual(8);
     });
 
@@ -175,7 +175,7 @@ describe('EntityRouter Integration Test with Territory', () => {
 
         expect(result.response.statusCode).toEqual(200);
 
-        let queryResult: OperationResult = result.body;
+        let queryResult: OperationManyResult = result.body;
         expect(queryResult.data.length).toEqual(5);
         expect(queryResult.pagination.total).toEqual(53);
     });
@@ -192,7 +192,7 @@ describe('EntityRouter Integration Test with Territory', () => {
 
         expect(result.response.statusCode).toEqual(200);
 
-        let queryResult: OperationResult = result.body;
+        let queryResult: OperationManyResult = result.body;
         expect(queryResult.data.length).toEqual(3);
         expect(queryResult.pagination.total).toEqual(53);
     });
@@ -210,7 +210,7 @@ describe('EntityRouter Integration Test with Territory', () => {
 
         expect(result.response.statusCode).toEqual(200);
 
-        let queryResult: OperationResult<Territory> = result.body;
+        let queryResult: OperationManyResult<Territory> = result.body;
         expect(queryResult.data.length).toEqual(3);
     });
 
@@ -295,7 +295,7 @@ describe('EntityRouter Integration Test with Territory', () => {
 
         expect(result.response.statusCode).toEqual(200);
 
-        let queryResult: OperationResult<Territory> = result.body;
+        let queryResult: OperationManyResult<Territory> = result.body;
         expect(queryResult.data.length).toEqual(1);
     });
 });

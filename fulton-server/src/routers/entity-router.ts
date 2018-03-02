@@ -1,6 +1,6 @@
 import { FullEntityRouterMetadata, getFullEntityRouterActionMetadata } from "./route-decorators-helpers";
 import { httpDelete, httpGet, httpPatch, httpPost } from "./route-decorators";
-import { IEntityService, injectable, NextFunction, OperationOneResult, OperationResult, OperationStatus, Request, Response, EntityServiceFactory, DiKeys } from "../interfaces";
+import { IEntityService, injectable, NextFunction, OperationOneResult, OperationManyResult, OperationResult, Request, Response, EntityServiceFactory, DiKeys } from "../interfaces";
 
 import { EntityService } from "../entities/entity-service";
 import { Router } from "./router";
@@ -106,15 +106,15 @@ export abstract class EntityRouter<TEntity> extends Router {
         }
     }
 
-    protected sendResult(res: Response): ((result: OperationResult | OperationOneResult | OperationStatus) => void) {
+    protected sendResult(res: Response): ((result: OperationManyResult | OperationOneResult | OperationResult) => void) {
         return (result) => {
             if (result.errors) {
                 res.status(400).send(result);
             } else {
-                let status = (<OperationStatus>result).status;
+                let status = (<OperationResult>result).status;
                 if (status) {
                     res.status(status).end();
-                } else if ((<OperationResult>result).data) {
+                } else if ((<OperationManyResult>result).data) {
                     res.send(result);
                 } else {
                     res.status(400).send({

@@ -94,7 +94,7 @@ export interface FindResult<TEntity> {
  * Entity Service provides basic CRUD
  */
 export interface IEntityService<TEntity> {
-    find(queryParams?: QueryParams): Promise<OperationResult<TEntity>>;
+    find(queryParams?: QueryParams): Promise<OperationManyResult<TEntity>>;
 
     findOne(queryParams?: QueryParams): Promise<OperationOneResult<TEntity>>;
 
@@ -102,9 +102,9 @@ export interface IEntityService<TEntity> {
 
     create(entity: TEntity): Promise<OperationOneResult<TEntity>>;
 
-    update(id: any, entity: TEntity): Promise<OperationStatus>;
+    update(id: any, entity: TEntity): Promise<OperationResult>;
 
-    delete(id: any): Promise<OperationStatus>;
+    delete(id: any): Promise<OperationResult>;
 }
 
 /** the real runner of entity service, it can be Mongo runner or Sql Runner */
@@ -133,7 +133,7 @@ export interface QueryColumnOptions {
     [key: string]: number;
 }
 
-export interface OperationStatus {
+export interface OperationResult {
     status?: number;
     errors?: FultonErrorObject;
 }
@@ -144,15 +144,13 @@ export interface OperationResultPagination {
     size?: number;
 }
 
-export interface OperationResult<T=any> {
+export interface OperationManyResult<T=any> extends OperationResult {
     data?: T[];
-    errors?: FultonErrorObject;
     pagination?: OperationResultPagination;
 }
 
-export interface OperationOneResult<T=any> {
+export interface OperationOneResult<T=any> extends OperationResult {
     data?: T;
-    errors?: FultonErrorObject;
 }
 
 export interface QueryParams {

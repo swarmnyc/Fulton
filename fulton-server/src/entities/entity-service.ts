@@ -1,6 +1,6 @@
 import * as lodash from 'lodash';
 
-import { DiKeys, FultonErrorObject, IEntityRunner, IEntityService, OperationOneResult, OperationResult, OperationStatus, QueryParams, Type, entity, inject, injectable } from '../interfaces';
+import { DiKeys, FultonErrorObject, IEntityRunner, IEntityService, OperationOneResult, OperationManyResult, OperationResult, QueryParams, Type, entity, inject, injectable } from '../interfaces';
 import { FultonError, FultonStackError } from '../common/fulton-error';
 import { MongoRepository, Repository, getMongoRepository, getRepository } from 'typeorm';
 import { ValidationError, validate } from "class-validator";
@@ -55,7 +55,7 @@ export class EntityService<TEntity> implements IEntityService<TEntity> {
         return getMongoRepository(entity, connectionName)
     }
 
-    find(queryParams?: QueryParams): Promise<OperationResult<TEntity>> {
+    find(queryParams?: QueryParams): Promise<OperationManyResult<TEntity>> {
         let errors = this.adjustParams(this.mainRepository.metadata, queryParams);
         if (errors) {
             return Promise.resolve(errors);
@@ -69,7 +69,7 @@ export class EntityService<TEntity> implements IEntityService<TEntity> {
                     pagination: {
                         total: result.total,
                         index: lodash.get(queryParams, "pagination.index") || 0,
-                        size: lodash.get(queryParams, "pagination.index") || result.total
+                        size: lodash.get(queryParams, "pagination.size") || result.total
                     }
                 }
             })
@@ -128,7 +128,7 @@ export class EntityService<TEntity> implements IEntityService<TEntity> {
             .catch(this.errorHandler);
     }
 
-    update(id: any, input: TEntity): Promise<OperationStatus> {
+    update(id: any, input: TEntity): Promise<OperationResult> {
         id = this.convertId(this.mainRepository.metadata, id);
 
         if (!id) {
@@ -147,7 +147,7 @@ export class EntityService<TEntity> implements IEntityService<TEntity> {
             .catch(this.errorHandler);
     }
 
-    delete(id: any): Promise<OperationStatus> {
+    delete(id: any): Promise<OperationResult> {
         id = this.convertId(this.mainRepository.metadata, id);
 
         if (!id) {
@@ -257,7 +257,7 @@ export class EntityService<TEntity> implements IEntityService<TEntity> {
      * handler operation fails
      * @param error 
      */
-    protected errorHandler(error: any): OperationResult & OperationOneResult {
+    protected errorHandler(error: any): OperationManyResult & OperationOneResult {
         FultonLog.warn("EntityService operation failed with error:\n", error);
 
         if (error instanceof FultonError) {

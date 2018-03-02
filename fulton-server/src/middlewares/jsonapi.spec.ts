@@ -1,5 +1,5 @@
 import { EntityRouter, entityRouter } from '../routers';
-import { IEntityService, OperationOneResult, OperationResult, OperationStatus, QueryParams, Request, Response, Type } from "../interfaces";
+import { IEntityService, OperationOneResult, OperationManyResult, OperationResult, QueryParams, Request, Response, Type } from "../interfaces";
 
 import { Category } from '../../spec/entities/category';
 import { Connection } from "typeorm/connection/Connection";
@@ -13,7 +13,7 @@ import { queryParamsParser } from "./query-params-parser";
 import { sampleData } from "../../spec/support/sample-data";
 
 class EmployeeEntityService implements IEntityService<Employee> {
-    find(queryParams: QueryParams): Promise<OperationResult<Employee>> {
+    find(queryParams: QueryParams): Promise<OperationManyResult<Employee>> {
         let data: Employee[] = [];
 
         data.push(Object.assign(new Employee(), {
@@ -129,10 +129,10 @@ class EmployeeEntityService implements IEntityService<Employee> {
     create(entity: Employee): Promise<OperationOneResult<Employee>> {
         throw new Error("Method not implemented.");
     }
-    update(id: string, entity: Employee): Promise<OperationStatus> {
+    update(id: string, entity: Employee): Promise<OperationResult> {
         throw new Error("Method not implemented.");
     }
-    delete(id: string): Promise<OperationStatus> {
+    delete(id: string): Promise<OperationResult> {
         throw new Error("Method not implemented.");
     }
 }

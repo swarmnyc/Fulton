@@ -2,7 +2,7 @@ import * as qs from "qs";
 import * as url from "url";
 
 import { JsonApiConverter, JsonApiData, JsonApiLinks, JsonApiRootLinks, JsonApiSerializeOptions, JsonApiTypeOptions } from "../helpers/jsonapi-converter";
-import { NextFunction, OperationOneResult, OperationResult, QueryParams, Request, Response, Type, EventKeys } from '../interfaces';
+import { NextFunction, OperationOneResult, OperationManyResult, QueryParams, Request, Response, Type, EventKeys } from '../interfaces';
 
 import { EntityRouter } from '../routers/entity-router';
 import { FultonApp } from "../fulton-app";
@@ -37,7 +37,7 @@ module.exports = function (app: FultonApp) {
             res.send = new Proxy(res.send, {
                 apply: (send: Function, thisArg: Response, args: any[]) => {
                     if (args && args.length > 0 && args[0].data) {
-                        let body: (OperationResult | OperationOneResult) = args[0];
+                        let body: (OperationManyResult | OperationOneResult) = args[0];
                         let data = body.data;
                         let entityType: Type
 
@@ -56,7 +56,7 @@ module.exports = function (app: FultonApp) {
                                 baseUrl: req.baseUrl,
                                 args: {
                                     queryParams: req.queryParams,
-                                    pagination: (<OperationResult>body).pagination
+                                    pagination: (<OperationManyResult>body).pagination
                                 }
                             };
 

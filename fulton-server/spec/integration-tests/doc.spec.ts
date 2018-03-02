@@ -1,4 +1,4 @@
-import { Request, Response, OperationResult, QueryParams, OperationOneResult, OperationStatus, IEntityService, injectable, Type } from "../../src/interfaces";
+import { Request, Response, OperationManyResult, QueryParams, OperationOneResult, OperationResult, IEntityService, injectable, Type } from "../../src/interfaces";
 import { UserServiceMock } from "../helpers/user-service-mock";
 import { HttpTester, HttpResult } from "../helpers/http-tester";
 import { MongoHelper } from "../helpers/mongo-helper";
@@ -15,7 +15,7 @@ import { FultonAppOptions } from '../../src/fulton-app-options';
 
 @injectable()
 class FakeEntityService implements IEntityService<any>{
-    find(queryParams: QueryParams): Promise<OperationResult<any>> {
+    find(queryParams: QueryParams): Promise<OperationManyResult<any>> {
         throw new Error("Method not implemented.");
     }
     findOne(queryParams: QueryParams): Promise<OperationOneResult<any>> {
@@ -27,10 +27,10 @@ class FakeEntityService implements IEntityService<any>{
     create(entity: any): Promise<OperationOneResult<any>> {
         throw new Error("Method not implemented.");
     }
-    update(id: string, entity: any): Promise<OperationStatus> {
+    update(id: string, entity: any): Promise<OperationResult> {
         throw new Error("Method not implemented.");
     }
-    delete(id: string): Promise<OperationStatus> {
+    delete(id: string): Promise<OperationResult> {
         throw new Error("Method not implemented.");
     }
 

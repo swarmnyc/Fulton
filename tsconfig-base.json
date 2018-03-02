@@ -1,17 +1,16 @@
- {
+{
   "compilerOptions": {
     "declaration": true,
-    "strict": true,
-    "noImplicitAny": true,
-    "strictNullChecks": false,
-    "noFallthroughCasesInSwitch": true,
-    "moduleResolution": "node",
-    "module": "commonjs",
-    "target": "es6",
-    "lib": ["es6"],
-    "skipLibCheck": true,
-    "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
-    "sourceMap": true
+    "experimentalDecorators": true,
+    "module": "commonjs",
+    "moduleResolution": "node",
+    "noFallthroughCasesInSwitch": true,
+    "noImplicitAny": true,
+    "skipLibCheck": true,
+    "sourceMap": true,
+    "strict": true,
+    "strictNullChecks": false,
+    "target": "es2016" // TODO: zone.js don't support es2017 for now
   }
 }

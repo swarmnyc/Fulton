@@ -1,7 +1,9 @@
-import { FultonApp, FultonAppOptions, authorize, AccessToken, Request, Response } from "../../src/index";
-import { UserServiceMock } from "../helpers/user-service-mock";
-import { HttpTester, HttpResult } from "../helpers/http-tester";
+import { HttpResult, HttpTester } from "../helpers/http-tester";
+import { Request, Response } from "../../src/interfaces";
 
+import { AccessToken } from '../../src/identity/interfaces';
+import { FultonApp } from '../../src/fulton-app';
+import { FultonAppOptions } from '../../src/fulton-app-options';
 
 class MyApp extends FultonApp {
     protected onInit(options: FultonAppOptions): void {
@@ -29,7 +31,7 @@ class MyApp extends FultonApp {
     }
 }
 
-xdescribe('Identity Integration Test', () => {
+describe('Identity Integration Test', () => {
     let app: MyApp;
     let httpTester: HttpTester;
 
@@ -49,7 +51,7 @@ xdescribe('Identity Integration Test', () => {
     });
 
     function prepareUser(): Promise<HttpResult> {
-        return httpTester.postJson("/auth/register", {
+        return httpTester.post("/auth/register", {
             email: "test@test.com",
             username: "test",
             password: "test123"
@@ -57,7 +59,7 @@ xdescribe('Identity Integration Test', () => {
     }
 
     it('should register', async () => {
-        let result = await httpTester.postJson("/auth/register", {
+        let result = await httpTester.post("/auth/register", {
             email: "test@test.com",
             username: "test",
             password: "test123"
@@ -76,21 +78,21 @@ xdescribe('Identity Integration Test', () => {
     it('should register failure register wiht the same name and email', async () => {
         await prepareUser()
 
-        let result = await httpTester.postJson("/auth/register", {
+        let result = await httpTester.post("/auth/register", {
             email: "test@test.com",
             username: "test",
             password: "test123"
         });
         expect(result.response.statusCode).toEqual(400);
 
-        expect(result.body.errors.username).toEqual(["the username is existed"]);
-        expect(result.body.errors.email).toEqual(["the email is existed"]);
+        expect(result.body.errors.detail.username.message).toEqual("the username is existed");
+        expect(result.body.errors.detail.email.message).toEqual("the email is existed");
     });
 
     it('should login successfully', async () => {
         await prepareUser();
 
-        let result = await httpTester.postJson("/auth/login", {
+        let result = await httpTester.post("/auth/login", {
             username: "test",
             password: "test123"
         });
@@ -102,13 +104,13 @@ xdescribe('Identity Integration Test', () => {
     it('should login failure', async () => {
         await prepareUser();
 
-        let result = await httpTester.postJson("/auth/login", {
+        let result = await httpTester.post("/auth/login", {
             username: "test",
             password: "test321"
         });
 
         expect(result.response.statusCode).toEqual(400);
-        expect(result.body.errors.$).toEqual(["username or password isn't correct"]);
+        expect(result.body.errors.message).toEqual("username or password isn't correct");
     });
 
     it('should access with token', async () => {

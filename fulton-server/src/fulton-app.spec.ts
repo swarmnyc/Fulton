@@ -1,12 +1,19 @@
-import { Factory, FultonApp, FultonAppOptions, FultonDiContainer, FultonRouter, FultonService, Inject, Injectable, Router } from "./index";
+import { Service } from './services/service';
+import { inject, injectable, DiContainer, DiKeys } from './interfaces';
+import { Router, router } from './routers';
+import { FultonApp } from './fulton-app';
+import { FultonAppOptions } from './fulton-app-options';
+import { EntityService } from './entities';
+import { Factory } from './helpers';
 
-@Injectable()
-class ServiceA extends FultonService {
+
+@injectable()
+class ServiceA extends Service {
     value = "a"
 }
 
-@Injectable()
-class ServiceB extends FultonService {
+@injectable()
+class ServiceB extends Service {
     constructor(public serviceA: ServiceA) {
         super();
     }
@@ -14,7 +21,7 @@ class ServiceB extends FultonService {
     value = "b"
 }
 
-@Injectable()
+@injectable()
 class ServiceC extends ServiceB {
     constructor(public serviceA: ServiceA) {
         super(serviceA);
@@ -23,7 +30,7 @@ class ServiceC extends ServiceB {
     value = "c"
 }
 
-@Injectable()
+@injectable()
 class ServiceD extends ServiceB {
     constructor(public serviceA: ServiceA) {
         super(serviceA);
@@ -32,29 +39,29 @@ class ServiceD extends ServiceB {
     value = "d"
 }
 
-@Injectable()
+@injectable()
 class ServiceE {
     constructor(public serviceA: ServiceA, public value: any) {
 
     }
 }
 
-@Injectable()
+@injectable()
 class ApiService {
-    constructor( @Inject("api_key") public apiKey: string) {
+    constructor(@inject("api_key") public apiKey: string) {
 
     }
 }
 
-@Router("/A")
-class RouterA extends FultonRouter {
+@router("/A")
+class RouterA extends Router {
     constructor(public serviceA: ServiceA) {
         super();
     }
 }
 
-@Router("/B")
-class RouterB extends FultonRouter {
+@router("/B")
+class RouterB extends Router {
     constructor(public serviceB: ServiceB) {
         super();
     }
@@ -63,7 +70,8 @@ class RouterB extends FultonRouter {
 class MyFultonApp extends FultonApp {
     protected onInit(options: FultonAppOptions): void | Promise<void> {
         options.providers = [
-            { provide: "api_key", useValue: "abcd" }
+            { provide: "api_key", useValue: "abcd" },
+            { provide: DiKeys.EntityServiceFactory, useValue: "abcd" }
         ];
 
         options.services = [
@@ -89,7 +97,7 @@ class MyFultonApp extends FultonApp {
             { provide: ServiceD, useValue: new ServiceE(new ServiceB(null), "e") },
             {
                 provide: "Service",
-                useFactory: (container: FultonDiContainer) => {
+                useFactory: (container: DiContainer) => {
                     return (type: string) => {
                         if (type == "a") return container.get(ServiceA);
                         if (type == "b") return container.get(ServiceB);
@@ -106,12 +114,12 @@ class MyFultonApp extends FultonApp {
         ];
     }
 
-    protected initDatabases() : Promise<void> {
+    protected initDatabases(): Promise<void> {
         return;
     }
 
-    routers: FultonRouter[];
-    protected didInitRouters(routers: FultonRouter[]) {
+    routers: Router[];
+    protected didInitRouters(routers: Router[]) {
         this.routers = routers;
     }
 }
@@ -215,5 +223,9 @@ describe('Fulton App', () => {
         expect(app.routers[0]["app"]).toBeTruthy();
         expect(app.routers[0]["metadata"].router.path).toEqual("/A");
         expect((app.routers[1] as RouterB).serviceB.value).toEqual("b");
+    });
+
+    it('should override EntityServiceFactory', async () => {
+        expect(app.container.get(DiKeys.EntityServiceFactory)).toEqual("abcd");
     });
 });

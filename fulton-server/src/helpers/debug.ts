@@ -2,7 +2,6 @@ import { isArray } from "util";
 import { moduleExists } from "./module-helpers";
 import { IDebugger } from "debug";
 
-//it is loaded in ./src/index.ts
 export let fultonDebug: IDebugger;
 export let fultonDebugFunc: (func: () => string | any[]) => void;
 

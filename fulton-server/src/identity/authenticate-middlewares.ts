@@ -1,6 +1,6 @@
 import * as passport from "passport";
 
-import { Middleware, NextFunction, Request, Response } from "../index";
+import { Middleware, NextFunction, Request, Response } from "../interfaces";
 
 import { AuthenticateOptions } from "./interfaces";
 

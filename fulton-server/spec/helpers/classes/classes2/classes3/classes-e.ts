@@ -1,6 +1,6 @@
-import { FultonRouter } from "../../../../../src/index";
+import { Router } from '../../../../../src/routers/router';
 
-export default class RouterE extends FultonRouter {
+export default class RouterE extends Router {
 
 }
 

@@ -1,12 +1,17 @@
 import * as passport from 'passport';
-import { Request, PathIdentifier, Middleware } from "../interfaces";
-import { Type, HttpMethod } from "../index";
+import { Request, PathIdentifier, Middleware, Type, HttpMethod } from "../interfaces";
 
 export type Strategy = passport.Strategy;
 export type AuthenticateOptions = passport.AuthenticateOptions;
 
 export interface IUser {
     [key: string]: any;
+}
+
+export interface IProfile {
+    email?: string;
+    username?: string;
+    portraitUrl?: string;
 }
 
 export interface IUserRegister extends IUser {
@@ -32,13 +37,13 @@ export interface FultonUserOauth {
     userId?: string;
     accessToken?: string;
     refreshToken?: string;
-    issuredAt?: Date;
+    issuedAt?: Date;
     expiredAt?: Date;
 }
 
 export interface FultonAccessToken {
     token?: string;
-    issuredAt?: Date;
+    issuedAt?: Date;
     expiredAt?: Date;
     revoked?: boolean;
 }
@@ -46,8 +51,8 @@ export interface FultonAccessToken {
 export interface IUserService<T extends IUser> {
     currentUser: IUser;
     login(username: string, password: string): Promise<T>;
-    loginByOauth(token: AccessToken, profile: any): Promise<T>;
-    findByAccessToken(token: string): Promise<T>;
+    loginByOauth(token: AccessToken, profile: IProfile): Promise<T>;
+    loginByAccessToken(token: string): Promise<T>;
     register(user: IUserRegister): Promise<T>;
     issueAccessToken(user: T): Promise<AccessToken>;
     refreshAccessToken(token: string): Promise<AccessToken>;
@@ -86,10 +91,10 @@ export interface StrategyOptions {
 
     /**
     * for passport, use it when create new Strategy object, like
-    * new LocalStrategy(options.strageyOptions, options.verifier)
+    * new LocalStrategy(options.strategyOptions, options.verifier)
     * the default value is null
     */
-    strategyOptions?: {[key: string]: any};
+    strategyOptions?: { [key: string]: any };
 
     /**
      * verify the oauth request.
@@ -125,15 +130,15 @@ export interface StrategyOptions {
 }
 
 export interface OAuthStrategyOptions extends StrategyOptions {
-     /**
-     * the default value is get
-     */
+    /**
+    * the default value is get
+    */
     callbackHttpMethod?: HttpMethod;
 
     /**
      * the route path for google auth callback
      * the default value is /auth/google/callback
-     * It can be overrided by procces.env["{appName}.options.identity.google.callbackPath"]
+     * It can be overridden by process.env["{appName}.options.identity.google.callbackPath"]
      */
     callbackPath?: string;
 
@@ -171,7 +176,7 @@ export interface OAuthStrategyOptions extends StrategyOptions {
     /**
      * transform the oauth profile to our user format
      */
-    prfoileTransformer?: (profile: any) => any;
+    profileTransformer?: (profile: any) => any;
 
     /**
      * the middleware next to authenticate
@@ -203,7 +208,7 @@ export interface GoogleStrategyOptions extends OAuthStrategyOptions {
 }
 
 export interface CustomStrategySettings {
-    options:  OAuthStrategyOptions;
+    options: OAuthStrategyOptions;
     /**
      * Custom passport-strategy
      */

@@ -1,48 +1,58 @@
 import "reflect-metadata";
+import "./extensions"
 
-import * as express from "express";
+import { Repository } from "typeorm";
+import { EntityMetadata } from 'typeorm/metadata/EntityMetadata';
+import { ColumnMetadata } from 'typeorm/metadata/ColumnMetadata';
+import { FultonStackError } from './common/fulton-error';
 
-import { IUser, IUserService } from "./identity";
-import { inject, injectable, interfaces } from "inversify";
+export * from "./re-export"
 
-import { FultonApp } from "./fulton-app";
+export enum DiKeys {
+    EntityServiceFactory = "__EntityServiceFactory__",
+    FultonApp = "__FultonApp__",
+    MongoEntityRunner = "__MongoEntityRunner__",
+    RepositoryFactory = "__RepositoryFactory__",
+    UserRepository = "__UserRepository__",
+}
 
-export const Injectable = injectable;
+export enum EventKeys {
+    didInit = "didInit",
+    didInitCors = "didInitCors",
+    didInitDatabases = "didInitDatabases",
+    didInitDiContainer = "didInitDiContainer",
+    didInitDocs = "didInitDocs",
+    didInitErrorHandler = "didInitErrorHandler",
+    didInitFormatter = "didInitFormatter",
+    didInitHttpLogging = "didInitHttpLogging",
+    didInitIdentity = "didInitIdentity",
+    didInitIndex = "didInitIndex",
+    didInitJsonApi = "didInitJsonApi",
+    didInitLogging = "didInitLogging",
+    didInitMiddlewares = "didInitMiddlewares",
+    didInitProviders = "didInitProviders",
+    didInitRepositories = "didInitRepositories",
+    didInitRouters = "didInitRouters",
+    didInitServer = "didInitServer",
+    didInitServices = "didInitServices",
+    didInitStaticFile = "didInitStaticFile",
+    onInitJsonApi = "onInitJsonApi",
+}
 
-export const Inject = inject;
+export interface AbstractType<T=any> extends Function {
+}
+
+export interface Type<T=any> extends Function {
+    new(...args: any[]): T;
+}
+
+export type TypeIdentifier<T=any> = (string | symbol | Type<T>);
 
 export type PathIdentifier = (string | RegExp | (string | RegExp)[]);
 
-/**
- * alias for inversify.interfaces.Container
- */
-export type FultonDiContainer = interfaces.Container;
+export type RepositoryFactory<TEntity = any> = ((entity: Type<TEntity>) => Repository<TEntity>);
 
-export interface NextFunction extends express.NextFunction { }
-
-/**
- * extends express.Request
- */
-export interface Request extends express.Request { }
-
-/**
- * extends express.Response
- */
-export interface Response extends express.Response { }
-
-/**
- * alias for express.RequestHandler
- */
-export interface Middleware extends express.RequestHandler {
-    (req: Request, res: Response, next: NextFunction): any;
-}
-
-/**
- * alias for express.ErrorRequestHandler
- */
-export interface ErrorMiddleware extends express.ErrorRequestHandler {
-    (err: any, req: Request, res: Response, next: NextFunction): any;
-}
+export type EntityServiceFactory<TEntity = any> = ((entity: Type<TEntity>) => IEntityService<TEntity>);
 
 export interface RouterDocOptions {
     title?: string;
@@ -55,52 +65,94 @@ export interface RouterActionDocOptions {
     description?: string;
 }
 
-
-export interface FultonErrorObject {
-    [key: string]: string[];
+export interface FultonErrorConstraints {
+    [key: string]: string;
 }
 
+export interface FultonErrorItem {
+    message?: string;
+    constraints?: FultonErrorConstraints;
+}
+
+export interface FultonErrorDetail {
+    [key: string]: string | FultonErrorItem | FultonErrorConstraints;
+}
+
+export interface FultonErrorObject {
+    message?: string;
+    detail?: FultonErrorDetail;
+}
+
+export interface FindResult<TEntity> {
+    /** the data of the result */
+    data: TEntity[],
+    /** the real total before pagination */
+    total: number
+}
+
+/**
+ * Entity Service provides basic CRUD
+ */
 export interface IEntityService<TEntity> {
-    find(queryParams: QueryParams): Promise<OperationReault<TEntity>>;
+    find(queryParams?: QueryParams): Promise<OperationResult<TEntity>>;
 
-    findOne(queryParams: QueryParams): Promise<OperationOneReault<TEntity>>;
+    findOne(queryParams?: QueryParams): Promise<OperationOneResult<TEntity>>;
 
-    create(): Promise<TEntity>;
+    findById(id: any, QueryParams?: QueryParams): Promise<OperationOneResult<TEntity>>;
 
-    update(): Promise<TEntity>;
+    create(entity: TEntity): Promise<OperationOneResult<TEntity>>;
 
-    delete(): Promise<TEntity>;
+    update(id: any, entity: TEntity): Promise<OperationStatus>;
+
+    delete(id: any): Promise<OperationStatus>;
+}
+
+/** the real runner of entity service, it can be Mongo runner or Sql Runner */
+export interface IEntityRunner {
+    find<TEntity>(repository: Repository<TEntity>, queryParams?: QueryParams): Promise<FindResult<TEntity>>;
+
+    findOne<TEntity>(repository: Repository<TEntity>, queryParams?: QueryParams): Promise<TEntity>;
+
+    findById<TEntity>(repository: Repository<TEntity>, id: any, queryParams?: QueryParams): Promise<TEntity>;
+
+    create<TEntity>(repository: Repository<TEntity>, entity: TEntity): Promise<TEntity>;
+
+    update<TEntity>(repository: Repository<TEntity>, id: any, entity: TEntity): Promise<void>;
+
+    delete<TEntity>(repository: Repository<TEntity>, id: any): Promise<void>;
+
+    adjustFilter<T>(filter: any, name: string, value: string, targetColumn: ColumnMetadata, errorTracker: FultonStackError): void
+
+    convertValue(type: any, value: any, errorTracker: FultonStackError): any;
 }
 
 /**
  * for sorting and select, for example sort = {column1:1 , column2:-1 }
  */
-export interface QueryColumnStates {
+export interface QueryColumnOptions {
     [key: string]: number;
 }
 
-export interface OperationReault<T=any> {
+export interface OperationStatus {
+    status?: number;
+    errors?: FultonErrorObject;
+}
+
+export interface OperationResultPagination {
+    total?: number;
+    index?: number;
+    size?: number;
+}
+
+export interface OperationResult<T=any> {
     data?: T[];
     errors?: FultonErrorObject;
-    pagination?: {
-        total?: number;
-        index?: number;
-        size?: number;
-    }
+    pagination?: OperationResultPagination;
 }
 
-export interface OperationOneReault<T=any> {
+export interface OperationOneResult<T=any> {
     data?: T;
     errors?: FultonErrorObject;
-    pagination?: {
-        total?: number;
-        index?: number;
-        size?: number;
-    }
-}
-
-export interface JsonApiOptions {
-    // TODO: JsonApiOptions
 }
 
 export interface QueryParams {
@@ -119,33 +171,53 @@ export interface QueryParams {
 
     /**
      * sort options
-     * true is ascending order
-     * false is descending order
+     * 1 is ascending order
+     * -1 is descending order
      * 
      * ## examples
      * two styles: 
-     *  - ?sort=columeA,-columeB 
-     *  - ?sort[columeA]=1|true&sort[columeB]=-1|false
+     *  - ?sort=columnA,-columnB 
+     *  - ?sort[columnA]=1&sort[columnB]=-1
      */
-    sort?: QueryColumnStates,
+    sort?: QueryColumnOptions;
+
+    /**
+     * projection options, can be parsed by select (for show)
+     * 1 is show
+     * -1 is descending order
+     * 
+     * ## examples
+     * two styles: 
+     *  - ?projection=columnA,-columnB 
+     *  - ?projection[columnA]=1&projection[columnB]=-1
+     */
+    projection?: QueryColumnOptions;
 
     /**
      * select options,
-     * if undefined, all output all columns excepts @Colume({hide:true})
+     * if undefined, all output all columns excepts @column({select:false})
      * ## examples
      * two styles: 
-     *  - ?select=columeA,columeB 
-     *  - ?select=columeA&select=columeB
+     *  - ?select=columnA,columnB 
+     *  - ?select=columnA&select=columnB
      */
     select?: string[];
 
     /**
      * pagination options,
      * ## examples
-     *  - ?includes=columeA,columeB 
-     *  - ?includes=columeA&includes=columeB
+     *  - ?includes=columnA,columnB 
+     *  - ?includes=columnA&includes=columnB
      */
     includes?: string[];
+
+    /**
+     * pagination options,
+     * ## examples
+     *  - ?includes=columnA,columnB 
+     *  - ?includes=columnA&includes=columnB
+     */
+    include?: string[];
 
     /**
      * pagination options,
@@ -156,44 +228,10 @@ export interface QueryParams {
     pagination?: {
         index?: number,
         size?: number,
-    }
+    },
+    needAdjust?: boolean;
 }
 
 export type HttpMethod = "all" | "get" | "post" | "patch" | "delete" | "head" | "put";
 
 export type AppMode = "api" | "web-view" | "mixed";
-
-
-// custom types for helping development;
-declare global {
-    namespace Express {
-        interface Request {
-            fultonApp?: FultonApp;
-            userService?: IUserService<IUser>;
-            container?: FultonDiContainer;
-            queryParams?: QueryParams;
-        }
-
-        interface Response {
-        }
-    }
-
-}
-
-// declare module "typeorm/decorator/options/ColumnOptions" {
-//     interface ColumnOptions {
-//         /**
-//          * only EntityService.find() supports, don't not output this colume to client
-//          */
-//         hide?: boolean;
-//     }
-// }
-
-// declare module "typeorm/decorator/options/ColumnCommonOptions" {
-//     interface ColumnCommonOptions {
-//         /**
-//          * only EntityService.find() supports, don't not output this colume to client
-//          */
-//         hide?: boolean;
-//     }
-// }

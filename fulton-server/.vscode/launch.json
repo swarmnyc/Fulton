@@ -15,6 +15,18 @@
                 "test:debug"
             ],
             "port": 9229
+        },
+        {
+            "type": "node",
+            "request": "launch",
+            "name": "Launch test:debug:it",
+            "cwd": "${workspaceFolder}",
+            "runtimeExecutable": "npm",
+            "runtimeArgs": [
+                "run-script",
+                "test:debug:it"
+            ],
+            "port": 9229
         }
     ]
 }

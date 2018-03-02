@@ -1,8 +1,11 @@
 import * as lodash from 'lodash';
 
-import { AccessToken, FultonError, FultonUser, IUserService, Inject, Injectable, IUserRegister } from "../../src/index";
+import { AccessToken, IUserRegister, IUserService } from '../../src/identity/interfaces';
+import { inject, injectable } from "../../src/interfaces";
 
 import { FultonApp } from "../../src/fulton-app";
+import { FultonError } from '../../src/common/fulton-error';
+import { FultonUser } from '../../src/identity/fulton-impl/fulton-user';
 
 export class UserServiceMock implements IUserService<FultonUser> {
     currentUser: FultonUser;
@@ -11,23 +14,23 @@ export class UserServiceMock implements IUserService<FultonUser> {
     }
 
     login(username: string, password: string): Promise<FultonUser> {
-        let errors = new FultonError();
+        let error = new FultonError();
 
         if (!lodash.some(username)) {
-            errors.addError("username", "username is required")
+            error.addError("username", "username is required")
         }
 
         if (!lodash.some(password)) {
-            errors.addError("password", "password is required")
+            error.addError("password", "password is required")
         }
 
-        if (errors.hasErrors()) {
-            return Promise.reject(errors);
+        if (error.hasErrors()) {
+            return Promise.reject(error);
         }
 
         if (/fail/i.test(password)) {
-            errors.addError("username or password isn't correct");
-            return Promise.reject(errors);
+            error.setMessage("username or password isn't correct");
+            return Promise.reject(error);
         } else {
             let user = new FultonUser();
             user.id = username;
@@ -40,7 +43,7 @@ export class UserServiceMock implements IUserService<FultonUser> {
         return Promise.resolve(profile);
     }
 
-    findByAccessToken(token: string): Promise<FultonUser> {
+    loginByAccessToken(token: string): Promise<FultonUser> {
         let info = token.split("-");
         if (info[1] == "accessToken") {
             let user = new FultonUser();
@@ -58,7 +61,7 @@ export class UserServiceMock implements IUserService<FultonUser> {
 
         let newUser = lodash.pick(input, ["username", "password", "email"]);
 
-        if (errors.verifyRequireds(input, ["username", "password", "email"])) {
+        if (errors.verifyRequired(input, ["username", "password", "email"])) {
             return Promise.resolve(input as FultonUser);
         } else {
             return Promise.reject(errors);
@@ -68,8 +71,8 @@ export class UserServiceMock implements IUserService<FultonUser> {
     issueAccessToken(user: FultonUser): Promise<AccessToken> {
         return Promise.resolve({
             access_token: `${user.username}-accessToken`,
-            token_type: this.app.options.identity.accessTokenType,
-            expires_in: this.app.options.identity.accessTokenDuration
+            token_type: this.app.options.identity.accessToken.type,
+            expires_in: this.app.options.identity.accessToken.duration
         });
     }
 

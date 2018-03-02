@@ -1,16 +1,16 @@
 import * as passport from 'passport';
 import * as lodash from 'lodash';
 
-import { FultonUser, Type, IFultonUser } from '../index';
+import { Type, DiKeys } from '../interfaces';
 import { IStrategyOptionsWithRequest, Strategy as LocalStrategy } from 'passport-local';
 import { Strategy } from 'passport';
-import { IUser, IUserService } from './interfaces';
+import { IUser, IUserService, IFultonUser } from './interfaces';
 
 import { Strategy as BearerStrategy } from 'passport-http-bearer';
 import { FultonApp } from "../fulton-app";
 import { getRepository } from 'typeorm';
 import { GoogleStrategy } from './strategies/google-strategy';
-import Helper from '../helpers/helper';
+import { Helper } from '../helpers/helper';
 
 module.exports = async function identityInitializer(app: FultonApp) {
     let idOptions = app.options.identity;
@@ -23,17 +23,17 @@ module.exports = async function identityInitializer(app: FultonApp) {
 
         if (idOptions.userService instanceof Function) {
             if (idOptions.userRepository) {
-                // use specical repository
+                // use special repository
                 if (idOptions.userRepository instanceof Function) {
-                    app.container.bind("UserRepository").to(idOptions.userRepository);
+                    app.container.bind(DiKeys.UserRepository).to(idOptions.userRepository);
                 } else {
-                    app.container.bind("UserRepository").toConstantValue(idOptions.userRepository);
+                    app.container.bind(DiKeys.UserRepository).toConstantValue(idOptions.userRepository);
                 }
             } else {
                 // use typeorm repository
                 let userRepository = getRepository(idOptions.userType);
 
-                app.container.bind("UserRepository").toConstantValue(userRepository);
+                app.container.bind(DiKeys.UserRepository).toConstantValue(userRepository);
             }
 
             userService = app.container.resolve(idOptions.userService as Type);
@@ -43,15 +43,15 @@ module.exports = async function identityInitializer(app: FultonApp) {
 
         // assign userService
         app.userService = userService;
-        app.server.request.constructor.prototype.userService = userService;
+        app.express.request.constructor.prototype.userService = userService;
 
-        app.server.use(passport.initialize());
+        app.express.use(passport.initialize());
 
         // for register
         if (idOptions.register.enabled) {
             let registerOptions = idOptions.register;
-            let httpMethod = app.server[registerOptions.httpMethod];
-            httpMethod.call(app.server, registerOptions.path, registerOptions.handler);
+            let httpMethod = app.express[registerOptions.httpMethod];
+            httpMethod.call(app.express, registerOptions.path, registerOptions.handler);
         }
 
         // add pre-defined login strategy
@@ -105,7 +105,7 @@ module.exports = async function identityInitializer(app: FultonApp) {
                 strategyOptions: {
                     clientID: opts.clientId
                 },
-                prfoileTransformer: (profile: any) => {
+                profileTransformer: (profile: any) => {
                     let email;
                     if (profile.emails instanceof Array) {
                         email = profile.emails.find((e: any) => e.primary || e.primary == null).value;
@@ -185,8 +185,8 @@ module.exports = async function identityInitializer(app: FultonApp) {
                     args.push(options.successMiddleware);
                 }
 
-                let httpMethod = app.server[options.httpMethod || "get"];
-                httpMethod.apply(app.server, [options.path, args]);
+                let httpMethod = app.express[options.httpMethod || "get"];
+                httpMethod.apply(app.express, [options.path, args]);
             }
 
             if (options.callbackPath) {
@@ -210,8 +210,8 @@ module.exports = async function identityInitializer(app: FultonApp) {
                     args.push(options.callbackSuccessMiddleware);
                 }
 
-                let httpMethod = app.server[options.callbackHttpMethod || "get"];
-                httpMethod.apply(app.server, [options.callbackPath, args]);
+                let httpMethod = app.express[options.callbackHttpMethod || "get"];
+                httpMethod.apply(app.express, [options.callbackPath, args]);
             }
 
             if (options.addToDefaultAuthenticateList) {
@@ -220,7 +220,7 @@ module.exports = async function identityInitializer(app: FultonApp) {
         }
 
         if (idOptions.defaultAuthenticate && idOptions.defaultAuthSupportStrategies.length > 0) {
-            app.server.use(idOptions.defaultAuthenticate);
+            app.express.use(idOptions.defaultAuthenticate);
         }
     }
 }

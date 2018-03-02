@@ -1,9 +1,11 @@
 import * as request from 'request';
-import { FultonApp } from '../../src/index';
 import * as url from 'url';
-import { RequiredUriUrl, OptionsWithUrl, Headers } from 'request';
-import FultonLog from '../../src/fulton-log';
+
+import { Headers, OptionsWithUrl, RequiredUriUrl } from 'request';
+
 import { ClientResponse } from 'http';
+import { FultonApp } from '../../src/fulton-app';
+import { FultonLog } from '../../src/fulton-log';
 
 export interface HttpResult {
     response?: ClientResponse;
@@ -11,20 +13,22 @@ export interface HttpResult {
 }
 
 export class HttpTester {
-    private baseUrl: string;
-
     private headers: Headers;
 
     constructor(private app: FultonApp) {
         FultonLog.level = "warn";
+        this.app.options.server.httpPort = 5000;
         this.app.options.logging.httpLoggerEnabled = false;
         this.headers = {};
     }
 
+
+    private get baseUrl(): string {
+        return "http://localhost:" + this.app.options.server.httpPort;
+    }
+
     start(): Promise<void> {
-        return this.app.start().then(() => {
-            this.baseUrl = "http://localhost:" + this.app.options.server.httpPort;
-        });
+        return this.app.start();
     }
 
     stop(): Promise<void> {
@@ -46,12 +50,33 @@ export class HttpTester {
         });
     }
 
-    postJson(path: string, object?: any, followRedirects?: boolean): Promise<HttpResult> {
+    post(path: string, object?: any, followRedirects?: boolean): Promise<HttpResult> {
         return this.request({
             method: "post",
             url: url.resolve(this.baseUrl, path),
             headers: this.headers,
             json: object,
+            followRedirect: followRedirects,
+            followAllRedirects: followRedirects
+        });
+    }
+
+    patch(path: string, object?: any, followRedirects?: boolean): Promise<HttpResult> {
+        return this.request({
+            method: "patch",
+            url: url.resolve(this.baseUrl, path),
+            headers: this.headers,
+            json: object,
+            followRedirect: followRedirects,
+            followAllRedirects: followRedirects
+        });
+    }
+
+    delete(path: string, followRedirects?: boolean): Promise<HttpResult> {
+        return this.request({
+            method: "delete",
+            url: url.resolve(this.baseUrl, path),
+            headers: this.headers,
             followRedirect: followRedirects,
             followAllRedirects: followRedirects
         });

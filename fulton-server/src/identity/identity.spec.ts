@@ -1,27 +1,31 @@
 import * as passport from 'passport';
+
+import { Request, Response } from "../interfaces";
+import { Router, httpGet, router } from '../routers';
+import { authorized, authorizedByRole, authorizedByRoles } from './authorizes-middlewares';
+
+import { AccessToken } from './interfaces';
 import { FultonApp } from "../fulton-app";
 import { FultonAppOptions } from "../fulton-app-options";
 import { HttpTester } from "../../spec/helpers/http-tester";
-import { AccessToken, authorize, authorizeByRole, authorizeByRoles, Router, HttpGet, Request, Response, FultonRouter } from "../index";
 import { UserServiceMock } from "../../spec/helpers/user-service-mock";
 
-
-@Router("/test")
-export class TestRouter extends FultonRouter {
-    @HttpGet("/role", authorizeByRole("admin"))
+@router("/test")
+export class TestRouter extends Router {
+    @httpGet("/role", authorizedByRole("admin"))
     role(req: Request, res: Response) {
         res.send("works");
     }
 
-    @HttpGet("/roles", authorizeByRoles(["admin", "rd"]))
+    @httpGet("/roles", authorizedByRoles(["admin", "rd"]))
     roles(req: Request, res: Response) {
         res.send("works");
     }
 }
 
-@Router("/test2", authorizeByRole("admin"))
-export class TestRouter2 extends FultonRouter {
-    @HttpGet()
+@router("/test2", authorizedByRole("admin"))
+export class TestRouter2 extends Router {
+    @httpGet()
     index(req: Request, res: Response) {
         res.send("works");
     }
@@ -46,7 +50,7 @@ class MyApp extends FultonApp {
     initIdentity(): Promise<void> {
         super.initIdentity()
 
-        this.server.all("/", (req, res) => {
+        this.express.all("/", (req, res) => {
             if (req.isAuthenticated()) {
                 res.send("with user:" + req.user.username);
             } else {
@@ -54,7 +58,7 @@ class MyApp extends FultonApp {
             }
         });
 
-        this.server.get("/profile", authorize(), (req, res) => {
+        this.express.get("/profile", authorized(), (req, res) => {
             res.send(req.user);
         });
 
@@ -82,7 +86,7 @@ describe('Identity local and bearer on UserServiceMock', () => {
     });
 
     it('should login and return access token', async () => {
-        let result = await httpTester.postJson("/auth/login", {
+        let result = await httpTester.post("/auth/login", {
             username: "test",
             password: "test"
         })
@@ -93,7 +97,7 @@ describe('Identity local and bearer on UserServiceMock', () => {
     });
 
     it('should login fails', async () => {
-        let result = await httpTester.postJson("/auth/login", {
+        let result = await httpTester.post("/auth/login", {
             username: "test",
             password: "fail"
         })
@@ -149,7 +153,7 @@ describe('Identity local and bearer on UserServiceMock', () => {
     });
 
     it('should register success by json', async () => {
-        let result = await httpTester.postJson("/auth/register", {
+        let result = await httpTester.post("/auth/register", {
             email: "test@test.com",
             username: "test3",
             password: "test3"
@@ -173,13 +177,13 @@ describe('Identity local and bearer on UserServiceMock', () => {
     });
 
     it('should register failure by empty data', async () => {
-        let result = await httpTester.postJson("/auth/register");
+        let result = await httpTester.post("/auth/register");
 
         let errors = result.body.errors;
         expect(result.response.statusCode).toEqual(400);
-        expect(errors.username).toEqual(["username is required"]);
-        expect(errors.password).toEqual(["password is required"]);
-        expect(errors.email).toEqual(["email is required"]);
+        expect(errors.detail.username.message).toEqual("username is required");
+        expect(errors.detail.password.message).toEqual("password is required");
+        expect(errors.detail.email.message).toEqual("email is required");
     });
 
     it('should authorize by role success', async () => {

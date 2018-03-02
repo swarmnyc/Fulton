@@ -2,15 +2,13 @@ import * as lodash from 'lodash';
 import * as passport from 'passport';
 import * as url from 'url';
 
-import { StrategyVerifyDone, IUserRegister, AccessToken, OAuthStrategyVerifier, StrategyOptions, OAuthStrategyOptions } from "../interfaces";
-import { Middleware, Request, Response, NextFunction } from "../../interfaces";
+import { AccessToken, IUser, IUserRegister, OAuthStrategyOptions, OAuthStrategyVerifier, StrategyOptions, StrategyVerifyDone } from "../interfaces";
+import { Middleware, NextFunction, Request, Response } from "../../interfaces";
 
 import { FultonApp } from '../../fulton-app';
-import { FultonUser } from "./fulton-user";
 import { FultonError } from '../../common/fulton-error';
-import FultonLog from '../../fulton-log';
-import { IUser } from '../../index';
-
+import { FultonLog } from '../../fulton-log';
+import { FultonUser } from "./fulton-user";
 
 /**
  * Default Fulton Implements
@@ -33,20 +31,24 @@ export let FultonImpl = {
      * for TokenStrategyVerify like bearer
      */
     async tokenStrategyVerifier(req: Request, token: string, done: StrategyVerifyDone) {
-        let user = await req.userService.findByAccessToken(token);
+        try {
+            let user = await req.userService.loginByAccessToken(token);
 
-        if (user) {
-            return done(null, user);
-        } else {
+            if (user) {
+                return done(null, user);
+            } else {
+                return done(null, false);
+            }
+        } catch (error) {
             return done(null, false);
         }
     },
 
     /**
-     * for StategySuccessHandler like login, bearer
+     * for StrategySuccessHandler like login, bearer
      */
-    async successMiddleware(req: Request, res: Response) {
-        //TODO: Web-view for fultonStategySuccessCallback
+    async issueAccessToken(req: Request, res: Response) {
+        //TODO: Web-view for fultonStrategySuccessCallback
         let accessToken = await req.userService.issueAccessToken(req.user);
         res.send(accessToken);
     },
@@ -75,9 +77,6 @@ export let FultonImpl = {
 
     /**
      * the wrapper of auth verifier, the purpose of it is to call req.userService.loginByOauth with the formated parameters.
-     * @param provider 
-     * @param options 
-     * @param prfoileTransformer 
      */
     oauthVerifierFn(options: OAuthStrategyOptions): OAuthStrategyVerifier {
         return (req: Request, access_token: string, fresh_token: string, profile: any, done: StrategyVerifyDone) => {
@@ -87,8 +86,8 @@ export let FultonImpl = {
                 refresh_token: fresh_token
             }
 
-            if (options.prfoileTransformer) {
-                profile = options.prfoileTransformer(profile);
+            if (options.profileTransformer) {
+                profile = options.profileTransformer(profile);
             }
 
             req.userService
@@ -141,7 +140,7 @@ export let FultonImpl = {
                                 if (options.callbackSuccessMiddleware) {
                                     options.callbackSuccessMiddleware(req, res, next);
                                 } else {
-                                    FultonImpl.successMiddleware(req, res);
+                                    FultonImpl.issueAccessToken(req, res);
                                 }
                             }
                         });
@@ -159,9 +158,11 @@ export let FultonImpl = {
         let options = req.fultonApp.options.identity.register;
 
         let input = req.body;
-        input.username = req.body[options.usernameField];
-        input.password = req.body[options.passwordField];
-        input.email = req.body[options.emailField];
+
+        // rename
+        input.username = input[options.usernameField];
+        input.password = input[options.passwordField];
+        input.email = input[options.emailField];
 
         req.userService
             .register(input)

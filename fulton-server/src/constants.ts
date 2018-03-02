@@ -1,5 +1,15 @@
-export const KEY_REPOSITORY_METADATA = "FultonDecrator.Repository";
+// values in this file are for internal
+export const None = {};
 
-export const KEY_ROUTER_METADATA = "FultonDecrator.Router";
-export const KEY_ROUTER_ERROR_HANDLER_METADATA = "FultonDecrator.RouterErrorHandler";
-export const KEY_ROUTER_HTTP_METHOD_LIST_METADATA = "FultonDecrator.HttpMethodList";
+export const Keys = {
+    RelatedToMetadata: "FultonDecorator.RelatedToMetadata",
+    RouterMetadata: "FultonDecorator.Router",
+    RouterErrorHandlerMetadata: "FultonDecorator.RouterErrorHandler",
+    HttpMethods: "FultonDecorator.HttpMethods",
+    RepositoryMetadata: "FultonDecorator.Repository"
+}
+
+export const MimeTypes = {
+    json: "application/json",
+    jsonApi: "application/vnd.api+json",
+}

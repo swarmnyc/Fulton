@@ -1,20 +1,22 @@
-import { FultonApp, FultonAppOptions, Response, Request } from "../index";
-import { queryParamsParser, queryById } from "./query-params-parser";
-import { HttpTester } from "../../spec/helpers/http-tester";
+import { Request, Response } from "../interfaces";
+import { queryById, queryParamsParser } from "./query-params-parser";
 
+import { FultonApp } from '../fulton-app';
+import { FultonAppOptions } from '../fulton-app-options';
+import { HttpTester } from "../../spec/helpers/http-tester";
 
 class MyApp extends FultonApp {
     protected onInit(options: FultonAppOptions): void | Promise<void> {
-    }
+        this.options.index.enabled = false;
+        this.events.once("didInitRouters", () => {
+            this.express.get("/", (req: Request, res: Response) => {            
+                res.send(req.queryParams);
+            })
 
-    didInitRouters() {
-        this.server.get("/", (req: Request, res: Response) => {
-            res.send(req.queryParams);
-        })
-
-        this.server.get("/test/:id", queryById(), (req: Request, res: Response) => {
-            res.send(req.queryParams);
-        })
+            this.express.get("/test/:id", queryById(), (req: Request, res: Response) => {
+                res.send(req.queryParams);
+            })
+        });
     }
 }
 
@@ -83,34 +85,34 @@ describe('query parser', () => {
     });
 
     it('should parse select with style 1', async () => {
-        let result = await httpTester.get("/?select=columeA,columeB ");
+        let result = await httpTester.get("/?select=columnA,columnB ");
 
         expect(result.body).toEqual({
-            select: ["columeA", "columeB"]
+            select: ["columnA", "columnB"]
         });
     });
 
     it('should parse select with style 2', async () => {
-        let result = await httpTester.get("/?select=columeA&select=columeB");
+        let result = await httpTester.get("/?select=columnA&select=columnB");
 
         expect(result.body).toEqual({
-            select: ["columeA", "columeB"]
+            select: ["columnA", "columnB"]
         });
     });
 
     it('should parse includes with style 1', async () => {
-        let result = await httpTester.get("/?includes=columeA,columeB ");
+        let result = await httpTester.get("/?includes=columnA,columnB ");
 
         expect(result.body).toEqual({
-            includes: ["columeA", "columeB"]
+            includes: ["columnA", "columnB"]
         });
     });
 
     it('should parse includes with style 2', async () => {
-        let result = await httpTester.get("/?includes=columeA&includes=columeB");
+        let result = await httpTester.get("/?includes=columnA&includes=columnB");
 
         expect(result.body).toEqual({
-            includes: ["columeA", "columeB"]
+            includes: ["columnA", "columnB"]
         });
     });
 
@@ -126,7 +128,7 @@ describe('query parser', () => {
     });
 
     it('should parse mixed', async () => {
-        let result = await httpTester.get("/?a=1&b=2&filter[name][$regex]=wade&filter[name][$options]=i&filter[$or][0][a]=1&filter[$or][1][b]=2&sort=a,-b,+c&select=columeA,columeB&includes=columeA&includes=columeB&pagination[index]=10&pagination[size]=100");
+        let result = await httpTester.get("/?a=1&b=2&filter[name][$regex]=wade&filter[name][$options]=i&filter[$or][0][a]=1&filter[$or][1][b]=2&sort=a,-b,+c&select=columnA,columnB&includes=columnA&includes=columnB&pagination[index]=10&pagination[size]=100");
 
         expect(result.body).toEqual({
             filter: {
@@ -138,8 +140,8 @@ describe('query parser', () => {
                 a: "1",
                 b: "2"
             },
-            select: ["columeA", "columeB"],
-            includes: ["columeA", "columeB"],
+            select: ["columnA", "columnB"],
+            includes: ["columnA", "columnB"],
             sort: {
                 a: 1,
                 b: -1,
@@ -153,14 +155,14 @@ describe('query parser', () => {
     });
 
     it('should parse with id', async () => {
-        let result = await httpTester.get("/test/wade?select=columeA,columeB&&includes=columeA&includes=columeB");
+        let result = await httpTester.get("/test/wade?select=columnA,columnB&&includes=columnA&includes=columnB");
 
         expect(result.body).toEqual({
             filter: {
                 id: "wade"
             },
-            select: ["columeA", "columeB"],
-            includes: ["columeA", "columeB"]
+            select: ["columnA", "columnB"],
+            includes: ["columnA", "columnB"]
         });
     });
 });

@@ -1,13 +1,16 @@
-import { loadModules, defaultClassLoader } from "./module-helpers";
 import * as moduleA from "../../spec/helpers/modules/module-a"
 import * as moduleB from "../../spec/helpers/modules/module-b"
 import * as moduleC from "../../spec/helpers/modules/sub-modules/module-c"
 import * as moduleD from "../../spec/helpers/modules/sub-modules/sub-modules/module-d"
-import { FultonRouter, FultonService, moduleExists } from "../index";
+
 import { RouterA, ServiceA } from "../../spec/helpers/classes/classes1/classes-a";
 import { RouterB, RouterC } from "../../spec/helpers/classes/classes1/classes-b";
 import RouterD, { ServiceB } from "../../spec/helpers/classes/classes2/classes-d";
+import { defaultClassLoader, loadModules, moduleExists } from './module-helpers';
+
+import { Router } from '../routers/router';
 import RouterE from "../../spec/helpers/classes/classes2/classes3/classes-e";
+import { Service } from '../services/service';
 
 describe("module helper", () => {
     it("should load moudule not recurrively", async () => {
@@ -27,7 +30,7 @@ describe("module helper", () => {
     });
 
     it("should load router classes", async () => {
-        let routers = await defaultClassLoader(FultonRouter)(["spec/helpers/classes/classes1", "spec/helpers/classes/classes2"]);
+        let routers = await defaultClassLoader(Router)(["spec/helpers/classes/classes1", "spec/helpers/classes/classes2"]);
         expect(routers.length).toEqual(5);
         expect(routers).toContain(RouterA);
         expect(routers).toContain(RouterB);
@@ -37,7 +40,7 @@ describe("module helper", () => {
     });
 
     it("should load service classes", async () => {
-        let services = await defaultClassLoader(FultonService)(["spec/helpers/classes/"]);
+        let services = await defaultClassLoader(Service)(["spec/helpers/classes/"]);
         expect(services.length).toEqual(2);
         expect(services).toContain(ServiceA);
         expect(services).toContain(ServiceB);

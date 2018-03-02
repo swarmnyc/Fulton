@@ -1,10 +1,13 @@
+import { IStrategyOptionsWithRequest, Strategy as LocalStrategy } from 'passport-local';
+import { Request, Response } from "../interfaces";
+
+import { AccessToken } from './interfaces';
 import { FultonApp } from "../fulton-app";
 import { FultonAppOptions } from "../fulton-app-options";
-import { IStrategyOptionsWithRequest, Strategy as LocalStrategy } from 'passport-local';
-import { HttpTester } from "../../spec/helpers/http-tester";
-import { AccessToken, authorize, authorizeByRole, authorizeByRoles, Router, HttpGet, Request, Response, FultonRouter, FultonImpl } from "../index";
-import { UserServiceMock } from "../../spec/helpers/user-service-mock";
+import { FultonImpl } from './fulton-impl/fulton-impl';
 import { GoogleStrategy } from "./strategies/google-strategy";
+import { HttpTester } from "../../spec/helpers/http-tester";
+import { UserServiceMock } from "../../spec/helpers/user-service-mock";
 
 class MyApp extends FultonApp {
     protected onInit(options: FultonAppOptions): void | Promise<void> {
@@ -19,7 +22,7 @@ class MyApp extends FultonApp {
             path: "/test/login",
             httpMethod: "post",
             verifier: FultonImpl.localStrategyVerifier,
-            successMiddleware: FultonImpl.successMiddleware
+            successMiddleware: FultonImpl.issueAccessToken
         }, LocalStrategy);
 
         this.options.identity.addStrategy({
@@ -71,7 +74,7 @@ describe('Identity Custom Strategies', () => {
     });
 
     it('should custom login strategy work', async () => {
-        let result = await httpTester.postJson("/test/login", {
+        let result = await httpTester.post("/test/login", {
             username: "test",
             password: "test"
         })

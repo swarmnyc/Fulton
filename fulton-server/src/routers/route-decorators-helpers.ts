@@ -1,8 +1,6 @@
-import { KEY_ROUTER_ERROR_HANDLER_METADATA, KEY_ROUTER_HTTP_METHOD_LIST_METADATA, KEY_ROUTER_METADATA } from "../constants";
+import { Middleware, PathIdentifier, RouterActionDocOptions, RouterDocOptions, Type, AbstractType } from '../interfaces';
 
-import { FultonRouter } from "./fulton-router";
-import { PathIdentifier, Middleware, RouterDocOptions, RouterActionDocOptions } from "../interfaces";
-import { Type } from "../index";
+import { Keys } from "../constants";
 
 export interface RouterMetadata {
     path: PathIdentifier,
@@ -14,7 +12,7 @@ export interface EntityRouterMetadata extends RouterMetadata {
     entity: Type;
 }
 
-export interface RouterMethodMetadata {
+export interface RouterActionMetadata {
     path: PathIdentifier,
     method: string,
     property: string,
@@ -22,66 +20,64 @@ export interface RouterMethodMetadata {
     middlewares: Middleware[]
 }
 
-export interface AllRouterMethodMetadata {
-    methods: RouterMethodMetadata[],
+export interface AllRouterActionMetadata {
+    actions: Map<string, RouterActionMetadata>,
     errorhandler: string;
 }
 
-export interface FullRouterMetadata extends AllRouterMethodMetadata {
+export interface FullRouterMetadata extends AllRouterActionMetadata {
     router: RouterMetadata
 }
 
-export interface FullEntityRouterMetadata extends AllRouterMethodMetadata {
+export interface FullEntityRouterMetadata extends AllRouterActionMetadata {
     router: EntityRouterMetadata,
 }
 
 export function getRouterMetadata(target: any): RouterMetadata {
-    return Reflect.getOwnMetadata(KEY_ROUTER_METADATA, target);
+    return Reflect.getOwnMetadata(Keys.RouterMetadata, target);
 }
 
 export function getEntityRouterMetadata(target: any): EntityRouterMetadata {
-    return Reflect.getOwnMetadata(KEY_ROUTER_METADATA, target);
+    return Reflect.getOwnMetadata(Keys.RouterMetadata, target);
 }
 
 export function getRouterErrorHandler(target: any): string {
-    return Reflect.getOwnMetadata(KEY_ROUTER_ERROR_HANDLER_METADATA, target);
+    return Reflect.getOwnMetadata(Keys.RouterErrorHandlerMetadata, target);
 }
 
 /**
  * get Router Method Metadata List only for the type
  * @param target 
  */
-export function getRouterMethodMetadataList(target: any): RouterMethodMetadata[] {
-    return Reflect.getOwnMetadata(KEY_ROUTER_HTTP_METHOD_LIST_METADATA, target) || [];
+export function getRouterActionMetadataList(target: any): RouterActionMetadata[] {
+    return Reflect.getOwnMetadata(Keys.HttpMethods, target) || [];
 }
 
-export function getFullRouterMethodMetadata(target: any): FullRouterMetadata {
-    let metadata = getAllRouterMethodMetadata(target) as FullRouterMetadata;
+export function getFullRouterActionMetadata(target: any, type: AbstractType): FullRouterMetadata {
+    let metadata = getAllRouterActionMetadata(target, type) as FullRouterMetadata;
     metadata.router = getRouterMetadata(target);
 
     return metadata;
 }
 
-export function getFullEntityRouterMethodMetadata(target: any): FullEntityRouterMetadata {
-    let metadata = getAllRouterMethodMetadata(target) as FullEntityRouterMetadata;
+export function getFullEntityRouterActionMetadata(target: any, type: AbstractType): FullEntityRouterMetadata {
+    let metadata = getAllRouterActionMetadata(target, type) as FullEntityRouterMetadata;
     metadata.router = getEntityRouterMetadata(target);
 
     return metadata;
 }
 
-function getAllRouterMethodMetadata(target: any): AllRouterMethodMetadata {
-    let methods = [];
+function getAllRouterActionMetadata(target: any, type: AbstractType): AllRouterActionMetadata {
+    let actions = new Map<string, RouterActionMetadata>();
     let errorhandler;
-    let keys = new Map<string, boolean>();
 
-    // get metadata from parent class recurrsively
-    while (target.prototype instanceof FultonRouter) {
-        let metadata = getRouterMethodMetadataList(target);
+    // get metadata from parent class recursively
+    while (target.prototype instanceof type) {
+        let metadata = getRouterActionMetadataList(target);
         for (const method of metadata) {
             // skip if exists
-            if (!keys.has(method.property)) {
-                methods.push(method);
-                keys.set(method.property, true);
+            if (!actions.has(method.property)) {
+                actions.set(method.property, method);
             }
         }
 
@@ -93,5 +89,5 @@ function getAllRouterMethodMetadata(target: any): AllRouterMethodMetadata {
         target = target.__proto__;
     }
 
-    return { methods, errorhandler };
+    return { actions, errorhandler };
 }

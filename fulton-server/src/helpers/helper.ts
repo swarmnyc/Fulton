@@ -1,35 +1,38 @@
+import * as escapeStringRegexp from "escape-string-regexp";
+
 const booleanReg = /^((true)|(false))$/i;
 const trueReg = /^((true)|1)$/i;
+const numberReg = /^\d+(?:.\d+)?$/;
 
-export default class Helper {
-    static isBoolean(str: string): boolean {
+export let Helper = {
+    isBooleanString(str: string): boolean {
         return booleanReg.test(str);
-    }
+    },
 
-    static getBoolean(str: string, defaultValue?: boolean): boolean {
+    getBoolean(str: string, defaultValue?: boolean): boolean {
         if (str == null)
             return defaultValue;
 
         return trueReg.test(str);
-    }
+    },
 
-    static isNumber(str: string): boolean {
-        return !isNaN(parseFloat(str));
-    }
+    isNumberString(str: string): boolean {
+        return numberReg.test(str);
+    },
 
-    static getInt(str: string, defaultValue?: number): number {
+    getInt(str: string, defaultValue?: number): number {
         if (str == null)
             return defaultValue;
 
         return parseInt(str) || defaultValue;
-    }
+    },
 
-    static getFloat(str: string, defaultValue?: number): number {
+    getFloat(str: string, defaultValue?: number): number {
         if (str == null)
             return defaultValue;
 
         return parseFloat(str) || defaultValue;
-    }
+    },
 
     /**
      * if object or value is null skip,
@@ -39,7 +42,7 @@ export default class Helper {
      * @param name 
      * @param value 
      */
-    static default<T>(object: T, name: keyof T, value: any): any {
+    default<T>(object: T, name: keyof T, value: any): any {
         if (object == null || value == null)
             return;
 
@@ -49,6 +52,10 @@ export default class Helper {
         } else {
             return object[name];
         }
+    },
+
+    escapedRegexp(input: string, flags?: string): RegExp {
+        return new RegExp(escapeStringRegexp(input), flags);
     }
 }
 

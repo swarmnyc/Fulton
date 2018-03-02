@@ -1,4 +1,4 @@
-import { Request, Response } from "../index";
+import { Request, Response } from "../interfaces";
 import { NextFunction } from "express";
 import * as lodash from 'lodash';
 
@@ -18,10 +18,10 @@ export interface AuthorizeOptions {
 }
 
 /**
- * check the requrest is authenticated.
+ * check the request is authenticated.
  * @param options 
  */
-export function authorize(options?: AuthorizeOptions) {
+export function authorized(options?: AuthorizeOptions) {
     return (req: Request, res: Response, next: NextFunction) => {
         if (req.isAuthenticated()) {
             next();
@@ -36,7 +36,7 @@ export function authorize(options?: AuthorizeOptions) {
  * @param roles 
  * @param options 
  */
-export function authorizeByRole(role: string, options?: AuthorizeOptions) {
+export function authorizedByRole(role: string, options?: AuthorizeOptions) {
     return (req: Request, res: Response, next: NextFunction) => {
         if (req.isAuthenticated()) {
             let userRoles = req.user.roles;
@@ -57,7 +57,7 @@ export function authorizeByRole(role: string, options?: AuthorizeOptions) {
  * @param roles 
  * @param options 
  */
-export function authorizeByRoles(roles: string[], options?: AuthorizeOptions) {
+export function authorizedByRoles(roles: string[], options?: AuthorizeOptions) {
     return (req: Request, res: Response, next: NextFunction) => {
         if (req.isAuthenticated()) {
             let userRoles = req.user.roles;

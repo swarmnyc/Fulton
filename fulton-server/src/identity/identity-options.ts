@@ -1,20 +1,21 @@
 import * as lodash from 'lodash';
 
-import { AppMode, HttpMethod, PathIdentifier } from "../interfaces";
-import { CustomStrategySettings, FultonUser, FultonUserService, IUser, Middleware, StrategyOptions, Type } from "../index";
-import { GoogleStrategyOptions, IUserService, LocalStrategyVerifier, OAuthStrategyOptions, OAuthStrategyVerifier, TokenStrategyVerifier } from "./interfaces";
+import { AppMode, HttpMethod, Middleware, PathIdentifier, Type } from "../interfaces";
+import { CustomStrategySettings, GoogleStrategyOptions, IUser, IUserService, LocalStrategyVerifier, OAuthStrategyOptions, OAuthStrategyVerifier, TokenStrategyVerifier, StrategyOptions } from './interfaces';
 
 import { AuthenticateOptions } from "passport";
 import { AuthorizeOptions } from "./authorizes-middlewares";
-import Env from "../helpers/env";
+import { Env } from "../helpers/env";
 import { FultonImpl } from "./fulton-impl/fulton-impl";
+import { FultonUser } from './fulton-impl/fulton-user';
+import { FultonUserService } from './fulton-impl/fulton-user-service';
 import { Repository } from "typeorm";
 import { Strategy } from "passport";
 
 export class IdentityOptions {
     /**
      * the default value is false
-     * It can be overrided by procces.env["{appName}.options.identity.enabled"]
+     * It can be overridden by process.env["{appName}.options.identity.enabled"]
      */
     enabled: boolean;
 
@@ -37,23 +38,56 @@ export class IdentityOptions {
      * `req.userService`
      * 
      * if your user schema is like FultonUser and auth strategies is
-     * usernamn-password and bearer token, then you don't need to change this value,
+     * username-password and bearer token, then you don't need to change this value,
      * otherwise you have to custom your user service;
      */
     userService: Type<IUserService<IUser>> | IUserService<IUser>;
 
     /**
-     * access token duratio in seconds
-     * 
-     * default is a mouth = 2,592,000
+     * the options for access token
      */
-    accessTokenDuration: number;
+    accessToken: {
+        /**
+         * the type of access token
+         * default is bearer, it affect authenticate method for every in coming request
+         */
+        type?: string;
 
-    /**
-     * access token type
-     * default is bearer, it affect authenticate method for every in coming request
-     */
-    accessTokenType: string;
+        /**
+         * the duration of access token in seconds
+         * 
+         * default is a mouth = 2,592,000
+         */
+        duration?: number;
+
+        /**
+         * the security level of access token
+         * default is medium
+         * 
+         * if level is low, the jwt payload is un-encrypted and just verify the jwt token when authenticate
+         * if level is medium, the jwt payload is encrypted and just verify the jwt token when authenticate
+         * if level is hight, the jwt payload is encrypted and also check database when authenticate
+         */
+        secureLevel?: "low" | "medium" | "high";
+
+        /**
+         * the scopes of access token
+         * default is "[profile, roles]"
+         */
+        scopes?: string[];
+
+        /**
+         * the secret for JWT Token
+         * default is app_name
+         */
+        secret?: string;
+
+        /**
+         * the aes key for encrypt and decrypt
+         * default is app_name
+         */
+        key?: string | Buffer;
+    };
 
     /**
      * the authenticate every request to get user info, enabled strategies like "bearer", "session"
@@ -98,25 +132,25 @@ export class IdentityOptions {
      * ### example for router level
      * ```
      * // router level authorization
-     * @Router("/Food", authorize())
-     * export class FoodRouter extends FultonRouter {
+     * @router("/Food", authorize())
+     * export class FoodRouter extends Router {
      *     // all actions needs to be authorized
-     *     @HttpGet()
+     *     @httpGet()
      *     list(req: Request, res: Response) { }  
      *    
-     *     @HttpGet("/:id")
+     *     @httpGet("/:id")
      *     detail(req: Request, res: Response) { }
      * } 
      * 
-     * @Router("/Food")
-     * export class FoodRouter extends FultonRouter {
+     * @router("/Food")
+     * export class FoodRouter extends Router {
      *     // no authorize
-     *     @HttpGet() 
+     *     @httpGet() 
      *     list(req: Request, res: Response) { }     
      * 
      *     // action level authorization
-     *     // authorize by admin role and loggined
-     *     @HttpDelete("/:id", authorizeByRole("admin")) 
+     *     // authorize by admin role and logged in
+     *     @httpDelete("/:id", authorizeByRole("admin")) 
      *     delete(req: Request, res: Response) { }
      * }
      * ```
@@ -130,17 +164,17 @@ export class IdentityOptions {
      * 
      * ## example for web view
      * ```
-     * @Router("/auth")
-     * export class AuthRouter extends FultonRouter {
-     *     @HttpGet("/register")
+     * @router("/auth")
+     * export class AuthRouter extends Router {
+     *     @httpGet("/register")
      *     registerView(req: Request, res: Response) {
      *         res.render("register");
      *     }
      * 
      *     // if you want to put all logics altogether
-     *     // you can set options.identity.register.endabled = false
+     *     // you can set options.identity.register.enabled = false
      *     // and add this action.
-     *     @HttpPost("/register"))
+     *     @httpPost("/register"))
      *     register(req: Request, res: Response) {
      *         req.userService
      *            .register(req.body)
@@ -187,7 +221,7 @@ export class IdentityOptions {
         /**
          * the options for hash password
          */
-        passwordHashOptons?: {
+        passwordHashOptions?: {
             /** 
              * the default value is sha256
              */
@@ -205,19 +239,19 @@ export class IdentityOptions {
         session?: boolean;
 
         /**
-         * accept other fields, like nickname or phonenumber
+         * accept other fields, like nickname or phone-number
          * the default value is empty
          */
-        otherFileds?: string[];
+        otherFields?: string[];
 
         /**
-         * verify password is vaild or not
+         * verify password is valid or not
          * the default value is /^[a-zA-Z0-9_-]{4,64}$/
          */
         usernameVerifier?: RegExp | ((username: string) => boolean);
 
         /**
-         * verify password is vaild or not
+         * verify password is valid or not
          * the default value is /^\S{6,64}$/, any 4 to 64 non-whitespace characters
          */
         passwordVerifier?: RegExp | ((pw: string) => boolean);
@@ -246,17 +280,17 @@ export class IdentityOptions {
      * 
      * ## example for web view
      * ```
-     * @Router("/auth")
-     * export class AuthRouter extends FultonRouter {
-     *     @HttpGet("/login")
+     * @router("/auth")
+     * export class AuthRouter extends Router {
+     *     @httpGet("/login")
      *     loginView(req: Request, res: Response) {
      *         res.render("login");
      *     }
      * 
      *     // if you want to all logics altogether
-     *     // you can set options.identity.login.endabled = false
+     *     // you can set options.identity.login.enabled = false
      *     // and add this action.
-     *     @HttpPost("/login", authenticate("local", { failureRedirect: "/auth/login" }))
+     *     @httpPost("/login", authenticate("local", { failureRedirect: "/auth/login" }))
      *     login(req: Request, res: Response) {
      *         res.redirect("/");
      *     }
@@ -266,7 +300,7 @@ export class IdentityOptions {
     login: {
         /**
          * the default value is true
-         * it can be overrided by procces.env["{appName}.options.identity.login.enabled"]
+         * it can be overridden by process.env["{appName}.options.identity.login.enabled"]
          */
         enabled?: boolean;
 
@@ -295,7 +329,7 @@ export class IdentityOptions {
          * 
          * the default value is FultonImpl.localStrategyVerifier
          * 
-         * ### customzing example
+         * ### customizing example
          * verifier = (req: Request, username: string, password: string, done: LocalStrategyVerifyDone) => {
          *     req.userService
          *         .login(username, password)
@@ -323,7 +357,7 @@ export class IdentityOptions {
     bearer: {
         /**
          * default is true
-         * it can be overrided by procces.env["{appName}.options.identity.bearer.enabled"]
+         * it can be overridden by process.env["{appName}.options.identity.bearer.enabled"]
          */
         enabled?: boolean;
 
@@ -358,8 +392,8 @@ export class IdentityOptions {
      * ## Require "google-auth-library" package ##
      * run `npm install google-auth-library` to install it
      * 
-     * clientId can be overrided by procces.env["{appName}.options.identity.google.clientId"]
-     * clientSecret can be overrided by procces.env["{appName}.options.identity.google.clientSecret"]
+     * clientId can be overridden by process.env["{appName}.options.identity.google.clientId"]
+     * clientSecret can be overridden by process.env["{appName}.options.identity.google.clientSecret"]
      */
     google: GoogleStrategyOptions;
 
@@ -372,12 +406,12 @@ export class IdentityOptions {
      * ## Require "passport-github" package ##
      * run `npm install passport-github` to install it
      * 
-     * clientId can be overrided by procces.env["{appName}.options.identity.github.clientId"]
-     * clientSecret can be overrided by procces.env["{appName}.options.identity.github.clientSecret"]
+     * clientId can be overridden by process.env["{appName}.options.identity.github.clientId"]
+     * clientSecret can be overridden by process.env["{appName}.options.identity.github.clientSecret"]
      */
     github: OAuthStrategyOptions;
 
-    /** other passport stratogies */
+    /** other passport strategies */
     readonly strategies: CustomStrategySettings[] = [];
 
     /**
@@ -392,8 +426,13 @@ export class IdentityOptions {
         this.userService = FultonUserService;
 
         this.defaultAuthorizes = [];
-        this.accessTokenDuration = 2592000;
-        this.accessTokenType = "bearer";
+
+        this.accessToken = {
+            duration: 2592000,
+            type: "bearer",
+            secureLevel: "medium",
+            scopes: ["profile", "roles"]
+        }
 
         this.defaultAuthenticate = FultonImpl.defaultAuthenticate;
         this.defaultAuthenticateErrorIfFailure = false;
@@ -407,13 +446,13 @@ export class IdentityOptions {
             emailField: "email",
             usernameVerifier: /^[a-zA-Z0-9_-]{4,64}$/,
             passwordVerifier: /\S{6,64}/,
-            passwordHashOptons: {
+            passwordHashOptions: {
                 algorithm: "sha256"
             },
             session: false,
-            otherFileds: [],
+            otherFields: [],
             handler: FultonImpl.registerHandler,
-            successCallback: FultonImpl.successMiddleware
+            successCallback: FultonImpl.issueAccessToken
         };
 
         this.login = {
@@ -421,7 +460,7 @@ export class IdentityOptions {
             path: "/auth/login",
             httpMethod: "post",
             verifier: FultonImpl.localStrategyVerifier,
-            successMiddleware: FultonImpl.successMiddleware
+            successMiddleware: FultonImpl.issueAccessToken
         };
 
         this.bearer = {
@@ -477,6 +516,13 @@ export class IdentityOptions {
         }
     }
 
+    get isUseDefaultImplement(): boolean {
+        return this.enabled &&
+            (this.userType == FultonUser) &&
+            (this.userRepository == null) &&
+            (this.userService == FultonUserService)
+    }
+
     /**
      * load options from environment to override the current options 
      */
@@ -515,13 +561,6 @@ export class IdentityOptions {
         }
 
         lodash.assignWith(this, envValues, customer);
-    }
-
-    useDefaultImplement(): boolean {
-        return this.enabled &&
-            (this.userType == FultonUser) &&
-            (this.userRepository == null) &&
-            (this.userService == FultonUserService)
     }
 
     addStrategy(options: StrategyOptions | OAuthStrategyOptions, strategy: Strategy | Type<Strategy>) {

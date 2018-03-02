@@ -13,7 +13,7 @@ export class FultonUser implements IFultonUser {
     username: string;
 
     @Column({ length: 256, select: false })
-    hashedPassword: string;
+    hashedPassword?: string;
 
     @Column({ length: 256 })
     displayName: string;
@@ -22,17 +22,17 @@ export class FultonUser implements IFultonUser {
     portraitUrl: string;
 
     @Column({})
-    accessTokens: FultonAccessToken[];
+    accessTokens?: FultonAccessToken[];
 
     @Column({})
-    oauthes: FultonUserOauth[];
+    oauthes?: FultonUserOauth[];
 
     @Column({})
     roles: string[];
 
     @Column()
-    resetPasswordCode: string;
+    resetPasswordCode?: string;
 
     @Column()
-    resetPasswordCodeExpiredAt: Date;
+    resetPasswordCodeExpiredAt?: Date;
 }

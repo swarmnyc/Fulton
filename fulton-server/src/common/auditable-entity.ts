@@ -1,4 +1,4 @@
-import { IUser } from "../index";
+import { IUser } from "../identity";
 
 // TODO: AuditableEntity
 export abstract class AuditableEntity {

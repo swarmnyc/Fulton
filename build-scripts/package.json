@@ -1,0 +1,22 @@
+{
+  "name": "fulton-build-scripts",
+  "version": "0.0.8",
+  "scripts": {
+    "build": "gulp build",
+    "build:major": "gulp build --increaseType major",
+    "build:minor": "gulp build --increaseType minor",
+    "build:try": "gulp build:try",
+    "publish": "gulp publish",
+    "bp": "gulp build && gulp publish",
+    "clean": "gulp clean",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+    "gulp": "^3.9.1",
+    "gulp-bump": "^3.1.0",
+    "gulp-replace": "^0.6.1",
+    "gulp-sequence": "^1.0.0",
+    "rimraf": "^2.6.2",
+    "yargs": "^11.0.0"
+  }
+}

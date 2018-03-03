@@ -16,7 +16,7 @@ interface IncludeOptions {
 
 @injectable()
 export class MongoEntityRunner extends EntityRunner {
-   
+
     /**
      * use provided repository to find entities
      * @param repository 
@@ -42,7 +42,7 @@ export class MongoEntityRunner extends EntityRunner {
         if (queryParams.sort) cursor.sort(queryParams.sort)
         if (queryParams.projection) cursor.project(queryParams.projection)
 
-        const[data, count] = await Promise.all<any>([
+        const [data, count] = await Promise.all<any>([
             cursor.toArray(),
             repo.count(queryParams.filter),
         ]);
@@ -178,7 +178,7 @@ export class MongoEntityRunner extends EntityRunner {
         }
 
         let projection = this.mergeProjection(metadata, params.projection)
-        if (projection){
+        if (projection) {
             params.projection = projection
         }
 
@@ -222,19 +222,23 @@ export class MongoEntityRunner extends EntityRunner {
      * merge metadata to projection
      * @param queryParams 
      */
-    private mergeProjection(metadata: EntityMetadata, projection: QueryColumnOptions): QueryColumnOptions {
-        let newProjection: any = projection || {}
-
+    private mergeProjection(metadata: EntityMetadata, projection: QueryColumnOptions = {}): QueryColumnOptions {
         metadata.columns.forEach((c) => {
             if (!c.isSelect) {
-                newProjection[c.propertyPath] = newProjection[c.propertyPath] || 0
+                if (projection[c.propertyPath] && projection[c.propertyPath] != 0) {
+                    // override the entity metadata
+                    delete projection[c.propertyPath]
+                } else {
+                    // hide the column
+                    projection[c.propertyPath] = 0;
+                }
             }
         })
 
-        if (Object.getOwnPropertyNames(newProjection).length == 0) {
+        if (Object.getOwnPropertyNames(projection).length == 0) {
             return null
         } else {
-            return newProjection
+            return projection
         }
     }
 

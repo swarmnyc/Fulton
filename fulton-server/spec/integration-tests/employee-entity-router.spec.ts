@@ -245,45 +245,58 @@ describe('EntityRouter Integration Test', () => {
         }).length).toEqual(0);
     });
 
-    it('should query employees with projection', async () => {
+    it('should query employees with default projection', async () => {
         let result = await httpTester.get("/employees")
 
         let queryResult: OperationManyResult<Employee> = result.body;
 
-        expect(queryResult.data.filter(c=>c.address).length).toEqual(0);
+        expect(queryResult.data.filter(c => c.address).length).toEqual(0);
     });
 
-    it('should query employees with projection', async () => {
+    it('should query employees with extra projection', async () => {
         let result = await httpTester.get("/employees", {
-            projection:{
-                lastName:0
+            projection: {
+                lastName: 0
             }
         })
 
         let queryResult: OperationManyResult<Employee> = result.body;
 
-        expect(queryResult.data.filter(c=>c.lastName).length).toEqual(0);
+        expect(queryResult.data.filter(c => c.lastName).length).toEqual(0);
     });
 
-    it('should query employee with projection', async () => {
+    it('should query a employee with default projection', async () => {
         let result = await httpTester.get("/employees/1")
 
         let queryResult: OperationOneResult<Employee> = result.body;
 
         expect(queryResult.data.address).toBeUndefined();
         expect(queryResult.data.lastName).toBeDefined();
-        
+
     });
 
-    it('should query employee with projection', async () => {
+    it('should query a employee with extra projection', async () => {
         let result = await httpTester.get("/employees/1", {
-            projection:{
-                lastName:0
+            projection: {
+                lastName: 0
             }
         })
 
         let queryResult: OperationOneResult<Employee> = result.body;
 
         expect(queryResult.data.lastName).toBeUndefined();
+    });
+
+    it('should query employee with overrided projection', async () => {
+        let result = await httpTester.get("/employees/1", {
+            projection: {
+                address: 1
+            }
+        })
+
+        let queryResult: OperationOneResult<Employee> = result.body;
+
+        expect(queryResult.data.lastName).toBeDefined();
+        expect(queryResult.data.address).toBeDefined();
     });
 });

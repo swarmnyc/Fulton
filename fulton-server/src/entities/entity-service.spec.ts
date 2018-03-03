@@ -613,4 +613,47 @@ describe('entity service', () => {
             }
         });
     });
+
+    it('should convert query params with function', async () => {
+        let queryParams: QueryParams = {
+            needAdjust: true,
+            filter: {
+                a1: "int(1)",
+                a2: "date(2018-03-01T10:20:30.400Z)",
+                a3: "num(100.20)",
+                a4: {
+                    a1: "int(1)",
+                    a2: "date(2018-03-01T10:20:30.400Z)",
+                    a3: "num(100.20)",
+                    a4: {
+                        a1: "int(1)",
+                        a2: "date(2018-03-01T10:20:30.400Z)",
+                        a3: "num(100.20)",
+                    }
+                },
+                a5: "bool(1)"
+            }
+        };
+
+        service["runner"]["adjustParams"](customerMetadata, queryParams);
+
+        expect(queryParams).toEqual({
+            filter: {
+                a1: 1,
+                a2: new Date("2018-03-01T10:20:30.400Z"),
+                a3: 100.20,
+                a4: {
+                    a1: 1,
+                    a2: new Date("2018-03-01T10:20:30.400Z"),
+                    a3: 100.20,
+                    a4: {
+                        a1: 1,
+                        a2: new Date("2018-03-01T10:20:30.400Z"),
+                        a3: 100.20,
+                    }
+                },
+                a5: true
+            }
+        });
+    });
 });

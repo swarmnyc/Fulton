@@ -117,7 +117,7 @@ export class MongoEntityRunner extends EntityRunner {
                 type = metadata;
             }
 
-            if (type == "ObjectId" && value.constructor.name != "ObjectID") {
+            if (("ObjectId".same(type)) && value.constructor.name != "ObjectID") {
                 try {
                     return new ObjectId(value);
                 } catch  {

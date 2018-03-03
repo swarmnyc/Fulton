@@ -6,12 +6,14 @@ import { EntityMetadata } from 'typeorm/metadata/EntityMetadata';
 import { Helper } from '../../helpers';
 import { Repository } from "typeorm";
 
+let funcReg = /^((?:num)|(?:int)|(?:date)|(?:bool)|(?:ObjectId))\((.+)\)$/
+
 /** the real runner of entity service, it can be Mongo runner or Sql Runner */
 @injectable()
 export abstract class EntityRunner {
     entityMetadatas: Map<Type, EntityMetadata>;
-    
-    find<TEntity>(repository: Repository<TEntity>, queryParams?: QueryParams): Promise<FindResult<TEntity>>{
+
+    find<TEntity>(repository: Repository<TEntity>, queryParams?: QueryParams): Promise<FindResult<TEntity>> {
         let errors = this.adjustParams(repository.metadata, queryParams);
         if (errors) {
             return Promise.reject(errors);
@@ -21,7 +23,7 @@ export abstract class EntityRunner {
     }
 
 
-    findOne<TEntity>(repository: Repository<TEntity>, queryParams?: QueryParams): Promise<TEntity>{
+    findOne<TEntity>(repository: Repository<TEntity>, queryParams?: QueryParams): Promise<TEntity> {
         let errors = this.adjustParams(repository.metadata, queryParams);
         if (errors) {
             return Promise.reject(errors);
@@ -30,11 +32,11 @@ export abstract class EntityRunner {
         return this.findOneCore(repository, queryParams)
     }
 
-    create<TEntity>(repository: Repository<TEntity>, entity: TEntity): Promise<TEntity>{
+    create<TEntity>(repository: Repository<TEntity>, entity: TEntity): Promise<TEntity> {
         return this.createCore(repository, entity)
     }
 
-    update<TEntity>(repository: Repository<TEntity>, id: any, entity: TEntity): Promise<void>{
+    update<TEntity>(repository: Repository<TEntity>, id: any, entity: TEntity): Promise<void> {
         id = this.convertId(repository.metadata, id);
 
         if (!id) {
@@ -44,7 +46,7 @@ export abstract class EntityRunner {
         return this.updateCore(repository, id, entity);
     }
 
-    delete<TEntity>(repository: Repository<TEntity>, id: any): Promise<void>{
+    delete<TEntity>(repository: Repository<TEntity>, id: any): Promise<void> {
         id = this.convertId(repository.metadata, id);
 
         if (!id) {
@@ -93,10 +95,17 @@ export abstract class EntityRunner {
 
             errorTracker.push(name);
 
-            if (["$regex", "$where", "$text", "$like", "$option", "$expr"].includes(name)) {
+            let match;
+            if (typeof value == "string" && (match = funcReg.exec(value))) {
+                // functions like num(), date(), bool(), ObjectId()
+                let type = match[1].toLocaleLowerCase()
+                let val = match[2]
+
+                filter[name] = this.convertValue(type, val, errorTracker);
+            } else if (["$regex", "$where", "$text", "$like", "$option", "$expr"].includes(name)) {
                 // entity service do nothing, but runner might have
                 this.extendedAdjustFilter(filter, name, value, targetColumn, errorTracker);
-            } else if (name == "$or" || name == "$and" || name == "$not" || name == "$nor") {
+            } else if (["$or", "$and", "$not", "$nor"].includes(name)) {
                 // { filter: { $or: [ object, object ]}}
                 if (value instanceof Array) {
                     errorTracker.forEach(value, (item) => {
@@ -146,7 +155,7 @@ export abstract class EntityRunner {
                     filter[name] = errorTracker.map(value, convert);
                 }
             } else {
-                let embeddedMetadata = metadata.findEmbeddedWithPropertyPath(name);
+                let embeddedMetadata = metadata ? metadata.findEmbeddedWithPropertyPath(name) : null;
 
                 if (embeddedMetadata) {
                     let targetMetadata = this.entityMetadatas.get(embeddedMetadata.type as Type);
@@ -180,6 +189,9 @@ export abstract class EntityRunner {
                             // call runner in case it have to do some things
                             this.extendedAdjustFilter(filter, name, filter[name], columnMetadata, errorTracker);
                         }
+                    } else {
+                        // for embeded object, but cannot find the metadata
+                        this.adjustFilter(null, value, null, errorTracker, level + 1);
                     }
                 }
             }
@@ -202,7 +214,7 @@ export abstract class EntityRunner {
             if (type == null) {
                 // try use extended convertValue
                 newValue = this.extendedConvertValue(metadata, value, errorTracker);
-            } else if ((type == "number" || type == Number) && typeof value != "number") {
+            } else if ((type == "number" || type == "num" || type == "int" || type == Number) && typeof value != "number") {
                 newValue = parseFloat(value);
                 if (isNaN(newValue)) {
                     if (errorTracker) {
@@ -211,7 +223,7 @@ export abstract class EntityRunner {
 
                     newValue = null;
                 }
-            } else if ((type == "boolean" || type == Boolean) && typeof value != "boolean") {
+            } else if ((type == "boolean" || type == "bool" || type == Boolean) && typeof value != "boolean") {
                 newValue = Helper.getBoolean(value);
 
                 if (newValue == null && errorTracker) {
@@ -244,10 +256,10 @@ export abstract class EntityRunner {
     protected extendedAdjustFilter<T>(filter: any, name: string, value: string, targetColumn: ColumnMetadata, errorTracker: FultonStackError): void {
     }
 
-    protected extendedConvertValue(metadata: string | ColumnMetadata, value: any, errorTracker: FultonStackError): any {        
+    protected extendedConvertValue(metadata: string | ColumnMetadata, value: any, errorTracker: FultonStackError): any {
     }
 
-    protected abstract findCore<TEntity>(repository: Repository<TEntity>, queryParams?: QueryParams): Promise<FindResult<TEntity>>    
+    protected abstract findCore<TEntity>(repository: Repository<TEntity>, queryParams?: QueryParams): Promise<FindResult<TEntity>>
 
     protected abstract findOneCore<TEntity>(repository: Repository<TEntity>, queryParams?: QueryParams): Promise<TEntity>;
 
@@ -258,7 +270,7 @@ export abstract class EntityRunner {
     protected abstract deleteCore<TEntity>(repository: Repository<TEntity>, id: any): Promise<void>;
 
     protected getColumnMetadata(metadata: EntityMetadata, name: string): ColumnMetadata {
-        if (name) {
+        if (metadata && name) {
             if ((name == "id" || name == "_id")) {
                 return metadata.primaryColumns[0];
             } else {

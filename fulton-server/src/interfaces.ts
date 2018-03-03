@@ -107,25 +107,6 @@ export interface IEntityService<TEntity> {
     delete(id: any): Promise<OperationResult>;
 }
 
-/** the real runner of entity service, it can be Mongo runner or Sql Runner */
-export interface IEntityRunner {
-    find<TEntity>(repository: Repository<TEntity>, queryParams?: QueryParams): Promise<FindResult<TEntity>>;
-
-    findOne<TEntity>(repository: Repository<TEntity>, queryParams?: QueryParams): Promise<TEntity>;
-
-    findById<TEntity>(repository: Repository<TEntity>, id: any, queryParams?: QueryParams): Promise<TEntity>;
-
-    create<TEntity>(repository: Repository<TEntity>, entity: TEntity): Promise<TEntity>;
-
-    update<TEntity>(repository: Repository<TEntity>, id: any, entity: TEntity): Promise<void>;
-
-    delete<TEntity>(repository: Repository<TEntity>, id: any): Promise<void>;
-
-    adjustFilter<T>(filter: any, name: string, value: string, targetColumn: ColumnMetadata, errorTracker: FultonStackError): void
-
-    convertValue(type: any, value: any, errorTracker: FultonStackError): any;
-}
-
 /**
  * for sorting and select, for example sort = {column1:1 , column2:-1 }
  */

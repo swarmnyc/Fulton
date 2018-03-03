@@ -1,11 +1,13 @@
-import { QueryColumnOptions, QueryParams, injectable, FindResult, IEntityRunner } from '../../interfaces';
+import { FindResult, QueryColumnOptions, QueryParams, injectable } from '../../interfaces';
 import { MongoRepository, Repository, getMongoRepository } from "typeorm";
 
+import { ColumnMetadata } from 'typeorm/metadata/ColumnMetadata';
+import { EntityMetadata } from 'typeorm/metadata/EntityMetadata';
+import { EntityRunner } from './entity-runner';
+import { FultonError } from '../../common';
+import { FultonStackError } from '../../common/fulton-error';
 import { ObjectId } from 'bson';
 import { Type } from "../../interfaces";
-import { EntityMetadata } from 'typeorm/metadata/EntityMetadata';
-import { ColumnMetadata } from 'typeorm/metadata/ColumnMetadata';
-import { FultonStackError } from '../../common/fulton-error';
 import { fultonDebug } from '../../helpers/debug';
 
 interface IncludeOptions {
@@ -13,13 +15,14 @@ interface IncludeOptions {
 }
 
 @injectable()
-export class MongoEntityRunner implements IEntityRunner {
+export class MongoEntityRunner extends EntityRunner {
+   
     /**
      * use provided repository to find entities
      * @param repository 
      * @param queryParams 
      */
-    async find<T>(repository: Repository<T>, queryParams: QueryParams = {}): Promise<FindResult<T>> {
+    protected async findCore<T>(repository: Repository<T>, queryParams: QueryParams = {}): Promise<FindResult<T>> {
         let repo = (<any>repository as MongoRepository<T>);
         this.adjustQueryParams(repo, queryParams);
 
@@ -57,7 +60,7 @@ export class MongoEntityRunner implements IEntityRunner {
      * @param repository 
      * @param queryParams 
      */
-    async findOne<T>(repository: Repository<T>, queryParams: QueryParams = {}): Promise<T> {
+    protected async findOneCore<T>(repository: Repository<T>, queryParams: QueryParams = {}): Promise<T> {
         let repo = (<any>repository as MongoRepository<T>);
         this.adjustQueryParams(repo, queryParams);
 
@@ -75,23 +78,7 @@ export class MongoEntityRunner implements IEntityRunner {
         return data
     }
 
-    /**
-     * use provided repository to find one entity
-     * @param repository 
-     * @param queryParams 
-     */
-    async findById<T>(repository: Repository<T>, id: any, queryParams: QueryParams = {}): Promise<T> {
-        queryParams.filter = {
-            _id: id
-        }
-
-        queryParams.sort = null;
-        queryParams.pagination = null;
-
-        return this.findOne(repository, queryParams);
-    }
-
-    create<T extends any>(repository: Repository<T>, entity: T): Promise<T> {
+    protected createCore<T extends any>(repository: Repository<T>, entity: T): Promise<T> {
         if (entity[repository.metadata.objectIdColumn.propertyName]) {
             // TODO: should move this code to typeorm
             entity._id = entity[repository.metadata.objectIdColumn.propertyName];
@@ -109,17 +96,17 @@ export class MongoEntityRunner implements IEntityRunner {
             });
     }
 
-    update<T>(repository: Repository<T>, id: any, entity: T, replace?: boolean): Promise<any> {
+    protected updateCore<T>(repository: Repository<T>, id: any, entity: T, replace?: boolean): Promise<any> {
         return (<any>repository as MongoRepository<T>)
             .updateOne({ _id: id }, replace ? entity : { $set: entity })
     }
 
-    delete<T>(repository: Repository<T>, id: any): Promise<any> {
+    protected deleteCore<T>(repository: Repository<T>, id: any): Promise<any> {
         return (<any>repository as MongoRepository<T>)
             .deleteOne({ _id: id })
     }
 
-    convertValue(metadata: string | ColumnMetadata, value: any, errorTracker: FultonStackError): any {
+    protected extendedConvertValue(metadata: string | ColumnMetadata, value: any, errorTracker: FultonStackError): any {
         if (metadata != null && value != null) {
             let type;
             if (metadata instanceof ColumnMetadata) {
@@ -147,7 +134,7 @@ export class MongoEntityRunner implements IEntityRunner {
     /**
      * adjust filter like change id to _id, change $like to {$regex, $options} 
      */
-    adjustFilter<T>(filter: any, name: string, value: string, targetColumn: ColumnMetadata, errorTracker: FultonStackError): void {
+    protected extendedAdjustFilter<T>(filter: any, name: string, value: string, targetColumn: ColumnMetadata, errorTracker: FultonStackError): void {
         if (name == "$like") {
             filter["$regex"] = value;
             filter["$options"] = "i";

@@ -34,6 +34,7 @@ describe('entity service', () => {
         service = new EntityService<Employee>(new Repository<Employee>())
         service["app"] = app;
         service["_runner"] = new MongoEntityRunner();
+        service["_runner"].entityMetadatas = app.entityMetadatas;
         employeeMetadata = app.entityMetadatas.get(Employee);
         categoryMetadata = app.entityMetadatas.get(Category);
         customerMetadata = app.entityMetadatas.get(Customer);
@@ -46,7 +47,7 @@ describe('entity service', () => {
                 employeeId: "1"
             }
         };
-        service["adjustParams"](employeeMetadata, queryParams);
+        service["runner"]["adjustParams"](employeeMetadata, queryParams);
 
         expect(queryParams).toEqual({
             filter: {
@@ -66,7 +67,7 @@ describe('entity service', () => {
             }
         };
 
-        service["adjustParams"](employeeMetadata, queryParams);
+        service["runner"]["adjustParams"](employeeMetadata, queryParams);
 
         expect(queryParams).toEqual({
             filter: {
@@ -89,7 +90,7 @@ describe('entity service', () => {
             }
         };
 
-        service["adjustParams"](employeeMetadata, queryParams);
+        service["runner"]["adjustParams"](employeeMetadata, queryParams);
 
         expect(queryParams).toEqual({
             filter: {
@@ -113,7 +114,7 @@ describe('entity service', () => {
             }
         };
 
-        service["adjustParams"](employeeMetadata, queryParams);
+        service["runner"]["adjustParams"](employeeMetadata, queryParams);
 
         expect(queryParams).toEqual({
             filter: {
@@ -136,7 +137,7 @@ describe('entity service', () => {
             }
         };
 
-        service["adjustParams"](employeeMetadata, queryParams);
+        service["runner"]["adjustParams"](employeeMetadata, queryParams);
 
         expect(queryParams).toEqual({
             filter: {
@@ -157,7 +158,7 @@ describe('entity service', () => {
             }
         };
 
-        service["adjustParams"](employeeMetadata, queryParams);
+        service["runner"]["adjustParams"](employeeMetadata, queryParams);
 
         expect(queryParams).toEqual({
             filter: {
@@ -181,7 +182,7 @@ describe('entity service', () => {
             }
         };
 
-        service["adjustParams"](employeeMetadata, queryParams);
+        service["runner"]["adjustParams"](employeeMetadata, queryParams);
 
         expect(queryParams).toEqual({
             filter: {
@@ -211,7 +212,7 @@ describe('entity service', () => {
             }
         };
 
-        service["adjustParams"](employeeMetadata, queryParams);
+        service["runner"]["adjustParams"](employeeMetadata, queryParams);
 
         expect(queryParams).toEqual({
             filter: {
@@ -238,7 +239,7 @@ describe('entity service', () => {
             }
         };
 
-        service["adjustParams"](employeeMetadata, queryParams);
+        service["runner"]["adjustParams"](employeeMetadata, queryParams);
 
         expect(queryParams).toEqual({
             filter: {
@@ -259,7 +260,7 @@ describe('entity service', () => {
             }
         };
 
-        service["adjustParams"](employeeMetadata, queryParams);
+        service["runner"]["adjustParams"](employeeMetadata, queryParams);
 
         expect(queryParams).toEqual({
             filter: {
@@ -282,7 +283,7 @@ describe('entity service', () => {
             }
         };
 
-        service["adjustParams"](employeeMetadata, queryParams);
+        service["runner"]["adjustParams"](employeeMetadata, queryParams);
 
         expect(queryParams).toEqual({
             filter: {
@@ -307,7 +308,7 @@ describe('entity service', () => {
             }
         };
 
-        service["adjustParams"](customerMetadata, queryParams);
+        service["runner"]["adjustParams"](customerMetadata, queryParams);
 
         expect(queryParams).toEqual({
             filter: {
@@ -589,7 +590,7 @@ describe('entity service', () => {
             }
         };
 
-        let errorTracker = service["adjustParams"](employeeMetadata, queryParams);
+        let errorTracker = service["runner"]["adjustParams"](employeeMetadata, queryParams);
 
         expect(errorTracker.errors).toEqual({
             message: "invalid query parameters",

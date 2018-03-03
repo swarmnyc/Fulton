@@ -47,12 +47,14 @@ describe('entity service', () => {
                 employeeId: "1"
             }
         };
+
         service["runner"]["adjustParams"](employeeMetadata, queryParams);
 
         expect(queryParams).toEqual({
             filter: {
                 _id: 1
-            }
+            },
+            projection: { address: 0 }
         })
     });
 
@@ -75,7 +77,8 @@ describe('entity service', () => {
                     { _id: 1 },
                     { hireDate: new Date("1992-05-01T00:00:00.000+0000") }
                 ]
-            }
+            },
+            projection: { address: 0 }
         })
     });
 
@@ -98,7 +101,8 @@ describe('entity service', () => {
                     { _id: 1 },
                     { hireDate: new Date("1992-05-01T00:00:00.000+0000") }
                 ]
-            }
+            },
+            projection: { address: 0 }
         })
     });
 
@@ -123,7 +127,8 @@ describe('entity service', () => {
                         _id: 1
                     }
                 }
-            }
+            },
+            projection: { address: 0 }
         })
     });
 
@@ -144,7 +149,8 @@ describe('entity service', () => {
                 hireDate: {
                     $gte: new Date("2001-01-01T00:00:00.000+0000")
                 }
-            }
+            },
+            projection: { address: 0 }
         })
     });
 
@@ -165,7 +171,8 @@ describe('entity service', () => {
                 country: {
                     $box: [[1.1, 2.2], [3.3, 4.4], 5]
                 }
-            }
+            },
+            projection: { address: 0 }
         })
     });
 
@@ -192,7 +199,8 @@ describe('entity service', () => {
                 city: {
                     $exists: true
                 }
-            }
+            },
+            projection: { address: 0 }
         })
     });
 
@@ -225,7 +233,8 @@ describe('entity service', () => {
                 reportsTo: {
                     $all: [1, 2]
                 }
-            }
+            },
+            projection: { address: 0 }
         })
     });
 
@@ -246,7 +255,8 @@ describe('entity service', () => {
                 extension: {
                     $size: 1
                 }
-            }
+            },
+            projection: { address: 0 }
         })
     });
 
@@ -267,7 +277,8 @@ describe('entity service', () => {
                 postalCode: {
                     $in: [1, 2, 3]
                 }
-            }
+            },
+            projection: { address: 0 }
         })
     });
 
@@ -292,7 +303,8 @@ describe('entity service', () => {
                         categoryId: new ObjectId("000000000000000000000003")
                     }
                 }
-            }
+            },
+            projection: { address: 0 }
         })
     });
 

@@ -57,17 +57,10 @@ export abstract class EntityRunner {
     /** 
      * adjust filter, because some properties are miss type QueryString is always string, but some params int or date
      */
-    protected adjustParams<T>(em: EntityMetadata | Type, params: QueryParams): FultonError {
+    protected adjustParams<T>(metadata: EntityMetadata, params: QueryParams): FultonError {
         // only adjust if it needs
         if (params && params.needAdjust) {
             let errorTracker = new FultonStackError("invalid query parameters");
-            let metadata: EntityMetadata;
-
-            if (em instanceof Function) {
-                metadata = this.entityMetadatas.get(em);
-            } else {
-                metadata = em;
-            }
 
             if (params.filter) {
                 errorTracker.push("filter");

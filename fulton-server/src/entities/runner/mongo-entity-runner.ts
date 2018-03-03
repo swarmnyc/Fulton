@@ -24,7 +24,6 @@ export class MongoEntityRunner extends EntityRunner {
      */
     protected async findCore<T>(repository: Repository<T>, queryParams: QueryParams = {}): Promise<FindResult<T>> {
         let repo = (<any>repository as MongoRepository<T>);
-        this.adjustQueryParams(repo, queryParams);
 
         let skip;
         let size;
@@ -62,7 +61,6 @@ export class MongoEntityRunner extends EntityRunner {
      */
     protected async findOneCore<T>(repository: Repository<T>, queryParams: QueryParams = {}): Promise<T> {
         let repo = (<any>repository as MongoRepository<T>);
-        this.adjustQueryParams(repo, queryParams);
 
         let cursor = repo.createEntityCursor(queryParams.filter)
         if (queryParams.sort) cursor.sort(queryParams.sort)
@@ -165,31 +163,34 @@ export class MongoEntityRunner extends EntityRunner {
         }
     }
 
-    /**
-     * adjust like change id to _id, change $like to {$regex, $options} 
-     */
-    protected adjustQueryParams<T>(repository: MongoRepository<T>, queryParams: QueryParams): void {
-        if (queryParams.select) {
-            queryParams.projection = this.transformSelect(queryParams.select);
+
+    protected adjustParams<T>(metadata: EntityMetadata, params: QueryParams): FultonError {
+        if (params.select) {
+            params.projection = this.transformSelect(params.select);
         }
 
-        if (queryParams.sort) {
-            this.adjustIdInOptions(repository, queryParams.sort);
+        if (params.sort) {
+            this.adjustIdInOptions(metadata, params.sort);
         }
 
-        if (queryParams.projection) {
-            this.adjustIdInOptions(repository, queryParams.projection);
+        if (params.projection) {
+            this.adjustIdInOptions(metadata, params.projection);
         }
 
-        queryParams.projection = this.mergeProjection(repository, queryParams.projection)
+        let projection = this.mergeProjection(metadata, params.projection)
+        if (projection){
+            params.projection = projection
+        }
+
+        return super.adjustParams(metadata, params)
     }
 
     /**
      * adjust options like change id to _id
      */
-    private adjustIdInOptions<T>(repository: MongoRepository<T>, options: any) {
+    private adjustIdInOptions<T>(metadata: EntityMetadata, options: any) {
         // TODO: should move this code to typeorm        
-        let idName = repository.metadata.objectIdColumn.propertyName;
+        let idName = metadata.objectIdColumn.propertyName;
 
         for (const name of Object.getOwnPropertyNames(options)) {
             if (name == idName) {
@@ -221,10 +222,10 @@ export class MongoEntityRunner extends EntityRunner {
      * merge metadata to projection
      * @param queryParams 
      */
-    private mergeProjection<T>(repository: MongoRepository<T>, projection: QueryColumnOptions): QueryColumnOptions {
+    private mergeProjection(metadata: EntityMetadata, projection: QueryColumnOptions): QueryColumnOptions {
         let newProjection: any = projection || {}
 
-        repository.metadata.columns.forEach((c) => {
+        metadata.columns.forEach((c) => {
             if (!c.isSelect) {
                 newProjection[c.propertyPath] = newProjection[c.propertyPath] || 0
             }

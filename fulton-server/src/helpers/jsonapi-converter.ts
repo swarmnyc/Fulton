@@ -212,7 +212,7 @@ export class JsonApiConverter {
  */
 class JsonApiSerializer {
     result: JsonApiResult = {};
-    included: JsonApiData[] = [];
+    included: Map<String, JsonApiData>  = new Map();
 
     constructor(private typeMap: Map<string, JsonApiTypeOptions>, private options: JsonApiSerializeOptions) { }
 
@@ -224,8 +224,8 @@ class JsonApiSerializer {
                 this.result.data = this.serializeData(type, items);
             }
 
-            if (this.included.length > 0) {
-                this.result.included = this.included;
+            if (this.included.size > 0) {
+                this.result.included = Array.from(this.included.values());
             }
         } else {
             this.result.data = [];
@@ -293,7 +293,10 @@ class JsonApiSerializer {
         //skip if no attributes and relationships;
         if ((data.attributes && Object.getOwnPropertyNames(data.attributes).length > 0) ||
             (data.relationships && Object.getOwnPropertyNames(data.relationships).length > 0)) {
-            this.included.push(data);
+                var key = `${data.type}!!${data.id}`
+                if (!this.included.has(key)){
+                    this.included.set(key, data);
+                }
         }
 
         return {

@@ -67,14 +67,14 @@ gulp.task('build-fulton-server', function (callback) {
         }));
 
         tasks.push(new Promise((resolve, reject) => {
-            gulp.src('../fulton-server/package*.json')
-                .pipe(gulp.dest("./dist/fulton-server/"))
+            gulp.src('../fulton-server/assets/**/*')
+                .pipe(gulp.dest("./dist/fulton-server/assets"))
                 .on("error", reject)
                 .on("end", resolve);
         }));
 
         tasks.push(new Promise((resolve, reject) => {
-            gulp.src('../readme.md')
+            gulp.src(['../fulton-server/package*.json', '../fulton-server/readme.md'])
                 .pipe(gulp.dest("./dist/fulton-server/"))
                 .on("error", reject)
                 .on("end", resolve);

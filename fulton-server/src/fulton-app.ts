@@ -4,6 +4,7 @@ import * as http from 'http';
 import * as https from 'https';
 import * as lodash from 'lodash';
 import * as path from 'path';
+import * as fs from 'fs';
 import * as winston from 'winston';
 
 import { AppMode, DiContainer, DiKeys, ErrorMiddleware, EventKeys, Middleware, RepositoryFactory, Request, Response, Type, TypeIdentifier } from './interfaces';
@@ -17,7 +18,7 @@ import { Env } from "./helpers/env";
 import { EventEmitter } from 'events';
 import { Express } from "express";
 import { FultonAppOptions } from "./fulton-app-options";
-import { FultonLog } from "./fulton-log";
+import { FultonLog } from './fulton-log';
 import { MimeTypes } from './constants';
 import { Router } from "./routers/router";
 import { Service } from "./services";
@@ -211,67 +212,80 @@ export abstract class FultonApp implements IFultonApp {
     /**
      * start http server or https server. if it isn't initialized, it will call init(), too.
      */
-    async start(): Promise<any> {
+    start(): Promise<any> {
         //TODO: implements cluster mode.
-
-        if (!this.isInitialized) {
-            await this.init().catch((err) => {
-                FultonLog.error(`${this.appName} failed to initialization`, err);
-                throw err;
-            });
+        if (this.httpServer || this.httpsServer) {
+            return Promise.reject(new Error(`${this.appName} is still running`));
         }
 
         if (this.options.settings.zoneEnabled) {
             require("zone.js");
         }
 
-        if (this.httpServer || this.httpsServer) {
-            throw new Error(`${this.appName} is still running`);
+        let initTask: Promise<any>
+        if (this.isInitialized) {
+            initTask = Promise.resolve();
+        } else {
+            initTask = this.init().catch((err) => {
+                FultonLog.error(`${this.appName} failed to initialization`, err);
+                return Promise.reject(err);
+            });
         }
 
-        var tasks = [];
+        return initTask.then(() => {
+            var tasks = [];
+            
+            if (this.options.server.httpEnabled) {
+                tasks.push(new Promise((resolve, reject) => {
+                    this.httpServer = http
+                        .createServer(this.serve)
+                        .on("error", (error) => {
+                            FultonLog.error(`${this.appName} failed to start http server on port ${this.options.server.httpPort}`);
+                            this.httpServer = null;
+                            reject(error);
+                        })
+                        .listen(this.options.server.httpPort, () => {
+                            FultonLog.info(`${this.appName} is running http server on port ${this.options.server.httpPort}`)
+                            resolve()
+                        });
+                }));
+            }
 
-        if (this.options.server.httpEnabled) {
-            tasks.push(new Promise((resolve, reject) => {
-                this.httpServer = http
-                    .createServer(this.serve)
-                    .on("error", (error) => {
-                        FultonLog.error(`${this.appName} failed to start http server on port ${this.options.server.httpPort}`);
-                        this.httpServer = null;
-                        reject(error);
-                    })
-                    .listen(this.options.server.httpPort, () => {
-                        FultonLog.info(`${this.appName} is running http server on port ${this.options.server.httpPort}`)
-                        resolve()
-                    });
+            if (this.options.server.httpsEnabled) {
+                tasks.push(new Promise((resolve, reject) => {
+                    if (!this.options.server.sslOptions) {
+                        if (Env.isProduction) {
+                            let error = `${this.appName} failed to start because https is enabled but sslOption wasn't given`;
+                            FultonLog.error(error);
+                            reject(error);
+                            return;
+                        } else {
+                            // if ssl options is empty,  use default ssl options
+                            this.options.server.sslOptions = {
+                                cert: fs.readFileSync(path.join(__dirname, "../assets/ssl/localhost.crt")),
+                                key: fs.readFileSync(path.join(__dirname, "../assets/ssl/localhost.key"))
+                            }
 
-            }));
-        }
+                            FultonLog.warn(`${this.appName} is using dev ssl certification which is for development only, you should change sslOption for production`);
+                        }
+                    }
 
-        if (this.options.server.httpsEnabled) {
-            tasks.push(new Promise((resolve, reject) => {
-                if (!this.options.server.sslOptions) {
-                    let error = `${this.appName} failed to start because https is enabled but sslOption was given`;
-                    FultonLog.error(error);
-                    reject(error);
-                    return;
-                }
+                    this.httpsServer = https
+                        .createServer(this.options.server.sslOptions, this.serve)
+                        .on("error", (error) => {
+                            FultonLog.error(`${this.appName} failed to start https server on port ${this.options.server.httpsPort}`);
+                            this.httpsServer = null;
+                            reject(error);
+                        })
+                        .listen(this.options.server.httpsPort, () => {
+                            FultonLog.info(`${this.appName} is running https server on port ${this.options.server.httpsPort}`);
+                            resolve()
+                        });
+                }));
+            }
 
-                this.httpsServer = https
-                    .createServer(this.options.server.sslOptions, this.serve)
-                    .on("error", (error) => {
-                        FultonLog.error(`${this.appName} failed to start https server on port ${this.options.server.httpsPort}`);
-                        this.httpsServer = null;
-                        reject(error);
-                    })
-                    .listen(this.options.server.httpsPort, () => {
-                        FultonLog.info(`${this.appName} is running https server on port ${this.options.server.httpsPort}`);
-                        resolve()
-                    });
-            }));
-        }
-
-        return Promise.all(tasks);
+            return Promise.all(tasks);
+        });
     }
 
     /**
@@ -295,7 +309,7 @@ export abstract class FultonApp implements IFultonApp {
 
         if (this.httpsServer) {
             tasks.push(new Promise((resolve, reject) => {
-                this.httpServer.close(() => {
+                this.httpsServer.close(() => {
                     FultonLog.info(`${this.appName} stopped https server`);
                     resolve();
                 })

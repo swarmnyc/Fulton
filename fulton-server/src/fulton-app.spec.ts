@@ -1,11 +1,12 @@
-import { Service } from './services/service';
-import { inject, injectable, DiContainer, DiKeys } from './interfaces';
+import { DiContainer, DiKeys, inject, injectable } from './interfaces';
+import { Env, Factory } from './helpers';
 import { Router, router } from './routers';
+
+import { EntityService } from './entities';
 import { FultonApp } from './fulton-app';
 import { FultonAppOptions } from './fulton-app-options';
-import { EntityService } from './entities';
-import { Factory } from './helpers';
-
+import { FultonLog } from './fulton-log';
+import { Service } from './services/service';
 
 @injectable()
 class ServiceA extends Service {
@@ -69,6 +70,8 @@ class RouterB extends Router {
 
 class MyFultonApp extends FultonApp {
     protected onInit(options: FultonAppOptions): void | Promise<void> {
+        options.settings.zoneEnabled = false;
+
         options.providers = [
             { provide: "api_key", useValue: "abcd" },
             { provide: DiKeys.EntityServiceFactory, useValue: "abcd" }
@@ -227,5 +230,44 @@ describe('Fulton App', () => {
 
     it('should override EntityServiceFactory', async () => {
         expect(app.container.get(DiKeys.EntityServiceFactory)).toEqual("abcd");
+    });
+});
+
+describe('Fulton Start will https', () => {
+    beforeAll(() => {
+        FultonLog.configure({
+            level: "error",
+            transports: []
+        })
+    })
+
+    afterAll(() => {
+        FultonLog.configure({
+            console: {
+                colorize: true,
+                level: "info"
+            }
+        });
+    })
+
+    it('should start https with localhost.crt', async () => {
+        let app = new MyFultonApp()
+        
+        Env.isProduction = false
+        app.options.server.httpsEnabled = true
+
+        await app.start().catch(fail)
+        await app.stop()
+    });
+
+    it('should fail to start https with localhost.crt', async () => {
+        let app = new MyFultonApp()
+
+        app.options.server.httpsEnabled = true
+        Env.isProduction = true
+
+        await app.start().then(fail).catch(() => { })
+        await app.stop()
+        Env.isProduction = false
     });
 });

@@ -8,7 +8,6 @@ import { FultonError } from '../../common';
 import { FultonStackError } from '../../common/fulton-error';
 import { ObjectId } from 'bson';
 import { Type } from "../../interfaces";
-import { fultonDebug } from '../../helpers/debug';
 
 interface IncludeOptions {
     [key: string]: IncludeOptions | false
@@ -33,8 +32,6 @@ export class MongoEntityRunner extends EntityRunner {
                 skip = queryParams.pagination.index * size;
             }
         }
-
-        fultonDebug("Query on %s QueryParams %O", repository.metadata.name, queryParams)
 
         let cursor = repo.createEntityCursor(queryParams.filter)
         if (skip) cursor.skip(skip)

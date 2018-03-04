@@ -36,7 +36,7 @@ export class GoogleStrategy extends Strategy {
                     return this.error(new Error('Failed to obtain access token ' + err.message));
                 }
 
-                fultonDebug("google token: %O", token);
+                fultonDebug("google", "google token: %O\t", token);
 
                 let verified = (err: any, user: IUser, info: any) => {
                     if (err) {
@@ -55,10 +55,10 @@ export class GoogleStrategy extends Strategy {
                 if (token.id_token) {
                     let jwt = this.jws.decode(token.id_token);
 
-                    fultonDebug("google id_token", jwt);
+                    fultonDebug("google", "google id_token : ", jwt);
 
                     let payload = jwt.payload;
-                    if (typeof payload == "string"){
+                    if (typeof payload == "string") {
                         payload = JSON.parse(payload);
                     }
 
@@ -86,7 +86,7 @@ export class GoogleStrategy extends Strategy {
                 scope: options.scope
             });
 
-            fultonDebug("google redirect url: %s", redirectUrl);
+            fultonDebug("google", "google redirect url: %s", redirectUrl);
 
             return this.redirect(redirectUrl);
         }

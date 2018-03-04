@@ -5,6 +5,7 @@ import { ColumnMetadata } from "typeorm/metadata/ColumnMetadata";
 import { EntityMetadata } from 'typeorm/metadata/EntityMetadata';
 import { Helper } from '../../helpers';
 import { Repository } from "typeorm";
+import { fultonDebug } from '../../helpers/debug';
 
 let funcReg = /^((?:num)|(?:int)|(?:date)|(?:bool)|(?:ObjectId))\((.+)\)$/
 
@@ -19,6 +20,8 @@ export abstract class EntityRunner {
             return Promise.reject(errors);
         }
 
+        fultonDebug("entity", "find on %s QueryParams:\n %O\t", repository.metadata.name, queryParams)
+        
         return this.findCore(repository, queryParams)
     }
 
@@ -28,6 +31,8 @@ export abstract class EntityRunner {
         if (errors) {
             return Promise.reject(errors);
         }
+
+        fultonDebug("entity", "findOne on %s QueryParams:\n %O\t", repository.metadata.name, queryParams)
 
         return this.findOneCore(repository, queryParams)
     }

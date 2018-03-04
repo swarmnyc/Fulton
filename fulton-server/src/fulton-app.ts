@@ -22,7 +22,7 @@ import { MimeTypes } from './constants';
 import { Router } from "./routers/router";
 import { Service } from "./services";
 import { defaultHttpLoggerHandler } from "./middlewares/http-logger";
-import { fultonDebug } from "./helpers/debug";
+import { fultonDebug } from './helpers/debug';
 
 // don't load too modules classes here, it will cause cyclical dependencies and cause very hard to debug and wired Error.
 
@@ -205,7 +205,7 @@ export abstract class FultonApp implements IFultonApp {
         this.isInitialized = true;
         this.events.emit(EventKeys.didInit, this);
 
-        fultonDebug("Options: %O", this.options);
+        fultonDebug("app", "Initializing with options: %O\t", this.options)
     }
 
     /**

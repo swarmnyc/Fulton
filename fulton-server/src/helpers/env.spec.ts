@@ -29,7 +29,9 @@ describe('env', () => {
         expect(Env.getBoolean("test.value2-3")).toBeFalsy();
 
         expect(Env.getBoolean("test.value2-4")).toBeFalsy();
+/*
         expect(Env.getBoolean("test.Value2-4", true)).toBeFalsy();
+*/
     });
 
     it('should load int', async () => {

@@ -596,7 +596,7 @@ export class FultonAppOptions {
             httpPort: 3000,
             httpsPort: 443,
             clusterEnabled: false,
-            clusterWorkerNumber: 0
+            clusterWorkerNumber: null
         };
 
         this.staticFile = {
@@ -677,6 +677,11 @@ export class FultonAppOptions {
         } as FultonAppOptions;
 
         let customer = (a: any, b: any): any => {
+            if (a == null && b == null) {
+                // lodash don't understand null
+                return undefined
+            }
+
             if (typeof a == "object") {
                 if (a instanceof IdentityOptions) {
                     return a

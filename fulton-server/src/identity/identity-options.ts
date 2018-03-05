@@ -553,6 +553,11 @@ export class IdentityOptions {
         } as IdentityOptions;
 
         let customer = (a: any, b: any): any => {
+            if (a == null && b == null) {
+                // lodash don't understand null
+                return undefined
+            }
+
             if (typeof a == "object") {
                 return lodash.assignWith(a, b, customer);
             } else {

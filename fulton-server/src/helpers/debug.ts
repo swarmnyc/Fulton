@@ -17,10 +17,13 @@ function getLogger(tag: string): IDebugger {
     return loggers.get(tag);
 }
 
+/**
+ * Only log if it is master
+ */
 export function fultonDebugMaster(tag: string, func: (clack: Chalk) => string | any[]): boolean
 export function fultonDebugMaster(tag: string, format: string, ...args: any[]): boolean
 export function fultonDebugMaster(tag: string, ...args: any[]): boolean {
-    if (cluster.isWorker) {
+    if (cluster.isMaster) {
         return fultonDebugCore(tag, ...args);
     }
 
@@ -47,18 +50,35 @@ function fultonDebugCore(tag: string, ...args: any[]): boolean {
         let arg1 = args[0];
         if (arg1 instanceof Function) {
             let result = arg1(clack);
-
-            if (!isArray(result)) {
-                result = [result]; // have to be array
+            if (result == null) {
+                return false;
+            } else if (isArray(result)) {
+                args = result;
+            } else {
+                args = [result]; // have to be array
             }
-
-            logger.apply(fultonDebug, result);
-        } else {
-            logger.apply(fultonDebug, args);
         }
+
+        if (cluster.isWorker) {
+            // if it is worker, add pid
+            if (args.length > 0 && typeof args[0] == "string"){
+                args[0] = addProceeInfo(args[0]);
+            }
+        }
+
+        logger.apply(fultonDebug, args);
 
         return true;
     }
 
     return false;
 };
+
+/** if it is worker add pid infront of message */
+export function addProceeInfo(msg: string): string {
+    if (cluster.isWorker) {
+        return `[${process.pid}] ` + msg;
+    }
+
+    return msg;
+}

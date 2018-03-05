@@ -2,6 +2,7 @@ import * as winston from "winston"
 
 import { FultonApp } from "./fulton-app";
 import { NPMLoggingLevel } from "winston";
+import { addProceeInfo } from './helpers/debug';
 
 /**
  * equels to winston.LoggerInstance
@@ -62,23 +63,23 @@ export let FultonLog = {
     },
 
     log(level: string, msg: string, ...meta: any[]): void {
-        winston.log(level, msg, ...meta);
+        winston.log(level, addProceeInfo(msg), ...meta);
     },
 
     debug(msg: string, ...meta: any[]): void {
-        winston.debug(msg, ...meta);
+        winston.debug(addProceeInfo(msg), ...meta);
     },
 
     info(msg: string, ...meta: any[]): void {
-        winston.info(msg, ...meta);
+        winston.info(addProceeInfo(msg), ...meta);
     },
 
     warn(msg: string, ...meta: any[]): void {
-        winston.warn(msg, ...meta);
+        winston.warn(addProceeInfo(msg), ...meta);
     },
 
     error(msg: string, ...meta: any[]): void {
-        winston.error(msg, ...meta);
+        winston.error(addProceeInfo(msg), ...meta);
     },
 
     /**

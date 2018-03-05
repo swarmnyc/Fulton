@@ -161,7 +161,7 @@ export class MongoEntityRunner extends EntityRunner {
     }
 
 
-    protected adjustParams<T>(metadata: EntityMetadata, params: QueryParams): FultonError {
+    protected adjustParams<T>(metadata: EntityMetadata, params: QueryParams = {}): FultonError {
         if (params.select) {
             params.projection = this.transformSelect(params.select);
         }

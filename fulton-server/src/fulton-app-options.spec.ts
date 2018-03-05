@@ -43,6 +43,7 @@ describe('Fulton App Options', () => {
         expect(app.options.server.httpsEnabled).toEqual(true);
         expect(app.options.server.httpPort).toEqual(777);
         expect(app.options.server.httpsPort).toEqual(999);
+        expect(app.options.server.clusterWorkerNumber).toBeUndefined();
     });
 
     it('should override', async () => {

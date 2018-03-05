@@ -23,7 +23,7 @@ import { MimeTypes } from './constants';
 import { Router } from "./routers/router";
 import { Service } from "./services";
 import { defaultHttpLoggerHandler } from "./middlewares/http-logger";
-import { fultonDebug } from './helpers/debug';
+import { fultonDebug, fultonDebugMaster } from './helpers/debug';
 
 // don't load too modules classes here, it will cause cyclical dependencies and cause very hard to debug and wired Error.
 
@@ -53,6 +53,12 @@ export interface IFultonApp {
     getLocalData(key: string): any;
 
     setLocalData(key: string, value: any): void;
+
+    init(): Promise<void>;
+
+    start(): Promise<any>;
+
+    stop(): Promise<any>;
 }
 
 /**
@@ -164,56 +170,61 @@ export abstract class FultonApp implements IFultonApp {
      * it can be run many times, every times call this will reset all the related objects
      */
     async init(): Promise<void> {
-        await this.initServer();
+        try {
+            await this.initServer();
 
-        await this.initDiContainer();
+            await this.initDiContainer();
 
-        await this.onInit(this.options);
-        this.options.loadEnvOptions();
+            await this.onInit(this.options);
+            this.options.loadEnvOptions();
 
-        await this.initLogging();
+            await this.initLogging();
 
-        await this.initProviders();
+            await this.initProviders();
 
-        await this.initDatabases();
+            await this.initDatabases();
 
-        await this.initRepositories();
+            await this.initRepositories();
 
-        await this.initServices();
+            await this.initServices();
 
-        /* start express middlewares */
-        await this.initHttpLogging();
+            /* start express middlewares */
+            await this.initHttpLogging();
 
-        await this.initCors();
+            await this.initCors();
 
-        await this.initFormatter();
+            await this.initFormatter();
 
-        await this.initIdentity();
+            await this.initIdentity();
 
-        await this.initIndex();
+            await this.initIndex();
 
-        await this.initStaticFile();
+            await this.initStaticFile();
 
-        await this.initMiddlewares();
+            await this.initMiddlewares();
 
-        await this.initRouters();
+            await this.initRouters();
 
-        await this.initDocs();
+            await this.initDocs();
 
-        await this.initErrorHandler();
-        /* end express middlewares */
+            await this.initErrorHandler();
+            /* end express middlewares */
 
-        this.isInitialized = true;
-        this.events.emit(EventKeys.didInit, this);
+            this.isInitialized = true;
+            this.events.emit(EventKeys.didInit, this);
 
-        fultonDebug("app", "Initializing with options: %O\t", this.options)
+            fultonDebugMaster("app", "Initializing with options: %O\t", this.options)
+        } catch (error) {
+            fultonDebug("app", "App Init failed with: %O\t", this.options)
+            FultonLog.error("App Init failed by", error)
+            throw error;
+        }
     }
 
     /**
      * start http server or https server. if it isn't initialized, it will call init(), too.
      */
     start(): Promise<any> {
-        //TODO: implements cluster mode.
         if (this.httpServer || this.httpsServer) {
             return Promise.reject(new Error(`${this.appName} is still running`));
         }
@@ -234,7 +245,7 @@ export abstract class FultonApp implements IFultonApp {
 
         return initTask.then(() => {
             var tasks = [];
-            
+
             if (this.options.server.httpEnabled) {
                 tasks.push(new Promise((resolve, reject) => {
                     this.httpServer = http

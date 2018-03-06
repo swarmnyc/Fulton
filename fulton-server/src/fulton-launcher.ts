@@ -41,12 +41,20 @@ export class FultonAppLauncher<TApp extends IFultonApp> {
      * Launch Tasks based on process.env["{appName}.Launch"]
      * @param stopAfterLaunch the default is based on task "App", if there is a task "App", the value is true
      */
-    launch(stopAfterLaunch?: boolean): Promise<any> {
-        let startTasks = Env.get(`${this.app.appName}.Launch`, "app")
+    launch(tasks?: string[], stopAfterLaunch?: boolean): Promise<any> {
+        if (tasks == null) {
+            if (process.argv.length > 2) {
+                // from args
+                tasks = process.argv.slice(2)
+            } else {
+                // from env
+                tasks = Env.get(`${this.app.appName}.Launch`, "app").split(",")
+            }
+        }
 
-        fultonDebug("launcher", `Start Tasks : ${startTasks}`)
+        fultonDebug("launcher", `Start Tasks : ${tasks}`)
         let promise = this.app.init().then(() => {
-            return Promise.all(startTasks.split(",").map((taskName) => {
+            return Promise.all(tasks.map((taskName) => {
                 taskName = taskName.trim();
 
                 let task = this.tasks.get(taskName);
@@ -73,7 +81,8 @@ export class FultonAppLauncher<TApp extends IFultonApp> {
                 return this.app.stop();
             }
         }).catch((error) => {
-            FultonLog.error("Launch Failed by ", error)
+            FultonLog.error("Launch Failed by", error)
+            return this.app.stop()
         });
     }
 
@@ -81,9 +90,9 @@ export class FultonAppLauncher<TApp extends IFultonApp> {
         if (app.options.server.clusterEnabled) {
             if (cluster.isMaster) {
                 let wokerNum = app.options.server.clusterWorkerNumber || os.cpus().length;
-                
+
                 fultonDebug("launcher", `Master ${process.pid} is running with ${wokerNum} worker(s)`);
-                
+
 
                 // Fork workers.
                 for (let i = 0; i < wokerNum; i++) {

@@ -161,24 +161,26 @@ export class MongoEntityRunner extends EntityRunner {
     }
 
 
-    protected adjustParams<T>(metadata: EntityMetadata, params: QueryParams = {}): FultonError {
-        if (params.select) {
-            params.projection = this.transformSelect(params.select);
+    protected adjustParams<T>(metadata: EntityMetadata, params: QueryParams = {}, onlyFilter:boolean = false): FultonError {
+        if (!onlyFilter){
+            if (params.select) {
+                params.projection = this.transformSelect(params.select);
+            }
+    
+            if (params.sort) {
+                this.adjustIdInOptions(metadata, params.sort);
+            }
+    
+            if (params.projection) {
+                this.adjustIdInOptions(metadata, params.projection);
+            }
+    
+            let projection = this.mergeProjection(metadata, params.projection)
+            if (projection) {
+                params.projection = projection
+            }
         }
-
-        if (params.sort) {
-            this.adjustIdInOptions(metadata, params.sort);
-        }
-
-        if (params.projection) {
-            this.adjustIdInOptions(metadata, params.projection);
-        }
-
-        let projection = this.mergeProjection(metadata, params.projection)
-        if (projection) {
-            params.projection = projection
-        }
-
+        
         return super.adjustParams(metadata, params)
     }
 

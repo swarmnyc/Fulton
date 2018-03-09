@@ -1,4 +1,4 @@
-import { HttpResult, HttpTester } from "../../src/helpers/http-tester";
+import { HttpResult, HttpTester } from "../../src/test/http-tester";
 import { OperationOneResult, OperationManyResult, OperationResult, QueryParams, Request, Response } from "../../src/interfaces";
 
 import { Category } from "../entities/category";
@@ -10,11 +10,16 @@ import { FultonAppOptions } from '../../src/fulton-app-options';
 import { MongoHelper } from "../helpers/mongo-helper";
 import { Territory } from "../entities/territory";
 import { UserServiceMock } from "../helpers/user-service-mock";
-import { entityRouter } from '../../src/routers/route-decorators';
+import { entityRouter, httpGet } from '../../src/routers/route-decorators';
 import { sampleData } from "../support/sample-data";
 
 @entityRouter("/employees", Employee)
 class EmployeeEntityRouter extends EntityRouter<Employee>{
+    @httpGet("/count")
+    async count(req: Request, res: Response) {
+        let result = await this.entityService.count(req.queryParams)
+        res.send(result)
+    }
 }
 
 class MyApp extends FultonApp {
@@ -298,5 +303,29 @@ describe('EntityRouter Integration Test', () => {
 
         expect(queryResult.data.lastName).toBeDefined();
         expect(queryResult.data.address).toBeDefined();
+    });
+
+    it('should count employees', async () => {
+        let result = await httpTester.get("/employees/count")
+
+
+        let queryResult: OperationOneResult<number> = result.body;
+
+        expect(queryResult.data).toEqual(9);
+    });
+
+    it('should count employees with filter', async () => {
+        let result = await httpTester.get("/employees/count", {
+            filter: {
+                hireDate: {
+                    $gte: "1993-01-01T00:00:00Z"
+                }
+            }
+        })
+
+
+        let queryResult: OperationOneResult<number> = result.body;
+
+        expect(queryResult.data).toEqual(6);
     });
 });

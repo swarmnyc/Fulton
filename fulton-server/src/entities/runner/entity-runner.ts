@@ -21,7 +21,7 @@ export abstract class EntityRunner {
         }
 
         fultonDebug("entity", "find on %s QueryParams:\n %O\t", repository.metadata.name, queryParams)
-        
+
         return this.findCore(repository, queryParams)
     }
 
@@ -35,6 +35,17 @@ export abstract class EntityRunner {
         fultonDebug("entity", "findOne on %s QueryParams:\n %O\t", repository.metadata.name, queryParams)
 
         return this.findOneCore(repository, queryParams)
+    }
+
+    count<TEntity>(repository: Repository<TEntity>, queryParams?: QueryParams): Promise<number> {
+        let errors = this.adjustParams(repository.metadata, queryParams, true);
+        if (errors) {
+            return Promise.reject(errors);
+        }
+
+        fultonDebug("entity", "count on %s QueryParams:\n %O\t", repository.metadata.name, queryParams)
+
+        return repository.count(queryParams.filter)
     }
 
     create<TEntity>(repository: Repository<TEntity>, entity: TEntity): Promise<TEntity> {
@@ -64,7 +75,7 @@ export abstract class EntityRunner {
     /** 
      * adjust filter, because some properties are miss type QueryString is always string, but some params int or date
      */
-    protected adjustParams<T>(metadata: EntityMetadata, params: QueryParams): FultonError {
+    protected adjustParams<T>(metadata: EntityMetadata, params: QueryParams, onlyFilter:boolean = false): FultonError {
         // only adjust if it needs
         if (params && params.needAdjust) {
             let errorTracker = new FultonStackError("invalid query parameters");

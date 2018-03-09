@@ -105,6 +105,17 @@ export class EntityService<TEntity> implements IEntityService<TEntity> {
             .catch(this.errorHandler);
     }
 
+    count(queryParams?: QueryParams): Promise<OperationOneResult<number>> {
+        return this.runner
+            .count(this.mainRepository, queryParams)
+            .then((num) => {
+                return {
+                    data: num
+                }
+            })
+            .catch(this.errorHandler);
+    }
+
     create(input: TEntity): Promise<OperationOneResult<TEntity>> {
         return this.convertAndVerifyEntity(this.mainRepository.metadata, input)
             .then((entity) => {

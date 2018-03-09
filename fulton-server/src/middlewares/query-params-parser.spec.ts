@@ -3,17 +3,19 @@ import { queryById, queryParamsParser } from "./query-params-parser";
 
 import { FultonApp } from '../fulton-app';
 import { FultonAppOptions } from '../fulton-app-options';
-import { HttpTester } from "../../spec/helpers/http-tester";
+import { HttpTester } from "../helpers/http-tester";
 
 class MyApp extends FultonApp {
     protected onInit(options: FultonAppOptions): void | Promise<void> {
         this.options.index.enabled = false;
         this.events.once("didInitRouters", () => {
-            this.express.get("/", (req: Request, res: Response) => {            
+            this.express.get("/", (req: Request, res: Response) => {  
+                delete req.queryParams.needAdjust          
                 res.send(req.queryParams);
             })
 
             this.express.get("/test/:id", queryById(), (req: Request, res: Response) => {
+                delete req.queryParams.needAdjust
                 res.send(req.queryParams);
             })
         });

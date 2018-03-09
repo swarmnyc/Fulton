@@ -1,7 +1,7 @@
 import * as lodash from 'lodash';
 
 import { OperationOneResult, OperationManyResult, OperationResult, QueryParams, Request, Response, injectable } from "../../src/interfaces";
-import { HttpResult, HttpTester } from "../helpers/http-tester";
+import { HttpResult, HttpTester } from "../../src/helpers/http-tester";
 
 import { Category } from '../entities/category';
 import { MongoHelper } from "../helpers/mongo-helper";

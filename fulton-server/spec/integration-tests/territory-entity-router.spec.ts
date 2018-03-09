@@ -1,6 +1,6 @@
 import * as lodash from 'lodash';
 
-import { HttpResult, HttpTester } from "../helpers/http-tester";
+import { HttpResult, HttpTester } from "../../src/helpers/http-tester";
 import { OperationOneResult, OperationManyResult, OperationResult, QueryParams, Request, Response, injectable } from "../../src/interfaces";
 import { httpGet, router } from '../../src/routers/route-decorators';
 

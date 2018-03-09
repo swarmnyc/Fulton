@@ -1,6 +1,6 @@
 import { Request, Response, OperationManyResult, QueryParams, OperationOneResult, OperationResult, IEntityService, injectable, Type } from "../../src/interfaces";
 import { UserServiceMock } from "../helpers/user-service-mock";
-import { HttpTester, HttpResult } from "../helpers/http-tester";
+import { HttpTester, HttpResult } from "../../src/helpers/http-tester";
 import { MongoHelper } from "../helpers/mongo-helper";
 import { sampleData } from "../support/sample-data";
 import { Connection } from "typeorm";

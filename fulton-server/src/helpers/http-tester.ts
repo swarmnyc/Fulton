@@ -4,8 +4,8 @@ import * as url from 'url';
 import { Headers, OptionsWithUrl, RequiredUriUrl } from 'request';
 
 import { ClientResponse } from 'http';
-import { FultonApp } from '../../src/fulton-app';
-import { FultonLog } from '../../src/fulton-log';
+import { FultonApp } from '../fulton-app';
+import { FultonLog } from '../fulton-log';
 
 export interface HttpResult {
     response?: ClientResponse;

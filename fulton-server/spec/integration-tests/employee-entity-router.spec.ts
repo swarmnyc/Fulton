@@ -1,4 +1,4 @@
-import { HttpResult, HttpTester } from "../helpers/http-tester";
+import { HttpResult, HttpTester } from "../../src/helpers/http-tester";
 import { OperationOneResult, OperationManyResult, OperationResult, QueryParams, Request, Response } from "../../src/interfaces";
 
 import { Category } from "../entities/category";

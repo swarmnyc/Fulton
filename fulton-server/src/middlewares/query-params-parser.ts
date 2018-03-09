@@ -91,7 +91,9 @@ export function queryById(name: string = "id") {
 export function queryParamsParser(req: Request, res: Response, next: NextFunction) {
     let params: QueryParams;
     if (req.query) {
-        params = {};
+        params = {
+            needAdjust: true
+        };
         for (const name of Object.getOwnPropertyNames(req.query)) {
             let value = req.query[name];
 

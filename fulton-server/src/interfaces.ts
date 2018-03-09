@@ -100,6 +100,8 @@ export interface IEntityService<TEntity> {
 
     findById(id: any, QueryParams?: QueryParams): Promise<OperationOneResult<TEntity>>;
 
+    count(queryParams?: QueryParams): Promise<OperationOneResult<number>>;
+
     create(entity: TEntity): Promise<OperationOneResult<TEntity>>;
 
     update(id: any, entity: TEntity): Promise<OperationResult>;

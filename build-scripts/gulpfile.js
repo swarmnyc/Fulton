@@ -61,7 +61,7 @@ gulp.task('build-fulton-server', function (callback) {
 
         tasks.push(new Promise((resolve, reject) => {
             gulp.src('../fulton-server/build/**/*')
-                .pipe(gulp.dest("./dist/fulton-server/build"))
+                .pipe(gulp.dest("./dist/fulton-server/"))
                 .on("error", reject)
                 .on("end", resolve);
         }));

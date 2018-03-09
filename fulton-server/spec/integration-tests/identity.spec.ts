@@ -1,4 +1,4 @@
-import { HttpResult, HttpTester } from "../../src/helpers/http-tester";
+import { HttpResult, HttpTester } from "../../src/test/http-tester";
 import { Request, Response } from "../../src/interfaces";
 
 import { AccessToken } from '../../src/identity/interfaces';

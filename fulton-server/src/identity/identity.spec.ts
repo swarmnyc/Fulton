@@ -7,7 +7,7 @@ import { authorized, authorizedByRole, authorizedByRoles } from './authorizes-mi
 import { AccessToken } from './interfaces';
 import { FultonApp } from "../fulton-app";
 import { FultonAppOptions } from "../fulton-app-options";
-import { HttpTester } from "../helpers/http-tester";
+import { HttpTester } from "../test/http-tester";
 import { UserServiceMock } from "../../spec/helpers/user-service-mock";
 
 @router("/test")

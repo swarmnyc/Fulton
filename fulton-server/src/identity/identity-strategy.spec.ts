@@ -6,7 +6,7 @@ import { FultonApp } from "../fulton-app";
 import { FultonAppOptions } from "../fulton-app-options";
 import { FultonImpl } from './fulton-impl/fulton-impl';
 import { GoogleStrategy } from "./strategies/google-strategy";
-import { HttpTester } from "../helpers/http-tester";
+import { HttpTester } from "../test/http-tester";
 import { UserServiceMock } from "../../spec/helpers/user-service-mock";
 
 class MyApp extends FultonApp {

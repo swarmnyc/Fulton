@@ -40,8 +40,7 @@ describe('query parser', () => {
         expect(result.body).toEqual({
             filter: {
                 a: "123",
-                b: "456",
-                q: "789"
+                b: "456"
             }
         });
     });
@@ -136,9 +135,7 @@ describe('query parser', () => {
                     "$regex": "wade",
                     "$options": "i"
                 },
-                "$or": [{ "a": "1" }, { "b": "2" }],
-                a: "1",
-                b: "2"
+                "$or": [{ "a": "1" }, { "b": "2" }]
             },
             select: ["columnA", "columnB"],
             includes: ["columnA", "columnB"],

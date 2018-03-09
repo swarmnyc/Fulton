@@ -215,7 +215,7 @@ export class FultonUserService implements IUserService<FultonUser> {
             username: username,
         });
 
-        if (user.hashedPassword && passwordHash.verify(password, user.hashedPassword)) {
+        if (user && user.hashedPassword && passwordHash.verify(password, user.hashedPassword)) {
             return user;
         } else {
             throw errors.setMessage("username or password isn't correct");

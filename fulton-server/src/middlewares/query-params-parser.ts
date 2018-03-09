@@ -95,6 +95,7 @@ export function queryParamsParser(req: Request, res: Response, next: NextFunctio
         for (const name of Object.getOwnPropertyNames(req.query)) {
             let value = req.query[name];
 
+            // query params does not parae other values
             switch (name) {
                 case "filter":
                     // express use https://www.npmjs.com/package/qs, which supports filter[a][b]=c
@@ -140,10 +141,6 @@ export function queryParamsParser(req: Request, res: Response, next: NextFunctio
                     }
                     continue;
             }
-
-            // others into filter, like ?a=123,b=123
-            if (params.filter == null) params.filter = {};
-            params.filter[name] = value;
         }
     } else if (req.body && typeof req.body.query == "object") {
         params = {

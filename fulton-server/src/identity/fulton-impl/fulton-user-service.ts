@@ -12,6 +12,7 @@ import { FultonError } from "../../common";
 import { FultonUser } from "./fulton-user";
 import { IFultonApp } from "../../fulton-app";
 import { IdentityOptions } from '../identity-options';
+import { ObjectId } from 'bson';
 
 interface TokenPayload {
     id?: string;
@@ -277,6 +278,11 @@ export class FultonUserService implements IUserService<FultonUser> {
                 json += decipher.final();
 
                 payload = JSON.parse(json);
+                
+                if (payload.id && ObjectId.isValid(payload.id)){
+                    // convert id to ObjectId
+                    payload.id = new ObjectId(payload.id) as any
+                }
 
             } else {
                 payload = JSON.parse(jwt.payload);

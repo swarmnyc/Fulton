@@ -24,6 +24,9 @@ class FakeEntityService implements IEntityService<any>{
     findById(id: any, QueryParams?: QueryParams): Promise<OperationOneResult<any>> {
         throw new Error("Method not implemented.");
     }
+    count(queryParams?: QueryParams): Promise<OperationOneResult<number>> {
+        throw new Error("Method not implemented.");
+    }
     create(entity: any): Promise<OperationOneResult<any>> {
         throw new Error("Method not implemented.");
     }

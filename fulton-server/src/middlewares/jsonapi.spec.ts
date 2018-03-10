@@ -123,6 +123,10 @@ class EmployeeEntityService implements IEntityService<Employee> {
         throw new Error("Method not implemented.");
     }
 
+    count(queryParams?: QueryParams): Promise<OperationOneResult<number>> {
+        throw new Error("Method not implemented.");
+    }
+
     create(entity: Employee): Promise<OperationOneResult<Employee>> {
         throw new Error("Method not implemented.");
     }

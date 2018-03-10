@@ -68,6 +68,7 @@ export interface IFultonApp {
  */
 export abstract class FultonApp implements IFultonApp {
     private isInitialized: boolean = false;
+    private assetFolder = "./assets"
 
     /**
      * app name, use in output, parser. default is class name.
@@ -273,8 +274,8 @@ export abstract class FultonApp implements IFultonApp {
                         } else {
                             // if ssl options is empty,  use default ssl options
                             this.options.server.sslOptions = {
-                                cert: fs.readFileSync(path.join(__dirname, "../assets/ssl/localhost.crt")),
-                                key: fs.readFileSync(path.join(__dirname, "../assets/ssl/localhost.key"))
+                                cert: fs.readFileSync(path.join(__dirname, this.assetFolder, "ssl/localhost.crt")),
+                                key: fs.readFileSync(path.join(__dirname, this.assetFolder, "ssl/localhost.key"))
                             }
 
                             FultonLog.warn(`${this.appName} is using dev ssl certification which is for development only, you should change sslOption for production`);

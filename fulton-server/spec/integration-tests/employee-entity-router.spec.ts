@@ -201,6 +201,19 @@ describe('EntityRouter Integration Test', () => {
         expect(result.response.statusCode).toEqual(202);
     });
 
+    fit('should load employees with territories', async () => {
+        let result = await httpTester.get("/employees", {
+            includes: ["territories"]
+        })
+
+        let queryResult: OperationManyResult<Employee> = result.body;
+
+        queryResult.data.forEach(employee => {
+            if (employee.territories && employee.territories.length > 0){
+                expect(employee.territories[0].territoryDescription).toBeDefined()
+            }
+        });
+    });
 
     it('should load a employee with territories', async () => {
         let result = await httpTester.get("/employees/1", {

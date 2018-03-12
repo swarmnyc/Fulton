@@ -45,7 +45,7 @@ export class MongoEntityRunner extends EntityRunner {
         ]);
 
         if (data.length > 0 && queryParams.includes) {
-            await this.processIncludes(repo, data[0], queryParams.includes);
+            await this.processIncludes(repo, data, queryParams.includes);
         }
 
         return { data: data, total: count };

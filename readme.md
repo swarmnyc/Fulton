@@ -1,6 +1,6 @@
 # Fulton
 
-Fulton is the best practical way to build web apis or websites we have done in our company. Basically, Fulton is integrated many popular libraries or frameworks seamlessly. By use Fulton, developers can build a completed web api or a websites quickly.
+Fulton is a quick and practical way to build web apis or websites. Fulton integrates many popular libraries or frameworks seamlessly. By using Fulton, developers can build a completed web api or a websites quickly. 
 
 ## Integration
 

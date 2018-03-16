@@ -28,6 +28,8 @@ import { fultonDebug, fultonDebugMaster } from './helpers/debug';
 // don't load too modules classes here, it will cause cyclical dependencies and cause very hard to debug and wired Error.
 
 export interface IFultonApp {
+    readonly isInitialized: boolean;
+
     readonly appName: string;
 
     express: Express;
@@ -67,7 +69,6 @@ export interface IFultonApp {
  * `onInit` is the required function when extends from FultonApp
  */
 export abstract class FultonApp implements IFultonApp {
-    private isInitialized: boolean = false;
     private assetFolder = "./assets"
 
     /**
@@ -129,6 +130,8 @@ export abstract class FultonApp implements IFultonApp {
      * routers, created during initRouters();
      */
     routers: Router[];
+
+    isInitialized: boolean = false;    
 
     /**
      * @param mode There are some different default values for api and web-view. 

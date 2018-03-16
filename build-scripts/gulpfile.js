@@ -100,12 +100,13 @@ gulp.task('publish-fulton-server', function (callback) {
     });
 });
 
-gulp.task("update-version", function () {
+gulp.task("update-package.json", function () {
     // use version of build-script/package.json 
     let version = require("./package.json").version;
 
     return gulp.src("./dist/*/package*.json")
         .pipe(replace("0.0.0-PLACEHOLDER", version))
+        .pipe(replace("./build/", "./"))
         .pipe(gulp.dest("./dist"));
 });
 
@@ -120,9 +121,9 @@ gulp.task("check-login", function (callback) {
     });
 });
 
-gulp.task('build:try', sequence("clean", "build-fulton-server", "update-version"));
+gulp.task('build:try', sequence("clean", "build-fulton-server", "update-package.json"));
 
-gulp.task('build', sequence("clean", "increase-version", "add-git-tag", "build-fulton-server", "update-version"));
+gulp.task('build', sequence("clean", "increase-version", "add-git-tag", "build-fulton-server", "update-package.json"));
 
 gulp.task('publish', sequence("check-login", "publish-fulton-server"));
 

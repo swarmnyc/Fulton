@@ -25,15 +25,17 @@ export class FultonAppLauncher<TApp extends IFultonApp> {
 
     private app: IFultonApp;
     private tasks: Map<string, LaunchTask<TApp>> = new Map();
+    private lognTasks: Map<string, boolean> = new Map();
 
     constructor(App: Type<IFultonApp>) {
         this.app = new App()
 
-        this.task("app", this.appTask);
+        this.task("app", this.appTask, true);
     }
 
-    task(name: string, task: LaunchTask<TApp>): FultonAppLauncher<TApp> {
+    task(name: string, task: LaunchTask<TApp>, isLongTask: boolean = false): FultonAppLauncher<TApp> {
         this.tasks.set(name, task);
+        this.lognTasks.set(name, isLongTask);
         return this
     }
 
@@ -41,7 +43,7 @@ export class FultonAppLauncher<TApp extends IFultonApp> {
      * Launch Tasks based on process.env["{appName}.Launch"]
      * @param stopAfterLaunch the default is based on task "App", if there is a task "App", the value is true
      */
-    launch(tasks?: string[], stopAfterLaunch?: boolean): Promise<any> {
+    launch(tasks?: string[]): Promise<any> {
         if (tasks == null) {
             if (process.argv.length > 2) {
                 // from args
@@ -53,19 +55,20 @@ export class FultonAppLauncher<TApp extends IFultonApp> {
         }
 
         fultonDebug("launcher", `Start Tasks : ${tasks}`)
+
+        let longTask = false;
         let promise = this.app.init().then(() => {
             return Promise.all(tasks.map((taskName) => {
                 taskName = taskName.trim();
 
                 let task = this.tasks.get(taskName);
-                if (stopAfterLaunch == null && taskName == "app") {
-                    stopAfterLaunch = false;
-                }
 
                 if (task == null) {
                     FultonLog.error(`The launcher doesn't have task name called ${taskName}`)
                     return;
                 }
+
+                longTask = longTask || this.lognTasks.get(taskName);
 
                 fultonDebug("launcher", `Starting Task : ${taskName}`)
 
@@ -76,7 +79,7 @@ export class FultonAppLauncher<TApp extends IFultonApp> {
         return promise.then(() => {
             fultonDebug("launcher", `Tasks Started`)
 
-            if (stopAfterLaunch == true || stopAfterLaunch == null) {
+            if (longTask == false) {
                 fultonDebug("launcher", `App Stopping`)
                 return this.app.stop();
             }

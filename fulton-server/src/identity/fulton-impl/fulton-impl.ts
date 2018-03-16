@@ -23,6 +23,7 @@ export let FultonImpl = {
             .then((user: IUser) => {
                 done(null, user);
             }).catch((error: any) => {
+                FultonLog.warn("login failed by", error)
                 done(error);
             });
     },
@@ -40,6 +41,7 @@ export let FultonImpl = {
                 return done(null, false);
             }
         } catch (error) {
+            FultonLog.warn("loginByAccessToken failed by", error)
             return done(null, false);
         }
     },

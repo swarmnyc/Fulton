@@ -36,12 +36,12 @@ module.exports = function (app: FultonApp) {
             // json to jsonapi
             res.send = new Proxy(res.send, {
                 apply: (send: Function, thisArg: Response, args: any[]) => {
-                    if (args && args.length > 0) {
-                        if (args[0].data){
-                            let body: (OperationManyResult | OperationOneResult) = args[0];
+                    if (args && args.length == 1 && typeof args[0] == "object") {
+                        if (args[0].data) {
+                            let body: (OperationManyResult & OperationOneResult) = args[0];
                             let data = body.data;
                             let entityType: Type
-    
+
                             if (data instanceof Array) {
                                 if (data.length > 0) {
                                     entityType = data[0].constructor
@@ -49,34 +49,33 @@ module.exports = function (app: FultonApp) {
                             } else {
                                 entityType = data.constructor
                             }
-    
+
                             if (entityType) {
                                 res.set("content-type", MimeTypes.jsonApi);
-    
+
                                 let serializeOpts: JsonApiSerializeOptions = {
                                     baseUrl: req.baseUrl,
                                     args: {
                                         queryParams: req.queryParams,
-                                        pagination: (<OperationManyResult>body).pagination
+                                        pagination: body.pagination
                                     }
                                 };
-    
+
                                 if (converter.options.domain) {
                                     serializeOpts.domain = converter.options.domain;
                                 } else {
+
                                     serializeOpts.domain = `${req.protocol}://${req.get("host")}`
                                 }
-    
-                                let result = converter.serialize(entityType.name, data, serializeOpts);
-    
-                                args[0] = result;
-                            }
-                        }
 
-                        if (args[0].error){
+                                let result = converter.serialize(entityType.name, data, serializeOpts);
+
+                                args[0] = JSON.stringify(result);
+                            }
+                        } else if (args[0].error) {
                             // JSONAPI use error array
-                            args[0].errors = [args[0].error]
-                            delete args[0].error
+                            res.set("content-type", MimeTypes.jsonApi);                                                        
+                            args[0] = JSON.stringify({ errors: [args[0].error] })
                         }
                     }
 

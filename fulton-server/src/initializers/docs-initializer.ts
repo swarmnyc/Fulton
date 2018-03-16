@@ -473,7 +473,7 @@ let errorResponse: ResponseObject = {
     schema: {
         type: "object",
         properties: {
-            errors: {
+            error: {
                 type: "object",
                 properties: {
                     message: {

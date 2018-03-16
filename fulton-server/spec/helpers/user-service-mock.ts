@@ -17,14 +17,14 @@ export class UserServiceMock implements IUserService<FultonUser> {
         let error = new FultonError();
 
         if (!lodash.some(username)) {
-            error.addError("username", "username is required")
+            error.addDetail("username", "username is required")
         }
 
         if (!lodash.some(password)) {
-            error.addError("password", "password is required")
+            error.addDetail("password", "password is required")
         }
 
-        if (error.hasErrors()) {
+        if (error.hasError()) {
             return Promise.reject(error);
         }
 
@@ -57,14 +57,14 @@ export class UserServiceMock implements IUserService<FultonUser> {
     }
 
     register(input: IUserRegister): Promise<FultonUser> {
-        let errors = new FultonError();
+        let error = new FultonError();
 
         let newUser = lodash.pick(input, ["username", "password", "email"]);
 
-        if (errors.verifyRequired(input, ["username", "password", "email"])) {
+        if (error.verifyRequired(input, ["username", "password", "email"])) {
             return Promise.resolve(input as FultonUser);
         } else {
-            return Promise.reject(errors);
+            return Promise.reject(error);
         }
     }
 

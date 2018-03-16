@@ -118,7 +118,7 @@ export interface QueryColumnOptions {
 
 export interface OperationResult {
     status?: number;
-    errors?: FultonErrorObject;
+    error?: FultonErrorObject;
 }
 
 export interface OperationResultPagination {

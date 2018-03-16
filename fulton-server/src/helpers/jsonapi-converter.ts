@@ -109,10 +109,15 @@ export interface JsonApiRelationshipData {
 
 export interface JsonApiResult {
     data?: JsonApiData | JsonApiData[];
-    errors?: any;
+    errors?: JsonApiError[];
     links?: JsonApiRootLinks;
     included?: JsonApiData[];
     meta?: any;
+}
+
+export interface JsonApiError {
+    message: string;
+    detail?: any;
 }
 
 const defaultOptions = {

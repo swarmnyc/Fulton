@@ -69,7 +69,7 @@ export abstract class EntityRouter<TEntity> extends Router {
                 .then(this.sendResult(res));
         } else {
             res.status(400).send({
-                errors: { "message": "no data" }
+                error: { "message": "no data" }
             });
         }
     }
@@ -83,7 +83,7 @@ export abstract class EntityRouter<TEntity> extends Router {
                 .then(this.sendResult(res));
         } else {
             res.status(400).send({
-                errors: { "message": "no data or id" }
+                error: { "message": "no data or id" }
             });
         }
     }
@@ -97,14 +97,14 @@ export abstract class EntityRouter<TEntity> extends Router {
                 .then(this.sendResult(res));
         } else {
             res.status(400).send({
-                errors: { "message": "no id" }
+                error: { "message": "no id" }
             });
         }
     }
 
     protected sendResult(res: Response): ((result: OperationManyResult | OperationOneResult | OperationResult) => void) {
         return (result) => {
-            if (result.errors) {
+            if (result.error) {
                 res.status(400).send(result);
             } else {
                 let status = (<OperationResult>result).status;
@@ -114,7 +114,7 @@ export abstract class EntityRouter<TEntity> extends Router {
                     res.send(result);
                 } else {
                     res.status(400).send({
-                        errors: {
+                        error: {
                             "message": "no data"
                         }
                     });

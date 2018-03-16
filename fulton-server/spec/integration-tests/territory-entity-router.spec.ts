@@ -69,7 +69,7 @@ class TerritoryRouter extends EntityRouter<Territory>{
             })
             .catch((err) => {
                 res.status(400).send({
-                    errors: {
+                    error: {
                         message: err.message
                     }
                 });

@@ -179,11 +179,12 @@ describe('Identity local and bearer on UserServiceMock', () => {
     it('should register failure by empty data', async () => {
         let result = await httpTester.post("/auth/register");
 
-        let errors = result.body.errors;
+        let error = result.body.error;
+    
         expect(result.response.statusCode).toEqual(400);
-        expect(errors.detail.username.message).toEqual("username is required");
-        expect(errors.detail.password.message).toEqual("password is required");
-        expect(errors.detail.email.message).toEqual("email is required");
+        expect(error.detail.username).toEqual("username is required");
+        expect(error.detail.password).toEqual("password is required");
+        expect(error.detail.email).toEqual("email is required");
     });
 
     it('should authorize by role success', async () => {

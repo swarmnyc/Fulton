@@ -107,15 +107,15 @@ export class FultonUserService implements IUserService<FultonUser> {
     }
 
     async register(input: IUserRegister): Promise<FultonUser> {
-        let errors = new FultonError();
+        let error = new FultonError();
         let registerOptions = this.options.register;
 
         // verify username, password, email
-        errors.verifyRequired(input, ["username", "email"])
+        error.verifyRequired(input, ["username", "email"])
 
         if (!input.oauthToken) {
             // if oauth register, no need password.
-            errors.verifyRequired(input, "password")
+            error.verifyRequired(input, "password")
 
             let pwResult: boolean;
             if (registerOptions.passwordVerifier instanceof Function) {
@@ -125,7 +125,7 @@ export class FultonUserService implements IUserService<FultonUser> {
             }
 
             if (!pwResult) {
-                errors.addError("password", "password is invalid")
+                error.addDetail("password", "password is invalid")
             }
 
             // if oauth register, skip username verify.            
@@ -137,17 +137,17 @@ export class FultonUserService implements IUserService<FultonUser> {
             }
 
             if (!unResult) {
-                errors.addError("username", "username is invalid")
+                error.addDetail("username", "username is invalid")
             }
         }
 
         if (!validator.isEmail(input.email)) {
-            errors.addError("email", "email is invalid")
+            error.addDetail("email", "email is invalid")
         }
 
-        if (errors.hasErrors()) {
-            errors.setMessage("register failed");
-            throw errors;
+        if (error.hasError()) {
+            error.setMessage("register failed");
+            throw error;
         }
 
         input.email = input.email.toLocaleLowerCase();
@@ -162,7 +162,7 @@ export class FultonUserService implements IUserService<FultonUser> {
         });
 
         if (count > 0) {
-            errors.addError("username", "the username is existed")
+            error.addDetail("username", "the username is existed")
         }
 
         count = await this.userRepository.count({
@@ -170,12 +170,12 @@ export class FultonUserService implements IUserService<FultonUser> {
         });
 
         if (count > 0) {
-            errors.addError("email", "the email is existed")
+            error.addDetail("email", "the email is existed")
         }
 
-        if (errors.hasErrors()) {
-            errors.setMessage("register failed");
-            throw errors;
+        if (error.hasError()) {
+            error.setMessage("register failed");
+            throw error;
         }
 
         if (input.oauthToken) {
@@ -197,19 +197,19 @@ export class FultonUserService implements IUserService<FultonUser> {
     }
 
     async login(username: string, password: string): Promise<FultonUser> {
-        let errors = new FultonError();
+        let error = new FultonError();
 
         if (!lodash.some(username)) {
-            errors.addError("username", "username is required")
+            error.addDetail("username", "username is required")
         }
 
         if (!lodash.some(password)) {
-            errors.addError("password", "password is required")
+            error.addDetail("password", "password is required")
         }
 
-        if (errors.hasErrors()) {
-            errors.setMessage("login failed");
-            throw errors;
+        if (error.hasError()) {
+            error.setMessage("login failed");
+            throw error;
         }
 
         let user = await this.userRepository.findOne({
@@ -219,16 +219,16 @@ export class FultonUserService implements IUserService<FultonUser> {
         if (user && user.hashedPassword && passwordHash.verify(password, user.hashedPassword)) {
             return user;
         } else {
-            throw errors.setMessage("username or password isn't correct");
+            throw error.setMessage("username or password isn't correct");
         }
     }
 
     async loginByOauth(token: AccessToken, profile: IProfile): Promise<FultonUser> {
-        let errors = new FultonError();
+        let error = new FultonError();
 
         // verify email
-        if (!errors.verifyRequired(profile, "email")) {
-            throw errors;
+        if (!error.verifyRequired(profile, "email")) {
+            throw error;
         }
 
         profile.email = profile.email.toLocaleLowerCase();

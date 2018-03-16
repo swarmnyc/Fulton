@@ -201,7 +201,7 @@ describe('EntityRouter Integration Test', () => {
         expect(result.response.statusCode).toEqual(202);
     });
 
-    fit('should load employees with territories', async () => {
+    it('should load employees with territories', async () => {
         let result = await httpTester.get("/employees", {
             includes: ["territories"]
         })

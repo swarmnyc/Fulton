@@ -169,7 +169,7 @@ export class EntityService<TEntity> implements IEntityService<TEntity> {
 
         let entity = this.convertEntity(metadata, input, errorTracker);
 
-        if (errorTracker.hasErrors()) {
+        if (errorTracker.hasError()) {
             return Promise.reject(errorTracker);
         }
 
@@ -180,7 +180,7 @@ export class EntityService<TEntity> implements IEntityService<TEntity> {
         return validate(entity, { skipMissingProperties: true })
             .then((errors) => {
                 if (errors.length == 0) {
-                    if (errorTracker.hasErrors()) {
+                    if (errorTracker.hasError()) {
                         return Promise.reject(errorTracker);
                     } else {
                         return entity;
@@ -207,7 +207,7 @@ export class EntityService<TEntity> implements IEntityService<TEntity> {
             return error
         } else {
             return {
-                errors: {
+                error: {
                     message: error.message
                 }
             }
@@ -304,7 +304,7 @@ export class EntityService<TEntity> implements IEntityService<TEntity> {
             }
 
             if (error.constraints) {
-                fultonError.addErrors(property, error.constraints);
+                fultonError.addDetail(property, error.constraints);
             }
         }
 

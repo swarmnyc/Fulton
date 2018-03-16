@@ -11,48 +11,50 @@ import { FultonErrorObject, FultonErrorConstraints, FultonErrorDetail, FultonErr
  * 
  */
 export class FultonError {
-    errors: FultonErrorObject;
+    error: FultonErrorObject;
 
     constructor(input?: FultonErrorObject | string) {
         if (typeof input == "string") {
-            this.errors = {
+            this.error = {
                 message: input
             }
         } else {
-            this.errors = input || {};
+            this.error = input || {};
         }
     }
 
     setMessage(msg: string) {
-        this.errors.message = msg;
+        this.error.message = msg;
         return this;
     }
 
-    addError(propertyName: string, errorMessage: string, constraints?: FultonErrorConstraints): FultonError {
-        if (this.errors.detail == null) {
-            this.errors.detail = {};
-        }
-
-        let error = this.errors.detail[propertyName] as FultonErrorItem
-        if (error && "constraints" in error) {
-            Object.assign(error.constraints, constraints);
+    addDetail(propertyName: string, errorMessage: string, constraints?: FultonErrorConstraints): FultonError
+    addDetail(propertyName: string, constraints?: FultonErrorConstraints): FultonError
+    addDetail(propertyName: string, ...args: any[]): FultonError {
+        let errorMessage: string, constraints: FultonErrorConstraints;
+        if (args.length == 1) {
+            constraints = args[0]
+        } else if (args.length == 2) {
+            errorMessage = args[0]
+            constraints = args[1]
         } else {
-            this.errors.detail[propertyName] = { message: errorMessage, constraints };
+            // not support
+            return
         }
 
-        return this;
-    }
-
-    addErrors(propertyName: string, constraints?: FultonErrorConstraints): FultonError {
-        if (this.errors.detail == null) {
-            this.errors.detail = {};
+        if (this.error.detail == null) {
+            this.error.detail = {};
         }
 
-        let error = this.errors.detail[propertyName] as FultonErrorConstraints
+        let error = this.error.detail[propertyName] as FultonErrorConstraints
         if (error) {
             Object.assign(error, constraints);
         } else {
-            this.errors.detail[propertyName] = constraints;
+            if (errorMessage) {
+                this.error.detail[propertyName] = { message: errorMessage, constraints };
+            } else {
+                this.error.detail[propertyName] = constraints;
+            }
         }
 
         return this;
@@ -74,7 +76,7 @@ export class FultonError {
             let errorMessage: string = arg2;
 
             if (!lodash.some(target[propertyName])) {
-                this.addError(propertyName, errorMessage || `${propertyName} is required`);
+                this.addDetail(propertyName, errorMessage || `${propertyName} is required`);
                 return false;
             }
         }
@@ -82,13 +84,13 @@ export class FultonError {
         return result;
     }
 
-    hasErrors(): boolean {
-        return this.errors.message != null || this.errors.detail != null;
+    hasError(): boolean {
+        return this.error.message != null || this.error.detail != null;
     }
 
     public toJSON() {
         return {
-            errors: this.errors
+            error: this.error
         };
     }
 }
@@ -136,8 +138,8 @@ export class FultonStackError extends FultonError {
     }
 
     add(errorMessage: string, addNameToMessage?: boolean): FultonStackError {
-        if (this.errors.detail == null) {
-            this.errors.detail = {};
+        if (this.error.detail == null) {
+            this.error.detail = {};
         }
 
         let propertyName = this.properties.join(".");
@@ -146,12 +148,12 @@ export class FultonStackError extends FultonError {
             errorMessage = `${this.properties[this.properties.length - 1]} ${errorMessage}`
         }
 
-        this.errors.detail[propertyName] = errorMessage;
+        this.error.detail[propertyName] = errorMessage;
 
         return this;
     }
 
-    hasErrors(): boolean {
-        return this.errors.detail != null;
+    hasError(): boolean {
+        return this.error.detail != null;
     }
 }

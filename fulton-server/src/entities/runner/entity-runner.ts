@@ -15,9 +15,9 @@ export abstract class EntityRunner {
     entityMetadatas: Map<Type, EntityMetadata>;
 
     find<TEntity>(repository: Repository<TEntity>, queryParams?: QueryParams): Promise<FindResult<TEntity>> {
-        let errors = this.adjustParams(repository.metadata, queryParams);
-        if (errors) {
-            return Promise.reject(errors);
+        let error = this.adjustParams(repository.metadata, queryParams);
+        if (error) {
+            return Promise.reject(error);
         }
 
         fultonDebug("entity", "find on %s QueryParams:\n %O\t", repository.metadata.name, queryParams)
@@ -27,9 +27,9 @@ export abstract class EntityRunner {
 
 
     findOne<TEntity>(repository: Repository<TEntity>, queryParams?: QueryParams): Promise<TEntity> {
-        let errors = this.adjustParams(repository.metadata, queryParams);
-        if (errors) {
-            return Promise.reject(errors);
+        let error = this.adjustParams(repository.metadata, queryParams);
+        if (error) {
+            return Promise.reject(error);
         }
 
         fultonDebug("entity", "findOne on %s QueryParams:\n %O\t", repository.metadata.name, queryParams)
@@ -38,9 +38,9 @@ export abstract class EntityRunner {
     }
 
     count<TEntity>(repository: Repository<TEntity>, queryParams?: QueryParams): Promise<number> {
-        let errors = this.adjustParams(repository.metadata, queryParams, true);
-        if (errors) {
-            return Promise.reject(errors);
+        let error = this.adjustParams(repository.metadata, queryParams, true);
+        if (error) {
+            return Promise.reject(error);
         }
 
         fultonDebug("entity", "count on %s QueryParams:\n %O\t", repository.metadata.name, queryParams)
@@ -88,7 +88,7 @@ export abstract class EntityRunner {
 
             delete params.needAdjust;
 
-            if (errorTracker.hasErrors()) {
+            if (errorTracker.hasError()) {
                 return errorTracker;
             }
         }

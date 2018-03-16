@@ -527,7 +527,7 @@ describe('entity service', () => {
                 fail("should not pass");
             })
             .catch((result: FultonError) => {
-                expect(result.errors).toEqual({
+                expect(result.error).toEqual({
                     message: "invalid input",
                     detail: {
                         companyName: { isDefined: 'companyName should not be null or undefined' },
@@ -553,7 +553,7 @@ describe('entity service', () => {
                 fail("should not pass");
             })
             .catch((result: FultonError) => {
-                expect(result.errors).toEqual({
+                expect(result.error).toEqual({
                     message: "invalid input",
                     detail: {
                         "territories.0.regionId": "regionId must be a number"
@@ -576,7 +576,7 @@ describe('entity service', () => {
         let errorTracker = new FultonStackError("invalid input");
         service["convertEntity"](employeeMetadata, input, errorTracker);
 
-        expect(errorTracker.errors).toEqual({
+        expect(errorTracker.error).toEqual({
             message: "invalid input",
             detail: {
                 "hireDate": "hireDate must be a date",
@@ -604,7 +604,7 @@ describe('entity service', () => {
 
         let errorTracker = service["runner"]["adjustParams"](employeeMetadata, queryParams);
 
-        expect(errorTracker.errors).toEqual({
+        expect(errorTracker.error).toEqual({
             message: "invalid query parameters",
             detail: {
                 "filter.territories.categories.categoryId": "categoryId must be an object id",

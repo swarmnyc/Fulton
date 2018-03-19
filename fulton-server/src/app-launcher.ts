@@ -18,9 +18,9 @@ export type LaunchTask<TApp> = (app: TApp) => Promise<any>
  * the value can be overrided by process.env["{appName}.Launch"]
  * for example process.env["MyApp.Launch"] = "taskA, app"
  */
-export class FultonAppLauncher<TApp extends IFultonApp> {
-    static create<TApp extends IFultonApp>(type: Type<TApp>): FultonAppLauncher<TApp> {
-        return new FultonAppLauncher(type);
+export class AppLauncher<TApp extends IFultonApp> {
+    static create<TApp extends IFultonApp>(type: Type<TApp>): AppLauncher<TApp> {
+        return new AppLauncher(type);
     }
 
     private app: IFultonApp;
@@ -33,7 +33,7 @@ export class FultonAppLauncher<TApp extends IFultonApp> {
         this.task("app", this.appTask, true);
     }
 
-    task(name: string, task: LaunchTask<TApp>, isLongTask: boolean = false): FultonAppLauncher<TApp> {
+    task(name: string, task: LaunchTask<TApp>, isLongTask: boolean = false): AppLauncher<TApp> {
         this.tasks.set(name, task);
         this.lognTasks.set(name, isLongTask);
         return this

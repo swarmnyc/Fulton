@@ -10,6 +10,17 @@ import { FultonError } from '../../common/fulton-error';
 import { FultonLog } from '../../fulton-log';
 import { FultonUser } from "./fulton-user";
 
+
+function setCallbackUrl(req: Request, options: OAuthStrategyOptions){
+    if (req.query.type == "mobile") {
+        // if type is mobile, the callbackUrl have to null, at least for Google                 
+        options.strategyOptions.callbackUrl = null
+    } else if (!options.callbackUrl) {
+        // if the callbackUrl is null, use current Url + callbackPath
+        options.strategyOptions.callbackUrl = url.resolve(`${req.protocol}://${req.get("host")}`, options.callbackPath);
+    }
+}
+
 /**
  * Default Fulton Implements
  */
@@ -108,9 +119,7 @@ export let FultonImpl = {
      */
     oauthAuthenticateFn(options: OAuthStrategyOptions): Middleware {
         return (req: Request, res: Response, next: NextFunction) => {
-            if (!options.callbackUrl) {
-                options.strategyOptions.callbackUrl = url.resolve(`${req.protocol}://${req.get("host")}`, options.callbackPath);
-            }
+            setCallbackUrl(req, options)
 
             passport.authenticate(options.name, options.authenticateOptions)(req, res, next);
         }
@@ -122,9 +131,7 @@ export let FultonImpl = {
      */
     oauthCallbackAuthenticateFn(options: OAuthStrategyOptions): Middleware {
         return (req: Request, res: Response, next: NextFunction) => {
-            if (!options.callbackUrl) {
-                options.strategyOptions.callbackUrl = url.resolve(`${req.protocol}://${req.get("host")}`, options.callbackPath);
-            }
+            setCallbackUrl(req, options)
 
             passport.authenticate(options.name,
                 function (error, user, info) {

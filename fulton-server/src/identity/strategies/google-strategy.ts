@@ -25,7 +25,7 @@ export class GoogleStrategy extends Strategy {
 
         if (!options.clientId) return this.error(new Error("clientId is required for GoogleStrategy"))
         if (!options.clientSecret) return this.error(new Error("clientSecret is required for GoogleStrategy"))
-        if (!options.callbackUrl) return this.error(new Error("clientUrl or clientPath is required for GoogleStrategy"))
+        // if (!options.callbackUrl) return this.error(new Error("clientUrl or clientPath is required for GoogleStrategy"))
 
         let oauthClient: OAuth2Client = new this.googleAuthLibrary.OAuth2Client(options.clientId, options.clientSecret, options.callbackUrl);
 
@@ -33,7 +33,7 @@ export class GoogleStrategy extends Strategy {
             // callback
             oauthClient.getToken(req.query.code, (err: any, token: AccessToken) => {
                 if (err) {
-                    return this.error(new Error('Failed to obtain access token ' + err.message));
+                    return this.error(new Error('Failed to obtain access token by' + err.message));
                 }
 
                 fultonDebug("google", "google token: %O\t", token);

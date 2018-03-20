@@ -2,15 +2,14 @@ import * as fs from 'fs';
 import * as lodash from 'lodash';
 
 import { DefinitionsObject, OpenApiSpec, OperationObject, ParameterObject, ParametersDefinitionsObject, PathItemObject, PathsObject, ResponseObject, SchemaObject } from '@loopback/openapi-spec';
-import { Middleware, NextFunction, PathIdentifier, Request, Response, Type, EventKeys } from '../interfaces';
+import { EventKeys, Middleware, NextFunction, PathIdentifier, Request, Response, Type } from '../interfaces';
 import { column, entity, manyToMany } from '../re-export';
 
+import { EntityRouter } from '../routers/entity-router';
 import { FultonApp } from "../fulton-app";
+import { Helper } from '../helpers/helper';
 import { MimeTypes } from '../constants';
 import { OAuthStrategyOptions } from '../identity/interfaces';
-import { EntityRouter } from '../routers/entity-router';
-
-let urlJoin = require('url-join');
 
 module.exports = function (app: FultonApp) {
     let options = app.options.docs;
@@ -393,14 +392,14 @@ function toPath(...args: PathIdentifier[]): string {
 
     for (const arg of args) {
         if (arg instanceof Array) {
-            path = urlJoin(path, toPath(...arg));
+            path = Helper.urlJoin(path, toPath(...arg));
         } else if (arg instanceof RegExp) {
             let reg = arg.toString();
             reg = pathReg.exec(reg)[1];
             reg = reg.replace(pathReplaceReg, "");
-            path = urlJoin(path, reg);
+            path = Helper.urlJoin(path, reg);
         } else {
-            path = urlJoin(path, arg);
+            path = Helper.urlJoin(path, arg);
         }
     }
 

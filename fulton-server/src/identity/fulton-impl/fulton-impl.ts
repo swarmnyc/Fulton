@@ -20,7 +20,7 @@ function setCallbackUrl(req: Request, options: OAuthStrategyOptions, target: Oau
             target.callbackUrl = target.callbackURL = options.callbackUrl;
         } else {
             // if the callbackUrl is null, use current Url + callbackPath
-            target.callbackUrl = target.callbackURL = url.resolve(`${req.protocol}://${req.get("host")}`, options.callbackPath);
+            target.callbackUrl = target.callbackURL = Helper.urlResolve(req, options.callbackPath);
         }
     }
 }

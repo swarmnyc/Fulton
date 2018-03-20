@@ -1,4 +1,8 @@
 import * as escapeStringRegexp from "escape-string-regexp";
+import { Request } from '../interfaces';
+
+
+let urlJoin:((...args:string[])=>string) = require('url-join');
 
 const booleanReg = /^((true)|(false))$/i;
 const trueReg = /^((true)|1)$/i;
@@ -58,9 +62,21 @@ export let Helper = {
 
     escapedRegexp(input: string, flags?: string): RegExp {
         return new RegExp(escapeStringRegexp(input), flags);
-    }
+    },
+
+    urlResolve(req: Request, ...pathes: string[]) {
+        // x-forwarded-proto is from proxy like AWS load balancer
+        let protocol = req.header("x-forwarded-proto") || req.protocol;
+        let domain = `${protocol}://${req.get("host")}`;
+
+        if (pathes == null || pathes.length == 0){
+            return domain;
+        }else{
+            return urlJoin(domain, ...pathes)
+        }
+    },
+
+    urlJoin: urlJoin
 }
-
-
 
 

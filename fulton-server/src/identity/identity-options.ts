@@ -1,7 +1,7 @@
 import * as lodash from 'lodash';
 
 import { AppMode, HttpMethod, Middleware, PathIdentifier, Type } from "../interfaces";
-import { CustomStrategySettings, GoogleStrategyOptions, IUser, IUserService, LocalStrategyVerifier, OAuthStrategyOptions, OAuthStrategyVerifier, TokenStrategyVerifier, StrategyOptions } from './interfaces';
+import { CustomStrategySettings, FacebookStrategyOptions, GoogleStrategyOptions, IUser, IUserService, LocalStrategyVerifier, OAuthStrategyOptions, OAuthStrategyVerifier, StrategyOptions, TokenStrategyVerifier } from './interfaces';
 
 import { AuthenticateOptions } from "passport";
 import { AuthorizeOptions } from "./authorizes-middlewares";
@@ -411,6 +411,21 @@ export class IdentityOptions {
      */
     github: OAuthStrategyOptions;
 
+    /**
+     * pre-defined facebook strategy
+     * path is `/auth/facebook`
+     * callback is `/auth/facebook/callback`
+     * scope is empty
+     * profileFields is ['id', 'displayName', 'profileUrl', 'email']
+     * 
+     * ## Require "passport-facebook" package ##
+     * run `npm install passport-facebook` to install it
+     * 
+     * clientId can be overridden by process.env["{appName}.options.identity.facebook.clientId"]
+     * clientSecret can be overridden by process.env["{appName}.options.identity.facebook.clientSecret"]
+     */
+    facebook: FacebookStrategyOptions;
+
     /** other passport strategies */
     readonly strategies: CustomStrategySettings[] = [];
 
@@ -490,6 +505,17 @@ export class IdentityOptions {
             callbackAuthenticateFn: FultonImpl.oauthCallbackAuthenticateFn
         }
 
+        this.facebook = {
+            enabled: false,
+            path: "/auth/facebook",
+            callbackPath: "/auth/facebook/callback",
+            strategyOptions: {},
+            profileFields: ['id', 'displayName', "profileUrl", 'email'],
+            verifierFn: FultonImpl.oauthVerifierFn,
+            authenticateFn: FultonImpl.oauthAuthenticateFn,
+            callbackAuthenticateFn: FultonImpl.oauthCallbackAuthenticateFn
+        }
+
         if (this.appModel == "api") {
             this.bearer.enabled = true;
         } else if (this.appModel == "web-view") {
@@ -549,6 +575,11 @@ export class IdentityOptions {
                 enabled: Env.getBoolean(`${prefix}.github.enabled`),
                 clientId: Env.get(`${prefix}.github.clientId`),
                 clientSecret: Env.get(`${prefix}.github.clientSecret`)
+            },
+            facebook: {
+                enabled: Env.getBoolean(`${prefix}.facebook.enabled`),
+                clientId: Env.get(`${prefix}.facebook.clientId`),
+                clientSecret: Env.get(`${prefix}.facebook.clientSecret`)
             }
         } as IdentityOptions;
 

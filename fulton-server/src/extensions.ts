@@ -1,7 +1,9 @@
-import { IFultonApp } from "./fulton-app";
-import { IUserService, IUser } from "./identity";
 import { DiContainer, QueryParams } from "./interfaces";
+import { IUser, IUserService, OAuthStrategyVerifier } from "./identity";
+
+import { IFultonApp } from "./fulton-app";
 import { RelatedToMetadata } from './entities/entity-decorators-helpers';
+import { Strategy } from "passport"
 
 // custom types for helping development;
 declare global {
@@ -25,12 +27,22 @@ declare global {
     }
 }
 
+declare module "passport" {
+    interface PassportStatic {
+        _strategy(name: string): OAuthStrategy
+    }
+
+    interface OAuthStrategy {
+        _verify: OAuthStrategyVerifier
+        userProfile(accessToken:string, done: (error: any, profile?: any) => void):void
+    }
+}
+
 declare module "typeorm/metadata/EntityMetadata" {
     interface EntityMetadata {
         relatedToMetadata: RelatedToMetadata
     }
 }
-
 
 /**
  * compare two strings are the same or not with case insesitive 

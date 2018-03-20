@@ -2,22 +2,26 @@ import * as lodash from 'lodash';
 import * as passport from 'passport';
 import * as url from 'url';
 
-import { AccessToken, IUser, IUserRegister, OAuthStrategyOptions, OAuthStrategyVerifier, StrategyOptions, StrategyVerifyDone } from "../interfaces";
+import { AccessToken, IUser, IUserRegister, OAuthStrategyOptions, OAuthStrategyVerifier, OauthAuthenticateOptions, StrategyOptions, StrategyVerifyDone } from "../interfaces";
 import { Middleware, NextFunction, Request, Response } from "../../interfaces";
 
 import { FultonApp } from '../../fulton-app';
 import { FultonError } from '../../common/fulton-error';
 import { FultonLog } from '../../fulton-log';
 import { FultonUser } from "./fulton-user";
+import { Helper } from '../../helpers/helper';
 
-
-function setCallbackUrl(req: Request, options: OAuthStrategyOptions){
-    if (req.query.type == "mobile") {
-        // if type is mobile, the callbackUrl have to null, at least for Google                 
-        options.strategyOptions.callbackUrl = null
-    } else if (!options.callbackUrl) {
-        // if the callbackUrl is null, use current Url + callbackPath
-        options.strategyOptions.callbackUrl = url.resolve(`${req.protocol}://${req.get("host")}`, options.callbackPath);
+function setCallbackUrl(req: Request, options: OAuthStrategyOptions, target: OauthAuthenticateOptions) {
+    if (Helper.getBoolean(req.query.noRedirectUrl, false)) {
+        // the callbackUrl have to null for mobile, at least for Google 
+        target.callbackUrl = target.callbackURL = null
+    } else {
+        if (options.callbackUrl) {
+            target.callbackUrl = target.callbackURL = options.callbackUrl;
+        } else {
+            // if the callbackUrl is null, use current Url + callbackPath
+            target.callbackUrl = target.callbackURL = url.resolve(`${req.protocol}://${req.get("host")}`, options.callbackPath);
+        }
     }
 }
 
@@ -119,7 +123,7 @@ export let FultonImpl = {
      */
     oauthAuthenticateFn(options: OAuthStrategyOptions): Middleware {
         return (req: Request, res: Response, next: NextFunction) => {
-            setCallbackUrl(req, options)
+            setCallbackUrl(req, options, options.authenticateOptions)
 
             passport.authenticate(options.name, options.authenticateOptions)(req, res, next);
         }
@@ -131,35 +135,55 @@ export let FultonImpl = {
      */
     oauthCallbackAuthenticateFn(options: OAuthStrategyOptions): Middleware {
         return (req: Request, res: Response, next: NextFunction) => {
-            setCallbackUrl(req, options)
+            function finished(error: any, user: any, info: any) {
+                if (error) {
+                    next(error);
+                    return;
+                }
 
-            passport.authenticate(options.name,
-                function (error, user, info) {
-                    if (error) {
-                        next(error);
-                        return;
-                    }
-
-                    if (user) {
-                        let opts = options.callbackAuthenticateOptions;
-                        req.logIn(user, opts, (err) => {
-                            if (opts && opts.successRedirect) {
-                                res.redirect(opts.successRedirect);
+                if (user) {
+                    let opts = options.callbackAuthenticateOptions;
+                    req.logIn(user, opts, (err) => {
+                        if (opts && opts.successRedirect) {
+                            res.redirect(opts.successRedirect);
+                        } else {
+                            if (options.callbackSuccessMiddleware) {
+                                options.callbackSuccessMiddleware(req, res, next);
                             } else {
-                                if (options.callbackSuccessMiddleware) {
-                                    options.callbackSuccessMiddleware(req, res, next);
-                                } else {
-                                    FultonImpl.issueAccessToken(req, res);
-                                }
+                                FultonImpl.issueAccessToken(req, res);
                             }
-                        });
+                        }
+                    });
 
-                        return;
-                    }
+                    return;
+                }
 
-                    // TODO: web-view mode
-                    res.sendStatus(401);
-                })(req, res, next);
+                // TODO: web-view mode
+                res.sendStatus(401);
+            }
+
+            if (req.query.access_token) {
+                // mobile flow, like facebook login on Android, android app get access_token already, so here just get profile
+                // this is hack passport to skip one step.
+                let strategy = passport._strategy(options.name)
+                if (strategy.userProfile) {
+                    strategy.userProfile(req.query.access_token, (error, profile) => {
+                        if (error) {
+                            next(error);
+                            return;
+                        }
+
+                        strategy._verify(req, req.query.access_token, req.query.refresh_token, profile, finished)
+                    })
+                } else {
+                    res.sendStatus(400)
+                }
+            } else {
+                setCallbackUrl(req, options, options.callbackAuthenticateOptions)
+
+                // normal flow, providers return a code, use the code to get access_token and profile
+                passport.authenticate(options.name, options.callbackAuthenticateOptions, finished)(req, res, next);
+            }
         }
     },
 

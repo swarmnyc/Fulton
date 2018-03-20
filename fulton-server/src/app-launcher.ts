@@ -50,7 +50,7 @@ export class AppLauncher<TApp extends IFultonApp> {
                 tasks = process.argv.slice(2)
             } else {
                 // from env
-                tasks = Env.get(`${this.app.appName}.Launch`, "app").split(",")
+                tasks = Env.get(`${this.app.appName}.launch`, "app").split(",")
             }
         }
 
@@ -85,7 +85,7 @@ export class AppLauncher<TApp extends IFultonApp> {
             }
         }).catch((error) => {
             FultonLog.error("Launch Failed by", error)
-            return this.app.stop()
+            return this.app.stop().then(() => Promise.reject(error))
         });
     }
 

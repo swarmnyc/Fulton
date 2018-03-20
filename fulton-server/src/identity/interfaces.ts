@@ -138,28 +138,33 @@ export interface OAuthStrategyOptions extends StrategyOptions {
     /**
      * the route path for google auth callback
      * the default value is /auth/google/callback
-     * It can be overridden by process.env["{appName}.options.identity.google.callbackPath"]
      */
     callbackPath?: string;
 
     /**
-     * the callback url google will redirect to, for example `https://www.example.com/auth/google/callback`
-     * if it is empty, fulton will combine req.originUrl + options.callbackPath
+     * the callback url for redirection, for example `https://www.example.com/auth/google/callback`
+     * if it is empty, fulton will combine req.originUrl + callbackPath dynamically 
+     * this value is a shortcut of strategyOptions.callbackUrl and strategyOptions.callbackURL
      */
     callbackUrl?: string;
 
     /**
-     * the clientId that google provides to you
+     * the clientId that provider(like google, facebook) provides to you,
+     * It can be overridden by process.env["{appName}.options.identity.{name}.clientId"]
+     * this value is a shortcut of strategyOptions.clientId and strategyOptions.clientID
      */
     clientId?: string;
 
     /**
-     * the clientId
+     * the clientSecret that provider(like google, facebook) provides to you
+     * It can be overridden by process.env["{appName}.options.identity.{name}.clientSecret"]
+     * this value is a shortcut of strategyOptions.clientSecret
      */
     clientSecret?: string;
 
     /**
      * the permission scopes to request access to,
+     * this value is a shortcut of strategyOptions.scope
      */
     scope?: string | string[];
 
@@ -179,6 +184,12 @@ export interface OAuthStrategyOptions extends StrategyOptions {
     profileTransformer?: (profile: any) => any;
 
     /**
+    * for passport
+    * the default value is null
+    */
+    authenticateOptions?: OauthAuthenticateOptions;
+
+    /**
      * the middleware next to authenticate
      * the default value is null
      */
@@ -188,7 +199,7 @@ export interface OAuthStrategyOptions extends StrategyOptions {
     * for passport
     * the default value is null
     */
-    callbackAuthenticateOptions?: AuthenticateOptions;
+    callbackAuthenticateOptions?: OauthAuthenticateOptions;
 
     /**
      * if provided, call this function to get the middleware, like
@@ -203,8 +214,27 @@ export interface OAuthStrategyOptions extends StrategyOptions {
 export interface GoogleStrategyOptions extends OAuthStrategyOptions {
     /**
      * Can be `online` (default) or `offline` (gets refresh_token)
+     * this value is a shortcut of strategyOptions.accessType
      */
     accessType?: "online" | "offline";
+}
+
+export interface FacebookStrategyOptions extends OAuthStrategyOptions {
+    /**
+     * the default value is ['id', 'displayName', 'profileUrl', 'email']
+     * this value is a shortcut of strategyOptions.profileFields
+     */
+    profileFields?: string[];
+}
+
+export interface OauthAuthenticateOptions extends AuthenticateOptions {
+    /**
+     * the callback url for redirection, for example `https://www.example.com/auth/google/callback`
+     * if it is identity.{name}.callbackUrl is empty, fultion will generate the value by combining req.originUrl + callbackPath
+     * so don't set this value manually
+     */
+    callbackUrl?: string;
+    callbackURL?: string;
 }
 
 export interface CustomStrategySettings {

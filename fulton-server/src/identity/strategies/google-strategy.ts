@@ -21,11 +21,10 @@ export class GoogleStrategy extends Strategy {
     }
 
     authenticate(req: Request, options: GoogleStrategyOptions) {
-        options = lodash.defaults(options, this.options);
+        options = Object.assign({}, this.options, options);
 
         if (!options.clientId) return this.error(new Error("clientId is required for GoogleStrategy"))
         if (!options.clientSecret) return this.error(new Error("clientSecret is required for GoogleStrategy"))
-        // if (!options.callbackUrl) return this.error(new Error("clientUrl or clientPath is required for GoogleStrategy"))
 
         let oauthClient: OAuth2Client = new this.googleAuthLibrary.OAuth2Client(options.clientId, options.clientSecret, options.callbackUrl);
 

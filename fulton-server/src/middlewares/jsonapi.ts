@@ -9,6 +9,7 @@ import { FultonApp } from "../fulton-app";
 import { MimeTypes } from "../constants";
 import { OperationResultPagination } from "../interfaces";
 import { Router } from '../routers/router';
+import { Helper } from '../helpers/helper';
 
 module.exports = function (app: FultonApp) {
     let converter: JsonApiConverter;
@@ -56,7 +57,7 @@ module.exports = function (app: FultonApp) {
                                 let serializeOpts: JsonApiSerializeOptions = {
                                     baseUrl: req.baseUrl,
                                     args: {
-                                        queryParams: req.queryParams,
+                                        query: req.query,
                                         pagination: body.pagination
                                     }
                                 };
@@ -64,8 +65,7 @@ module.exports = function (app: FultonApp) {
                                 if (converter.options.domain) {
                                     serializeOpts.domain = converter.options.domain;
                                 } else {
-
-                                    serializeOpts.domain = `${req.protocol}://${req.get("host")}`
+                                    serializeOpts.domain = Helper.urlResolve(req);
                                 }
 
                                 let result = converter.serialize(entityType.name, data, serializeOpts);
@@ -74,7 +74,7 @@ module.exports = function (app: FultonApp) {
                             }
                         } else if (args[0].error) {
                             // JSONAPI use error array
-                            res.set("content-type", MimeTypes.jsonApi);                                                        
+                            res.set("content-type", MimeTypes.jsonApi);
                             args[0] = JSON.stringify({ errors: [args[0].error] })
                         }
                     }
@@ -158,32 +158,35 @@ function initConverter(app: FultonApp): JsonApiConverter {
 }
 
 function rootLinks(opts: JsonApiSerializeOptions): JsonApiRootLinks {
-    if (opts.args && opts.args.queryParams && opts.args.pagination) {
+    if (opts.args && opts.args.query && opts.args.pagination) {
         let pagination = opts.args.pagination as OperationResultPagination
-        let queryParams = opts.args.queryParams as QueryParams;
-        delete queryParams.needAdjust;
+        let query = opts.args.query;
 
         let links: JsonApiRootLinks = {}
         let last = Math.ceil(pagination.total / pagination.size) - 1;
 
-        if (pagination.total > pagination.size) {
-            queryParams.pagination.size = pagination.size;
+        if (query.pagination == null) query.pagination = {}
 
-            queryParams.pagination.index = 0;
-            links.first = `${opts.domain}${opts.baseUrl}?${qs.stringify(queryParams)}`;
+        query.pagination.size = pagination.size;
 
-            queryParams.pagination.index = last;
-            links.last = `${opts.domain}${opts.baseUrl}?${qs.stringify(queryParams)}`;
+        query.pagination.index = 0;
+        links.first = `${opts.domain}${opts.baseUrl}?${qs.stringify(query)}`;
 
-            if (pagination.index > 0) {
-                queryParams.pagination.index = pagination.index - 1;
-                links.prev = `${opts.domain}${opts.baseUrl}?${qs.stringify(queryParams)}`;
-            }
+        if (last == 0) {
+            links.last = links.first;
+        } else {
+            query.pagination.index = last;
+            links.last = `${opts.domain}${opts.baseUrl}?${qs.stringify(query)}`;
+        }
 
-            if (pagination.index < last) {
-                queryParams.pagination.index = pagination.index + 1;
-                links.next = `${opts.domain}${opts.baseUrl}?${qs.stringify(queryParams)}`;
-            }
+        if (pagination.index > 0) {
+            query.pagination.index = pagination.index - 1;
+            links.prev = `${opts.domain}${opts.baseUrl}?${qs.stringify(query)}`;
+        }
+
+        if (pagination.index < last) {
+            query.pagination.index = pagination.index + 1;
+            links.next = `${opts.domain}${opts.baseUrl}?${qs.stringify(query)}`;
         }
 
         links.meta = pagination;

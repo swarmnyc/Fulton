@@ -131,7 +131,7 @@ export abstract class FultonApp implements IFultonApp {
      */
     routers: Router[];
 
-    isInitialized: boolean = false;    
+    isInitialized: boolean = false;
 
     /**
      * @param mode There are some different default values for api and web-view. 
@@ -337,7 +337,7 @@ export abstract class FultonApp implements IFultonApp {
     protected initServer(): void | Promise<void> {
         this.express = express();
         this.express.request.constructor.prototype.fultonApp = this;
-
+        
         this.express.disable('x-powered-by');
 
         this.events.emit(EventKeys.didInitServer, this);

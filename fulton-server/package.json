@@ -55,6 +55,7 @@
     "jasmine-reporters": "^2.3.0",
     "mongodb": "^2.2.35",
     "nyc": "^11.4.1",
+    "passport-facebook": "^2.1.1",
     "passport-github": "^1.1.0",
     "qs": "^6.5.1",
     "request": "^2.83.0",

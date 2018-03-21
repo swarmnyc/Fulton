@@ -1,9 +1,10 @@
-import { IFultonUser, FultonAccessToken, FultonUserOauth } from "../interfaces"
-import { Entity, ObjectIdColumn, Column } from "typeorm";
+import { IFultonUser } from '../interfaces';
+import { Entity, ObjectIdColumn, Column, PrimaryColumn, PrimaryGeneratedColumn } from 'typeorm';
 
 @Entity("users")
 export class FultonUser implements IFultonUser {
     @ObjectIdColumn()
+    @PrimaryGeneratedColumn("uuid")
     id: string;
 
     @Column({ unique: true, nullable: false, length: 256 })
@@ -22,12 +23,6 @@ export class FultonUser implements IFultonUser {
     portraitUrl: string;
 
     @Column({})
-    accessTokens?: FultonAccessToken[];
-
-    @Column({})
-    oauthes?: FultonUserOauth[];
-
-    @Column({})
     roles: string[];
 
     @Column()
@@ -35,4 +30,45 @@ export class FultonUser implements IFultonUser {
 
     @Column()
     resetPasswordCodeExpiredAt?: Date;
+}
+
+
+@Entity("user_access_tokens")
+export class FultonAccessToken {
+    @ObjectIdColumn()
+    @PrimaryGeneratedColumn("uuid")
+    id?: string;
+
+    @Column()    
+    token?: string;
+    @Column()    
+    issuedAt?: Date;
+    @Column()    
+    expiredAt?: Date;
+    @Column()    
+    revoked?: boolean;
+
+    @Column()    
+    userId?: string;
+}
+
+@Entity("user_oauth_tokens")
+export class FultonOauthToken {
+    @ObjectIdColumn()
+    @PrimaryGeneratedColumn("uuid")
+    id?: string;
+
+    @Column()    
+    provider?: string;
+    @Column()    
+    accessToken?: string;
+    @Column()    
+    refreshToken?: string;
+    @Column()    
+    issuedAt?: Date;
+    @Column()    
+    expiredAt?: Date;
+
+    @Column()    
+    userId?: string;
 }

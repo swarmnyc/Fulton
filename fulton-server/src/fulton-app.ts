@@ -9,7 +9,7 @@ import * as winston from 'winston';
 
 import { AppMode, DiContainer, DiKeys, ErrorMiddleware, EventKeys, Middleware, RepositoryFactory, Request, Response, Type, TypeIdentifier } from './interfaces';
 import { ClassProvider, FactoryProvider, FunctionProvider, Provider, TypeProvider, ValueProvider } from "./helpers/type-helpers";
-import { Connection, Repository } from 'typeorm';
+import { Connection, Repository, getRepository } from 'typeorm';
 import { IUser, IUserService } from "./identity/interfaces";
 
 import { EntityMetadata } from 'typeorm/metadata/EntityMetadata';
@@ -24,6 +24,7 @@ import { Router } from "./routers/router";
 import { Service } from "./services";
 import { defaultHttpLoggerHandler } from "./middlewares/http-logger";
 import { fultonDebug, fultonDebugMaster } from './helpers/debug';
+import { entity } from './re-export';
 
 // don't load too modules classes here, it will cause cyclical dependencies and cause very hard to debug and wired Error.
 
@@ -61,6 +62,11 @@ export interface IFultonApp {
     start(): Promise<any>;
 
     stop(): Promise<any>;
+
+    /**
+     * A shortcut to get typeorm repository
+     */
+    getRepository<T>(entity: Type, connectionName?: string): Repository<T>
 }
 
 /**
@@ -187,8 +193,6 @@ export abstract class FultonApp implements IFultonApp {
             await this.initProviders();
 
             await this.initDatabases();
-
-            await this.initRepositories();
 
             await this.initServices();
 
@@ -334,10 +338,14 @@ export abstract class FultonApp implements IFultonApp {
         return Promise.all(tasks);
     }
 
+    getRepository<T>(entity: Type, connectionName?: string): Repository<T> {
+        return getRepository<T>(entity, connectionName);
+    }
+
     protected initServer(): void | Promise<void> {
         this.express = express();
         this.express.request.constructor.prototype.fultonApp = this;
-        
+
         this.express.disable('x-powered-by');
 
         this.events.emit(EventKeys.didInitServer, this);
@@ -376,28 +384,6 @@ export abstract class FultonApp implements IFultonApp {
      */
     protected initDatabases(): Promise<void> {
         return require('./initializers/database-initializer')(this);
-    }
-
-    protected async initRepositories(): Promise<void> {
-        let providers = this.options.repositories || [];
-        if (this.options.loader.repositoryLoaderEnabled) {
-            let dirs = this.options.loader.repositoryDirs.map((dir) => path.join(this.options.loader.appDir, dir));
-            let loadedProviders = await this.options.loader.repositoryLoader(dirs, true) as TypeProvider[];
-            providers = loadedProviders.concat(providers);
-        }
-
-        // repositories needs to be singleton to integrate typeorm and inversify
-        let factory = this.container.get<RepositoryFactory>(DiKeys.RepositoryFactory);
-        let newProviders: ValueProvider[] = providers.map((provider) => {
-            return {
-                provide: provider,
-                useValue: factory(provider)
-            }
-        });
-
-        this.registerTypes(newProviders);
-
-        this.events.emit(EventKeys.didInitRepositories, this);
     }
 
     protected async initServices(): Promise<void> {

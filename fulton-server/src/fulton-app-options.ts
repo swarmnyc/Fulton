@@ -136,31 +136,6 @@ export class FultonAppOptions {
     /**
      * Define injections for the repositories
      * 
-     * ```
-     * class MyApp extends FultonApp {
-     *   onInit(options){
-     *       options.repositories = [
-     *           FoodRepository
-     *       ];
-     * 
-     *       // turn on the repository loader if you want app to load repositories automatically 
-     *       options.loader.repositoryLoaderEnabled = true;
-     *   }
-     * }
-     * 
-     * @Entity()
-     * class Food { }
-     * 
-     * @Repository(Food)
-     * class FoodRepository extends MongoRepository<Food> {
-     * }
-     * ```
-     */
-    repositories: TypeProvider[] = [];
-
-    /**
-     * Define injections for the repositories
-     * 
      * ``` typescript
      * class MyApp extends FultonApp {
      *   onInit(options){
@@ -272,24 +247,6 @@ export class FultonAppOptions {
          * default is FultonClassLoader
          */
         serviceLoader: FultonClassLoader<Service>;
-
-        /**
-         * if true, Fulton will load repositories based on repositoryDirs automatically
-         * the default value is false
-         * It can be overridden by process.env["{appName}.options.loader.repositoryLoaderEnabled"] 
-         */
-        repositoryLoaderEnabled: boolean;
-
-        /**
-         * the folders that router-loader looks at, default value is ["repositories"], 
-         */
-        repositoryDirs: string[];
-
-        /**
-         * the repository loader (a function), it loads all repositories under the folders of all repositoryDirs
-         * default is FultonClassLoader
-         */
-        repositoryLoader: FultonClassLoader<Repository<any>>;
     }
 
     /**
@@ -584,10 +541,6 @@ export class FultonAppOptions {
             serviceLoaderEnabled: false,
             serviceDirs: ["services"],
             serviceLoader: defaultClassLoader(Service),
-
-            repositoryLoaderEnabled: false,
-            repositoryDirs: ["repositories"],
-            repositoryLoader: defaultClassLoader(Repository)
         };
 
         this.server = {
@@ -657,8 +610,7 @@ export class FultonAppOptions {
             },
             loader: {
                 routerLoaderEnabled: Env.getBoolean(`${prefix}.loader.routerLoaderEnabled`),
-                serviceLoaderEnabled: Env.getBoolean(`${prefix}.loader.serviceLoaderEnabled`),
-                repositoryLoaderEnabled: Env.getBoolean(`${prefix}.loader.repositoryLoaderEnabled`)
+                serviceLoaderEnabled: Env.getBoolean(`${prefix}.loader.serviceLoaderEnabled`)
             },
             server: {
                 httpEnabled: Env.getBoolean(`${prefix}.server.httpEnabled`),

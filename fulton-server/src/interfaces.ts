@@ -12,8 +12,6 @@ export enum DiKeys {
     EntityServiceFactory = "__EntityServiceFactory__",
     FultonApp = "__FultonApp__",
     MongoEntityRunner = "__MongoEntityRunner__",
-    RepositoryFactory = "__RepositoryFactory__",
-    UserRepository = "__UserRepository__",
 }
 
 export enum EventKeys {

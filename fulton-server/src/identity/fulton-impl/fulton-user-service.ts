@@ -5,16 +5,17 @@ import * as passwordHash from 'password-hash';
 import * as validator from 'validator';
 
 import { AccessToken, IFultonUser, IProfile, IUserRegister, IUserService } from "../interfaces";
-import { DiKeys, Request, inject, injectable, Type } from "../../interfaces";
-import { EntityRepository, MongoRepository, Repository, getManager, MongoEntityManager, EntityManager } from "typeorm";
+import { DiKeys, Request, Type, inject, injectable } from "../../interfaces";
+import { EntityManager, EntityRepository, MongoEntityManager, MongoRepository, Repository, getManager } from "typeorm";
+import { FultonAccessToken, FultonOauthToken, FultonUser } from './fulton-user';
 
+import { EntityMetadata } from 'typeorm/metadata/EntityMetadata';
 import { FultonError } from "../../common";
-import { FultonUser, FultonAccessToken, FultonOauthToken } from './fulton-user';
 import { IFultonApp } from "../../fulton-app";
 import { IdentityOptions } from '../identity-options';
 import { ObjectId } from 'bson';
 
-interface TokenPayload {
+interface JWTPayload {
     id?: string;
     email?: string;
     username?: string;
@@ -25,10 +26,19 @@ interface TokenPayload {
 }
 
 //TODO: multiple database engines supports, move to other files
+/**
+ * the runner is for multiple database engines supports
+ */
 interface IRunner {
-    addAccessToken?(accessToken: FultonAccessToken): Promise<any>
-    addOauthToken?(oauthToken: FultonOauthToken): Promise<any>
-    findUserByToken?(token: string): Promise<FultonUser>;
+    updateMetadata(metadata: EntityMetadata): void;
+    addUser(user: FultonUser): Promise<FultonUser>
+    addAccessToken(accessToken: FultonAccessToken): Promise<any>
+    addOauthToken(oauthToken: FultonOauthToken): Promise<any>
+    findUserByNameOrEmail(name: string): Promise<FultonUser>;
+    findUserByEmail(email: string): Promise<FultonUser>;
+    findUserByToken(token: string): Promise<FultonUser>;
+    countUserByName(name: string): Promise<number>;
+    countUserByEmail(email: string): Promise<number>;
 }
 
 class MongoRunner implements IRunner {
@@ -37,17 +47,64 @@ class MongoRunner implements IRunner {
     tokenRepository: MongoRepository<FultonAccessToken>
 
     constructor(private manager: MongoEntityManager) {
-        this.userRepository = manager.getMongoRepository(FultonUser)
-        this.oauthRepository = manager.getMongoRepository(FultonOauthToken)
-        this.tokenRepository = manager.getMongoRepository(FultonAccessToken)
+        this.userRepository = manager.getMongoRepository(FultonUser) as any
+        this.oauthRepository = manager.getMongoRepository(FultonOauthToken) as any
+        this.tokenRepository = manager.getMongoRepository(FultonAccessToken) as any
+
+        this.updateMetadata(this.userRepository.metadata);
+        this.updateMetadata(this.oauthRepository.metadata);
+        this.updateMetadata(this.tokenRepository.metadata);
+    }
+
+    updateMetadata(metadata: EntityMetadata) {
+        let idColumn = metadata.ownColumns.find((c) => c.propertyName == "id")
+
+        idColumn.isObjectId = true;
+        idColumn.givenDatabaseName =
+            idColumn.databaseNameWithoutPrefixes =
+            idColumn.databaseName = "_id";
+
+        metadata.generatedColumns = [idColumn]
+        metadata.objectIdColumn = idColumn
+    }
+
+    addUser(user: FultonUser): Promise<FultonUser> {
+        return this.userRepository.save(user);
     }
 
     addAccessToken(accesstoken: FultonAccessToken): Promise<any> {
-        return this.tokenRepository.insert(accesstoken);
+        return this.tokenRepository.insertOne(accesstoken);
     }
 
     addOauthToken(oauthToken: AccessToken): Promise<any> {
-        return this.oauthRepository.insert(oauthToken);
+        return this.oauthRepository.insertOne(oauthToken);
+    }
+
+    countUserByName(name: string): Promise<number> {
+        return this.userRepository.count({
+            username: name,
+        })
+    }
+
+    countUserByEmail(email: string): Promise<number> {
+        return this.userRepository.count({
+            email: email,
+        })
+    }
+
+    findUserByNameOrEmail(nameOrEmail: string): Promise<FultonUser> {
+        return this.userRepository.findOne({
+            "$or": [
+                { username: nameOrEmail },
+                { email: nameOrEmail }
+            ]
+        } as any)
+    }
+
+    findUserByEmail(email: string): Promise<FultonUser> {
+        return this.userRepository.findOne({
+            email: email,
+        })
     }
 
     async findUserByToken(token: string): Promise<FultonUser> {
@@ -61,37 +118,17 @@ class MongoRunner implements IRunner {
     }
 }
 
-class SqlRunner implements IRunner {
-    constructor(private manager: EntityManager) {
-    }
-
-    addAccessToken?(accessToken: FultonAccessToken): Promise<any> {
-        return null
-    }
-
-    addOauthToken?(oauthToken: FultonOauthToken): Promise<any> {
-        return null
-    }
-
-    findUserByToken?(token: string): Promise<FultonUser> {
-        return null
-    }
-}
-
 @injectable()
 export class FultonUserService implements IUserService<FultonUser> {
     private runner: IRunner;
-    private userRepository: Repository<FultonUser>
 
     constructor(@inject(DiKeys.FultonApp) protected app: IFultonApp) {
         let manager = getManager(app.options.identity.databaseConnectionName)
 
-        this.userRepository = manager.getRepository(FultonUser)
-
         if (manager instanceof MongoEntityManager) {
             this.runner = new MongoRunner(manager)
         } else {
-            this.runner = new SqlRunner(manager)
+            //this.runner = new SqlRunner(manager)
         }
     }
 
@@ -161,17 +198,13 @@ export class FultonUserService implements IUserService<FultonUser> {
         let newUser = lodash.pick(input, fields) as FultonUser;
 
         // verify existence
-        let count = await this.userRepository.count({
-            username: newUser.username,
-        });
+        let count = await this.runner.countUserByName(newUser.username);
 
         if (count > 0) {
             error.addDetail("username", "the username is existed")
         }
 
-        count = await this.userRepository.count({
-            email: input.email,
-        });
+        count = await this.runner.countUserByEmail(newUser.email);
 
         if (count > 0) {
             error.addDetail("email", "the email is existed")
@@ -186,8 +219,7 @@ export class FultonUserService implements IUserService<FultonUser> {
             newUser.hashedPassword = passwordHash.generate(input.password, registerOptions.passwordHashOptions);
         }
 
-
-        let user = await this.userRepository.save(newUser);
+        let user = await this.runner.addUser(newUser);
 
         if (input.oauthToken) {
             this.runner.addOauthToken({
@@ -218,9 +250,7 @@ export class FultonUserService implements IUserService<FultonUser> {
             throw error;
         }
 
-        let user = await this.userRepository.findOne({
-            username: username,
-        });
+        let user = await this.runner.findUserByNameOrEmail(username.toLocaleLowerCase());
 
         if (user && user.hashedPassword && passwordHash.verify(password, user.hashedPassword)) {
             return user;
@@ -240,9 +270,7 @@ export class FultonUserService implements IUserService<FultonUser> {
         profile.email = profile.email.toLocaleLowerCase();
 
         // verify existence
-        let user = await this.userRepository.findOne({
-            email: profile.email,
-        });
+        let user = await this.runner.findUserByEmail(profile.email);
 
         if (user) {
             // email is the same            
@@ -277,7 +305,7 @@ export class FultonUserService implements IUserService<FultonUser> {
             }
 
             let jwt = jws.decode(token);
-            let payload: TokenPayload;
+            let payload: JWTPayload;
             if (level == "medium") {
                 let decipher = crypto.createDecipher("aes-128-ecb", this.cipherPassword)
                 let json = decipher.update(jwt.payload, "base64", "utf8");
@@ -310,7 +338,7 @@ export class FultonUserService implements IUserService<FultonUser> {
         let now = new Date();
 
         let expiredAt = now.valueOf() + (this.options.accessToken.duration * 1000);
-        let payload: TokenPayload | string = {
+        let payload: JWTPayload | string = {
             id: user.id,
             expiredAt: expiredAt
         };

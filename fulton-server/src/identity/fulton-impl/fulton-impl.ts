@@ -199,7 +199,7 @@ export let FultonImpl = {
 
         req.userService
             .register(input)
-            .then(async (user: IUser) => {
+            .then((user: IUser) => {
                 req.logIn(user, options, (err) => {
                     if (options.responseOptions && options.responseOptions.successRedirect) {
                         res.redirect(options.responseOptions.successRedirect)
@@ -209,6 +209,7 @@ export let FultonImpl = {
                 })
             })
             .catch((error: any) => {
+                FultonLog.warn("user register failed by", error)
                 if (options.responseOptions && options.responseOptions.failureRedirect) {
                     res.redirect(options.responseOptions.failureRedirect)
                 } else {

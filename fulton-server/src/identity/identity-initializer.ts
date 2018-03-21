@@ -124,8 +124,6 @@ module.exports = async function identityInitializer(app: FultonApp) {
                     profileFields: opts.profileFields
                 },
                 profileTransformer: (profile: any) => {
-                    console.log(profile);
-                    
                     let email;                    
                     if (profile.emails instanceof Array && profile.emails.length > 0) {
                         email = profile.emails[0].value

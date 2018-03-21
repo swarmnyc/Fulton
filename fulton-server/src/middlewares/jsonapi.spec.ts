@@ -467,10 +467,10 @@ describe('jsonapi middleware', () => {
                 }
             ],
             "links": {
-                "first": "http://localhost:5000/employees?pagination%5Bindex%5D=0&pagination%5Bsize%5D=2",
-                "last": "http://localhost:5000/employees?pagination%5Bindex%5D=4&pagination%5Bsize%5D=2",
-                "prev": "http://localhost:5000/employees?pagination%5Bindex%5D=0&pagination%5Bsize%5D=2",
-                "next": "http://localhost:5000/employees?pagination%5Bindex%5D=2&pagination%5Bsize%5D=2",
+                "first": "http://localhost:5000/employees?pagination%5Bsize%5D=2&pagination%5Bindex%5D=0",
+                "last": "http://localhost:5000/employees?pagination%5Bsize%5D=2&pagination%5Bindex%5D=4",
+                "prev": "http://localhost:5000/employees?pagination%5Bsize%5D=2&pagination%5Bindex%5D=0",
+                "next": "http://localhost:5000/employees?pagination%5Bsize%5D=2&pagination%5Bindex%5D=2",
                 "meta": {
                     "index": 1,
                     "size": 2,

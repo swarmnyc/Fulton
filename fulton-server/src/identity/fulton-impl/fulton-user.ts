@@ -3,8 +3,7 @@ import { Entity, ObjectIdColumn, Column, PrimaryColumn, PrimaryGeneratedColumn }
 
 @Entity("users")
 export class FultonUser implements IFultonUser {
-    @ObjectIdColumn()
-    @PrimaryGeneratedColumn("uuid")
+    @PrimaryColumn()
     id: string;
 
     @Column({ unique: true, nullable: false, length: 256 })
@@ -35,8 +34,7 @@ export class FultonUser implements IFultonUser {
 
 @Entity("user_access_tokens")
 export class FultonAccessToken {
-    @ObjectIdColumn()
-    @PrimaryGeneratedColumn("uuid")
+    @PrimaryColumn()
     id?: string;
 
     @Column()    
@@ -54,8 +52,7 @@ export class FultonAccessToken {
 
 @Entity("user_oauth_tokens")
 export class FultonOauthToken {
-    @ObjectIdColumn()
-    @PrimaryGeneratedColumn("uuid")
+    @PrimaryColumn()
     id?: string;
 
     @Column()    

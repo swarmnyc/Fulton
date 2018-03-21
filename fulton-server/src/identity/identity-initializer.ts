@@ -22,20 +22,6 @@ module.exports = async function identityInitializer(app: FultonApp) {
         let userService: IUserService<IUser>;
 
         if (idOptions.userService instanceof Function) {
-            if (idOptions.userRepository) {
-                // use special repository
-                if (idOptions.userRepository instanceof Function) {
-                    app.container.bind(DiKeys.UserRepository).to(idOptions.userRepository);
-                } else {
-                    app.container.bind(DiKeys.UserRepository).toConstantValue(idOptions.userRepository);
-                }
-            } else {
-                // use typeorm repository
-                let userRepository = getRepository(idOptions.userType);
-
-                app.container.bind(DiKeys.UserRepository).toConstantValue(userRepository);
-            }
-
             userService = app.container.resolve(idOptions.userService as Type);
         } else {
             userService = idOptions.userService as IUserService<IUser>;
@@ -138,8 +124,6 @@ module.exports = async function identityInitializer(app: FultonApp) {
                     profileFields: opts.profileFields
                 },
                 profileTransformer: (profile: any) => {
-                    console.log(profile);
-                    
                     let email;                    
                     if (profile.emails instanceof Array && profile.emails.length > 0) {
                         email = profile.emails[0].value

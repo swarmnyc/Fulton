@@ -4,6 +4,7 @@ import { Request, Response } from "../../src/interfaces";
 import { AccessToken } from '../../src/identity/interfaces';
 import { FultonApp } from '../../src/fulton-app';
 import { FultonAppOptions } from '../../src/fulton-app-options';
+import { FultonLog } from '../../src/fulton-log';
 
 class MyApp extends FultonApp {
     protected onInit(options: FultonAppOptions): void {
@@ -79,8 +80,8 @@ describe('Identity Integration Test', () => {
         await prepareUser()
 
         let result = await httpTester.post("/auth/register", {
-            email: "test@test.com",
-            username: "test",
+            email: "Test@test.com",
+            username: "Test",
             password: "test123"
         });
         expect(result.response.statusCode).toEqual(400);
@@ -93,7 +94,7 @@ describe('Identity Integration Test', () => {
         await prepareUser();
 
         let result = await httpTester.post("/auth/login", {
-            username: "test",
+            username: "Test",
             password: "test123"
         });
 

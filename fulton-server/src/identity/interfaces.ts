@@ -28,24 +28,7 @@ export interface IFultonUser extends IUser {
     displayName?: string;
     portraitUrl?: string;
     hashedPassword?: string;
-    accessTokens?: FultonAccessToken[];
     roles?: string[];
-}
-
-export interface FultonUserOauth {
-    provider?: string;
-    userId?: string;
-    accessToken?: string;
-    refreshToken?: string;
-    issuedAt?: Date;
-    expiredAt?: Date;
-}
-
-export interface FultonAccessToken {
-    token?: string;
-    issuedAt?: Date;
-    expiredAt?: Date;
-    revoked?: boolean;
 }
 
 export interface IUserService<T extends IUser> {
@@ -56,6 +39,8 @@ export interface IUserService<T extends IUser> {
     register(user: IUserRegister): Promise<T>;
     issueAccessToken(user: T): Promise<AccessToken>;
     refreshAccessToken(token: string): Promise<AccessToken>;
+    //revokeAccessToken(user: T): Promise<any>;
+    //revokeAccessTokens(user: T): Promise<any>;
 }
 
 export interface AccessToken {

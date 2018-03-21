@@ -94,7 +94,7 @@ function generateDocs(app: FultonApp): OpenApiSpec {
 
 function generateDefinitions(app: FultonApp, definitions: DefinitionsObject) {
     app.entityMetadatas.forEach((metadata, entity) => {
-        if (entity == app.options.identity.userType) {
+        if (app.options.identity.entities.includes(entity)) {
             return;
         }
 

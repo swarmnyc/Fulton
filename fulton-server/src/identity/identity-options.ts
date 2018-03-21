@@ -7,7 +7,7 @@ import { AuthenticateOptions } from "passport";
 import { AuthorizeOptions } from "./authorizes-middlewares";
 import { Env } from "../helpers/env";
 import { FultonImpl } from "./fulton-impl/fulton-impl";
-import { FultonUser } from './fulton-impl/fulton-user';
+import { FultonUser, FultonAccessToken, FultonOauthToken } from './fulton-impl/fulton-user';
 import { FultonUserService } from './fulton-impl/fulton-user-service';
 import { Repository } from "typeorm";
 import { Strategy } from "passport";
@@ -20,16 +20,15 @@ export class IdentityOptions {
     enabled: boolean;
 
     /**
-     * the type of User
-     * the default value is FultonUser
+     * the types of entities for registion, 
+     * the default value is [FultonUser, FultonAccessToken, FultonOauthToken]
      */
-    userType: Type<IUser>;
+    entities: Type[];
 
     /**
-     * the instance or type of User Repository
-     * the default value is typeorm Repository
+     * the database connection name, the default value is "default"
      */
-    userRepository: Type<Repository<IUser>> | Repository<IUser>;
+    databaseConnectionName: string;
 
     /**
      * the instance or type of UserService
@@ -437,8 +436,9 @@ export class IdentityOptions {
     constructor(private appName: string, private appModel: AppMode) {
         this.enabled = false;
 
-        this.userType = FultonUser;
         this.userService = FultonUserService;
+
+        this.entities = [FultonUser, FultonAccessToken, FultonOauthToken]
 
         this.defaultAuthorizes = [];
 
@@ -540,13 +540,6 @@ export class IdentityOptions {
                 successRedirect: "/"
             }
         }
-    }
-
-    get isUseDefaultImplement(): boolean {
-        return this.enabled &&
-            (this.userType == FultonUser) &&
-            (this.userRepository == null) &&
-            (this.userService == FultonUserService)
     }
 
     /**

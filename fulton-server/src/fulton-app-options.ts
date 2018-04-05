@@ -493,6 +493,15 @@ export class FultonAppOptions {
         //TODO: implement compression
     }
 
+    caching: {
+        outputCacheOption: {
+
+        },
+        reids: {
+            //TODO: options like server, 
+        }
+    }
+
     settings: {
         /**
          * the size of a page for pagination.
@@ -575,6 +584,12 @@ export class FultonAppOptions {
         this.settings = {
             paginationSize: 20,
             zoneEnabled: true
+        }
+
+        this.caching = {
+            outputCacheOption: {},
+            reids: {
+            }
         }
 
         // TODO: get more information

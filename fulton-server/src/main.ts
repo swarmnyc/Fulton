@@ -12,4 +12,6 @@ export * from "./services/index";
 export * from "./entities/index";
 export * from "./routers/index";
 
+export * from "./middlewares/output-cache";
+
 // don't import this file, like "./main" which cause circular module imports

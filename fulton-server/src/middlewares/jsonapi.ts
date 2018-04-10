@@ -77,9 +77,13 @@ module.exports = function (app: FultonApp) {
                             res.set("content-type", MimeTypes.jsonApi);
                             args[0] = JSON.stringify({ errors: [args[0].error] })
                         }
-                    }
 
-                    send.apply(thisArg, args);
+                        // go through the send follow again
+                        res.send(...args)
+                    }else{
+                        // use original send
+                        send.apply(thisArg, args);
+                    }
                 },
             })
         }

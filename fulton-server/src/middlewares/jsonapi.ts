@@ -37,6 +37,7 @@ module.exports = function (app: FultonApp) {
             // json to jsonapi
             res.send = new Proxy(res.send, {
                 apply: (send: Function, thisArg: Response, args: any[]) => {
+                    let useOrigin: boolean = true;
                     if (args && args.length == 1 && typeof args[0] == "object") {
                         if (args[0].data) {
                             let body: (OperationManyResult & OperationOneResult) = args[0];
@@ -71,18 +72,23 @@ module.exports = function (app: FultonApp) {
                                 let result = converter.serialize(entityType.name, data, serializeOpts);
 
                                 args[0] = JSON.stringify(result);
+
+                                useOrigin = false;
                             }
                         } else if (args[0].error) {
                             // JSONAPI use error array
                             res.set("content-type", MimeTypes.jsonApi);
                             args[0] = JSON.stringify({ errors: [args[0].error] })
+                            useOrigin = false;
                         }
+                    }
 
-                        // go through the send follow again
-                        res.send(...args)
-                    }else{
+                    if (useOrigin) {
                         // use original send
                         send.apply(thisArg, args);
+                    } else {
+                        // go through the send flow again
+                        res.send(...args)
                     }
                 },
             })

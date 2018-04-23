@@ -75,10 +75,10 @@ export abstract class EntityRunner {
     /** 
      * adjust filter, because some properties are miss type QueryString is always string, but some params int or date
      */
-    protected adjustParams<T>(metadata: EntityMetadata, params: QueryParams, onlyFilter:boolean = false): FultonError {
+    protected adjustParams<T>(metadata: EntityMetadata, params: QueryParams, onlyFilter: boolean = false): FultonError {
         // only adjust if it needs
         if (params && params.needAdjust) {
-            let errorTracker = new FultonStackError("invalid query parameters");
+            let errorTracker = new FultonStackError("invalid_query_parameters");
 
             if (params.filter) {
                 errorTracker.push("filter");
@@ -234,7 +234,7 @@ export abstract class EntityRunner {
                 newValue = parseFloat(value);
                 if (isNaN(newValue)) {
                     if (errorTracker) {
-                        errorTracker.add(`must be a number`, true);
+                        errorTracker.add("number", `must be a number`, true);
                     }
 
                     newValue = null;
@@ -243,7 +243,7 @@ export abstract class EntityRunner {
                 newValue = Helper.getBoolean(value);
 
                 if (newValue == null && errorTracker) {
-                    errorTracker.add(`must be a boolean`, true);
+                    errorTracker.add("boolean", `must be a boolean`, true);
                 }
             } else if ((type == "date" || type == "datetime" || type == Date) && !(value instanceof Date)) {
                 if (Helper.isNumberString(value)) {
@@ -254,7 +254,7 @@ export abstract class EntityRunner {
 
                 if (isNaN(newValue.valueOf())) {
                     if (errorTracker) {
-                        errorTracker.add(`must be a date`, true);
+                        errorTracker.add("date", `must be a date`, true);
                     }
 
                     newValue = null;

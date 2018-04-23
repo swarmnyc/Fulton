@@ -148,11 +148,11 @@ export class FultonUserService implements IUserService<FultonUser> {
     }
 
     async register(input: IUserRegister): Promise<FultonUser> {
-        let error = new FultonError();
+        let error = new FultonError("register_failed");
         let registerOptions = this.options.register;
 
         // verify username, password, email
-        error.verifyRequired(input, ["username", "email"])
+        error.verifyRequireds(input, ["username", "email"])
 
         if (!input.oauthToken) {
             // if oauth register, no need password.
@@ -166,7 +166,7 @@ export class FultonUserService implements IUserService<FultonUser> {
             }
 
             if (!pwResult) {
-                error.addDetail("password", "password is invalid")
+                error.addDetail("password", "invalid", "the password is invalid")
             }
 
             // if oauth register, skip username verify.            
@@ -178,16 +178,15 @@ export class FultonUserService implements IUserService<FultonUser> {
             }
 
             if (!unResult) {
-                error.addDetail("username", "username is invalid")
+                error.addDetail("username", "invalid", "the username is invalid")
             }
         }
 
         if (!validator.isEmail(input.email)) {
-            error.addDetail("email", "email is invalid")
+            error.addDetail("email", "invalid", "the email is invalid")
         }
 
         if (error.hasError()) {
-            error.setMessage("register failed");
             throw error;
         }
 
@@ -201,17 +200,16 @@ export class FultonUserService implements IUserService<FultonUser> {
         let count = await this.runner.countUserByName(newUser.username);
 
         if (count > 0) {
-            error.addDetail("username", "the username is existed")
+            error.addDetail("username", "existed", "the username is existed")
         }
 
         count = await this.runner.countUserByEmail(newUser.email);
 
         if (count > 0) {
-            error.addDetail("email", "the email is existed")
+            error.addDetail("email", "existed", "the email is existed")
         }
 
         if (error.hasError()) {
-            error.setMessage("register failed");
             throw error;
         }
 
@@ -235,18 +233,17 @@ export class FultonUserService implements IUserService<FultonUser> {
     }
 
     async login(username: string, password: string): Promise<FultonUser> {
-        let error = new FultonError();
+        let error = new FultonError("login_failed");
 
         if (!lodash.some(username)) {
-            error.addDetail("username", "username is required")
+            error.addDetail("username", "required")
         }
 
         if (!lodash.some(password)) {
-            error.addDetail("password", "password is required")
+            error.addDetail("password", "required")
         }
 
         if (error.hasError()) {
-            error.setMessage("login failed");
             throw error;
         }
 
@@ -255,7 +252,7 @@ export class FultonUserService implements IUserService<FultonUser> {
         if (user && user.hashedPassword && passwordHash.verify(password, user.hashedPassword)) {
             return user;
         } else {
-            throw error.setMessage("username or password isn't correct");
+            throw error.set("login_failed", "username or password isn't correct");
         }
     }
 

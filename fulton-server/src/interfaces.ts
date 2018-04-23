@@ -63,20 +63,17 @@ export interface RouterActionDocOptions {
     description?: string;
 }
 
-export interface FultonErrorConstraints {
-    [key: string]: string;
-}
-
-export interface FultonErrorItem {
+export interface FultonErrorDetailItem {
+    code?: string;
     message?: string;
-    constraints?: FultonErrorConstraints;
 }
 
 export interface FultonErrorDetail {
-    [key: string]: string | FultonErrorItem | FultonErrorConstraints;
+    [key: string]: FultonErrorDetailItem[];
 }
 
 export interface FultonErrorObject {
+    code?: string;
     message?: string;
     detail?: FultonErrorDetail;
 }

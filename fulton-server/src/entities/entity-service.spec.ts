@@ -528,11 +528,11 @@ describe('entity service', () => {
             })
             .catch((result: FultonError) => {
                 expect(result.error).toEqual({
-                    message: "invalid input",
+                    code: "invalid_input",
                     detail: {
-                        companyName: { isDefined: 'companyName should not be null or undefined' },
-                        rating: { max: 'rating must be less than 10' },
-                        email: { isEmail: 'email must be an email' }
+                        companyName: [{ code: "isDefined", message: 'companyName should not be null or undefined' }],
+                        rating: [{ code: "max", message: 'rating must be less than 10' }],
+                        email: [{ code: "isEmail", message: 'email must be an email' }]
                     }
                 });
             });
@@ -554,9 +554,9 @@ describe('entity service', () => {
             })
             .catch((result: FultonError) => {
                 expect(result.error).toEqual({
-                    message: "invalid input",
+                    code: "invalid_input",
                     detail: {
-                        "territories.0.regionId": "regionId must be a number"
+                        "territories.0.regionId": [{ code: "number", message: 'regionId must be a number' }]
                     }
                 });
             });
@@ -577,11 +577,11 @@ describe('entity service', () => {
         service["convertEntity"](employeeMetadata, input, errorTracker);
 
         expect(errorTracker.error).toEqual({
-            message: "invalid input",
+            code: "invalid input",
             detail: {
-                "hireDate": "hireDate must be a date",
-                "territories.0.territoryId": "territoryId should not be null or undefined",
-                "territories.1.territoryId": "territoryId must be a number"
+                "hireDate": [{ code: "date", message: 'hireDate must be a date' }],
+                "territories.0.territoryId": [{ code: "undefined", message: 'territoryId should not be null or undefined' }],
+                "territories.1.territoryId": [{ code: "number", message: 'territoryId must be a number' }]
             }
         });
     });
@@ -605,11 +605,11 @@ describe('entity service', () => {
         let errorTracker = service["runner"]["adjustParams"](employeeMetadata, queryParams);
 
         expect(errorTracker.error).toEqual({
-            message: "invalid query parameters",
+            code: "invalid_query_parameters",
             detail: {
-                "filter.territories.categories.categoryId": "categoryId must be an object id",
-                "filter.$or.0._id": "_id must be a number",
-                "filter.$or.1.hireDate": "hireDate must be a date"
+                "filter.territories.categories.categoryId": [{ code: "object_id", message: 'categoryId must be an object id' }],
+                "filter.$or.0._id": [{ code: "number", message: '_id must be a number' }],
+                "filter.$or.1.hireDate": [{ code: "date", message: 'hireDate must be a date' }]
             }
         });
     });

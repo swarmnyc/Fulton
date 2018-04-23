@@ -1,5 +1,5 @@
 import * as lodash from 'lodash';
-import { FultonErrorObject, FultonErrorConstraints, FultonErrorDetail, FultonErrorItem } from '../interfaces';
+import { FultonErrorObject, FultonErrorDetail, FultonErrorDetailItem } from '../interfaces';
 
 /**
  * The error that returns to client
@@ -13,30 +13,53 @@ import { FultonErrorObject, FultonErrorConstraints, FultonErrorDetail, FultonErr
 export class FultonError {
     error: FultonErrorObject;
 
-    constructor(input?: FultonErrorObject | string) {
-        if (typeof input == "string") {
+    constructor()
+    constructor(code: string, message?: string)
+    constructor(input?: FultonErrorObject)
+    constructor(...args: any[]) {
+        if (args.length == 2) {
             this.error = {
-                message: input
+                code: args[0],
+                message: args[1]
+            }
+        } else if (args.length == 1) {
+            if (typeof args[0] == "string") {
+                this.error = {
+                    code: args[0]
+                }
+            } else {
+                this.error = args[0] || {};
             }
         } else {
-            this.error = input || {};
+            this.error = {};
         }
+
     }
 
-    setMessage(msg: string) {
-        this.error.message = msg;
+    set(code: string, message?: string) {
+        this.error.code = code;
+        this.error.message = message;
+
         return this;
     }
 
-    addDetail(propertyName: string, errorMessage: string, constraints?: FultonErrorConstraints): FultonError
-    addDetail(propertyName: string, constraints?: FultonErrorConstraints): FultonError
+    addDetail(propertyName: string, errorCode: string, errorMessage?: string): FultonError
+    addDetail(propertyName: string, constraints: FultonErrorDetailItem): FultonError
     addDetail(propertyName: string, ...args: any[]): FultonError {
-        let errorMessage: string, constraints: FultonErrorConstraints;
+        let item: FultonErrorDetailItem;
         if (args.length == 1) {
-            constraints = args[0]
+            if (typeof args[0] == "string") {
+                item = {
+                    code: args[0]
+                }
+            } else {
+                item = args[0]
+            }
         } else if (args.length == 2) {
-            errorMessage = args[0]
-            constraints = args[1]
+            item = {
+                code: args[0],
+                message: args[1]
+            }
         } else {
             // not support
             return
@@ -46,46 +69,36 @@ export class FultonError {
             this.error.detail = {};
         }
 
-        let error = this.error.detail[propertyName] as FultonErrorConstraints
-        if (error) {
-            Object.assign(error, constraints);
+        if (this.error.detail[propertyName] == null) {
+            this.error.detail[propertyName] = [item];
         } else {
-            if (errorMessage) {
-                this.error.detail[propertyName] = { message: errorMessage, constraints };
-            } else {
-                this.error.detail[propertyName] = constraints;
-            }
+            this.error.detail[propertyName].push(item)
         }
-
+    
         return this;
     }
 
-    verifyRequired(target: any, propertyName: string, errorMessages?: string): boolean
-    verifyRequired(target: any, propertyNames: string[], errorMessages?: string[]): boolean
-    verifyRequired(target: any, arg1: any, arg2: any): boolean {
-        let result: boolean = true;
-        if (arg1 instanceof Array) {
-            let propertyNames: string[] = arg1;
-            let errorMessages: string[] = arg2;
-
-            propertyNames.forEach((name: string, i: number) => {
-                result = this.verifyRequired(target, name, errorMessages ? errorMessages[i] : null) && result
-            });
-        } else {
-            let propertyName: string = arg1;
-            let errorMessage: string = arg2;
-
-            if (!lodash.some(target[propertyName])) {
-                this.addDetail(propertyName, errorMessage || `${propertyName} is required`);
-                return false;
-            }
+    verifyRequired(target: any, propertyName: string, errorMessage?: string): boolean {
+        if (!lodash.some(target[propertyName])) {
+            this.addDetail(propertyName, "required", errorMessage || `${propertyName} is required`);
+            return false;
         }
+
+        return true;
+    }
+
+    verifyRequireds(target: any, propertyNames: string[], errorMessages?: string[]): boolean {
+        let result: boolean = true;
+
+        propertyNames.forEach((name: string, i: number) => {
+            result = this.verifyRequired(target, name, errorMessages ? errorMessages[i] : null) && result
+        });
 
         return result;
     }
 
     hasError(): boolean {
-        return this.error.message != null || this.error.detail != null;
+        return this.error.detail != null;
     }
 
     public toJSON() {
@@ -101,8 +114,8 @@ export class FultonError {
 export class FultonStackError extends FultonError {
     private properties: string[];
 
-    constructor(message: string) {
-        super(message);
+    constructor(code: string) {
+        super(code);
 
         this.properties = [];
     }
@@ -137,7 +150,7 @@ export class FultonStackError extends FultonError {
         });
     }
 
-    add(errorMessage: string, addNameToMessage?: boolean): FultonStackError {
+    add(errorCode: string, errorMessage: string, addNameToMessage?: boolean): FultonStackError {
         if (this.error.detail == null) {
             this.error.detail = {};
         }
@@ -148,12 +161,8 @@ export class FultonStackError extends FultonError {
             errorMessage = `${this.properties[this.properties.length - 1]} ${errorMessage}`
         }
 
-        this.error.detail[propertyName] = errorMessage;
+        this.addDetail(propertyName, errorCode, errorMessage)
 
         return this;
-    }
-
-    hasError(): boolean {
-        return this.error.detail != null;
     }
 }

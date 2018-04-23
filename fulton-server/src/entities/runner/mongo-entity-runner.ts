@@ -118,7 +118,7 @@ export class MongoEntityRunner extends EntityRunner {
                 try {
                     return new ObjectId(value);
                 } catch  {
-                    errorTracker.add("must be an object id", true);
+                    errorTracker.add("object_id","must be an object id", true);
                 }
             }
         }

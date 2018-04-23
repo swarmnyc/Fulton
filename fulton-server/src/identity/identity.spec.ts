@@ -180,11 +180,11 @@ describe('Identity local and bearer on UserServiceMock', () => {
         let result = await httpTester.post("/auth/register");
 
         let error = result.body.error;
-    
+
         expect(result.response.statusCode).toEqual(400);
-        expect(error.detail.username).toEqual("username is required");
-        expect(error.detail.password).toEqual("password is required");
-        expect(error.detail.email).toEqual("email is required");
+        expect(error.detail.username).toEqual([{ code: 'required', message: 'username is required' }]);
+        expect(error.detail.password).toEqual([{ code: 'required', message: "password is required" }]);
+        expect(error.detail.email).toEqual([{ code: 'required', message: "email is required" }]);
     });
 
     it('should authorize by role success', async () => {
@@ -279,7 +279,7 @@ describe('Identity local and bearer on UserServiceMock', () => {
         spyOn(oauth2.prototype, "_request").and.callFake((method: any, url: string, headers: any, post_body: any, access_token: any, callback: any) => {
             if (url.startsWith("https://github.com/login/oauth/access_token")) {
                 callback(null, "access_token=0a19c6216599daf812a601d78164b17e60b61be4&scope=read%3Auser%2Cuser%3Aemail&token_type=bearer")
-            } else if (url.startsWith("https://api.github.com/user/emails")){
+            } else if (url.startsWith("https://api.github.com/user/emails")) {
                 callback(null, `[]`)
             } else {
                 callback(null, `{"login":"test","name":"test","email":"test@test.com"}`)

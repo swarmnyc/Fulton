@@ -159,7 +159,7 @@ export class EntityService<TEntity> implements IEntityService<TEntity> {
      */
     protected convertAndVerifyEntity(em: EntityMetadata | Type, input: any): Promise<any> {
         let metadata: EntityMetadata;
-        let errorTracker = new FultonStackError("invalid input");
+        let errorTracker = new FultonStackError("invalid_input");
 
         if (em instanceof Function) {
             metadata = this.app.entityMetadatas.get(em);
@@ -208,7 +208,7 @@ export class EntityService<TEntity> implements IEntityService<TEntity> {
         } else {
             return {
                 error: {
-                    message: error.message
+                    code: error.message
                 }
             }
         }
@@ -283,7 +283,7 @@ export class EntityService<TEntity> implements IEntityService<TEntity> {
             if (id) {
                 rel[keyColumn.propertyName] = this.runner.convertValue(keyColumn, input[keyColumn.propertyName], errorTracker);
             } else {
-                errorTracker.add(`should not be null or undefined`, true)
+                errorTracker.add("undefined", `should not be null or undefined`, true)
             }
 
             errorTracker.pop();
@@ -304,7 +304,9 @@ export class EntityService<TEntity> implements IEntityService<TEntity> {
             }
 
             if (error.constraints) {
-                fultonError.addDetail(property, error.constraints);
+                for (const key in error.constraints) {
+                    fultonError.addDetail(property, key, error.constraints[key]);                    
+                }
             }
         }
 

@@ -29,7 +29,7 @@ export class UserServiceMock implements IUserService<FultonUser> {
         }
 
         if (/fail/i.test(password)) {
-            error.setMessage("username or password isn't correct");
+            error.set("username or password isn't correct");
             return Promise.reject(error);
         } else {
             let user = new FultonUser();
@@ -61,7 +61,7 @@ export class UserServiceMock implements IUserService<FultonUser> {
 
         let newUser = lodash.pick(input, ["username", "password", "email"]);
 
-        if (error.verifyRequired(input, ["username", "password", "email"])) {
+        if (error.verifyRequireds(input, ["username", "password", "email"])) {
             return Promise.resolve(input as FultonUser);
         } else {
             return Promise.reject(error);

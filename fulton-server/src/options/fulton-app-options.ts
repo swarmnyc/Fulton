@@ -1,36 +1,23 @@
-import * as express from 'express';
 import * as https from 'https';
 import * as lodash from 'lodash';
-import * as path from 'path';
-import * as winston from 'winston';
 import {
     AppMode,
-    ErrorMiddleware,
     Middleware,
     PathIdentifier,
     Type
-} from '../interfaces';
+    } from '../interfaces';
 import { CorsOptions } from 'cors';
 import { DatabaseOptions } from './databases-options';
-import {
-    defaultClassLoader,
-    FultonClassLoader,
-    Provider,
-    TypeProvider
-} from '../helpers';
 import { Env } from '../helpers/env';
 import { ErrorHandlerOptions } from './error-handler-options';
+import { FormatterOptions } from './formatter-options';
 import { FultonLoggerLevel, FultonLoggerOptions } from '../fulton-log';
-import { Helper } from '../helpers/helper';
 import { IdentityOptions } from '../identity/identity-options';
 import { IndexOptions } from './index-options';
 import { InfoObject } from '@loopback/openapi-spec';
-import { Options } from './options';
-import { Router } from '../routers/router';
+import { LoaderOptions } from './loader-options';
+import { Provider } from '../helpers';
 import { ServeStaticOptions } from 'serve-static';
-import { Service } from '../services/service';
-import { FormatterOptions } from './formatter-options';
-
 
 export class FultonAppOptions {
     /**
@@ -159,50 +146,7 @@ export class FultonAppOptions {
      * for loading modules automatically, default is disabled, 
      * because we want to use Angular style, define types explicitly
      */
-    loader: {
-        /**
-         * the directory of the app, the default router loader use the value ({appDir}/routers)
-         * default is the folder of the executed file like if run "node ./src/main.js",
-         * the value of appDir is ./src/
-         */
-        appDir: string;
-
-        /**
-         * if true, Fulton will load routers based on routerDirs automatically 
-         * the default value is false
-         * It can be overridden by process.env["{appName}.options.loader.routerLoaderEnabled"]
-         */
-        routerLoaderEnabled: boolean;
-
-        /**
-         * the folders that router-loader looks at, default value is ["routers"], 
-         */
-        routerDirs: string[];
-
-        /**
-         * the router loader (a function), loads all routers under the folders of routerDirs
-         * default is FultonClassLoader
-         */
-        routerLoader: FultonClassLoader<Router>;
-
-        /**
-         * if true, Fulton will load services based on serviceDirs automatically 
-         * the default value is false
-         * It can be overridden by process.env["{appName}.options.loader.serviceLoaderEnabled"]
-         */
-        serviceLoaderEnabled: boolean;
-
-        /**
-         * the folders that service-loader looks at, default value is ["services"], 
-         */
-        serviceDirs: string[];
-
-        /**
-         * the router loader (a function), loads all services under the folders of all serviceDirs
-         * default is FultonClassLoader
-         */
-        serviceLoader: FultonClassLoader<Service>;
-    }
+    loader = new LoaderOptions()
 
     /**
      * Logging options
@@ -499,18 +443,6 @@ export class FultonAppOptions {
             httpLoggerMiddlewares: []
         };
 
-        this.loader = {
-            appDir: path.dirname(process.mainModule.filename),
-
-            routerLoaderEnabled: false,
-            routerDirs: ["routers"],
-            routerLoader: defaultClassLoader(Router),
-
-            serviceLoaderEnabled: false,
-            serviceDirs: ["services"],
-            serviceLoader: defaultClassLoader(Service),
-        };
-
         this.server = {
             httpEnabled: true,
             httpsEnabled: false,
@@ -562,10 +494,6 @@ export class FultonAppOptions {
                 defaultLoggerLevel: Env.get(`${prefix}.logging.defaultLoggerLevel`),
                 defaultLoggerColorized: Env.getBoolean(`${prefix}.logging.defaultLoggerColorized`),
                 httpLoggerEnabled: Env.getBoolean(`${prefix}.logging.httpLoggerEnabled`)
-            },
-            loader: {
-                routerLoaderEnabled: Env.getBoolean(`${prefix}.loader.routerLoaderEnabled`),
-                serviceLoaderEnabled: Env.getBoolean(`${prefix}.loader.serviceLoaderEnabled`)
             },
             server: {
                 httpEnabled: Env.getBoolean(`${prefix}.server.httpEnabled`),

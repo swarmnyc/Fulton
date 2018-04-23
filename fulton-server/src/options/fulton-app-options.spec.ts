@@ -50,8 +50,13 @@ describe('Fulton App Options', () => {
         process.env[`MyFultonApp.options.server.httpPort`] = "777"
 
         let app = new MyFultonApp();
+        app.options.index.options({
+            message : "test",
+        })
+
         await app.init();
         expect(app.options.server.httpPort).toEqual(777);
+        expect(app.options.index.message).toEqual("test");
     });
 
     it('should load default database options', async () => {

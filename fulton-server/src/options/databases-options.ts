@@ -1,6 +1,6 @@
 import { ConnectionOptions, Repository } from 'typeorm';
 import { Helper } from '../helpers/helper';
-import { Options } from './interfaces';
+import { Options } from './options';
 
 export class DatabaseOptions implements Options {
     map: Map<string, ConnectionOptions> = new Map();

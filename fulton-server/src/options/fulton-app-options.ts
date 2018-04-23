@@ -10,10 +10,8 @@ import {
     PathIdentifier,
     Type
     } from '../interfaces';
-
 import { CorsOptions } from 'cors';
 import { DatabaseOptions } from './databases-options';
-import { default404ErrorHandler, defaultErrorHandler } from '../middlewares/error-handlers';
 import {
     defaultClassLoader,
     FultonClassLoader,
@@ -21,18 +19,20 @@ import {
     TypeProvider
     } from '../helpers';
 import { Env } from '../helpers/env';
+import { ErrorHandlerOptions } from './error-handler-options';
 import { FultonLoggerLevel, FultonLoggerOptions } from '../fulton-log';
 import { Helper } from '../helpers/helper';
 import { IdentityOptions } from '../identity/identity-options';
+import { IndexOptions } from './index-options';
 import { InfoObject } from '@loopback/openapi-spec';
-import { Options } from './interfaces';
+import { Options } from './options';
 import { Router } from '../routers/router';
 import { ServeStaticOptions } from 'serve-static';
 import { Service } from '../services/service';
 
 
-
 export class FultonAppOptions {
+    
     /**
      * User manager and authentication based on passport
      */
@@ -55,44 +55,12 @@ export class FultonAppOptions {
     /**
      * behavior for "/" request, only one of three methods can be activated at the same time.
      */
-    index: {
-        /**
-         * If true, log every http request.
-         * The default is true.
-         * It can be overridden by process.env["{appName}.options.index.enabled"]
-         */
-        enabled: boolean;
-
-        /**
-          * custom response middleware function
-          */
-        handler?: Middleware;
-
-        /**
-         * response the index file, like index.html
-         */
-        filepath?: string;
-
-        /**
-         * response the static message
-         */
-        message?: string;
-    }
+    index = new IndexOptions();
 
     /**
      * error and 404 middlewares, they will be placed on the last.
      */
-    errorHandler: {
-        /**
-         * middlewares for error, default is [fultonDefaultErrorHandler]
-         */
-        errorMiddlewares?: ErrorMiddleware[],
-
-        /**
-         * middlewares for 404 error, default is [fultonDefault404ErrorHandler]
-         */
-        error404Middlewares?: Middleware[]
-    }
+    errorHandler = new ErrorHandlerOptions();
 
     /**
      * Define values or types injections
@@ -541,11 +509,6 @@ export class FultonAppOptions {
     }
 
     constructor(private appName: string, private appMode: AppMode) {
-        this.index = {
-            enabled: true,
-            message: `${appName} works.`
-        };
-
         this.logging = {
             defaultLoggerColorized: true,
             httpLoggerEnabled: true,
@@ -558,11 +521,6 @@ export class FultonAppOptions {
                 }
             },
             httpLoggerMiddlewares: []
-        };
-
-        this.errorHandler = {
-            errorMiddlewares: [defaultErrorHandler],
-            error404Middlewares: [default404ErrorHandler]
         };
 
         this.loader = {
@@ -634,9 +592,6 @@ export class FultonAppOptions {
         let prefix = `${this.appName}.options`;
 
         let envValues = {
-            index: {
-                enabled: Env.getBoolean(`${prefix}.index.enabled`)
-            },
             logging: {
                 defaultLoggerLevel: Env.get(`${prefix}.logging.defaultLoggerLevel`),
                 defaultLoggerColorized: Env.getBoolean(`${prefix}.logging.defaultLoggerColorized`),
@@ -685,7 +640,7 @@ export class FultonAppOptions {
 
         for (const name of Object.getOwnPropertyNames(this)) {
             var prop = lodash.get(this, name);
-            
+
             if (prop && prop.init) {
                 prop.init(this.appName);
             }

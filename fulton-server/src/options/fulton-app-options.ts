@@ -9,7 +9,7 @@ import {
     Middleware,
     PathIdentifier,
     Type
-    } from '../interfaces';
+} from '../interfaces';
 import { CorsOptions } from 'cors';
 import { DatabaseOptions } from './databases-options';
 import {
@@ -17,7 +17,7 @@ import {
     FultonClassLoader,
     Provider,
     TypeProvider
-    } from '../helpers';
+} from '../helpers';
 import { Env } from '../helpers/env';
 import { ErrorHandlerOptions } from './error-handler-options';
 import { FultonLoggerLevel, FultonLoggerOptions } from '../fulton-log';
@@ -29,39 +29,10 @@ import { Options } from './options';
 import { Router } from '../routers/router';
 import { ServeStaticOptions } from 'serve-static';
 import { Service } from '../services/service';
+import { FormatterOptions } from './formatter-options';
 
 
 export class FultonAppOptions {
-    
-    /**
-     * User manager and authentication based on passport
-     */
-    identity: IdentityOptions;
-
-    /**
-     * Databases connection options, you can define connection options on FultonApp.onInt(),  
-     * and use 
-     * `env["{appName}.options.databases.{connectionName}.{optionName}"]` to override data.
-     * 
-     * for example: 
-     * FultonApp.options.databases.default.url={url}
-     * 
-     * and 
-     * `env["{appName}.options.database.{optionName}"]` is the shortcut of 
-     * `env["{appName}.options.databases.default.{optionName}"]`
-     */
-    databases = new DatabaseOptions();
-
-    /**
-     * behavior for "/" request, only one of three methods can be activated at the same time.
-     */
-    index = new IndexOptions();
-
-    /**
-     * error and 404 middlewares, they will be placed on the last.
-     */
-    errorHandler = new ErrorHandlerOptions();
-
     /**
      * Define values or types injections
      * 
@@ -145,39 +116,44 @@ export class FultonAppOptions {
      */
     entities: Type[] = [];
 
-    formatter: {
-        /**
-         * if true, add express.json() as a middleware
-         * the default value is true
-         */
-        json?: boolean;
-        /**
-         * if true, add fulton Jsonapi() as a middleware
-         * if true, have to run `npm install jsonapi-serializer`
-         * the default value is false
-         */
-        jsonApi?: boolean;
-
-        /**
-         * if true, add express.urlencoded({ extended: true })() as a middleware
-         * the default value is true
-         */
-        form?: boolean;
-
-        /**
-         * it true, add queryParamsParser as a middleware
-         */
-        queryParams?: boolean;
-        /**
-         * other custom middlewares
-         */
-        customs?: Middleware[];
-    }
-
     /**
      * app level custom middlewares, they will be placed before routers
      */
     middlewares: Middleware[] = [];
+
+    /**
+     * User manager and authentication based on passport
+     */
+    identity = new IdentityOptions(this.appName, this.appMode);
+
+    /**
+     * Databases connection options, you can define connection options on FultonApp.onInt(),  
+     * and use 
+     * `env["{appName}.options.databases.{connectionName}.{optionName}"]` to override data.
+     * 
+     * for example: 
+     * FultonApp.options.databases.default.url={url}
+     * 
+     * and 
+     * `env["{appName}.options.database.{optionName}"]` is the shortcut of 
+     * `env["{appName}.options.databases.default.{optionName}"]`
+     */
+    databases = new DatabaseOptions();
+
+    /**
+     * behavior for "/" request, only one of three methods can be activated at the same time.
+     */
+    index = new IndexOptions();
+
+    /**
+     * error and 404 middlewares, they will be placed on the last.
+     */
+    errorHandler = new ErrorHandlerOptions();
+
+    /**
+     * request and response format
+     */
+    formatter = new FormatterOptions();
 
     /**
      * for loading modules automatically, default is disabled, 
@@ -556,14 +532,6 @@ export class FultonAppOptions {
             middlewares: []
         };
 
-        this.formatter = {
-            json: true,
-            jsonApi: false,
-            form: true,
-            queryParams: true,
-            customs: []
-        };
-
         this.settings = {
             paginationSize: 20,
             zoneEnabled: true
@@ -581,8 +549,6 @@ export class FultonAppOptions {
                 version: info.version
             }
         }
-
-        this.identity = new IdentityOptions(this.appName, this.appMode);
     }
 
     /**

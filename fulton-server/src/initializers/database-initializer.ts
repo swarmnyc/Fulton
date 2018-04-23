@@ -20,9 +20,9 @@ module.exports = async function (app: FultonApp): Promise<any> {
 
     let connOptions: ConnectionOptions[] = [];
 
-    app.options.databases.forEach((conn, name) => {
+    app.options.databases.forEach((name, conn) => {
         lodash.set(conn, "name", name);
-
+        
         // extends entities
         if (lodash.some(app.options.entities)) {
             if (conn.entities) {

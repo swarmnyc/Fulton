@@ -3,21 +3,34 @@ import * as https from 'https';
 import * as lodash from 'lodash';
 import * as path from 'path';
 import * as winston from 'winston';
-
-import { AppMode, ErrorMiddleware, Middleware, PathIdentifier, Type } from '../interfaces';
-import { ConnectionOptions, Repository } from 'typeorm';
-import { FultonClassLoader, Provider, TypeProvider, defaultClassLoader } from '../helpers';
-import { FultonLoggerLevel, FultonLoggerOptions } from '../fulton-log';
-import { default404ErrorHandler, defaultErrorHandler } from '../middlewares/error-handlers';
+import {
+    AppMode,
+    ErrorMiddleware,
+    Middleware,
+    PathIdentifier,
+    Type
+    } from '../interfaces';
 
 import { CorsOptions } from 'cors';
+import { DatabaseOptions } from './databases-options';
+import { default404ErrorHandler, defaultErrorHandler } from '../middlewares/error-handlers';
+import {
+    defaultClassLoader,
+    FultonClassLoader,
+    Provider,
+    TypeProvider
+    } from '../helpers';
 import { Env } from '../helpers/env';
+import { FultonLoggerLevel, FultonLoggerOptions } from '../fulton-log';
 import { Helper } from '../helpers/helper';
 import { IdentityOptions } from '../identity/identity-options';
 import { InfoObject } from '@loopback/openapi-spec';
+import { Options } from './interfaces';
 import { Router } from '../routers/router';
 import { ServeStaticOptions } from 'serve-static';
 import { Service } from '../services/service';
+
+
 
 export class FultonAppOptions {
     /**
@@ -28,18 +41,16 @@ export class FultonAppOptions {
     /**
      * Databases connection options, you can define connection options on FultonApp.onInt(),  
      * and use 
-     * `process.env["{appName}.options.databases.{connectionName}.{optionName}"]` to override data.
+     * `env["{appName}.options.databases.{connectionName}.{optionName}"]` to override data.
      * 
      * for example: 
      * FultonApp.options.databases.default.url={url}
      * 
      * and 
-     * `process.env["{appName}.options.database.{optionName}"]` is the shortcut of 
-     * `process.env["{appName}.options.databases.default.{optionName}"]`
-     * 
-     * if the map is empty, it will use typeorm.json, for more information see [typeorm](http://typeorm.io/)
+     * `env["{appName}.options.database.{optionName}"]` is the shortcut of 
+     * `env["{appName}.options.databases.default.{optionName}"]`
      */
-    databases: Map<string, ConnectionOptions> = new Map();
+    databases = new DatabaseOptions();
 
     /**
      * behavior for "/" request, only one of three methods can be activated at the same time.
@@ -495,7 +506,7 @@ export class FultonAppOptions {
 
     notification: {
         email?: {
-            templatingFn?: ((template:string, variables: any) => void),
+            templatingFn?: ((template: string, variables: any) => void),
             sendFn?: (() => void),
             smtp?: {
                 host?: string,
@@ -671,45 +682,12 @@ export class FultonAppOptions {
         lodash.assignWith(this, envValues, customer);
 
         this.identity.loadEnvOptions();
-        this.loadEnvDatabaseOptions();
-    }
 
-    /**
-     * load database options from environment to override the current database options 
-     */
-    loadEnvDatabaseOptions() {
-        let defaultReg = new RegExp(`^${this.appName}\\.options\\.database\\.(\\w+?)$`, "i");
-        let namedReg = new RegExp(`^${this.appName}\\.options\\.databases\\.(\\w+?)\\.(\\w+?)$`, "i");
-
-        for (const key in process.env) {
-            let connName, propName, value;
-            let match = defaultReg.exec(key)
-            if (match) {
-                connName = "default";
-                propName = match[1];
-                value = process.env[key];
-            } else if ((match = namedReg.exec(key))) {
-                connName = match[1];
-                propName = match[2];
-                value = process.env[key];
-            } else {
-                continue;
-            }
-
-            let options: any;
-            if (this.databases.has(connName)) {
-                options = this.databases.get(connName);
-            } else {
-                options = {};
-                this.databases.set(connName, options as ConnectionOptions);
-            }
-
-            if (Helper.isBooleanString(value)) {
-                options[propName] = Helper.getBoolean(value);
-            } else if (Helper.isNumberString(value)) {
-                options[propName] = Helper.getFloat(value);
-            } else {
-                options[propName] = value;
+        for (const name of Object.getOwnPropertyNames(this)) {
+            var prop = lodash.get(this, name);
+            
+            if (prop && prop.init) {
+                prop.init(this.appName);
             }
         }
     }

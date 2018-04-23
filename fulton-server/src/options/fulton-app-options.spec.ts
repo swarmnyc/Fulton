@@ -1,5 +1,5 @@
 import { MongoConnectionOptions } from "typeorm/driver/mongodb/MongoConnectionOptions";
-import { FultonApp } from './fulton-app';
+import { FultonApp } from '../fulton-app';
 import { FultonAppOptions } from './fulton-app-options';
 
 class MyFultonApp extends FultonApp {

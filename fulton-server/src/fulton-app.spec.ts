@@ -4,7 +4,7 @@ import { Router, router } from './routers';
 
 import { EntityService } from './entities';
 import { FultonApp } from './fulton-app';
-import { FultonAppOptions } from './fulton-app-options';
+import { FultonAppOptions } from './options/fulton-app-options';
 import { FultonLog } from './fulton-log';
 import { Service } from './services/service';
 

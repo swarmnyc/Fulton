@@ -2,7 +2,7 @@ import { Request, Response } from "../interfaces";
 import { queryById, queryParamsParser } from "./query-params-parser";
 
 import { FultonApp } from '../fulton-app';
-import { FultonAppOptions } from '../fulton-app-options';
+import { FultonAppOptions } from '../options/fulton-app-options';
 import { HttpTester } from "../test/http-tester";
 
 class MyApp extends FultonApp {

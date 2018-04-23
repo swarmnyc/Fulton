@@ -5,7 +5,7 @@ import { Category } from '../../spec/entities/category';
 import { Connection } from "typeorm/connection/Connection";
 import { Employee } from '../../spec/entities/employee';
 import { FultonApp } from '../fulton-app';
-import { FultonAppOptions } from '../fulton-app-options';
+import { FultonAppOptions } from '../options/fulton-app-options';
 import { HttpTester } from "../test/http-tester";
 import { Territory } from '../../spec/entities/territory';
 import { getRelatedToMetadata } from "../entities/entity-decorators-helpers";

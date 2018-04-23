@@ -6,7 +6,7 @@ import { entityRouter, httpGet, router } from "./route-decorators";
 import { EntityRouter } from "./entity-router";
 import { EntityService } from "../entities/entity-service";
 import { FultonApp } from "../fulton-app";
-import { FultonAppOptions } from "../fulton-app-options";
+import { FultonAppOptions } from "../options/fulton-app-options";
 import { Repository } from "typeorm/repository/Repository";
 
 @entity("foods")

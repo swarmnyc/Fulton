@@ -4,20 +4,20 @@ import * as lodash from 'lodash';
 import * as path from 'path';
 import * as winston from 'winston';
 
-import { AppMode, ErrorMiddleware, Middleware, PathIdentifier, Type } from './interfaces';
+import { AppMode, ErrorMiddleware, Middleware, PathIdentifier, Type } from '../interfaces';
 import { ConnectionOptions, Repository } from 'typeorm';
-import { FultonClassLoader, Provider, TypeProvider, defaultClassLoader } from './helpers';
-import { FultonLoggerLevel, FultonLoggerOptions } from './fulton-log';
-import { default404ErrorHandler, defaultErrorHandler } from './middlewares/error-handlers';
+import { FultonClassLoader, Provider, TypeProvider, defaultClassLoader } from '../helpers';
+import { FultonLoggerLevel, FultonLoggerOptions } from '../fulton-log';
+import { default404ErrorHandler, defaultErrorHandler } from '../middlewares/error-handlers';
 
 import { CorsOptions } from 'cors';
-import { Env } from './helpers/env';
-import { Helper } from './helpers/helper';
-import { IdentityOptions } from './identity/identity-options';
+import { Env } from '../helpers/env';
+import { Helper } from '../helpers/helper';
+import { IdentityOptions } from '../identity/identity-options';
 import { InfoObject } from '@loopback/openapi-spec';
-import { Router } from './routers/router';
+import { Router } from '../routers/router';
 import { ServeStaticOptions } from 'serve-static';
-import { Service } from './services/service';
+import { Service } from '../services/service';
 
 export class FultonAppOptions {
     /**
@@ -491,6 +491,29 @@ export class FultonAppOptions {
 
     compression: {
         //TODO: implement compression
+    }
+
+    notification: {
+        email?: {
+            templatingFn?: ((template:string, variables: any) => void),
+            sendFn?: (() => void),
+            smtp?: {
+                host?: string,
+                port?: string,
+                secure?: string,
+                auth?: {
+                    username?: string,
+                    password?: string,
+                },
+                sender?: {
+                    email?: string,
+                    name?: string,
+                }
+            }
+        },
+        sms?: {
+            //TODO: sms notification
+        }
     }
 
     settings: {

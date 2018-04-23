@@ -1,9 +1,9 @@
 export * from "./interfaces";
 
 export * from "./fulton-app";
-export * from "./fulton-app-options";
 export * from "./fulton-log";
 export * from "./app-launcher";
+export * from "./options/fulton-app-options";
 
 export * from "./helpers/index";
 export * from "./common/index";

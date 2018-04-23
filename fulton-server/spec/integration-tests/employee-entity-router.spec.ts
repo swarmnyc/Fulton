@@ -6,7 +6,7 @@ import { Customer } from '../entities/customer';
 import { Employee } from '../entities/employee';
 import { EntityRouter } from '../../src/routers/entity-router';
 import { FultonApp } from '../../src/fulton-app';
-import { FultonAppOptions } from '../../src/fulton-app-options';
+import { FultonAppOptions } from '../../src/options/fulton-app-options';
 import { MongoHelper } from "../helpers/mongo-helper";
 import { Territory } from "../entities/territory";
 import { UserServiceMock } from "../helpers/user-service-mock";

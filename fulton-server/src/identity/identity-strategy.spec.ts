@@ -3,7 +3,7 @@ import { Request, Response } from "../interfaces";
 
 import { AccessToken } from './interfaces';
 import { FultonApp } from "../fulton-app";
-import { FultonAppOptions } from "../fulton-app-options";
+import { FultonAppOptions } from "../options/fulton-app-options";
 import { FultonImpl } from './fulton-impl/fulton-impl';
 import { GoogleStrategy } from "./strategies/google-strategy";
 import { HttpTester } from "../test/http-tester";

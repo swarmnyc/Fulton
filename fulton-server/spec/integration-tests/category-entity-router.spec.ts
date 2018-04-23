@@ -12,7 +12,7 @@ import { sampleData } from "../support/sample-data";
 import { EntityRouter } from '../../src/routers/entity-router';
 import { entityRouter } from '../../src/routers/route-decorators';
 import { FultonApp } from '../../src/fulton-app';
-import { FultonAppOptions } from '../../src/fulton-app-options';
+import { FultonAppOptions } from '../../src/options/fulton-app-options';
 
 
 @entityRouter("categories", Category)

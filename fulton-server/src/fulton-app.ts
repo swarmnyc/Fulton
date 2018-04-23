@@ -17,7 +17,7 @@ import { EntityMetadataHelper } from "./helpers/entity-metadata-helper";
 import { Env } from "./helpers/env";
 import { EventEmitter } from 'events';
 import { Express } from "express";
-import { FultonAppOptions } from "./fulton-app-options";
+import { FultonAppOptions } from "./options/fulton-app-options";
 import { FultonLog } from './fulton-log';
 import { MimeTypes } from './constants';
 import { Router } from "./routers/router";

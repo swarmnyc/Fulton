@@ -3,7 +3,7 @@ import { Request, Response } from "../../src/interfaces";
 
 import { AccessToken } from '../../src/identity/interfaces';
 import { FultonApp } from '../../src/fulton-app';
-import { FultonAppOptions } from '../../src/fulton-app-options';
+import { FultonAppOptions } from '../../src/options/fulton-app-options';
 import { FultonLog } from '../../src/fulton-log';
 
 class MyApp extends FultonApp {

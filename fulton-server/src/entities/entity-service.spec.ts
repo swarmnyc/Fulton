@@ -5,7 +5,7 @@ import { Employee } from '../../spec/entities/employee';
 import { EntityMetadata } from 'typeorm/metadata/EntityMetadata';
 import { EntityService } from './entity-service';
 import { FultonApp } from '../fulton-app';
-import { FultonAppOptions } from '../fulton-app-options';
+import { FultonAppOptions } from '../options/fulton-app-options';
 import { QueryParams } from '../interfaces';
 import { Territory } from '../../spec/entities/territory';
 import { createFakeConnection } from '../../spec/helpers/entity-helper';

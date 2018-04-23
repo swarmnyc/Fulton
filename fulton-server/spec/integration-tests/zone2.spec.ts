@@ -1,5 +1,5 @@
 import { FultonApp } from "../../src/fulton-app";
-import { FultonAppOptions } from "../../src/fulton-app-options";
+import { FultonAppOptions } from "../../src/options/fulton-app-options";
 import { Request, Response } from "../../src/interfaces";
 import { HttpTester } from "../../src/test/http-tester";
 import { setTimeout } from "timers";

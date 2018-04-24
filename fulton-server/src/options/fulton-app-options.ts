@@ -5,7 +5,7 @@ import {
     Middleware,
     PathIdentifier,
     Type
-    } from '../interfaces';
+} from '../interfaces';
 import { CorsOptions } from 'cors';
 import { DatabaseOptions } from './databases-options';
 import { Env } from '../helpers/env';
@@ -17,7 +17,7 @@ import { InfoObject } from '@loopback/openapi-spec';
 import { LoaderOptions } from './loader-options';
 import { LoggingOptions } from './logging-options';
 import { Provider } from '../helpers';
-import { ServeStaticOptions } from 'serve-static';
+import { StaticFilesOptions } from './static-file-options';
 
 export class FultonAppOptions {
     /**
@@ -146,61 +146,17 @@ export class FultonAppOptions {
      * for loading modules automatically, default is disabled, 
      * because we want to use Angular style, define types explicitly
      */
-    loader = new LoaderOptions()
+    loader = new LoaderOptions();
 
     /**
      * Logging options
      */
-    logging = new LoggingOptions()
+    logging = new LoggingOptions();
 
     /**
      * the options for serving static files
      */
-    staticFile: {
-        /**
-         * if true, app will serve static files.
-         * the default value is false
-         * It can be overridden by process.env["{appName}.options.staticFile.enabled]
-         */
-        enabled?: boolean;
-
-        /**
-         * the folders and options of static files.
-         * the default value is [], this value will be ignored if middlewares is not empty.
-         * 
-         * ## equivalent
-         * ```
-         * // if path is null
-         * app.use(express.static(folder, options))
-         * 
-         * // if path is not null
-         * app.use(path, express.static(folder, options))
-         * ```
-         */
-        folders?: {
-            path?: PathIdentifier;
-            folder: string;
-            options?: ServeStaticOptions;
-        }[]
-
-
-        /**
-         * custom middlewares for serving static files
-         * default is []
-         * ## equivalent
-         * ```
-         * // if path is null
-         * app.use(middleware)
-         * 
-         * // if path is not null
-         * app.use(path, middleware)
-         * ```
-         */
-        middlewares?: {
-            path?: PathIdentifier;
-            middleware: Middleware;
-        }[]
-    }
+    staticFile = new StaticFilesOptions();
 
     /**
      * app level cors middlewares
@@ -379,12 +335,6 @@ export class FultonAppOptions {
             clusterWorkerNumber: null
         };
 
-        this.staticFile = {
-            enabled: false,
-            folders: [],
-            middlewares: []
-        };
-
         this.cors = {
             enabled: false,
             options: null,
@@ -424,9 +374,6 @@ export class FultonAppOptions {
                 httpsPort: Env.getInt(`${prefix}.server.httpsPort`),
                 clusterEnabled: Env.getBoolean(`${prefix}.server.clusterEnabled`),
                 clusterWorkerNumber: Env.getInt(`${prefix}.server.clusterWorkerNumber`)
-            },
-            staticFile: {
-                enabled: Env.getBoolean(`${prefix}.staticFile.enabled`)
             },
             cors: {
                 enabled: Env.getBoolean(`${prefix}.cors.enabled`)

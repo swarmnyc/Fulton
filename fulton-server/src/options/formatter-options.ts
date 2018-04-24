@@ -30,5 +30,5 @@ export class FormatterOptions extends BaseOptions<FormatterOptions> {
     /**
      * other custom middlewares
      */
-    customs?: Middleware[];
+    customs?: Middleware[] = [];
 }

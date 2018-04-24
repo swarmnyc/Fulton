@@ -50,7 +50,7 @@ describe('Fulton App Options', () => {
         process.env[`MyFultonApp.options.server.httpPort`] = "777"
 
         let app = new MyFultonApp();
-        app.options.index.options({
+        app.options.index.set({
             message : "test",
         })
 

@@ -60,7 +60,7 @@ export class LoggingOptions extends BaseOptions<LoggingOptions> {
      * custom middlewares for http logging, like morgan or others
      * default is []
      */
-    httpLoggerMiddlewares?: Middleware[];
+    httpLoggerMiddlewares?: Middleware[] = [];
 
     init?(appName: string): void {
         this.defaultLoggerLevel = Env.get(`${appName}.options.logging.defaultLoggerLevel`, this.defaultLoggerLevel) as any;

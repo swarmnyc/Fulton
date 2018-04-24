@@ -6,7 +6,7 @@ import { setTimeout } from "timers";
 
 class MyApp extends FultonApp {
     protected onInit(options: FultonAppOptions): void | Promise<void> {
-        options.settings.zoneEnabled = false;
+        options.miscellaneous.zoneEnabled = false;
 
         this.express.use("/test", (req, res) => {
             if ((<any>global)["Zone"]) {

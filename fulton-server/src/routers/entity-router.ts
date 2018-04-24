@@ -41,11 +41,11 @@ export abstract class EntityRouter<TEntity> extends Router {
                 req.queryParams.pagination.index = 0;
 
             if (req.queryParams.pagination.size == null)
-                req.queryParams.pagination.size = this.app.options.settings.paginationSize;
+                req.queryParams.pagination.size = this.app.options.miscellaneous.paginationSize;
         } else {
             req.queryParams.pagination = {
                 index: 0,
-                size: this.app.options.settings.paginationSize
+                size: this.app.options.miscellaneous.paginationSize
             }
         }
 

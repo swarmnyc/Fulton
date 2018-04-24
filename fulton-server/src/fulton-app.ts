@@ -155,7 +155,7 @@ export abstract class FultonApp implements IFultonApp {
      * get data from res.locals[key], and use Zone to manage context
      */
     getLocalData(key: string): any {
-        if (this.options.settings.zoneEnabled) {
+        if (this.options.miscellaneous.zoneEnabled) {
             let res: Response = Zone.current.get("res");
             if (res) {
                 return res.locals[key];
@@ -167,7 +167,7 @@ export abstract class FultonApp implements IFultonApp {
      * set data from res.locals[key], and use Zone to manage context
      */
     setLocalData(key: string, value: any) {
-        if (this.options.settings.zoneEnabled) {
+        if (this.options.miscellaneous.zoneEnabled) {
             let res: Response = Zone.current.get("res");
             if (res) {
                 res.locals[key] = value;
@@ -237,7 +237,7 @@ export abstract class FultonApp implements IFultonApp {
             return Promise.reject(new Error(`${this.appName} is still running`));
         }
 
-        if (this.options.settings.zoneEnabled) {
+        if (this.options.miscellaneous.zoneEnabled) {
             require("zone.js");
         }
 
@@ -596,7 +596,7 @@ export abstract class FultonApp implements IFultonApp {
     protected abstract onInit(options: FultonAppOptions): void | Promise<void>;
 
     private serve = (req: any, res: any) => {
-        if (this.options.settings.zoneEnabled) {
+        if (this.options.miscellaneous.zoneEnabled) {
             Zone.current.fork({
                 name: this.appName,
                 properties: { req, res },

@@ -10,9 +10,11 @@ import { IdentityOptions } from '../identity/identity-options';
 import { IndexOptions } from './index-options';
 import { LoaderOptions } from './loader-options';
 import { LoggingOptions } from './logging-options';
+import { MiscellaneousOptions } from './miscellaneous-options';
+import { NotificationOptions } from './notification-options';
 import { Provider } from '../helpers';
-import { StaticFilesOptions } from './static-file-options';
 import { ServerOptions } from './server-options';
+import { StaticFilesOptions } from './static-file-options';
 
 export class FultonAppOptions {
     /**
@@ -178,52 +180,14 @@ export class FultonAppOptions {
      */
     server = new ServerOptions();
 
-    compression: {
-        //TODO: implement compression
-    }
+    notification = new NotificationOptions();
 
-    notification: {
-        email?: {
-            templatingFn?: ((template: string, variables: any) => void),
-            sendFn?: (() => void),
-            smtp?: {
-                host?: string,
-                port?: string,
-                secure?: string,
-                auth?: {
-                    username?: string,
-                    password?: string,
-                },
-                sender?: {
-                    email?: string,
-                    name?: string,
-                }
-            }
-        },
-        sms?: {
-            //TODO: sms notification
-        }
-    }
+    miscellaneous = new MiscellaneousOptions();
 
-    settings: {
-        /**
-         * the size of a page for pagination.
-         * the default value is 20
-         */
-        paginationSize?: number,
-        /**
-         * use zone.js for context management.
-         * the default value is true
-         */
-        zoneEnabled?: boolean
-    }
+    //TODO: implement compression
+    compression = {};
 
-    constructor(private appName: string, private appMode: AppMode) {
-        this.settings = {
-            paginationSize: 20,
-            zoneEnabled: true
-        }
-    }
+    constructor(private appName: string, private appMode: AppMode) {}
 
     /**
      * init options and load values from environment

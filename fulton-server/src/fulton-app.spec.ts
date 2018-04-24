@@ -70,7 +70,7 @@ class RouterB extends Router {
 
 class MyFultonApp extends FultonApp {
     protected onInit(options: FultonAppOptions): void | Promise<void> {
-        options.settings.zoneEnabled = false;
+        options.miscellaneous.zoneEnabled = false;
 
         options.providers = [
             { provide: "api_key", useValue: "abcd" },

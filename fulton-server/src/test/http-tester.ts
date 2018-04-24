@@ -17,7 +17,7 @@ export class HttpTester {
 
     constructor(private app: FultonApp) {
         FultonLog.level = "warn";
-        this.app.options.settings.zoneEnabled = false;
+        this.app.options.miscellaneous.zoneEnabled = false;
         this.app.options.server.httpPort = 5000;
         this.app.options.logging.httpLoggerEnabled = false;
         this.headers = {};

@@ -11,11 +11,11 @@ import { DatabaseOptions } from './databases-options';
 import { Env } from '../helpers/env';
 import { ErrorHandlerOptions } from './error-handler-options';
 import { FormatterOptions } from './formatter-options';
-import { FultonLoggerLevel, FultonLoggerOptions } from '../fulton-log';
 import { IdentityOptions } from '../identity/identity-options';
 import { IndexOptions } from './index-options';
 import { InfoObject } from '@loopback/openapi-spec';
 import { LoaderOptions } from './loader-options';
+import { LoggingOptions } from './logging-options';
 import { Provider } from '../helpers';
 import { ServeStaticOptions } from 'serve-static';
 
@@ -151,66 +151,7 @@ export class FultonAppOptions {
     /**
      * Logging options
      */
-    logging: {
-
-        /**
-         * the default logger logging level
-         * default is "debug"
-         * It can be overridden by process.env["{appName}.options.logging.defaultLoggerLevel"]
-         */
-        defaultLoggerLevel?: FultonLoggerLevel;
-
-        /**
-         * if not null, reset winston default logger with this value, the default value is null
-         * 
-         * ## example
-         * ```
-         * option.defaultLoggerOptions = {
-         *      level: "debug",
-         *      transports: [new winston.transports.Console()]
-         * }
-         * ```
-         */
-        defaultLoggerOptions?: FultonLoggerOptions;
-
-        /**
-         * enable default logger console transport colorized
-         * the default value is true
-         * It can be overridden by process.env["{appName}.options.logging.defaultLoggerColorized"]
-         */
-        defaultLoggerColorized?: boolean;
-
-        /**
-         * if true, app will logs every http requests.
-         * the default value is true
-         * It can be overridden by process.env["${appName}.options.logging.httpLoggerEnabled"]
-         */
-        httpLoggerEnabled: boolean;
-
-        /**
-         * the options for http logger, it is winston options 
-         * this value will be ignored, if httpLogMiddlewares is not empty
-         * 
-         * ### default value
-         * ```
-         * option.httpLogOptions =  {
-         *      console: {
-         *          colorize: true,
-         *          level: "info",
-         *          showLevel: false,
-         *          label: "Http"
-         *      }
-         * }
-         * ```
-         */
-        httpLoggerOptions?: FultonLoggerOptions;
-
-        /**
-         * custom middlewares for http logging, like morgan or others
-         * default is []
-         */
-        httpLoggerMiddlewares?: Middleware[];
-    }
+    logging = new LoggingOptions()
 
     /**
      * the options for serving static files
@@ -429,20 +370,6 @@ export class FultonAppOptions {
     }
 
     constructor(private appName: string, private appMode: AppMode) {
-        this.logging = {
-            defaultLoggerColorized: true,
-            httpLoggerEnabled: true,
-            httpLoggerOptions: {
-                console: {
-                    colorize: true,
-                    level: "info",
-                    showLevel: false,
-                    label: "Http"
-                }
-            },
-            httpLoggerMiddlewares: []
-        };
-
         this.server = {
             httpEnabled: true,
             httpsEnabled: false,
@@ -490,11 +417,6 @@ export class FultonAppOptions {
         let prefix = `${this.appName}.options`;
 
         let envValues = {
-            logging: {
-                defaultLoggerLevel: Env.get(`${prefix}.logging.defaultLoggerLevel`),
-                defaultLoggerColorized: Env.getBoolean(`${prefix}.logging.defaultLoggerColorized`),
-                httpLoggerEnabled: Env.getBoolean(`${prefix}.logging.httpLoggerEnabled`)
-            },
             server: {
                 httpEnabled: Env.getBoolean(`${prefix}.server.httpEnabled`),
                 httpsEnabled: Env.getBoolean(`${prefix}.server.httpsEnabled`),

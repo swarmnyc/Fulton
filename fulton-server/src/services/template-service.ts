@@ -6,7 +6,7 @@ declare type Templator = ((textOrFilePath: string, variables: any) => string)
 var templator: Templator = require("angular-template")
 
 export class TemplateService extends Service implements ITemplateService {
-    geneate(textOrFilePath: string, variables: any): string {
+    geneate(textOrFilePath: string, variables: any = {}): string {
         return templator(textOrFilePath, variables);
     }
 }

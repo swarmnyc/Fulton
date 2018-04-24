@@ -1,3 +1,7 @@
+var dotenv = require('dotenv');
+
+dotenv.config({path: "./spec/secret.env"})
+
 var Jasmine = require('jasmine');
 var runner = new Jasmine();
 

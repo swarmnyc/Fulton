@@ -36,6 +36,11 @@ export class EmailOptions extends BaseOptions<EmailOptions>{
      */
     readonly smtp?= new EmailSmtpOptions();
 
+    /**
+     * if the value is defiened, will use this value to create a transporter of nodemailer.
+     */
+    otherOptions?: any;
+
     init?(appName: string): void {
         this.enabled = Env.getBoolean(`${appName}.options.notification.email.enabled`, this.enabled);
 
@@ -93,9 +98,9 @@ export class EmailSmtpOptions extends BaseOptions<EmailSmtpOptions>{
         var username = Env.get(`${appName}.options.notification.email.smtp.auth.username`);
         var password = Env.get(`${appName}.options.notification.email.smtp.auth.password`);
 
+        if (this.auth == null) this.auth = {}
+        
         if (username || password) {
-            if (this.auth == null) this.auth = {}
-
             if (username) this.auth.username = username
             if (password) this.auth.password = password
         }

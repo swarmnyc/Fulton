@@ -215,7 +215,7 @@ export interface ITemplateService {
 }
 
 export interface IEmailService {
-    send(message: EmailMessage): void
+    send(message: EmailMessage): Promise<void>
 }
 
 export interface NotificationMessage {

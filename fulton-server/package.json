@@ -12,8 +12,8 @@
     "test": "ts-node --typeCheck=true ./spec/test.ts",
     "test:it": "ts-node --typeCheck=true ./spec/test.ts --it",
     "test:all": "npm run test && npm run test:it",
-    "test:debug": "node -r ts-node/register --inspect-brk=9229 --typeCheck=true ./spec/test.ts",
-    "test:debug:it": "node -r ts-node/register --inspect-brk=9229 --typeCheck=true ./spec/test.ts --it",
+    "test:debug": "node --inspect-brk=9229 -r ts-node/register ./spec/test.ts",
+    "test:debug:it": "node --inspect-brk=9229 -r ts-node/register ./spec/test.ts --it",
     "coverage": "nyc npm test"
   },
   "author": {
@@ -49,7 +49,6 @@
     "@types/request": "^2.0.13",
     "@types/validator": "^6.3.0",
     "@types/winston": "^2.3.7",
-    "angular-template": "^2.4.0",
     "debug": "^3.1.0",
     "google-auth-library": "^1.1.0",
     "jasmine": "^2.9.0",
@@ -62,7 +61,7 @@
     "request": "^2.83.0",
     "rimraf": "^2.6.2",
     "swagger-ui-express": "^2.0.15",
-    "ts-node": "^6.0.0",
+    "ts-node": "^3.3.0",
     "typescript": "^2.8.3"
   },
   "dependencies": {

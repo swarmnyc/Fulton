@@ -1,10 +1,5 @@
-import * as https from 'https';
 import * as lodash from 'lodash';
-import {
-    AppMode,
-    Middleware,
-    Type
-    } from '../interfaces';
+import { AppMode, Middleware, Type } from '../interfaces';
 import { CorsOptions } from './cors-options';
 import { DatabaseOptions } from './databases-options';
 import { DocOptions } from './doc-options';
@@ -17,6 +12,7 @@ import { LoaderOptions } from './loader-options';
 import { LoggingOptions } from './logging-options';
 import { Provider } from '../helpers';
 import { StaticFilesOptions } from './static-file-options';
+import { ServerOptions } from './server-options';
 
 export class FultonAppOptions {
     /**
@@ -175,59 +171,12 @@ export class FultonAppOptions {
      * });
      * ```
      */
-    docs = new DocOptions()
+    docs = new DocOptions();
 
     /**
      * the settings for http and https servers
      */
-    server: {
-        /**
-         * if true, start a http server
-         * the default value is true
-         * It can be overridden by process.env["{appName}.options.server.httpEnabled]
-         */
-        httpEnabled: boolean,
-
-        /**
-         * if true, start a https server
-         * the default value is false
-         * It can be overridden by process.env["{appName}.options.server.httpsEnabled]
-         */
-        httpsEnabled: boolean,
-
-        /**
-         * the port for http
-         * the default value is 3000
-         * It can be overridden by process.env["{appName}.options.server.httpPort"]
-         */
-        httpPort: number,
-
-        /**
-         * the port for https 
-         * the default value is 443
-         * It can be overridden by process.env["{appName}.options.server.httpsPort"]
-         */
-        httpsPort: number,
-
-        /**
-         * ssl options, must to provide if httpsEnabled is true.
-         */
-        sslOptions?: https.ServerOptions,
-
-        /**
-         * if true, app will start in cluster mode
-         * the default value is false
-         * It can be overridden by process.env["{appName}.options.server.clusterEnabled]
-         */
-        clusterEnabled?: boolean
-
-        /**
-         * the number of worker for cluster
-         * the default value is 0, which will use the number of cup cores
-         * It can be overridden by process.env["{appName}.options.server.clusterWorkerNumber]
-         */
-        clusterWorkerNumber?: number
-    }
+    server = new ServerOptions();
 
     compression: {
         //TODO: implement compression
@@ -270,15 +219,6 @@ export class FultonAppOptions {
     }
 
     constructor(private appName: string, private appMode: AppMode) {
-        this.server = {
-            httpEnabled: true,
-            httpsEnabled: false,
-            httpPort: 3000,
-            httpsPort: 443,
-            clusterEnabled: false,
-            clusterWorkerNumber: null
-        };
-
         this.settings = {
             paginationSize: 20,
             zoneEnabled: true
@@ -286,41 +226,9 @@ export class FultonAppOptions {
     }
 
     /**
-     * load options from environment to override the current options 
+     * init options and load values from environment
      */
     init() {
-        let prefix = `${this.appName}.options`;
-
-        let envValues = {
-            server: {
-                httpEnabled: Env.getBoolean(`${prefix}.server.httpEnabled`),
-                httpsEnabled: Env.getBoolean(`${prefix}.server.httpsEnabled`),
-                httpPort: Env.getInt(`${prefix}.server.httpPort`),
-                httpsPort: Env.getInt(`${prefix}.server.httpsPort`),
-                clusterEnabled: Env.getBoolean(`${prefix}.server.clusterEnabled`),
-                clusterWorkerNumber: Env.getInt(`${prefix}.server.clusterWorkerNumber`)
-            }
-        } as FultonAppOptions;
-
-        let customer = (a: any, b: any): any => {
-            if (a == null && b == null) {
-                // lodash don't understand null
-                return undefined
-            }
-
-            if (typeof a == "object") {
-                if (a instanceof IdentityOptions) {
-                    return a
-                }
-
-                return lodash.assignWith(a, b, customer);
-            } else {
-                return b == null ? a : b;
-            }
-        }
-
-        lodash.assignWith(this, envValues, customer);
-
         this.identity.init();
 
         for (const name of Object.getOwnPropertyNames(this)) {

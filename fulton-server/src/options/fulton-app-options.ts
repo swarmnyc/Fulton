@@ -108,7 +108,7 @@ export class FultonAppOptions {
     /**
      * User manager and authentication based on passport
      */
-    identity = new IdentityOptions(this.appName, this.appMode);
+    readonly identity = new IdentityOptions(this.appName, this.appMode);
 
     /**
      * Databases connection options, you can define connection options on FultonApp.onInt(),  
@@ -122,43 +122,43 @@ export class FultonAppOptions {
      * `env["{appName}.options.database.{optionName}"]` is the shortcut of 
      * `env["{appName}.options.databases.default.{optionName}"]`
      */
-    databases = new DatabaseOptions();
+    readonly databases = new DatabaseOptions();
 
     /**
      * behavior for "/" request, only one of three methods can be activated at the same time.
      */
-    index = new IndexOptions();
+    readonly index = new IndexOptions();
 
     /**
      * error and 404 middlewares, they will be placed on the last.
      */
-    errorHandler = new ErrorHandlerOptions();
+    readonly errorHandler = new ErrorHandlerOptions();
 
     /**
      * request and response format
      */
-    formatter = new FormatterOptions();
+    readonly formatter = new FormatterOptions();
 
     /**
      * for loading modules automatically, default is disabled, 
      * because we want to use Angular style, define types explicitly
      */
-    loader = new LoaderOptions();
+    readonly loader = new LoaderOptions();
 
     /**
      * Logging options
      */
-    logging = new LoggingOptions();
+    readonly logging = new LoggingOptions();
 
     /**
      * the options for serving static files
      */
-    staticFile = new StaticFilesOptions();
+    readonly staticFile = new StaticFilesOptions();
 
     /**
      * app level cors middlewares
      */
-    cors = new CorsOptions();
+    readonly cors = new CorsOptions();
 
     /**
      * use swagger to serve docs, see https://swagger.io/specification/.
@@ -173,16 +173,16 @@ export class FultonAppOptions {
      * });
      * ```
      */
-    docs = new DocOptions();
+    readonly docs = new DocOptions();
 
     /**
      * the settings for http and https servers
      */
-    server = new ServerOptions();
+    readonly server = new ServerOptions();
 
-    notification = new NotificationOptions();
+    readonly notification = new NotificationOptions();
 
-    miscellaneous = new MiscellaneousOptions();
+    readonly miscellaneous = new MiscellaneousOptions();
 
     //TODO: implement compression
     compression = {};

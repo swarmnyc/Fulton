@@ -51,7 +51,7 @@ describe('Fulton App Options', () => {
 
         let app = new MyFultonApp();
         app.options.index.set({
-            message : "test",
+            message: "test",
         })
 
         await app.init();
@@ -144,5 +144,37 @@ describe('Fulton App Options', () => {
 
         expect(options.identity.github.clientSecret).toEqual("abc");
 
+    });
+
+    it('should load email and smtp options', async () => {
+        let options = new FultonAppOptions("loadTest", "api");
+
+        options.notification.email.set({
+            bcc: "bcc@server.com"
+        });
+
+        process.env[`loadTest.options.notification.email.sender`] = "sender@server.com"
+        process.env[`loadTest.options.notification.email.cc`] = "cc@server.com"
+
+        options.notification.email.smtp.set({
+            port: 123
+        })
+
+        process.env[`loadTest.options.notification.email.smtp.host`] = "host"
+        process.env[`loadTest.options.notification.email.smtp.secure`] = "true"
+        process.env[`loadTest.options.notification.email.smtp.auth.username`] = "username"
+        process.env[`loadTest.options.notification.email.smtp.auth.password`] = "password"
+
+        options.init();
+
+        expect(options.notification.email.sender).toEqual("sender@server.com");
+        expect(options.notification.email.cc).toEqual("cc@server.com");
+        expect(options.notification.email.bcc).toEqual("bcc@server.com");
+
+        expect(options.notification.email.smtp.host).toEqual("host");
+        expect(options.notification.email.smtp.port).toEqual(123);
+        expect(options.notification.email.smtp.secure).toEqual(true);
+        expect(options.notification.email.smtp.auth.username).toEqual("username");
+        expect(options.notification.email.smtp.auth.password).toEqual("password");
     });
 });

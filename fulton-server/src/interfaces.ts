@@ -208,6 +208,35 @@ export interface QueryParams {
     needAdjust?: boolean;
 }
 
+export interface EmailMessage {
+    /**
+     * the sender, if null, use the default sender.
+     */
+    from?: string;
+
+    /**
+     * the cc. if null, use the default cc.
+     */
+    cc?: string;
+
+    /**
+     * the bcc. if null, use the default bcc.
+     */
+    bcc?: string;
+
+    to: string | string[];
+
+    subject?: string;
+    subjectTemplateContent?: string;
+    subjectTemplateFilePath?: string;
+
+    body?:string;
+    bodyTemplateContent?: string;
+    bodyTemplateFilePath?: string;
+
+    attachments?: any[]
+}
+
 export type HttpMethod = "all" | "get" | "post" | "patch" | "delete" | "head" | "put";
 
 export type AppMode = "api" | "web-view" | "mixed";

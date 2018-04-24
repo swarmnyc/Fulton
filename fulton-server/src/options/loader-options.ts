@@ -16,43 +16,43 @@ export class LoaderOptions extends BaseOptions<LoaderOptions> {
      * default is the folder of the executed file like if run "node ./src/main.js",
      * the value of appDir is ./src/
      */
-    appDir: string;
+    appDir?: string;
 
     /**
      * if true, Fulton will load routers based on routerDirs automatically 
      * the default value is false
      * It can be overridden by process.env["{appName}.options.loader.routerLoaderEnabled"]
      */
-    routerLoaderEnabled: boolean = false;
+    routerLoaderEnabled?: boolean = false;
 
     /**
      * the folders that router-loader looks at, default value is ["routers"], 
      */
-    routerDirs: string[] = ["routers"];
+    routerDirs?: string[] = ["routers"];
 
     /**
      * the router loader (a function), loads all routers under the folders of routerDirs
      * default is FultonClassLoader
      */
-    routerLoader: FultonClassLoader<Router>;
+    routerLoader?: FultonClassLoader<Router>;
 
     /**
      * if true, Fulton will load services based on serviceDirs automatically 
      * the default value is false
      * It can be overridden by process.env["{appName}.options.loader.serviceLoaderEnabled"]
      */
-    serviceLoaderEnabled: boolean = false;
+    serviceLoaderEnabled?: boolean = false;
 
     /**
      * the folders that service-loader looks at, default value is ["services"], 
      */
-    serviceDirs: string[] = ["services"];
+    serviceDirs?: string[] = ["services"];
 
     /**
      * the router loader (a function), loads all services under the folders of all serviceDirs
      * default is FultonClassLoader
      */
-    serviceLoader: FultonClassLoader<Service>;
+    serviceLoader?: FultonClassLoader<Service>;
 
     init?(appName: string): void {
         if (this.appDir == null) {

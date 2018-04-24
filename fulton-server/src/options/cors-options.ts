@@ -7,9 +7,9 @@ export class CorsOptions extends BaseOptions<CorsOptions> {
     /**
      * if true, app will enable cors.
      * the default value is false
-     * It can be overridden by process.env["{appName}.options.cors.enabled]
+     * It can be overridden by env["{appName}.options.cors.enabled"]
      */
-    enabled: boolean = false;
+    enabled?: boolean = false;
 
     /**
      * the options for cors.

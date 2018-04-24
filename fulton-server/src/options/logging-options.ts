@@ -36,7 +36,7 @@ export class LoggingOptions extends BaseOptions<LoggingOptions> {
      * the default value is true
      * It can be overridden by env["${appName}.options.logging.httpLoggerEnabled"]
      */
-    httpLoggerEnabled: boolean = true;
+    httpLoggerEnabled?: boolean = true;
 
     /**
      * the options for http logger, it is winston options 

@@ -1,14 +1,15 @@
-import { BaseOptions } from '../../options/options';;
-import { Env } from '../../helpers';
-import { PathIdentifier, HttpMethod, Middleware } from '../../interfaces';
 import { AuthenticateOptions } from '../interfaces';
+import { BaseOptions } from '../../options/options';
+import { Env } from '../../helpers';
 import { FultonImpl } from '../fulton-impl/fulton-impl';
-
+import { HttpMethod, Middleware, PathIdentifier } from '../../interfaces';
+import { IdentityNotificationOptions } from './notification-Options';
 
 export class RegisterOptions extends BaseOptions<RegisterOptions> {
     /**
-         * the default value is true
-         */
+     * the default value is true
+     * it can be overridden by process.env["{appName}.options.identity.register.enabled"]
+     */
     enabled?: boolean = true;
 
     /**
@@ -74,9 +75,9 @@ export class RegisterOptions extends BaseOptions<RegisterOptions> {
 
     /**
      * verify password is valid or not
-     * the default value is /^\S{6,64}$/, any 4 to 64 non-whitespace characters
+     * the default value is /.{6,64}/, any 6 to 64 characters
      */
-    passwordVerifier?: RegExp | ((pw: string) => boolean) = /\S{6,64}/;
+    passwordVerifier?: RegExp | ((pw: string) => boolean) = /.{6,64}/;
 
     /**
      * the handler for register
@@ -91,8 +92,11 @@ export class RegisterOptions extends BaseOptions<RegisterOptions> {
     successCallback?: Middleware = FultonImpl.issueAccessToken;
 
     /**
+     * the options for response
      */
     responseOptions?: AuthenticateOptions;
+
+    readonly notiication = new IdentityNotificationOptions(this.appName, this.appMode, "register");
 
     init?(): void {
         this.enabled = Env.getBoolean(`${this.appName}.options.identity.register.enabled`, this.enabled);

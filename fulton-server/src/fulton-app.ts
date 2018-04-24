@@ -219,7 +219,7 @@ export abstract class FultonApp implements IFultonApp {
             /* end express middlewares */
 
             this.isInitialized = true;
-            this.events.emit(EventKeys.didInit, this);
+            this.events.emit(EventKeys.AppDidInit, this);
 
             fultonDebugMaster("app", "Initializing with options: %O\t", this.options)
         } catch (error) {
@@ -348,7 +348,7 @@ export abstract class FultonApp implements IFultonApp {
 
         this.express.disable('x-powered-by');
 
-        this.events.emit(EventKeys.didInitServer, this);
+        this.events.emit(EventKeys.AppDidInitServer, this);
     }
 
     protected initDiContainer(): void | Promise<void> {
@@ -370,13 +370,13 @@ export abstract class FultonApp implements IFultonApp {
             }
         }
 
-        this.events.emit(EventKeys.didInitLogging, this);
+        this.events.emit(EventKeys.AppDidInitLogging, this);
     }
 
     protected initProviders(): void | Promise<void> {
         this.registerTypes(this.options.providers || []);
 
-        this.events.emit(EventKeys.didInitProviders, this);
+        this.events.emit(EventKeys.AppDidInitProviders, this);
     }
 
     /**
@@ -396,7 +396,7 @@ export abstract class FultonApp implements IFultonApp {
             let promise: Promise<any> = (require("./identity/identity-initializer")(this));
 
             return promise.then(() => {
-                this.events.emit(EventKeys.didInitIdentity, this);
+                this.events.emit(EventKeys.AppDidInitIdentity, this);
             })
         } else {
             return;
@@ -421,7 +421,7 @@ export abstract class FultonApp implements IFultonApp {
             return router;
         });
 
-        this.events.emit(EventKeys.didInitRouters, this);
+        this.events.emit(EventKeys.AppDidInitRouters, this);
     }
 
     protected initHttpLogging(): void | Promise<void> {
@@ -432,7 +432,7 @@ export abstract class FultonApp implements IFultonApp {
                 this.express.use(defaultHttpLoggerHandler(this.options.logging.httpLoggerOptions));
             }
 
-            this.events.emit(EventKeys.didInitHttpLogging, this);
+            this.events.emit(EventKeys.AppDidInitHttpLogging, this);
         }
     }
 
@@ -456,7 +456,7 @@ export abstract class FultonApp implements IFultonApp {
                 })
             }
 
-            this.events.emit(EventKeys.didInitStaticFile, this);
+            this.events.emit(EventKeys.AppDidInitStaticFile, this);
         }
     }
 
@@ -468,7 +468,7 @@ export abstract class FultonApp implements IFultonApp {
                 this.express.use(cors(this.options.cors.options));
             }
 
-            this.events.emit(EventKeys.didInitCors, this);
+            this.events.emit(EventKeys.AppDidInitCors, this);
         }
     }
 
@@ -476,7 +476,7 @@ export abstract class FultonApp implements IFultonApp {
         if (lodash.some(this.options.middlewares)) {
             this.express.use(...this.options.middlewares);
 
-            this.events.emit(EventKeys.didInitMiddlewares, this);
+            this.events.emit(EventKeys.AppDidInitMiddlewares, this);
         }
     }
 
@@ -501,7 +501,7 @@ export abstract class FultonApp implements IFultonApp {
             });
         }
 
-        this.events.emit(EventKeys.didInitIndex, this);
+        this.events.emit(EventKeys.AppDidInitIndex, this);
     }
 
     protected initErrorHandler(): void | Promise<void> {
@@ -514,7 +514,7 @@ export abstract class FultonApp implements IFultonApp {
                 this.express.use(...this.options.errorHandler.errorMiddlewares);
             }
 
-            this.events.emit(EventKeys.didInitErrorHandler, this);
+            this.events.emit(EventKeys.AppDidInitErrorHandler, this);
         }
     }
 

@@ -5,7 +5,7 @@ import * as passwordHash from 'password-hash';
 import * as validator from 'validator';
 
 import { AccessToken, IFultonUser, IProfile, IUserRegister, IUserService } from "../interfaces";
-import { DiKeys, Request, Type, inject, injectable } from "../../interfaces";
+import { DiKeys, Request, Type, inject, injectable, EventKeys } from "../../interfaces";
 import { EntityManager, EntityRepository, MongoEntityManager, MongoRepository, Repository, getManager } from "typeorm";
 import { FultonAccessToken, FultonOauthToken, FultonUser } from './fulton-user';
 
@@ -228,6 +228,8 @@ export class FultonUserService implements IUserService<FultonUser> {
                 userId: user.id
             })
         }
+
+        this.app.events.emit(EventKeys.UserDidRegister, user);
 
         return user;
     }

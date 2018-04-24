@@ -17,26 +17,30 @@ export enum DiKeys {
 }
 
 export enum EventKeys {
-    didInit = "didInit",
-    didInitCors = "didInitCors",
-    didInitDatabases = "didInitDatabases",
-    didInitDiContainer = "didInitDiContainer",
-    didInitDocs = "didInitDocs",
-    didInitErrorHandler = "didInitErrorHandler",
-    didInitFormatter = "didInitFormatter",
-    didInitHttpLogging = "didInitHttpLogging",
-    didInitIdentity = "didInitIdentity",
-    didInitIndex = "didInitIndex",
-    didInitJsonApi = "didInitJsonApi",
-    didInitLogging = "didInitLogging",
-    didInitMiddlewares = "didInitMiddlewares",
-    didInitProviders = "didInitProviders",
-    didInitRepositories = "didInitRepositories",
-    didInitRouters = "didInitRouters",
-    didInitServer = "didInitServer",
-    didInitServices = "didInitServices",
-    didInitStaticFile = "didInitStaticFile",
-    onInitJsonApi = "onInitJsonApi",
+    AppDidInit = "AppDidInit",
+    AppDidInitCors = "AppDidInitCors",
+    AppDidInitDatabases = "AppDidInitDatabases",
+    AppDidInitDiContainer = "AppDidInitDiContainer",
+    AppDidInitDocs = "AppDidInitDocs",
+    AppDidInitErrorHandler = "AppDidInitErrorHandler",
+    AppDidInitFormatter = "AppDidInitFormatter",
+    AppDidInitHttpLogging = "AppDidInitHttpLogging",
+    AppDidInitIdentity = "AppDidInitIdentity",
+    AppDidInitIndex = "AppDidInitIndex",
+    AppDidInitJsonApi = "AppDidInitJsonApi",
+    AppDidInitLogging = "AppDidInitLogging",
+    AppDidInitMiddlewares = "AppDidInitMiddlewares",
+    AppDidInitProviders = "AppDidInitProviders",
+    AppDidInitRepositories = "AppDidInitRepositories",
+    AppDidInitRouters = "AppDidInitRouters",
+    AppDidInitServer = "AppDidInitServer",
+    AppDidInitServices = "AppDidInitServices",
+    AppDidInitStaticFile = "AppDidInitStaticFile",
+
+    UserDidRegister = "UserDidRegister",
+    
+    OnInitJsonApi = "OnInitJsonApi",
+
 }
 
 export interface AbstractType<T=any> extends Function {

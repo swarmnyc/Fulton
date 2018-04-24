@@ -365,7 +365,7 @@ export class IdentityOptions {
      */
     readonly defaultAuthSupportStrategies: string[] = [];
 
-    constructor(private appName: string, private appModel: AppMode) {
+    constructor(private appName: string, private appMode: AppMode) {
         this.defaultAuthorizes = [];
 
         this.accessToken = {
@@ -424,9 +424,9 @@ export class IdentityOptions {
             callbackAuthenticateFn: FultonImpl.oauthCallbackAuthenticateFn
         }
 
-        if (this.appModel == "api") {
+        if (this.appMode == "api") {
             this.bearer.enabled = true;
-        } else if (this.appModel == "web-view") {
+        } else if (this.appMode == "web-view") {
             this.bearer.enabled = false;
             this.register.responseOptions = {
                 failureRedirect: "/auth/register",
@@ -456,45 +456,24 @@ export class IdentityOptions {
     init() {
         let prefix = `${this.appName}.options.identity`;
 
-        let envValues = {
-            enabled: Env.getBoolean(`${prefix}.enabled`),
-            login: {
-                enabled: Env.getBoolean(`${prefix}.login.enabled`)
-            },
-            bearer: {
-                enabled: Env.getBoolean(`${prefix}.login.enabled`)
-            },
-            google: {
-                enabled: Env.getBoolean(`${prefix}.google.enabled`),
-                clientId: Env.get(`${prefix}.google.clientId`),
-                clientSecret: Env.get(`${prefix}.google.clientSecret`)
-            },
-            github: {
-                enabled: Env.getBoolean(`${prefix}.github.enabled`),
-                clientId: Env.get(`${prefix}.github.clientId`),
-                clientSecret: Env.get(`${prefix}.github.clientSecret`)
-            },
-            facebook: {
-                enabled: Env.getBoolean(`${prefix}.facebook.enabled`),
-                clientId: Env.get(`${prefix}.facebook.clientId`),
-                clientSecret: Env.get(`${prefix}.facebook.clientSecret`)
-            }
-        } as IdentityOptions;
+        this.enabled = Env.getBoolean(`${prefix}.enabled`, this.enabled)
+        this.login.enabled = Env.getBoolean(`${prefix}.login.enabled`, this.login.enabled)
 
-        let customer = (a: any, b: any): any => {
-            if (a == null && b == null) {
-                // lodash don't understand null
-                return undefined
-            }
+        this.bearer.enabled = Env.getBoolean(`${prefix}.bearer.enabled`, this.bearer.enabled)
 
-            if (typeof a == "object") {
-                return lodash.assignWith(a, b, customer);
-            } else {
-                return b == null ? a : b;
-            }
-        }
+        this.google.enabled = Env.getBoolean(`${prefix}.google.enabled`, this.google.enabled)
+        this.google.clientId = Env.get(`${prefix}.google.clientId`, this.google.clientId)
+        this.google.clientSecret = Env.get(`${prefix}.google.clientSecret`, this.google.clientSecret)
 
-        lodash.assignWith(this, envValues, customer);
+        this.github.enabled = Env.getBoolean(`${prefix}.github.enabled`, this.github.enabled)
+        this.github.clientId = Env.get(`${prefix}.github.clientId`, this.github.clientId)
+        this.github.clientSecret = Env.get(`${prefix}.github.clientSecret`, this.github.clientSecret)
+
+        this.facebook.enabled = Env.getBoolean(`${prefix}.facebook.enabled`, this.facebook.enabled)
+        this.facebook.clientId = Env.get(`${prefix}.facebook.clientId`, this.facebook.clientId)
+        this.facebook.clientSecret = Env.get(`${prefix}.facebook.clientSecret`, this.facebook.clientSecret)
+
+        this.register.init()
     }
 
     addStrategy(options: StrategyOptions | OAuthStrategyOptions, strategy: Strategy | Type<Strategy>) {

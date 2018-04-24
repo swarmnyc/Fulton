@@ -34,5 +34,5 @@ module.exports = function (app: FultonApp) {
         app.express.use(...app.options.formatter.customs);
     }
 
-    app.events.emit(EventKeys.didInitFormatter, app);
+    app.events.emit(EventKeys.AppDidInitFormatter, app);
 }

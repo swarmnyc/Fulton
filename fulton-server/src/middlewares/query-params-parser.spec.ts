@@ -1,4 +1,4 @@
-import { Request, Response } from "../interfaces";
+import { Request, Response, EventKeys } from "../interfaces";
 import { queryById, queryParamsParser } from "./query-params-parser";
 
 import { FultonApp } from '../fulton-app';
@@ -8,7 +8,7 @@ import { HttpTester } from "../test/http-tester";
 class MyApp extends FultonApp {
     protected onInit(options: FultonAppOptions): void | Promise<void> {
         this.options.index.enabled = false;
-        this.events.once("didInitRouters", () => {
+        this.events.once(EventKeys.AppDidInitRouters, () => {
             this.express.get("/", (req: Request, res: Response) => {  
                 delete req.queryParams.needAdjust          
                 res.send(req.queryParams);

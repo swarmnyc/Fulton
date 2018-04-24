@@ -22,7 +22,7 @@ module.exports = function (app: FultonApp) {
         return ctx.container.resolve(runner);
     }).inSingletonScope();
 
-    app.events.emit(EventKeys.didInitDiContainer, app);
+    app.events.emit(EventKeys.AppDidInitDiContainer, app);
 }
 
 /**

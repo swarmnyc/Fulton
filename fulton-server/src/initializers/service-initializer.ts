@@ -32,5 +32,5 @@ module.exports = async function (app: FultonApp) {
             .inSingletonScope()
     }
 
-    app.events.emit(EventKeys.didInitServices, this);
+    app.events.emit(EventKeys.AppDidInitServices, this);
 }

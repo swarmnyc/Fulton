@@ -16,7 +16,7 @@ module.exports = function (app: FultonApp) {
 
     // init jsonapi needs after initRouters, but middleware have to register before initRouters
     // so add a hook.
-    app.events.once("didInitRouters", (app) => {
+    app.events.once(EventKeys.AppDidInitRouters, (app) => {
         converter = initConverter(app);
     });
 
@@ -91,7 +91,7 @@ module.exports = function (app: FultonApp) {
 function initConverter(app: FultonApp): JsonApiConverter {
     let converter: JsonApiConverter = new JsonApiConverter();
 
-    app.events.emit(EventKeys.onInitJsonApi, app, converter);
+    app.events.emit(EventKeys.OnInitJsonApi, app, converter);
 
     app.entityMetadatas.forEach((metadata, type) => {
         let relatedToMetadata = metadata.relatedToMetadata;
@@ -152,7 +152,7 @@ function initConverter(app: FultonApp): JsonApiConverter {
         converter.register(type.name, options);
     })
 
-    app.events.emit(EventKeys.didInitJsonApi, app, converter);
+    app.events.emit(EventKeys.AppDidInitJsonApi, app, converter);
 
     return converter;
 }

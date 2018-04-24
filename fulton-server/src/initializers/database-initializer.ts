@@ -52,5 +52,5 @@ module.exports = async function (app: FultonApp): Promise<any> {
         }
     }
 
-    app.events.emit(EventKeys.didInitDatabases, app);
+    app.events.emit(EventKeys.AppDidInitDatabases, app);
 }

@@ -9,9 +9,11 @@ import { FultonStackError } from './common/fulton-error';
 export * from "./re-export"
 
 export enum DiKeys {
-    EntityServiceFactory = "__EntityServiceFactory__",
-    FultonApp = "__FultonApp__",
-    MongoEntityRunner = "__MongoEntityRunner__",
+    EntityServiceFactory = "EntityServiceFactory",
+    FultonApp = "FultonApp",
+    MongoEntityRunner = "MongoEntityRunner",
+    EmailService = "EmailService",
+    TemplateService = "TemplateService",
 }
 
 export enum EventKeys {
@@ -208,6 +210,21 @@ export interface QueryParams {
     needAdjust?: boolean;
 }
 
+export interface ITemplateService {
+    geneate(contentOrFilePath: string, variables: any): string;
+}
+
+export interface IEmailService {
+    send(message: EmailMessage): void
+}
+
+export interface NotificationMessage {
+    email: EmailMessage,
+
+    // TODO: sms message
+    sms: any;
+}
+
 export interface EmailMessage {
     /**
      * the sender, if null, use the default sender.
@@ -224,17 +241,37 @@ export interface EmailMessage {
      */
     bcc?: string;
 
+    /**
+     * the to
+     */
     to: string | string[];
 
+    /**
+     * if subjectTemplate is not null, app will generate subject by template
+     */
     subject?: string;
-    subjectTemplateContent?: string;
-    subjectTemplateFilePath?: string;
 
-    body?:string;
-    bodyTemplateContent?: string;
-    bodyTemplateFilePath?: string;
+    /**
+     * the subject template, it can be text or file path
+     */
+    subjectTemplate?: string;
 
-    attachments?: any[]
+    /**
+     * if bodyTemplate is not null, app will generate body by template
+     */
+    body?: string;
+
+    /**
+     * the body template, it can be text or file path
+     */
+    bodyTemplate?: string;
+
+    /**
+     * the variables for template
+     */
+    variables?: any;
+
+    attachments?: any[];
 }
 
 export type HttpMethod = "all" | "get" | "post" | "patch" | "delete" | "head" | "put";

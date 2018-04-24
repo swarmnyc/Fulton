@@ -7,7 +7,7 @@ import * as path from 'path';
 import * as fs from 'fs';
 import * as winston from 'winston';
 
-import { AppMode, DiContainer, DiKeys, ErrorMiddleware, EventKeys, Middleware, RepositoryFactory, Request, Response, Type, TypeIdentifier } from './interfaces';
+import { AppMode, DiContainer, DiKeys, ErrorMiddleware, EventKeys, Middleware, RepositoryFactory, Request, Response, Type, TypeIdentifier, NotificationMessage } from './interfaces';
 import { ClassProvider, FactoryProvider, FunctionProvider, Provider, TypeProvider, ValueProvider } from "./helpers/type-helpers";
 import { Connection, Repository, getRepository } from 'typeorm';
 import { IUser, IUserService } from "./identity/interfaces";
@@ -387,16 +387,7 @@ export abstract class FultonApp implements IFultonApp {
     }
 
     protected async initServices(): Promise<void> {
-        let providers = this.options.services || [];
-        if (this.options.loader.serviceLoaderEnabled) {
-            let dirs = this.options.loader.serviceDirs.map((dir) => path.join(this.options.loader.appDir, dir));
-            let loadedProviders = await this.options.loader.serviceLoader(dirs, true) as Provider[];
-            providers = loadedProviders.concat(providers);
-        }
-
-        this.registerTypes(providers);
-
-        this.events.emit(EventKeys.didInitServices, this);
+        return require('./initializers/service-initializer')(this);
     }
 
     protected initIdentity(): void | Promise<void> {
@@ -587,7 +578,8 @@ export abstract class FultonApp implements IFultonApp {
         return ids;
     }
 
-    // events
+    notify(...messages: NotificationMessage[]) {
+    }
 
     /**
      * to init the app. Env values for options will be loaded after onInit.

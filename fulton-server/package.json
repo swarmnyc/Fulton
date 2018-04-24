@@ -49,6 +49,7 @@
     "@types/request": "^2.0.13",
     "@types/validator": "^6.3.0",
     "@types/winston": "^2.3.7",
+    "angular-template": "^2.4.0",
     "debug": "^3.1.0",
     "google-auth-library": "^1.1.0",
     "jasmine": "^2.9.0",

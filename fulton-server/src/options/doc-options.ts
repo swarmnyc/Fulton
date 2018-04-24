@@ -35,8 +35,8 @@ export class DocOptions extends BaseOptions<DocOptions> {
      */
     info?: InfoObject;
 
-    init?(appName: string): void {
-        this.enabled = Env.getBoolean(`${appName}.options.docs.enabled`, this.enabled);
+    init?(): void {
+        this.enabled = Env.getBoolean(`${this.appName}.options.docs.enabled`, this.enabled);
 
         if (this.info == null) {
             // TODO: get more information

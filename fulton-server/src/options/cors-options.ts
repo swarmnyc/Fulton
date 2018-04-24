@@ -28,7 +28,7 @@ export class CorsOptions extends BaseOptions<CorsOptions> {
      */
     middlewares?: Middleware[] = []
 
-    init?(appName: string): void {
-        this.enabled = Env.getBoolean(`${appName}.options.cors.enabled`, this.enabled);
+    init?(): void {
+        this.enabled = Env.getBoolean(`${this.appName}.options.cors.enabled`, this.enabled);
     }
 }

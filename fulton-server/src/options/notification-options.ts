@@ -34,21 +34,21 @@ export class EmailOptions extends BaseOptions<EmailOptions>{
     /**
      * the options of SMTP
      */
-    readonly smtp?= new EmailSmtpOptions();
+    readonly smtp?= new EmailSmtpOptions(this.appName, this.appMode);
 
     /**
      * if the value is defiened, will use this value to create a transporter of nodemailer.
      */
     otherOptions?: any;
 
-    init?(appName: string): void {
-        this.enabled = Env.getBoolean(`${appName}.options.notification.email.enabled`, this.enabled);
+    init?(): void {
+        this.enabled = Env.getBoolean(`${this.appName}.options.notification.email.enabled`, this.enabled);
 
-        this.sender = Env.get(`${appName}.options.notification.email.sender`, this.sender);
-        this.cc = Env.get(`${appName}.options.notification.email.cc`, this.cc);
-        this.bcc = Env.get(`${appName}.options.notification.email.bcc`, this.bcc);
+        this.sender = Env.get(`${this.appName}.options.notification.email.sender`, this.sender);
+        this.cc = Env.get(`${this.appName}.options.notification.email.cc`, this.cc);
+        this.bcc = Env.get(`${this.appName}.options.notification.email.bcc`, this.bcc);
 
-        this.smtp.init(appName);
+        this.smtp.init();
     }
 }
 
@@ -90,16 +90,16 @@ export class EmailSmtpOptions extends BaseOptions<EmailSmtpOptions>{
         password?: string;
     };
 
-    init?(appName: string): void {
-        this.host = Env.get(`${appName}.options.notification.email.smtp.host`, this.host);
-        this.port = Env.getInt(`${appName}.options.notification.email.smtp.port`, this.port);
-        this.secure = Env.getBoolean(`${appName}.options.notification.email.smtp.secure`, this.secure);
+    init?(): void {
+        this.host = Env.get(`${this.appName}.options.notification.email.smtp.host`, this.host);
+        this.port = Env.getInt(`${this.appName}.options.notification.email.smtp.port`, this.port);
+        this.secure = Env.getBoolean(`${this.appName}.options.notification.email.smtp.secure`, this.secure);
 
-        var username = Env.get(`${appName}.options.notification.email.smtp.auth.username`);
-        var password = Env.get(`${appName}.options.notification.email.smtp.auth.password`);
+        var username = Env.get(`${this.appName}.options.notification.email.smtp.auth.username`);
+        var password = Env.get(`${this.appName}.options.notification.email.smtp.auth.password`);
 
         if (this.auth == null) this.auth = {}
-        
+
         if (username || password) {
             if (username) this.auth.username = username
             if (password) this.auth.password = password
@@ -108,12 +108,12 @@ export class EmailSmtpOptions extends BaseOptions<EmailSmtpOptions>{
 }
 
 export class NotificationOptions extends BaseOptions<NotificationOptions> {
-    readonly email = new EmailOptions();
+    readonly email = new EmailOptions(this.appName, this.appMode);
 
     //TODO: sms notification
     readonly sms?: {}
 
-    init?(appName: string): void {
-        this.email.init(appName);
+    init?(): void {
+        this.email.init();
     }
 }

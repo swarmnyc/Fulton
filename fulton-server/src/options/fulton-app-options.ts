@@ -15,6 +15,7 @@ import { NotificationOptions } from './notification-options';
 import { Provider } from '../helpers';
 import { ServerOptions } from './server-options';
 import { StaticFilesOptions } from './static-file-options';
+import { Options } from './options';
 
 export class FultonAppOptions {
     /**
@@ -122,43 +123,43 @@ export class FultonAppOptions {
      * `env["{appName}.options.database.{optionName}"]` is the shortcut of 
      * `env["{appName}.options.databases.default.{optionName}"]`
      */
-    readonly databases = new DatabaseOptions();
+    readonly databases = new DatabaseOptions(this.appName, this.appMode);
 
     /**
      * behavior for "/" request, only one of three methods can be activated at the same time.
      */
-    readonly index = new IndexOptions();
+    readonly index = new IndexOptions(this.appName, this.appMode);
 
     /**
      * error and 404 middlewares, they will be placed on the last.
      */
-    readonly errorHandler = new ErrorHandlerOptions();
+    readonly errorHandler = new ErrorHandlerOptions(this.appName, this.appMode);
 
     /**
      * request and response format
      */
-    readonly formatter = new FormatterOptions();
+    readonly formatter = new FormatterOptions(this.appName, this.appMode);
 
     /**
      * for loading modules automatically, default is disabled, 
      * because we want to use Angular style, define types explicitly
      */
-    readonly loader = new LoaderOptions();
+    readonly loader = new LoaderOptions(this.appName, this.appMode);
 
     /**
      * Logging options
      */
-    readonly logging = new LoggingOptions();
+    readonly logging = new LoggingOptions(this.appName, this.appMode);
 
     /**
      * the options for serving static files
      */
-    readonly staticFile = new StaticFilesOptions();
+    readonly staticFile = new StaticFilesOptions(this.appName, this.appMode);
 
     /**
      * app level cors middlewares
      */
-    readonly cors = new CorsOptions();
+    readonly cors = new CorsOptions(this.appName, this.appMode);
 
     /**
      * use swagger to serve docs, see https://swagger.io/specification/.
@@ -173,33 +174,31 @@ export class FultonAppOptions {
      * });
      * ```
      */
-    readonly docs = new DocOptions();
+    readonly docs = new DocOptions(this.appName, this.appMode);
 
     /**
      * the settings for http and https servers
      */
-    readonly server = new ServerOptions();
+    readonly server = new ServerOptions(this.appName, this.appMode);
 
-    readonly notification = new NotificationOptions();
+    readonly notification = new NotificationOptions(this.appName, this.appMode);
 
-    readonly miscellaneous = new MiscellaneousOptions();
+    readonly miscellaneous = new MiscellaneousOptions(this.appName, this.appMode);
 
     //TODO: implement compression
-    compression = {};
+    readonly compression = {};
 
-    constructor(private appName: string, private appMode: AppMode) {}
+    constructor(private appName: string, private appMode: AppMode) { }
 
     /**
      * init options and load values from environment
      */
     init() {
-        this.identity.init();
-
         for (const name of Object.getOwnPropertyNames(this)) {
-            var prop = lodash.get(this, name);
+            var prop: Options = lodash.get(this, name);
 
             if (prop && prop.init) {
-                prop.init(this.appName);
+                prop.init();
             }
         }
     }

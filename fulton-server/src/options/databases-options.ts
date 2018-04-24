@@ -2,8 +2,10 @@ import { ConnectionOptions, Repository } from 'typeorm';
 import { Helper } from '../helpers/helper';
 import { Options } from './options';
 
-export class DatabaseOptions implements Options {
+export class DatabaseOptions implements Options {    
     map: Map<string, ConnectionOptions> = new Map();
+
+    constructor(protected appName: string, protected appMode: string) {}
 
     get size(): number {
         return this.map.size;
@@ -31,9 +33,9 @@ export class DatabaseOptions implements Options {
         return this;
     }
 
-    init(appName: string): void {
-        let defaultReg = new RegExp(`^${appName}\\.options\\.database\\.(\\w+?)$`, "i");
-        let namedReg = new RegExp(`^${appName}\\.options\\.databases\\.(\\w+?)\\.(\\w+?)$`, "i");
+    init?(): void {
+        let defaultReg = new RegExp(`^${this.appName}\\.options\\.database\\.(\\w+?)$`, "i");
+        let namedReg = new RegExp(`^${this.appName}\\.options\\.databases\\.(\\w+?)\\.(\\w+?)$`, "i");
 
         for (const key in process.env) {
             let connName, propName, value;

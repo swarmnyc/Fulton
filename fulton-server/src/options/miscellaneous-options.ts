@@ -18,8 +18,8 @@ export class MiscellaneousOptions extends BaseOptions<MiscellaneousOptions> {
      */
     paginationSize?: number = 20;
 
-    init?(appName: string): void {
-        this.zoneEnabled = Env.getBoolean(`${appName}.options.miscellaneous.enabled`, this.zoneEnabled);
-        this.paginationSize = Env.getInt(`${appName}.options.miscellaneous.paginationSize`, this.paginationSize);
+    init?(): void {
+        this.zoneEnabled = Env.getBoolean(`${this.appName}.options.miscellaneous.enabled`, this.zoneEnabled);
+        this.paginationSize = Env.getInt(`${this.appName}.options.miscellaneous.paginationSize`, this.paginationSize);
     }
 }

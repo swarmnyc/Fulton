@@ -1,29 +1,45 @@
 import * as lodash from 'lodash';
-
-import { AppMode, HttpMethod, Middleware, PathIdentifier, Type } from "../interfaces";
-import { CustomStrategySettings, FacebookStrategyOptions, GoogleStrategyOptions, IUser, IUserService, LocalStrategyVerifier, OAuthStrategyOptions, OAuthStrategyVerifier, StrategyOptions, TokenStrategyVerifier } from './interfaces';
-
-import { AuthenticateOptions } from "passport";
-import { AuthorizeOptions } from "./authorizes-middlewares";
-import { Env } from "../helpers/env";
-import { FultonImpl } from "./fulton-impl/fulton-impl";
-import { FultonUser, FultonAccessToken, FultonOauthToken } from './fulton-impl/fulton-user';
+import {
+    AppMode,
+    HttpMethod,
+    Middleware,
+    PathIdentifier,
+    Type
+    } from '../interfaces';
+import { AuthenticateOptions } from 'passport';
+import { AuthorizeOptions } from './authorizes-middlewares';
+import {
+    CustomStrategySettings,
+    FacebookStrategyOptions,
+    GoogleStrategyOptions,
+    IUser,
+    IUserService,
+    LocalStrategyVerifier,
+    OAuthStrategyOptions,
+    OAuthStrategyVerifier,
+    StrategyOptions,
+    TokenStrategyVerifier
+    } from './interfaces';
+import { Env } from '../helpers/env';
+import { FultonAccessToken, FultonOauthToken, FultonUser } from './fulton-impl/fulton-user';
+import { FultonImpl } from './fulton-impl/fulton-impl';
 import { FultonUserService } from './fulton-impl/fulton-user-service';
-import { Repository } from "typeorm";
-import { Strategy } from "passport";
+import { RegisterOptions } from './options/register-options';
+import { Repository } from 'typeorm';
+import { Strategy } from 'passport';
 
 export class IdentityOptions {
     /**
      * the default value is false
      * It can be overridden by process.env["{appName}.options.identity.enabled"]
      */
-    enabled: boolean;
+    enabled: boolean = false;
 
     /**
      * the types of entities for registion, 
      * the default value is [FultonUser, FultonAccessToken, FultonOauthToken]
      */
-    entities: Type[];
+    entities: Type[] = [FultonUser, FultonAccessToken, FultonOauthToken];
 
     /**
      * the database connection name, the default value is "default"
@@ -40,7 +56,7 @@ export class IdentityOptions {
      * username-password and bearer token, then you don't need to change this value,
      * otherwise you have to custom your user service;
      */
-    userService: Type<IUserService<IUser>> | IUserService<IUser>;
+    userService: Type<IUserService<IUser>> | IUserService<IUser> = FultonUserService;
 
     /**
      * the options for access token
@@ -186,91 +202,7 @@ export class IdentityOptions {
      * }
      * ```
      */
-    register: {
-        /**
-         * the default value is true
-         */
-        enabled?: boolean;
-
-        /**
-         * the default value is /auth/login
-         */
-        path?: PathIdentifier;
-
-        /**
-         * the default value is `post`
-         */
-        httpMethod?: HttpMethod;
-
-        /**
-         * the default value email
-         */
-        emailField?: string;
-
-        /**
-         * the default value username
-         */
-        usernameField?: string;
-
-        /**
-         * the default value password
-         */
-        passwordField?: string;
-
-        /**
-         * the options for hash password
-         */
-        passwordHashOptions?: {
-            /** 
-             * the default value is sha256
-             */
-            algorithm?: string;
-            /**
-             * the default value is 8
-             */
-            saltLength?: number;
-            /**
-             * the default value is 1
-             */
-            iterations?: number;
-        }
-
-        session?: boolean;
-
-        /**
-         * accept other fields, like nickname or phone-number
-         * the default value is empty
-         */
-        otherFields?: string[];
-
-        /**
-         * verify password is valid or not
-         * the default value is /^[a-zA-Z0-9_-]{4,64}$/
-         */
-        usernameVerifier?: RegExp | ((username: string) => boolean);
-
-        /**
-         * verify password is valid or not
-         * the default value is /^\S{6,64}$/, any 4 to 64 non-whitespace characters
-         */
-        passwordVerifier?: RegExp | ((pw: string) => boolean);
-
-        /**
-         * the handler for register
-         * the default value is fultonDefaultRegisterHandler
-         */
-        handler?: Middleware;
-
-        /**
-         * either use successCallback or responseOptions for response
-         * the default value is sendAccessToken
-         */
-        successCallback?: Middleware;
-
-        /**
-         */
-        responseOptions?: AuthenticateOptions;
-    }
+    readonly register = new RegisterOptions()
 
     /**
      * the local strategy for login, fulton doesn't have html for login, 
@@ -391,8 +323,8 @@ export class IdentityOptions {
      * ## Require "google-auth-library" package ##
      * run `npm install google-auth-library` to install it
      * 
-     * clientId can be overridden by process.env["{appName}.options.identity.google.clientId"]
-     * clientSecret can be overridden by process.env["{appName}.options.identity.google.clientSecret"]
+     * clientId can be overridden by env["{appName}.options.identity.google.clientId"]
+     * clientSecret can be overridden by env["{appName}.options.identity.google.clientSecret"]
      */
     google: GoogleStrategyOptions;
 
@@ -405,8 +337,8 @@ export class IdentityOptions {
      * ## Require "passport-github" package ##
      * run `npm install passport-github` to install it
      * 
-     * clientId can be overridden by process.env["{appName}.options.identity.github.clientId"]
-     * clientSecret can be overridden by process.env["{appName}.options.identity.github.clientSecret"]
+     * clientId can be overridden by env["{appName}.options.identity.github.clientId"]
+     * clientSecret can be overridden by env["{appName}.options.identity.github.clientSecret"]
      */
     github: OAuthStrategyOptions;
 
@@ -420,8 +352,8 @@ export class IdentityOptions {
      * ## Require "passport-facebook" package ##
      * run `npm install passport-facebook` to install it
      * 
-     * clientId can be overridden by process.env["{appName}.options.identity.facebook.clientId"]
-     * clientSecret can be overridden by process.env["{appName}.options.identity.facebook.clientSecret"]
+     * clientId can be overridden by env["{appName}.options.identity.facebook.clientId"]
+     * clientSecret can be overridden by env["{appName}.options.identity.facebook.clientSecret"]
      */
     facebook: FacebookStrategyOptions;
 
@@ -434,12 +366,6 @@ export class IdentityOptions {
     readonly defaultAuthSupportStrategies: string[] = [];
 
     constructor(private appName: string, private appModel: AppMode) {
-        this.enabled = false;
-
-        this.userService = FultonUserService;
-
-        this.entities = [FultonUser, FultonAccessToken, FultonOauthToken]
-
         this.defaultAuthorizes = [];
 
         this.accessToken = {
@@ -451,24 +377,6 @@ export class IdentityOptions {
 
         this.defaultAuthenticate = FultonImpl.defaultAuthenticate;
         this.defaultAuthenticateErrorIfFailure = false;
-
-        this.register = {
-            enabled: true,
-            path: "/auth/register",
-            httpMethod: "post",
-            usernameField: "username",
-            passwordField: "password",
-            emailField: "email",
-            usernameVerifier: /^[a-zA-Z0-9_-]{4,64}$/,
-            passwordVerifier: /\S{6,64}/,
-            passwordHashOptions: {
-                algorithm: "sha256"
-            },
-            session: false,
-            otherFields: [],
-            handler: FultonImpl.registerHandler,
-            successCallback: FultonImpl.issueAccessToken
-        };
 
         this.login = {
             enabled: true,
@@ -550,9 +458,6 @@ export class IdentityOptions {
 
         let envValues = {
             enabled: Env.getBoolean(`${prefix}.enabled`),
-            register: {
-                enabled: Env.getBoolean(`${prefix}.register.enabled`)
-            },
             login: {
                 enabled: Env.getBoolean(`${prefix}.login.enabled`)
             },

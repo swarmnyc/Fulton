@@ -62,11 +62,11 @@ export class LoggingOptions extends BaseOptions<LoggingOptions> {
      */
     httpLoggerMiddlewares?: Middleware[] = [];
 
-    init?(appName: string): void {
-        this.defaultLoggerLevel = Env.get(`${appName}.options.logging.defaultLoggerLevel`, this.defaultLoggerLevel) as any;
-        this.defaultLoggerColorized = Env.getBoolean(`${appName}.options.logging.defaultLoggerColorized`, this.defaultLoggerColorized);
+    init?(): void {
+        this.defaultLoggerLevel = Env.get(`${this.appName}.options.logging.defaultLoggerLevel`, this.defaultLoggerLevel) as any;
+        this.defaultLoggerColorized = Env.getBoolean(`${this.appName}.options.logging.defaultLoggerColorized`, this.defaultLoggerColorized);
 
-        this.httpLoggerEnabled = Env.getBoolean(`${appName}.options.logging.httpLoggerEnabled`, this.httpLoggerEnabled);
+        this.httpLoggerEnabled = Env.getBoolean(`${this.appName}.options.logging.httpLoggerEnabled`, this.httpLoggerEnabled);
 
         if (this.httpLoggerOptions == null) {
             this.httpLoggerOptions = {

@@ -53,15 +53,15 @@ export class ServerOptions extends BaseOptions<ServerOptions> {
      */
     clusterWorkerNumber?: number
 
-    init?(appName: string): void {
-        this.httpEnabled = Env.getBoolean(`${appName}.options.server.httpEnabled`, this.httpEnabled);
-        this.httpsEnabled = Env.getBoolean(`${appName}.options.server.httpsEnabled`, this.httpsEnabled);
+    init?(): void {
+        this.httpEnabled = Env.getBoolean(`${this.appName}.options.server.httpEnabled`, this.httpEnabled);
+        this.httpsEnabled = Env.getBoolean(`${this.appName}.options.server.httpsEnabled`, this.httpsEnabled);
         
-        this.httpPort = Env.getInt(`${appName}.options.server.httpPort`, this.httpPort);
-        this.httpsPort = Env.getInt(`${appName}.options.server.httpsPort`, this.httpsPort);
+        this.httpPort = Env.getInt(`${this.appName}.options.server.httpPort`, this.httpPort);
+        this.httpsPort = Env.getInt(`${this.appName}.options.server.httpsPort`, this.httpsPort);
 
-        this.clusterEnabled = Env.getBoolean(`${appName}.options.server.clusterEnabled`, this.clusterEnabled);
-        this.clusterWorkerNumber = Env.getInt(`${appName}.options.server.clusterWorkerNumber`, this.clusterWorkerNumber);
+        this.clusterEnabled = Env.getBoolean(`${this.appName}.options.server.clusterEnabled`, this.clusterEnabled);
+        this.clusterWorkerNumber = Env.getInt(`${this.appName}.options.server.clusterWorkerNumber`, this.clusterWorkerNumber);
         
     }
 }

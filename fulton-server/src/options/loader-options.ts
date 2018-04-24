@@ -54,13 +54,13 @@ export class LoaderOptions extends BaseOptions<LoaderOptions> {
      */
     serviceLoader?: FultonClassLoader<Service>;
 
-    init?(appName: string): void {
+    init?(): void {
         if (this.appDir == null) {
             this.appDir = path.dirname(process.mainModule.filename)
         }
 
-        this.routerLoaderEnabled = Env.getBoolean(`${appName}.options.loader.routerLoaderEnabled`, this.routerLoaderEnabled);
-        this.serviceLoaderEnabled = Env.getBoolean(`${appName}.options.loader.serviceLoaderEnabled`, this.serviceLoaderEnabled);
+        this.routerLoaderEnabled = Env.getBoolean(`${this.appName}.options.loader.routerLoaderEnabled`, this.routerLoaderEnabled);
+        this.serviceLoaderEnabled = Env.getBoolean(`${this.appName}.options.loader.serviceLoaderEnabled`, this.serviceLoaderEnabled);
 
         if (this.routerLoaderEnabled && this.routerLoader == null) {
             this.routerLoader = defaultClassLoader(Router)

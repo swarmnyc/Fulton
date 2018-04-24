@@ -49,7 +49,7 @@ export class StaticFilesOptions extends BaseOptions<StaticFilesOptions> {
         middleware: Middleware;
     }[] = []
 
-    init?(appName: string): void {
-        this.enabled = Env.getBoolean(`${appName}.options.staticFile.enabled`, this.enabled);
+    init?(): void {
+        this.enabled = Env.getBoolean(`${this.appName}.options.staticFile.enabled`, this.enabled);
     }
 }

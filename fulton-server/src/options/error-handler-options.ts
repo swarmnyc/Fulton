@@ -14,7 +14,7 @@ export class ErrorHandlerOptions extends BaseOptions<ErrorHandlerOptions> {
      */
     error404Middlewares?: Middleware[] = []
 
-    init?(appName: string): void {
+    init?(): void {
         if (this.error404Middlewares || this.error404Middlewares.length == 0) {
             this.errorMiddlewares = [defaultErrorHandler]
         }

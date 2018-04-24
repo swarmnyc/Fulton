@@ -186,7 +186,7 @@ export abstract class FultonApp implements IFultonApp {
             await this.initDiContainer();
 
             await this.onInit(this.options);
-            this.options.loadEnvOptions();
+            this.options.init();
 
             await this.initLogging();
 

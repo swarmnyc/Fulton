@@ -545,7 +545,7 @@ export class IdentityOptions {
     /**
      * load options from environment to override the current options 
      */
-    loadEnvOptions() {
+    init() {
         let prefix = `${this.appName}.options.identity`;
 
         let envValues = {

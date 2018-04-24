@@ -5,10 +5,10 @@ import { Env } from "../helpers";
 
 export class LoggingOptions extends BaseOptions<LoggingOptions> {
     /**
-         * the default logger logging level
-         * default is "info"
-         * It can be overridden by env["{appName}.options.logging.defaultLoggerLevel"]
-         */
+     * the default logger logging level
+     * default is "info"
+     * It can be overridden by env["{appName}.options.logging.defaultLoggerLevel"]
+     */
     defaultLoggerLevel?: FultonLoggerLevel;
 
     /**

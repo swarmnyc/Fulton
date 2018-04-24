@@ -67,7 +67,7 @@ describe('Fulton App Options', () => {
         process.env[`test.options.database.authSource`] = "true."
         process.env[`test.options.database.port`] = "80"
 
-        options.loadEnvOptions();
+        options.init();
 
         let dbOptions = options.databases.get("default") as MongoConnectionOptions;
         expect(dbOptions).toBeTruthy();
@@ -85,7 +85,7 @@ describe('Fulton App Options', () => {
         process.env[`test.options.databases.test.authSource`] = "true."
         process.env[`test.options.databases.test.port`] = "80"
 
-        options.loadEnvOptions();
+        options.init();
 
         let dbOptions = options.databases.get("test") as MongoConnectionOptions;
         expect(dbOptions).toBeTruthy();
@@ -99,7 +99,7 @@ describe('Fulton App Options', () => {
         process.env[`test.options.databases.test2.authSource`] = "true."
         process.env[`test.options.databases.test2.port`] = "80"
 
-        options.loadEnvOptions();
+        options.init();
 
         dbOptions = options.databases.get("test2") as MongoConnectionOptions;
         expect(dbOptions).toBeTruthy();
@@ -119,7 +119,7 @@ describe('Fulton App Options', () => {
 
         process.env[`test.options.databases[test3].url`] = "http://test"
 
-        options.loadEnvOptions();
+        options.init();
 
         let dbOptions = options.databases.get("test3") as MongoConnectionOptions;
         expect(dbOptions).toBeTruthy();
@@ -137,7 +137,7 @@ describe('Fulton App Options', () => {
         process.env[`loadTest.options.identity.google.clientId`] = "cda"
         process.env[`loadTest.options.identity.google.clientSecret`] = "cda"
 
-        options.loadEnvOptions();
+        options.init();
 
         expect(options.identity.google.clientId).toEqual("cda");
         expect(options.identity.google.clientSecret).toEqual("cda");

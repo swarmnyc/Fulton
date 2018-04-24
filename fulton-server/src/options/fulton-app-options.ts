@@ -3,17 +3,16 @@ import * as lodash from 'lodash';
 import {
     AppMode,
     Middleware,
-    PathIdentifier,
     Type
-} from '../interfaces';
-import { CorsOptions } from 'cors';
+    } from '../interfaces';
+import { CorsOptions } from './cors-options';
 import { DatabaseOptions } from './databases-options';
+import { DocOptions } from './doc-options';
 import { Env } from '../helpers/env';
 import { ErrorHandlerOptions } from './error-handler-options';
 import { FormatterOptions } from './formatter-options';
 import { IdentityOptions } from '../identity/identity-options';
 import { IndexOptions } from './index-options';
-import { InfoObject } from '@loopback/openapi-spec';
 import { LoaderOptions } from './loader-options';
 import { LoggingOptions } from './logging-options';
 import { Provider } from '../helpers';
@@ -161,31 +160,7 @@ export class FultonAppOptions {
     /**
      * app level cors middlewares
      */
-    cors: {
-        /**
-         * if true, app will enable cors.
-         * the default value is false
-         * It can be overridden by process.env["{appName}.options.cors.enabled]
-         */
-        enabled: boolean;
-
-        /**
-         * the options for cors.
-         * the default value is null, 
-         * this value will be ignored if middlewares is not empty.
-         * 
-         * ## equivalent
-         * ```
-         * app.use(cors.static(options))
-         * ```
-         */
-        options?: CorsOptions;
-
-        /**
-         * custom middlewares for cors
-         */
-        middlewares?: Middleware[]
-    }
+    cors = new CorsOptions();
 
     /**
      * use swagger to serve docs, see https://swagger.io/specification/.
@@ -200,38 +175,7 @@ export class FultonAppOptions {
      * });
      * ```
      */
-    docs: {
-        /**
-         * if true, app will enable docs.
-         * the default value is false
-         * It can be overridden by process.env["{appName}.options.docs.enabled]
-         */
-        enabled?: boolean;
-
-        /**
-         * the path for docs
-         * the default value is /docs
-         */
-        path?: PathIdentifier;
-
-        /** 
-         * the access key for the docs, if provided, to access the docs needs key on the url
-         * for example `http://localhost:3000/docs?key=the-key`
-         * the default value is empty
-        */
-        accessKey?: string;
-
-        /**
-         * use the specific swagger format json file, if you don't want to use Fulton generate docs
-         * the default value is empty
-         */
-        docsFilePath?: string;
-
-        /**        
-         * the information of the app. default values are from package.json
-         */
-        info?: InfoObject;
-    }
+    docs = new DocOptions()
 
     /**
      * the settings for http and https servers
@@ -335,35 +279,16 @@ export class FultonAppOptions {
             clusterWorkerNumber: null
         };
 
-        this.cors = {
-            enabled: false,
-            options: null,
-            middlewares: []
-        };
-
         this.settings = {
             paginationSize: 20,
             zoneEnabled: true
-        }
-
-        // TODO: get more information
-        let info = require(global.process.cwd() + "/package.json");
-
-        this.docs = {
-            enabled: false,
-            path: "/docs",
-            info: {
-                title: info.displayName || info.name,
-                description: info.description,
-                version: info.version
-            }
         }
     }
 
     /**
      * load options from environment to override the current options 
      */
-    loadEnvOptions() {
+    init() {
         let prefix = `${this.appName}.options`;
 
         let envValues = {
@@ -374,9 +299,6 @@ export class FultonAppOptions {
                 httpsPort: Env.getInt(`${prefix}.server.httpsPort`),
                 clusterEnabled: Env.getBoolean(`${prefix}.server.clusterEnabled`),
                 clusterWorkerNumber: Env.getInt(`${prefix}.server.clusterWorkerNumber`)
-            },
-            cors: {
-                enabled: Env.getBoolean(`${prefix}.cors.enabled`)
             }
         } as FultonAppOptions;
 
@@ -399,7 +321,7 @@ export class FultonAppOptions {
 
         lodash.assignWith(this, envValues, customer);
 
-        this.identity.loadEnvOptions();
+        this.identity.init();
 
         for (const name of Object.getOwnPropertyNames(this)) {
             var prop = lodash.get(this, name);

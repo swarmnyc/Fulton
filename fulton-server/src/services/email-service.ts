@@ -1,10 +1,6 @@
 import * as mailer from 'nodemailer';
-import {
-    DiKeys,
-    EmailMessage,
-    IEmailService,
-    ITemplateService
-} from '../interfaces';
+import { DiKeys } from '../keys';
+import { EmailMessage, IEmailService, ITemplateService } from '../interfaces';
 import { FultonLog } from '../fulton-log';
 import { Options as SmtpOptions } from 'nodemailer/lib/smtp-transport';
 import { Options as MailOptions } from 'nodemailer/lib/mailer';

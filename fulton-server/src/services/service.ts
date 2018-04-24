@@ -1,6 +1,6 @@
-import { DiContainer, DiKeys, Type, inject, injectable } from "../interfaces";
-
-import { IFultonApp } from "../fulton-app";
+import { DiContainer, inject, injectable, Type } from '../interfaces';
+import { DiKeys } from '../keys';
+import { IFultonApp } from '../fulton-app';
 
 /**
  * Fulton Service

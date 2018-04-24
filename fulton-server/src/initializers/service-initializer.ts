@@ -1,5 +1,5 @@
 import * as path from 'path';
-import { EventKeys, DiKeys } from '../interfaces';
+import { EventKeys, DiKeys } from '../keys';
 import { FultonApp } from '../fulton-app';
 import { Provider } from '../helpers';
 import { EmailService } from '../services/email-service';

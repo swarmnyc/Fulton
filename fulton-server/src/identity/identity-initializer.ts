@@ -1,16 +1,15 @@
-import * as passport from 'passport';
 import * as lodash from 'lodash';
-
-import { Type, DiKeys } from '../interfaces';
-import { IStrategyOptionsWithRequest, Strategy as LocalStrategy } from 'passport-local';
-import { Strategy } from 'passport';
-import { IUser, IUserService, IFultonUser } from './interfaces';
-
-import { Strategy as BearerStrategy } from 'passport-http-bearer';
-import { FultonApp } from "../fulton-app";
+import * as passport from 'passport';
+import { DiKeys } from '../keys';
+import { FultonApp } from '../fulton-app';
 import { getRepository } from 'typeorm';
 import { GoogleStrategy } from './strategies/google-strategy';
 import { Helper } from '../helpers/helper';
+import { IFultonUser, IUser, IUserService } from './interfaces';
+import { IStrategyOptionsWithRequest, Strategy as LocalStrategy } from 'passport-local';
+import { Strategy as BearerStrategy } from 'passport-http-bearer';
+import { Strategy } from 'passport';
+import { Type } from '../interfaces';
 
 module.exports = async function identityInitializer(app: FultonApp) {
     let idOptions = app.options.identity;
@@ -124,7 +123,7 @@ module.exports = async function identityInitializer(app: FultonApp) {
                     profileFields: opts.profileFields
                 },
                 profileTransformer: (profile: any) => {
-                    let email;                    
+                    let email;
                     if (profile.emails instanceof Array && profile.emails.length > 0) {
                         email = profile.emails[0].value
                     } else {

@@ -1,15 +1,14 @@
-import * as qs from "qs";
-import * as url from "url";
-
-import { JsonApiConverter, JsonApiData, JsonApiLinks, JsonApiRootLinks, JsonApiSerializeOptions, JsonApiTypeOptions } from "../helpers/jsonapi-converter";
-import { NextFunction, OperationOneResult, OperationManyResult, QueryParams, Request, Response, Type, EventKeys } from '../interfaces';
-
+import * as qs from 'qs';
+import * as url from 'url';
 import { EntityRouter } from '../routers/entity-router';
-import { FultonApp } from "../fulton-app";
-import { MimeTypes } from "../constants";
-import { OperationResultPagination } from "../interfaces";
-import { Router } from '../routers/router';
+import { EventKeys } from '../keys';
+import { FultonApp } from '../fulton-app';
 import { Helper } from '../helpers/helper';
+import { JsonApiConverter, JsonApiData, JsonApiLinks, JsonApiRootLinks, JsonApiSerializeOptions, JsonApiTypeOptions } from '../helpers/jsonapi-converter';
+import { MimeTypes } from '../constants';
+import { NextFunction, OperationManyResult, OperationOneResult, QueryParams, Request, Response, Type } from '../interfaces';
+import { OperationResultPagination } from '../interfaces';
+import { Router } from '../routers/router';
 
 module.exports = function (app: FultonApp) {
     let converter: JsonApiConverter;

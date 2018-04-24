@@ -7,7 +7,8 @@ import * as path from 'path';
 import * as fs from 'fs';
 import * as winston from 'winston';
 
-import { AppMode, DiContainer, DiKeys, ErrorMiddleware, EventKeys, Middleware, RepositoryFactory, Request, Response, Type, TypeIdentifier, NotificationMessage } from './interfaces';
+import { EventKeys, DiKeys } from "./keys"
+import { AppMode, DiContainer, ErrorMiddleware, Middleware, RepositoryFactory, Request, Response, Type, TypeIdentifier, NotificationMessage } from './interfaces';
 import { ClassProvider, FactoryProvider, FunctionProvider, Provider, TypeProvider, ValueProvider } from "./helpers/type-helpers";
 import { Connection, Repository, getRepository } from 'typeorm';
 import { IUser, IUserService } from "./identity/interfaces";

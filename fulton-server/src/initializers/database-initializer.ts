@@ -1,8 +1,8 @@
 import * as lodash from 'lodash';
 
 import { Connection, ConnectionOptions, createConnections } from "typeorm";
-import { EventKeys, Type } from '../interfaces';
-
+import { Type } from '../interfaces';
+import { EventKeys } from "../keys"
 import { FultonApp } from '../fulton-app';
 import { FultonLog } from "../fulton-log";
 import { getRelatedToMetadata } from '../entities/entity-decorators-helpers';

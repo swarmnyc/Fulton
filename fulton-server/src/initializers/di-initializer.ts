@@ -1,10 +1,10 @@
-import { Container, interfaces } from "inversify";
-import { DiKeys, EntityServiceFactory, RepositoryFactory, Type, EventKeys } from '../interfaces';
-import { MongoRepository, Repository, getConnection, getRepository } from "typeorm";
-
+import { Container, interfaces } from 'inversify';
+import { DiKeys, EventKeys } from '../keys';
 import { EntityService } from '../entities';
-import { FultonApp } from "../fulton-app";
-import { getRepositoryMetadata } from "../entities/repository-decorator-helper";
+import { EntityServiceFactory, RepositoryFactory, Type } from '../interfaces';
+import { FultonApp } from '../fulton-app';
+import { getConnection, getRepository, MongoRepository, Repository } from 'typeorm';
+import { getRepositoryMetadata } from '../entities/repository-decorator-helper';
 
 module.exports = function (app: FultonApp) {
     app.container = new Container();

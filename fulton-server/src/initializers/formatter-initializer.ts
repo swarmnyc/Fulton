@@ -1,11 +1,11 @@
 import * as express from 'express';
 import * as lodash from 'lodash';
-
 import { EntityService } from '../entities';
-import { FultonApp } from "../fulton-app";
+import { EventKeys } from '../keys';
+import { FultonApp } from '../fulton-app';
 import { MimeTypes } from '../constants';
-import { Type, EventKeys } from '../interfaces';
 import { queryParamsParser } from '../middlewares/query-params-parser';
+import { Type } from '../interfaces';
 
 module.exports = function (app: FultonApp) {
     if (app.options.formatter.json) {

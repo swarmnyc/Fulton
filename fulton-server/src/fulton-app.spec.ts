@@ -1,11 +1,10 @@
-import { DiContainer, DiKeys, inject, injectable } from './interfaces';
-import { Env, Factory } from './helpers';
-import { Router, router } from './routers';
-
-import { EntityService } from './entities';
 import { FultonApp } from './fulton-app';
-import { FultonAppOptions } from './options/fulton-app-options';
 import { FultonLog } from './fulton-log';
+import { Env, Factory } from './helpers';
+import { DiContainer, inject, injectable } from './interfaces';
+import { DiKeys } from './keys';
+import { FultonAppOptions } from './options/fulton-app-options';
+import { Router, router } from './routers';
 import { Service } from './services/service';
 
 @injectable()

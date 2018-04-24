@@ -1,9 +1,9 @@
-import { FullEntityRouterMetadata, getFullEntityRouterActionMetadata } from "./route-decorators-helpers";
-import { httpDelete, httpGet, httpPatch, httpPost } from "./route-decorators";
-import { IEntityService, injectable, NextFunction, OperationOneResult, OperationManyResult, OperationResult, Request, Response, EntityServiceFactory, DiKeys } from "../interfaces";
-
-import { EntityService } from "../entities/entity-service";
-import { Router } from "./router";
+import { DiKeys } from '../keys';
+import { EntityService } from '../entities/entity-service';
+import { EntityServiceFactory, IEntityService, injectable, NextFunction, OperationManyResult, OperationOneResult, OperationResult, Request, Response } from '../interfaces';
+import { FullEntityRouterMetadata, getFullEntityRouterActionMetadata } from './route-decorators-helpers';
+import { httpDelete, httpGet, httpPatch, httpPost } from './route-decorators';
+import { Router } from './router';
 
 @injectable()
 export abstract class EntityRouter<TEntity> extends Router {

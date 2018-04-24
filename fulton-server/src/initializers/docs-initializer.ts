@@ -1,13 +1,12 @@
 import * as fs from 'fs';
 import * as lodash from 'lodash';
-
-import { DefinitionsObject, OpenApiSpec, OperationObject, ParameterObject, ParametersDefinitionsObject, PathItemObject, PathsObject, ResponseObject, SchemaObject } from '@loopback/openapi-spec';
-import { EventKeys, Middleware, NextFunction, PathIdentifier, Request, Response, Type } from '../interfaces';
 import { column, entity, manyToMany } from '../re-export';
-
+import { DefinitionsObject, OpenApiSpec, OperationObject, ParameterObject, ParametersDefinitionsObject, PathItemObject, PathsObject, ResponseObject, SchemaObject } from '@loopback/openapi-spec';
 import { EntityRouter } from '../routers/entity-router';
-import { FultonApp } from "../fulton-app";
+import { EventKeys } from '../keys';
+import { FultonApp } from '../fulton-app';
 import { Helper } from '../helpers/helper';
+import { Middleware, NextFunction, PathIdentifier, Request, Response, Type } from '../interfaces';
 import { MimeTypes } from '../constants';
 import { OAuthStrategyOptions } from '../identity/interfaces';
 

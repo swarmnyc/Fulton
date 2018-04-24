@@ -1,7 +1,8 @@
 import * as assert from "assert";
 import * as lodash from "lodash";
 
-import { ErrorMiddleware, Request, Response, Middleware, TypeIdentifier, DiKeys } from "../interfaces";
+import { ErrorMiddleware, Request, Response, Middleware, TypeIdentifier } from "../interfaces";
+import { DiKeys } from "../keys"
 import { FullRouterMetadata, RouterMetadata, getFullRouterActionMetadata } from "./route-decorators-helpers";
 import { DiContainer, PathIdentifier, inject, injectable } from "../interfaces";
 import { IRouterMatcher, Router as ExpressRouter } from "express";

@@ -3,17 +3,17 @@ import * as jws from 'jws';
 import * as lodash from 'lodash';
 import * as passwordHash from 'password-hash';
 import * as validator from 'validator';
-
-import { AccessToken, IFultonUser, IProfile, IUserRegister, IUserService } from "../interfaces";
-import { DiKeys, Request, Type, inject, injectable, EventKeys } from "../../interfaces";
-import { EntityManager, EntityRepository, MongoEntityManager, MongoRepository, Repository, getManager } from "typeorm";
-import { FultonAccessToken, FultonOauthToken, FultonUser } from './fulton-user';
-
+import { AccessToken, IFultonUser, IProfile, IUserRegister, IUserService } from '../interfaces';
+import { DiKeys, EventKeys } from '../../keys';
+import { EntityManager, EntityRepository, getManager, MongoEntityManager, MongoRepository, Repository } from 'typeorm';
 import { EntityMetadata } from 'typeorm/metadata/EntityMetadata';
-import { FultonError } from "../../common";
-import { IFultonApp } from "../../fulton-app";
+import { FultonAccessToken, FultonOauthToken, FultonUser } from './fulton-user';
+import { FultonError } from '../../common';
 import { IdentityOptions } from '../identity-options';
+import { IFultonApp } from '../../fulton-app';
+import { inject, injectable, Request, Type } from '../../interfaces';
 import { ObjectId } from 'bson';
+
 
 interface JWTPayload {
     id?: string;

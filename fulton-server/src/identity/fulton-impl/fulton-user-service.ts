@@ -11,7 +11,7 @@ import { FultonAccessToken, FultonOauthToken, FultonUser } from './fulton-user';
 import { FultonError } from '../../common';
 import { IdentityOptions } from '../identity-options';
 import { IFultonApp } from '../../fulton-app';
-import { inject, injectable, Request, Type } from '../../interfaces';
+import { inject, injectable, Request, Type, NotificationMessage } from '../../interfaces';
 import { ObjectId } from 'bson';
 
 
@@ -229,6 +229,7 @@ export class FultonUserService implements IUserService<FultonUser> {
             })
         }
 
+        this.sendWelcomeNotification(user)
         this.app.events.emit(EventKeys.UserDidRegister, user);
 
         return user;
@@ -406,5 +407,21 @@ export class FultonUserService implements IUserService<FultonUser> {
 
     private get cipherPassword(): string | Buffer {
         return this.options.accessToken.key || this.app.appName;
+    }
+
+    private sendWelcomeNotification(user: FultonUser) {
+        var opts = this.options.register.notiication
+        if (opts.email.enabled){
+            var message: NotificationMessage = {
+                email:{
+                    to : user.email,
+                    subjectTemplate : opts.email.subjectTemplate,
+                    bodyTemplate : opts.email.bodyTemplate,
+                    variables: user
+                }
+            }
+
+            this.app.sendNotifications(message);
+        }
     }
 }

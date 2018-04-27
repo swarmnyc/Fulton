@@ -183,15 +183,19 @@ export interface ITemplateService {
     geneate(contentOrFilePath: string, variables: any): string;
 }
 
-export interface IEmailService {
-    send(message: EmailMessage): Promise<void>
+export interface INotificationService {
+    send(...messages: NotificationMessage[]): Promise<void>
 }
 
 export interface NotificationMessage {
-    email: EmailMessage,
+    email?: EmailMessage,
 
     // TODO: sms message
-    sms: any;
+    sms?: any;
+}
+
+export interface IEmailService {
+    send(message: EmailMessage): Promise<void>
 }
 
 export interface EmailMessage {

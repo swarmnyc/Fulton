@@ -96,7 +96,7 @@ export class RegisterOptions extends BaseOptions<RegisterOptions> {
      */
     responseOptions?: AuthenticateOptions;
 
-    readonly notiication = new IdentityNotificationOptions(this.appName, this.appMode, "register");
+    readonly notiication? = new IdentityNotificationOptions(this.appName, this.appMode, "register");
 
     init?(): void {
         this.enabled = Env.getBoolean(`${this.appName}.options.identity.register.enabled`, this.enabled);

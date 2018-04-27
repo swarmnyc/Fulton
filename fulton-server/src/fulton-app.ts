@@ -8,7 +8,7 @@ import * as fs from 'fs';
 import * as winston from 'winston';
 
 import { EventKeys, DiKeys } from "./keys"
-import { AppMode, DiContainer, ErrorMiddleware, Middleware, RepositoryFactory, Request, Response, Type, TypeIdentifier, NotificationMessage } from './interfaces';
+import { AppMode, DiContainer, ErrorMiddleware, Middleware, RepositoryFactory, Request, Response, Type, TypeIdentifier, NotificationMessage, INotificationService } from './interfaces';
 import { ClassProvider, FactoryProvider, FunctionProvider, Provider, TypeProvider, ValueProvider } from "./helpers/type-helpers";
 import { Connection, Repository, getRepository } from 'typeorm';
 import { IUser, IUserService } from "./identity/interfaces";
@@ -68,6 +68,8 @@ export interface IFultonApp {
      * A shortcut to get typeorm repository
      */
     getRepository<T>(entity: Type, connectionName?: string): Repository<T>
+
+    sendNotifications(...messages: NotificationMessage[]): Promise<void>;
 }
 
 /**
@@ -341,6 +343,12 @@ export abstract class FultonApp implements IFultonApp {
 
     getRepository<T>(entity: Type, connectionName?: string): Repository<T> {
         return getRepository<T>(entity, connectionName);
+    }
+
+    sendNotifications(...messages: NotificationMessage[]): Promise<void> {
+        var service = this.container.get<INotificationService>(DiKeys.NotificationService);
+
+        return service.send(...messages);
     }
 
     protected initServer(): void | Promise<void> {

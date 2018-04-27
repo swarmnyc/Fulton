@@ -6,6 +6,14 @@ import { IEmailService } from '../../src/interfaces';
 class MyApp extends FultonApp {
     protected onInit(options: FultonAppOptions): void {
         // use aws ses
+        options.notification.email.enabled = true
+        options.identity.enabled = true
+
+        options.databases.set("default", {
+            type: "mongodb",
+            url: "mongodb://localhost:27017/fulton-test"
+        });
+
         options.notification.email.sender = process.env["stmp_sender"]
 
         options.notification.email.smtp.set({
@@ -15,19 +23,29 @@ class MyApp extends FultonApp {
                 username: process.env["stmp_username"],
                 password: process.env["stmp_password"]
             }
+        });
+
+
+        options.identity.register.notiication.set({
+            email: {
+                enabled: true,
+                subjectTemplate: "Welcome to Fulton",
+                bodyTemplate: "<h1>Hello {{username}}</h1><p> Thanks for your registration.</p>",
+            }
         })
-        options.docs.enabled = true;
     }
 }
 
-xdescribe('Email Service', () => {
+fdescribe('Email Service', () => {
     var app = new MyApp()
 
-    beforeAll(() => {
-        return app.init()
+    beforeAll(async () => {
+        await app.init();
+
+        app.connections[0].dropDatabase()
     })
 
-    it('should send email', async () => {
+    xit('should send email', async () => {
         var service: IEmailService = app.container.get(DiKeys.EmailService)
 
         await service.send({
@@ -39,5 +57,17 @@ xdescribe('Email Service', () => {
                 message: "Email Testing"
             }
         });
+    });
+
+    it('should send email welcome email',  (done) => {
+        app.userService.register({
+            username: "wade",
+            email: "wade@swarmnyc.com",
+            password: "abcd1234"
+        }).then(()=>{
+            setTimeout(function(){
+                done()
+            }, 1000)
+        })
     });
 });

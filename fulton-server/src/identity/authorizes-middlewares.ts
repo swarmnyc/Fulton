@@ -18,7 +18,7 @@ export interface AuthorizeOptions {
 }
 
 /**
- * check the request is authenticated.
+ * check the currect request is authorized.
  * @param options 
  */
 export function authorized(options?: AuthorizeOptions) {
@@ -53,7 +53,7 @@ export function authorizedByRole(role: string, options?: AuthorizeOptions) {
 }
 
 /**
- * authorize the current user has of the roles 
+ * authorize the current user has one of the roles 
  * @param roles 
  * @param options 
  */

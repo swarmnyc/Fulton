@@ -8,12 +8,10 @@ import { Service } from './service';
 import { Transporter } from 'nodemailer';
 
 export class EmailService extends Service implements IEmailService {
-    private inited: boolean = false;
     private templateService: ITemplateService;
     private transporter: Transporter;
 
-    init() {
-        this.inited = true;
+    onInit() {
         this.templateService = this.app.container.get(DiKeys.TemplateService);
 
         if (this.app.options.notification.email.otherOptions) {
@@ -33,8 +31,6 @@ export class EmailService extends Service implements IEmailService {
     }
 
     send(message: EmailMessage): Promise<void> {
-        if (!this.inited) this.init()
-
         return new Promise((resolve, reject) => {
             if (message.subjectTemplate) {
                 message.subject = this.templateService.geneate(message.subjectTemplate, message.variables)

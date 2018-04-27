@@ -10,18 +10,19 @@ import { getMongoRepository, getRepository, MongoRepository, Repository } from '
 import { Helper } from '../helpers/helper';
 import { IFultonApp } from '../fulton-app';
 import { IUser } from '../identity';
+import { Service } from '../services';
 import { validate, ValidationError } from 'class-validator';
 
 @injectable()
-export class EntityService<TEntity> implements IEntityService<TEntity> {
-    @inject(DiKeys.FultonApp)
-    protected app: IFultonApp;
+export class EntityService<TEntity> extends Service implements IEntityService<TEntity> {
     protected mainRepository: Repository<TEntity>
     private _runner: EntityRunner;
 
     constructor(entity: Type<TEntity>)
     constructor(mainRepository: Repository<TEntity>)
     constructor(input: Repository<TEntity> | Type<TEntity>) {
+        super()
+        
         if (input instanceof Repository) {
             this.mainRepository = input
         } else {

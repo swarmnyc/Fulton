@@ -113,5 +113,7 @@ export class RegisterOptions extends BaseOptions<RegisterOptions> {
                 successRedirect: "/"
             };
         }
+
+        this.notiication.init()
     }
 }

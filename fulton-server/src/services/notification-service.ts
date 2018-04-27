@@ -5,14 +5,19 @@ import { Service } from './service';
 import { EmailService } from './email-service';
 
 export class NotificationService extends Service implements INotificationService {
-    @inject(DiKeys.EmailService)
     emailService: IEmailService
+
+    onInit() {
+        if (this.app.options.notification.email.enabled) {
+            this.emailService = this.app.container.get(DiKeys.EmailService)
+        }
+    }
 
     send(...messages: NotificationMessage[]): Promise<any> {
         return new Promise((resolve, reject) => {
             var tasks: Promise<any>[] = []
             messages.forEach((msg) => {
-                if (this.app.options.notification.email.enabled && msg.email) {
+                if (this.emailService && msg.email) {
                     tasks.push(this.emailService.send(msg.email))
                 }
             });

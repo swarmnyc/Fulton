@@ -36,7 +36,7 @@ class MyApp extends FultonApp {
     }
 }
 
-fdescribe('Email Service', () => {
+xdescribe('Email Service', () => {
     var app = new MyApp()
 
     beforeAll(async () => {
@@ -45,7 +45,7 @@ fdescribe('Email Service', () => {
         app.connections[0].dropDatabase()
     })
 
-    xit('should send email', async () => {
+    it('should send email', async () => {
         var service: IEmailService = app.container.get(DiKeys.EmailService)
 
         await service.send({

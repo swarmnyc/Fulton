@@ -9,4 +9,7 @@ import { IFultonApp } from '../fulton-app';
 export abstract class Service {
     @inject(DiKeys.FultonApp)
     protected app: IFultonApp;
+
+    onInit(): void {
+    }
 }

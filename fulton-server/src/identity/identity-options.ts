@@ -202,7 +202,7 @@ export class IdentityOptions {
      * }
      * ```
      */
-    readonly register = new RegisterOptions()
+    readonly register = new RegisterOptions(this.appName, this.appMode)
 
     /**
      * the local strategy for login, fulton doesn't have html for login, 

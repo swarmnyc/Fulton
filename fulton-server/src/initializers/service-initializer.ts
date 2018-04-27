@@ -3,6 +3,7 @@ import { EventKeys, DiKeys } from '../keys';
 import { FultonApp } from '../fulton-app';
 import { Provider } from '../helpers';
 import { EmailService } from '../services/email-service';
+import { Service } from '../services/service';
 
 module.exports = async function (app: FultonApp) {
     let providers = app.options.services || [];
@@ -12,7 +13,7 @@ module.exports = async function (app: FultonApp) {
         providers = loadedProviders.concat(providers);
     }
 
-    app["registerTypes"](providers);
+    var ids = app["registerTypes"](providers, true);
 
     // add these services if one of notifications are enabled
     if (app.options.notification.email.enabled) {
@@ -21,7 +22,9 @@ module.exports = async function (app: FultonApp) {
             app.container
                 .bind(DiKeys.TemplateService)
                 .to(require("../services/template-service").TemplateService)
-                .inSingletonScope()
+                .inSingletonScope();
+
+            ids.push(DiKeys.TemplateService)
         }
 
         // add the default EMailService if there is no EMailService registered
@@ -29,17 +32,29 @@ module.exports = async function (app: FultonApp) {
             app.container
                 .bind(DiKeys.EmailService)
                 .to(require("../services/email-service").EmailService)
-                .inSingletonScope()
-        }
+                .inSingletonScope();
 
-        // add the default NotificationService if there is no NotificationService registered
-        if (!app.container.isBound(DiKeys.NotificationService)) {
-            app.container
-                .bind(DiKeys.NotificationService)
-                .to(require("../services/notification-service").NotificationService)
-                .inSingletonScope()
+            ids.push(DiKeys.EmailService)
         }
     }
+
+    // add the default NotificationService if there is no NotificationService registered
+    if (!app.container.isBound(DiKeys.NotificationService)) {
+        app.container
+            .bind(DiKeys.NotificationService)
+            .to(require("../services/notification-service").NotificationService)
+            .inSingletonScope();
+
+        ids.push(DiKeys.NotificationService)
+    }
+
+    // init services
+    ids.forEach((id) => {
+        var service = app.container.get<Service>(id);
+        if (service.onInit) {
+            service.onInit();
+        }
+    });
 
     app.events.emit(EventKeys.AppDidInitServices, this);
 }

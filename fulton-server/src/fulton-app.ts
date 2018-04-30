@@ -1,5 +1,6 @@
 import * as cors from 'cors';
 import * as express from "express";
+import * as compression from "compression";
 import * as http from 'http';
 import * as https from 'https';
 import * as lodash from 'lodash';
@@ -203,6 +204,8 @@ export abstract class FultonApp implements IFultonApp {
             await this.initHttpLogging();
 
             await this.initCors();
+
+            await this.initCompression();
 
             await this.initFormatter();
 
@@ -478,6 +481,18 @@ export abstract class FultonApp implements IFultonApp {
             }
 
             this.events.emit(EventKeys.AppDidInitCors, this);
+        }
+    }
+
+    protected initCompression(): void | Promise<void> {
+        if (this.options.compression.enabled) {
+            if (lodash.some(this.options.compression.middlewares)) {
+                this.express.use(...this.options.compression.middlewares);
+            } else {
+                this.express.use(compression(this.options.compression.options))
+            }
+
+            this.events.emit(EventKeys.AppDidInitCompression, this);
         }
     }
 

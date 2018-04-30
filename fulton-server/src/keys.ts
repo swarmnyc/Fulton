@@ -10,6 +10,7 @@ export enum DiKeys {
 export enum EventKeys {
     AppDidInit = "AppDidInit",
     AppDidInitCors = "AppDidInitCors",
+    AppDidInitCompression = "AppDidInitCompression",
     AppDidInitDatabases = "AppDidInitDatabases",
     AppDidInitDiContainer = "AppDidInitDiContainer",
     AppDidInitDocs = "AppDidInitDocs",

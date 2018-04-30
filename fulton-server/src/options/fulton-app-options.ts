@@ -16,6 +16,7 @@ import { Provider } from '../helpers';
 import { ServerOptions } from './server-options';
 import { StaticFilesOptions } from './static-file-options';
 import { Options } from './options';
+import { CompressionOptions } from './compression-options';
 
 export class FultonAppOptions {
     /**
@@ -185,8 +186,7 @@ export class FultonAppOptions {
 
     readonly miscellaneous = new MiscellaneousOptions(this.appName, this.appMode);
 
-    //TODO: implement compression
-    readonly compression = {};
+    readonly compression = new CompressionOptions(this.appName, this.appMode);
 
     constructor(private appName: string, private appMode: AppMode) { }
 

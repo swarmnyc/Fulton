@@ -18,7 +18,7 @@ export class CompressionOptions extends BaseOptions<CompressionOptions> {
      * 
      * ## equivalent
      * ```
-     * app.use(compression.static(options))
+     * app.use(compression(options))
      * ```
      */
     options?: CompressionOpts;

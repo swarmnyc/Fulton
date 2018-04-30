@@ -8,35 +8,42 @@ export interface IUser {
     [key: string]: any;
 }
 
-export interface IProfile {
-    email?: string;
+export interface IOauthProfile {
+    id?: string;
+    email: string;
     username?: string;
     portraitUrl?: string;
+    [key: string]: any;
 }
 
-export interface IUserRegister extends IUser {
+export interface RegisterModel {
     email?: string;
     username?: string;
     password?: string;
-    oauthToken?: AccessToken;
+    [key: string]: any;
 }
 
 export interface IFultonUser extends IUser {
     id?: string;
-    email?: string;
     username?: string;
-    displayName?: string;
     portraitUrl?: string;
-    hashedPassword?: string;
+    emails?: string[];
     roles?: string[];
+    registeredAt?: Date
 }
 
 export interface IUserService<T extends IUser> {
     currentUser: IUser;
     login(username: string, password: string): Promise<T>;
-    loginByOauth(token: AccessToken, profile: IProfile): Promise<T>;
+    /**
+     * There are 3 scenarios
+     * 1. userId is provided, add the oauth info to his identity
+     * 2. userId is not provided, add it is new oauth user, create a new user then, add the oauth info to his identity
+     * 3. userId is not provided, add it is existed oauth user, update the oauth info
+     */
+    loginByOauth(userId:string, token: AccessToken, profile: IOauthProfile): Promise<T>;
     loginByAccessToken(token: string): Promise<T>;
-    register(user: IUserRegister): Promise<T>;
+    register(input: RegisterModel): Promise<T>;
     issueAccessToken(user: T): Promise<AccessToken>;
     refreshAccessToken(token: string): Promise<AccessToken>;
     //revokeAccessToken(user: T): Promise<any>;
@@ -152,6 +159,11 @@ export interface OAuthStrategyOptions extends StrategyOptions {
      * this value is a shortcut of strategyOptions.scope
      */
     scope?: string | string[];
+
+    /**
+     * the data to carry
+     */
+    state?: string;
 
     /**
      * verify the oauth request.

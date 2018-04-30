@@ -4,38 +4,67 @@ import { Entity, ObjectIdColumn, Column, PrimaryColumn, PrimaryGeneratedColumn }
 @Entity("users")
 export class FultonUser implements IFultonUser {
     @PrimaryColumn()
-    id: string;
-
-    @Column({ unique: true, nullable: false, length: 256 })
-    email: string;
-
-    @Column({ unique: true, nullable: false, length: 256 })
-    username: string;
-
-    @Column({ length: 256, select: false })
-    hashedPassword?: string;
+    id: any;
 
     @Column({ length: 256 })
-    displayName: string;
+    username: string; // only for display
 
     @Column()
     portraitUrl: string;
 
-    @Column({})
+    @Column()
     roles: string[];
 
     @Column()
-    resetPasswordCode?: string;
+    emails: string[]; // only for notification
 
     @Column()
-    resetPasswordCodeExpiredAt?: Date;
+    registeredAt: Date;
+
+    @Column()
+    status: string;
 }
 
+@Entity("users_identities")
+export class FultonIdentity {
+    @PrimaryColumn()
+    id?: any;
+
+    @Column()    
+    userId: any;
+
+    @Column()    
+    type: string;
+
+    // for type is local
+    @Column({ length: 256 })
+    email?: string;
+    @Column({ length: 256 })
+    username?: string;
+    @Column({ length: 256 })
+    hashedPassword?: string;
+    @Column()
+    resetPasswordCode?: string;
+    @Column()
+    resetPasswordCodeExpiredAt?: Date;
+
+    // for type is oauth, only keep last tokens
+    @Column()    
+    sourceUserId?: string;
+    @Column()    
+    accessToken?: string;
+    @Column()    
+    refreshToken?: string;
+    @Column()    
+    issuedAt?: Date;
+    @Column()    
+    expiredAt?: Date;
+}
 
 @Entity("user_access_tokens")
 export class FultonAccessToken {
     @PrimaryColumn()
-    id?: string;
+    id?: any;
 
     @Column()    
     token?: string;
@@ -45,26 +74,6 @@ export class FultonAccessToken {
     expiredAt?: Date;
     @Column()    
     revoked?: boolean;
-
-    @Column()    
-    userId?: string;
-}
-
-@Entity("user_oauth_tokens")
-export class FultonOauthToken {
-    @PrimaryColumn()
-    id?: string;
-
-    @Column()    
-    provider?: string;
-    @Column()    
-    accessToken?: string;
-    @Column()    
-    refreshToken?: string;
-    @Column()    
-    issuedAt?: Date;
-    @Column()    
-    expiredAt?: Date;
 
     @Column()    
     userId?: string;

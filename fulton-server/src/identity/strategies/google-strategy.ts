@@ -62,9 +62,9 @@ export class GoogleStrategy extends Strategy {
                     }
 
                     profile = {
+                        id: payload.sub,
                         email: payload.email,
-                        username: payload.email,
-                        dispalyName: payload.name,
+                        username: payload.name,
                         portraitUrl: payload.picture
                     }
                 } else {
@@ -82,7 +82,8 @@ export class GoogleStrategy extends Strategy {
             // redirect
             let redirectUrl = oauthClient.generateAuthUrl({
                 access_type: options.accessType,
-                scope: options.scope
+                scope: options.scope,
+                state: options.state
             });
 
             fultonDebug("google", "google redirect url: %s", redirectUrl);

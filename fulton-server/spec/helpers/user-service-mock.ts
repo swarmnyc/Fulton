@@ -1,6 +1,6 @@
 import * as lodash from 'lodash';
 
-import { AccessToken, IUserRegister, IUserService } from '../../src/identity/interfaces';
+import { AccessToken, IUserService, RegisterModel, IOauthProfile } from '../../src/identity/interfaces';
 import { inject, injectable } from "../../src/interfaces";
 
 import { FultonApp } from "../../src/fulton-app";
@@ -39,8 +39,8 @@ export class UserServiceMock implements IUserService<FultonUser> {
         }
     }
 
-    loginByOauth(token: AccessToken, profile: FultonUser): Promise<FultonUser> {
-        return Promise.resolve(profile);
+    loginByOauth(userId: string, token: AccessToken, profile: IOauthProfile): Promise<FultonUser> {
+        return Promise.resolve(profile as any);
     }
 
     loginByAccessToken(token: string): Promise<FultonUser> {
@@ -56,7 +56,7 @@ export class UserServiceMock implements IUserService<FultonUser> {
         }
     }
 
-    register(input: IUserRegister): Promise<FultonUser> {
+    register(input: RegisterModel): Promise<FultonUser> {
         let error = new FultonError();
 
         let newUser = lodash.pick(input, ["username", "password", "email"]);

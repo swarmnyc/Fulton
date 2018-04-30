@@ -2,7 +2,7 @@ import * as lodash from 'lodash';
 import * as passport from 'passport';
 import * as url from 'url';
 
-import { AccessToken, IUser, IUserRegister, OAuthStrategyOptions, OAuthStrategyVerifier, OauthAuthenticateOptions, StrategyOptions, StrategyVerifyDone } from "../interfaces";
+import { AccessToken, IUser, OAuthStrategyOptions, OAuthStrategyVerifier, OauthAuthenticateOptions, StrategyOptions, StrategyVerifyDone } from "../interfaces";
 import { Middleware, NextFunction, Request, Response } from "../../interfaces";
 
 import { FultonApp } from '../../fulton-app';
@@ -93,6 +93,22 @@ export let FultonImpl = {
     },
 
     /**
+     * the wrapper for passport.authenticate, the purpose of it is that generate callbackUrl dynamically
+     * @param options 
+     */
+    oauthAuthenticateFn(options: OAuthStrategyOptions): Middleware {
+        return (req: Request, res: Response, next: NextFunction) => {
+            setCallbackUrl(req, options, options.authenticateOptions)
+
+            // if 
+            if (req.user) {
+                options.state = req.user.id;
+            }
+
+            passport.authenticate(options.name, options.authenticateOptions)(req, res, next);
+        }
+    },
+    /**
      * the wrapper of auth verifier, the purpose of it is to call req.userService.loginByOauth with the formated parameters.
      */
     oauthVerifierFn(options: OAuthStrategyOptions): OAuthStrategyVerifier {
@@ -107,25 +123,15 @@ export let FultonImpl = {
                 profile = options.profileTransformer(profile);
             }
 
+            var userId = req.query["state"];
+
             req.userService
-                .loginByOauth(token, profile)
+                .loginByOauth(userId, token, profile)
                 .then((user: IUser) => {
                     done(null, user);
                 }).catch((error: any) => {
                     done(error);
                 });
-        }
-    },
-
-    /**
-     * the wrapper for passport.authenticate, the purpose of it is that generate callbackUrl dynamically
-     * @param options 
-     */
-    oauthAuthenticateFn(options: OAuthStrategyOptions): Middleware {
-        return (req: Request, res: Response, next: NextFunction) => {
-            setCallbackUrl(req, options, options.authenticateOptions)
-
-            passport.authenticate(options.name, options.authenticateOptions)(req, res, next);
         }
     },
 

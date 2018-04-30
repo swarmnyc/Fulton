@@ -21,7 +21,7 @@ import {
     TokenStrategyVerifier
     } from './interfaces';
 import { Env } from '../helpers/env';
-import { FultonAccessToken, FultonOauthToken, FultonUser } from './fulton-impl/fulton-user';
+import { FultonAccessToken, FultonUser, FultonIdentity } from './fulton-impl/fulton-user';
 import { FultonImpl } from './fulton-impl/fulton-impl';
 import { FultonUserService } from './fulton-impl/fulton-user-service';
 import { RegisterOptions } from './options/register-options';
@@ -37,9 +37,9 @@ export class IdentityOptions {
 
     /**
      * the types of entities for registion, 
-     * the default value is [FultonUser, FultonAccessToken, FultonOauthToken]
+     * the default value is [FultonUser, FultonAccessToken, FultonIdentity]
      */
-    entities: Type[] = [FultonUser, FultonAccessToken, FultonOauthToken];
+    entities: Type[] = [FultonUser, FultonAccessToken, FultonIdentity];
 
     /**
      * the database connection name, the default value is "default"
@@ -80,14 +80,13 @@ export class IdentityOptions {
          * default is medium
          * 
          * if level is low, the jwt payload is un-encrypted and just verify the jwt token when authenticate
-         * if level is medium, the jwt payload is encrypted and just verify the jwt token when authenticate
-         * if level is hight, the jwt payload is encrypted and also check database when authenticate
+         * if level is medium, high, the jwt payload is encrypted 
          */
         secureLevel?: "low" | "medium" | "high";
 
         /**
-         * the scopes of access token
-         * default is "[profile, roles]"
+         * the scopes of access token, for examples, username, rolus, emails
+         * default is "[]"
          */
         scopes?: string[];
 
@@ -371,8 +370,7 @@ export class IdentityOptions {
         this.accessToken = {
             duration: 2592000,
             type: "bearer",
-            secureLevel: "medium",
-            scopes: ["profile", "roles"]
+            scopes: []
         }
 
         this.defaultAuthenticate = FultonImpl.defaultAuthenticate;

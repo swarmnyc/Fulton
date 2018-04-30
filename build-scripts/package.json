@@ -1,11 +1,12 @@
 {
   "name": "fulton-build-scripts",
-  "version": "0.0.18",
+  "version": "0.0.21-1",
   "scripts": {
     "build": "gulp build",
     "build:major": "gulp build --increaseType major",
     "build:minor": "gulp build --increaseType minor",
     "build:try": "gulp build:try",
+    "build:sp": "gulp build --snapshot",
     "publish": "gulp publish",
     "bp": "gulp build && gulp publish",
     "clean": "gulp clean",

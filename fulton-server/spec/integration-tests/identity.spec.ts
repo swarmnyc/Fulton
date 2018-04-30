@@ -5,13 +5,12 @@ import { AccessToken } from '../../src/identity/interfaces';
 import { FultonApp } from '../../src/fulton-app';
 import { FultonAppOptions } from '../../src/options/fulton-app-options';
 import { FultonLog } from '../../src/fulton-log';
+import { FultonUserService } from '../../src/identity/fulton-impl/fulton-user-service';
+import { ObjectId } from "bson";
 
 class MyApp extends FultonApp {
     protected onInit(options: FultonAppOptions): void {
         options.identity.enabled = true;
-        options.identity.google.enabled = true;
-        options.identity.google.clientId = "test"
-        options.identity.google.clientSecret = "test";
 
         options.databases.set("default", {
             type: "mongodb",
@@ -140,26 +139,13 @@ describe('Identity Integration Test', () => {
         expect(result.body).toEqual("no user");
     });
 
-    it('should google oauth login', async () => {
-        // should redirect        
-        let result1 = await httpTester.get("/auth/google", null, false);
-        expect(result1.response.headers.location).toContain("https://accounts.google.com/o/oauth2/v2/auth");
+    it('should decode access token', () => {
+        let userService = app.userService as FultonUserService
+        let token = "eyJhbGciOiJIUzI1NiJ9.ZzBDN1FTcEpIZmt1ekxuZUNQUFVnVDlHUmdJZXZUK3A2YVp3SVhnR2ZjR3pVeHFpTk9sYkpVeTJPVytPMkRHWg.BzCj8cfhs1HMRbqxCxT-EjphqIi-zSCV5riuGxhVYFE"
+        let payload = userService["decryptJwtToken"](token)
 
-        // should parse the code
-        let axios = require("axios");
-        let fakeToken = {
-            "access_token": "ya29.GmFPBQC7v1zToRKWCc5XD9qdqdnv090ZT2Grk",
-            "token_type": "Bearer",
-            "id_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJuYW1lIjoidGVzdCIsImVtYWlsIjoidGVzdEBnbWFpbC5jb20ifQ.9WpSTovz4JOgt_Sm4U9oNwplBENjIhyJcTLPM3yIk2Y",
-            "expiry_date": 1517087460847
-        };
-
-        spyOn(axios, "default").and.returnValue(Promise.resolve({ data: fakeToken }));
-        let result2 = await httpTester.get("/auth/google/callback?code=test");
-
-        let at: AccessToken = result2.body;
-        expect(at.access_token).toBeTruthy();
-        expect(at.token_type).toEqual("bearer");
-        expect(at.expires_in).toEqual(2592000);
-    });
+        expect(payload).toEqual({
+            id:new ObjectId("5ae7b4adefa5bd37d835d4ca") 
+        } as any);
+    })
 });

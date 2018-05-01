@@ -48,7 +48,7 @@ describe('Identity Integration Test', () => {
         return httpTester.start();
     });
 
-    afterAll(async () => {
+    afterAll(() => {
         return httpTester.stop();
     });
 
@@ -199,7 +199,7 @@ describe('Identity Integration Test', () => {
         expect(identityCount).toEqual(2)
     })
 
-    fit('should create fail to link user by oauth login', async () => {
+    it('should create fail to link user by oauth login', async () => {
         let userService = app.userService as FultonUserService
 
         let accessToken: AccessToken = {

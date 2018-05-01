@@ -265,7 +265,7 @@ describe('Identity local and bearer on UserServiceMock', () => {
         let result2 = await httpTester.get("/auth/google/callback?code=test");
 
         let at: AccessToken = result2.body;
-        expect(at.access_token).toEqual("test@gmail.com-accessToken");
+        expect(at.access_token).toEqual("test-accessToken");
     });
 
     it('should github oauth login', async () => {
@@ -289,6 +289,6 @@ describe('Identity local and bearer on UserServiceMock', () => {
         let result2 = await httpTester.get("/auth/github/callback?code=test");
 
         let at: AccessToken = result2.body;
-        expect(at.access_token).toEqual("test@test.com-accessToken");
+        expect(at.access_token).toEqual("test-accessToken");
     });
 });

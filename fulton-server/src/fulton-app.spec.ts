@@ -134,27 +134,6 @@ describe('Fulton App', () => {
         return app.init();
     })
 
-    it('should register class by self with transient', async () => {
-        let instance = app.container.get(ServiceB);
-
-        expect(instance).toBeTruthy();
-        expect(instance.value).toEqual("b");
-        expect(instance.serviceA.value).toEqual("a");
-
-        expect(instance != app.container.get(ServiceB)).toBeTruthy();
-    });
-
-    it('should register class by type with transient', async () => {
-
-        let instance = app.container.get(ServiceC);
-
-        expect(instance).toBeTruthy();
-        expect(instance.value).toEqual("d");
-        expect(instance.serviceA.value).toEqual("a");
-
-        expect(instance != app.container.get(ServiceC)).toBeTruthy();
-    });
-
     it('should register class by type with singleton', async () => {
 
         let instance = app.container.get<ServiceC>("ServiceC2");
@@ -186,18 +165,6 @@ describe('Fulton App', () => {
         expect(instance).toBeTruthy();
         expect(instance.value).toEqual("e");
         expect(instance.serviceA.value).toEqual("b");
-    });
-
-    it('should register class by function with transient', async () => {
-
-        let instance = app.container.get<ServiceC>("ServiceC3");
-
-        expect(instance).toBeTruthy();
-        expect(instance.value).toEqual("e");
-        expect(instance.serviceA.value).toEqual("b");
-
-        let instance2 = app.container.get<ServiceC>("ServiceC3");
-        expect(instance != instance2).toBeTruthy();
     });
 
     it('should register class by function with singleton', async () => {

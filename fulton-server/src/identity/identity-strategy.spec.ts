@@ -102,7 +102,7 @@ describe('Identity Custom Strategies', () => {
         let result2 = await httpTester.get("/test/google/callback?code=test");
 
         let at: AccessToken = result2.body;
-        expect(at.access_token).toEqual("test@gmail.com-accessToken");
+        expect(at.access_token).toEqual("test-accessToken");
     });
 
     it('should github oauth login', async () => {

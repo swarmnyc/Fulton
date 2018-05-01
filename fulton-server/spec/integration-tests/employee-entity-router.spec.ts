@@ -46,7 +46,7 @@ describe('EntityRouter Integration Test', () => {
         await MongoHelper.insertData(sampleData, true);
     });
 
-    afterAll(async () => {
+    afterAll(() => {
         return httpTester.stop();
     });
 

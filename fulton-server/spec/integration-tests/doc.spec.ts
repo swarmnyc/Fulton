@@ -86,7 +86,7 @@ describe('Doc Integration Test', () => {
         await httpTester.start();
     });
 
-    afterAll(async () => {
+    afterAll(() => {
         app.connections = [];
         return httpTester.stop();
     });

@@ -41,7 +41,7 @@ describe('EntityRouter Integration Test with Category', () => {
         await MongoHelper.insertData(lodash.pick(sampleData, ["categories"]), true);
     });
 
-    afterAll(async () => {
+    afterAll(() => {
         return httpTester.stop();
     });
 

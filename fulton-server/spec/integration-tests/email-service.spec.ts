@@ -45,6 +45,10 @@ describe('Email Service', () => {
         app.connections[0].dropDatabase()
     })
 
+    afterAll(() => {
+        return app.stop();
+    });
+
     it('should send email', async () => {
         var service: IEmailService = app.container.get(DiKeys.EmailService)
 

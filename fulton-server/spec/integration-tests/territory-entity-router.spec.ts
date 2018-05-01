@@ -102,7 +102,7 @@ describe('EntityRouter Integration Test with Territory', () => {
         await MongoHelper.insertData(lodash.pick(sampleData, ["territories", "categories"]), true);
     });
 
-    afterAll(async () => {
+    afterAll(() => {
         return httpTester.stop();
     });
 

@@ -141,16 +141,6 @@ describe('Identity Integration Test', () => {
         expect(result.body).toEqual("no user");
     });
 
-    it('should decode access token', () => {
-        let userService = app.userService as FultonUserService
-        let token = "eyJhbGciOiJIUzI1NiJ9.ZzBDN1FTcEpIZmt1ekxuZUNQUFVnVDlHUmdJZXZUK3A2YVp3SVhnR2ZjR3pVeHFpTk9sYkpVeTJPVytPMkRHWg.BzCj8cfhs1HMRbqxCxT-EjphqIi-zSCV5riuGxhVYFE"
-        let payload = userService["decryptJwtToken"](token)
-
-        expect(payload).toEqual({
-            id: new ObjectId("5ae7b4adefa5bd37d835d4ca")
-        } as any);
-    });
-
     // for oauth 
     it('should create a user by oauth login', async () => {
         let userService = app.userService as FultonUserService

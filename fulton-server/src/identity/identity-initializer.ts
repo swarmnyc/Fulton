@@ -96,9 +96,9 @@ module.exports = async function identityInitializer(app: FultonApp) {
                     }
 
                     let user: IFultonUser = {
+                        id: profile.id,
                         email: email,
-                        username: email,
-                        displayName: profile.displayName,
+                        username: profile.displayName,
                         portraitUrl: profile._json.avatar_url
                     };
 
@@ -130,11 +130,16 @@ module.exports = async function identityInitializer(app: FultonApp) {
                         email = profile.email;
                     }
 
+                    let portraitUrl;
+                    if (profile.photos instanceof Array && profile.photos.length > 0) {
+                        portraitUrl = profile.photos[0].value
+                    }
+
                     let user: IFultonUser = {
+                        id: profile.id,
                         email: email,
-                        username: email,
-                        displayName: profile.displayName,
-                        portraitUrl: profile.profileUrl
+                        username: profile.displayName,
+                        portraitUrl: portraitUrl
                     };
 
                     return user;
@@ -174,10 +179,10 @@ module.exports = async function identityInitializer(app: FultonApp) {
                 }
 
                 strategy = settings.strategy = new strategy(options.strategyOptions, options.verifier);
-            } 
+            }
 
             options.name = options.name || strategy.name;
-        
+
             if (options.addToDefaultAuthenticateList) {
                 idOptions.defaultAuthSupportStrategies.push(options.name);
             }
@@ -191,7 +196,7 @@ module.exports = async function identityInitializer(app: FultonApp) {
         // register strategies to passport and express
         for (const { options, strategy } of idOptions.strategies) {
             if (!options.enabled) continue;
-            
+
             // register to passport
             passport.use(options.name, strategy as Strategy);
 

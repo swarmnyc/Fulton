@@ -76,15 +76,6 @@ export class IdentityOptions {
         duration?: number;
 
         /**
-         * the security level of access token
-         * default is medium
-         * 
-         * if level is low, the jwt payload is un-encrypted and just verify the jwt token when authenticate
-         * if level is medium, high, the jwt payload is encrypted 
-         */
-        secureLevel?: "low" | "medium" | "high";
-
-        /**
          * the scopes of access token, for examples, username, rolus, emails
          * default is "[]"
          */
@@ -95,12 +86,6 @@ export class IdentityOptions {
          * default is app_name
          */
         secret?: string;
-
-        /**
-         * the aes key for encrypt and decrypt
-         * default is app_name
-         */
-        key?: string | Buffer;
     };
 
     /**
@@ -346,7 +331,7 @@ export class IdentityOptions {
      * path is `/auth/facebook`
      * callback is `/auth/facebook/callback`
      * scope is empty
-     * profileFields is ['id', 'displayName', 'profileUrl', 'email']
+     * profileFields is ['id', 'displayName', 'photos', 'email']
      * 
      * ## Require "passport-facebook" package ##
      * run `npm install passport-facebook` to install it
@@ -416,7 +401,7 @@ export class IdentityOptions {
             path: "/auth/facebook",
             callbackPath: "/auth/facebook/callback",
             strategyOptions: {},
-            profileFields: ['id', 'displayName', "profileUrl", 'email'],
+            profileFields: ['id', 'displayName', "photos", 'email'],
             verifierFn: FultonIdentityImpl.oauthVerifierFn,
             authenticateFn: FultonIdentityImpl.oauthAuthenticateFn,
             callbackAuthenticateFn: FultonIdentityImpl.oauthCallbackAuthenticateFn

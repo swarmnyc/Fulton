@@ -342,7 +342,7 @@ export class FultonUserService implements IUserService<FultonUser> {
     }
 
     async issueAccessToken(user: IFultonUser): Promise<AccessToken> {
-        let token = this.encryptJwtToken(user)
+        let token = this.encodeJwtToken(user)
 
         let userToken: FultonAccessToken = {
             token: token,
@@ -370,11 +370,7 @@ export class FultonUserService implements IUserService<FultonUser> {
     }
 
     private get jwtSecret(): string | Buffer {
-        return this.options.accessToken.key || this.app.appName;
-    }
-
-    private get cipherPassword(): string | Buffer {
-        return this.options.accessToken.key || this.app.appName;
+        return this.options.accessToken.secret || this.app.appName;
     }
 
     private sendWelcomeNotification(user: FultonUser) {
@@ -431,58 +427,29 @@ export class FultonUserService implements IUserService<FultonUser> {
         }
     }
 
-    private encryptJwtToken(user: IFultonUser): string {
+    private encodeJwtToken(user: IFultonUser): string {
         let payload: JWTPayload = {
             id: user.id
         };
 
         this.options.accessToken.scopes.forEach(scope => {
-            if (scope == "profile") {
-                payload.username = user.username;
-                payload.portraitUrl = user.portraitUrl;
-            }
-
             payload[scope] = user[scope];
         });
-
-        let cipher = crypto.createCipher("aes-128-ecb", this.cipherPassword);
-
-        var encryptedPayload;
-        if (this.options.accessToken.secureLevel == "low") {
-            // if level is low, the payload is plain text
-            encryptedPayload = payload
-        } else {
-            // if level greater than low, encrypt the payload 
-            // java only support aes 128
-            let cipher = crypto.createCipher("aes-128-ecb", this.cipherPassword)
-            encryptedPayload = cipher.update(JSON.stringify(payload), "utf8", "base64");
-            encryptedPayload += cipher.final("base64");
-        }
 
         var token = jws.sign({
             header: {
                 alg: "HS256"
             },
             secret: this.jwtSecret,
-            payload: encryptedPayload
+            payload: payload
         });
 
         return token
     }
 
-    private decryptJwtToken(token: string): JWTPayload {
+    private decodeJwtToken(token: string): JWTPayload {
         let jwt = jws.decode(token);
         let json;
-
-        if (typeof jwt.payload == "string" && jwt.payload.startsWith("{")) {
-            // plain text payload
-            json = jwt.payload
-        } else {
-            // aes encrypted payload
-            let decipher = crypto.createDecipher("aes-128-ecb", this.cipherPassword)
-            json = decipher.update(jwt.payload, "base64", "utf8");
-            json += decipher.final();
-        }
 
         var payload: JWTPayload = JSON.parse(json);
 

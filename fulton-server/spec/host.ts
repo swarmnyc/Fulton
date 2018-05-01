@@ -10,10 +10,13 @@ dotenv.config({ path: "./spec/secret.env" })
 //this file uses to test app for oauth
 class MyApp extends FultonApp {
     protected onInit(options: FultonAppOptions): void {
+        this["assetFolder"] = "../assets"
+        options.server.httpsEnabled = true;
+
         options.identity.enabled = true;
         options.identity.google.enabled = true;
-        options.identity.google.clientId = process.env["google_client_id"]
-        options.identity.google.clientSecret = process.env["google_client_secret"];
+        options.identity.github.enabled = true;
+        options.identity.facebook.enabled = true;
 
         options.databases.set("default", {
             type: "mongodb",
@@ -22,7 +25,7 @@ class MyApp extends FultonApp {
 
         // remove database
         this.events.once(EventKeys.AppDidInitDatabases, () => {
-            this.connections[0].dropDatabase();
+            //this.connections[0].dropDatabase();
         })
     }
 }

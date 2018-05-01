@@ -232,6 +232,10 @@ export interface OauthAuthenticateOptions extends AuthenticateOptions {
      */
     callbackUrl?: string;
     callbackURL?: string;
+    /**
+     * the data to carry
+     */
+    state?: string;
 }
 
 export interface CustomStrategySettings {

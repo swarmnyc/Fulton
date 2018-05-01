@@ -4,7 +4,7 @@ import { Request, Response } from "../interfaces";
 import { AccessToken } from './interfaces';
 import { FultonApp } from "../fulton-app";
 import { FultonAppOptions } from "../options/fulton-app-options";
-import { FultonImpl } from './fulton-impl/fulton-impl';
+import { FultonIdentityImpl } from './fulton-impl/fulton-impl';
 import { GoogleStrategy } from "./strategies/google-strategy";
 import { HttpTester } from "../test/http-tester";
 import { UserServiceMock } from "../../spec/helpers/user-service-mock";
@@ -21,8 +21,8 @@ class MyApp extends FultonApp {
             name: "login",
             path: "/test/login",
             httpMethod: "post",
-            verifier: FultonImpl.localStrategyVerifier,
-            successMiddleware: FultonImpl.issueAccessToken
+            verifier: FultonIdentityImpl.localStrategyVerifier,
+            successMiddleware: FultonIdentityImpl.issueAccessToken
         }, LocalStrategy);
 
         this.options.identity.addStrategy({
@@ -31,9 +31,9 @@ class MyApp extends FultonApp {
             scope: "profile email",
             clientId: "test",
             clientSecret: "test",
-            verifierFn: FultonImpl.oauthVerifierFn,
-            authenticateFn: FultonImpl.oauthAuthenticateFn,
-            callbackAuthenticateFn: FultonImpl.oauthCallbackAuthenticateFn
+            verifierFn: FultonIdentityImpl.oauthVerifierFn,
+            authenticateFn: FultonIdentityImpl.oauthAuthenticateFn,
+            callbackAuthenticateFn: FultonIdentityImpl.oauthCallbackAuthenticateFn
         }, GoogleStrategy);
 
         this.options.identity.addStrategy({
@@ -44,12 +44,12 @@ class MyApp extends FultonApp {
                 clientID: "test",
                 clientSecret: "test"
             },
-            verifierFn: FultonImpl.oauthVerifierFn,
-            authenticateFn: FultonImpl.oauthAuthenticateFn,
+            verifierFn: FultonIdentityImpl.oauthVerifierFn,
+            authenticateFn: FultonIdentityImpl.oauthAuthenticateFn,
             callbackAuthenticateOptions: {
                 successRedirect: "/"
             },
-            callbackAuthenticateFn: FultonImpl.oauthCallbackAuthenticateFn
+            callbackAuthenticateFn: FultonIdentityImpl.oauthCallbackAuthenticateFn
         }, require("passport-github").Strategy);
     }
 }

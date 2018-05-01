@@ -13,11 +13,13 @@ export class IdentityNotificationOptions extends BaseOptions<IdentityNotificatio
         enabled?: boolean;
         /**
          * the template for subject, the value can be text or filepath
+         * the default value is "Welcome to {appName}"
          */
         subjectTemplate?: string;
 
         /**
          * the template for body, the value can be text or filepath
+         * the default value is "./templates/email-welcome.html"
          */
         bodyTemplate?: string;
     }
@@ -29,7 +31,9 @@ export class IdentityNotificationOptions extends BaseOptions<IdentityNotificatio
     init?(): void {
         if (this.email == null) {
             this.email = {
-                enabled: true
+                enabled: true,
+                subjectTemplate: `Welcome to ${this.appName}`,
+                bodyTemplate: "./templates/email-welcome.html"
             }
         }
 

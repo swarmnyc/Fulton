@@ -46,16 +46,16 @@ interface IRunner {
 
 class MongoRunner implements IRunner {
     userRepository: MongoRepository<FultonUser>
-    identitiesRepository: MongoRepository<FultonIdentity>
+    identityRepository: MongoRepository<FultonIdentity>
     tokenRepository: MongoRepository<FultonAccessToken>
 
     constructor(private manager: MongoEntityManager) {
         this.userRepository = manager.getMongoRepository(FultonUser) as any
-        this.identitiesRepository = manager.getMongoRepository(FultonIdentity) as any
+        this.identityRepository = manager.getMongoRepository(FultonIdentity) as any
         this.tokenRepository = manager.getMongoRepository(FultonAccessToken) as any
 
         this.updateMetadata(this.userRepository.metadata);
-        this.updateMetadata(this.identitiesRepository.metadata);
+        this.updateMetadata(this.identityRepository.metadata);
         this.updateMetadata(this.tokenRepository.metadata);
     }
 
@@ -84,22 +84,22 @@ class MongoRunner implements IRunner {
     }
 
     addIdentity(identity: FultonIdentity): Promise<any> {
-        return this.identitiesRepository.insertOne(identity);
+        return this.identityRepository.insertOne(identity);
     }
 
     updateIdentity(identity: FultonIdentity): Promise<any> {
-        return this.identitiesRepository.save(identity);
+        return this.identityRepository.save(identity);
     }
 
     countUserName(name: string): Promise<number> {
-        return this.identitiesRepository.count({
+        return this.identityRepository.count({
             "type": "local",
             username: name,
         })
     }
 
     countUserEmail(email: string): Promise<number> {
-        return this.identitiesRepository.count({
+        return this.identityRepository.count({
             "type": "local",
             email: email,
         })
@@ -110,7 +110,7 @@ class MongoRunner implements IRunner {
     }
 
     async findUserByLocal(nameOrEmail: string, password: string): Promise<FultonUser> {
-        var id = await this.identitiesRepository.findOne({
+        var id = await this.identityRepository.findOne({
             "type": "local",
             "$or": [
                 { username: nameOrEmail },
@@ -126,7 +126,7 @@ class MongoRunner implements IRunner {
     }
 
     async findUserByOauth(type: string, sourceUserId: string): Promise<FultonUser> {
-        var id = await this.identitiesRepository.findOne({
+        var id = await this.identityRepository.findOne({
             "type": type,
             "sourceUserId": sourceUserId
         })
@@ -149,7 +149,7 @@ class MongoRunner implements IRunner {
     }
 
     findIdentity(type: string, sourceUserId: string): Promise<FultonIdentity> {
-        return this.identitiesRepository.findOne({
+        return this.identityRepository.findOne({
             "type": type,
             "sourceUserId": sourceUserId
         });

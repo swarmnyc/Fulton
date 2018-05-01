@@ -22,7 +22,7 @@ import {
     } from './interfaces';
 import { Env } from '../helpers/env';
 import { FultonAccessToken, FultonUser, FultonIdentity } from './fulton-impl/fulton-user';
-import { FultonImpl } from './fulton-impl/fulton-impl';
+import { FultonIdentityImpl } from './fulton-impl/fulton-impl';
 import { FultonUserService } from './fulton-impl/fulton-user-service';
 import { RegisterOptions } from './options/register-options';
 import { Repository } from 'typeorm';
@@ -257,7 +257,7 @@ export class IdentityOptions {
         /**
          * the function to find the user
          * 
-         * the default value is FultonImpl.localStrategyVerifier
+         * the default value is FultonIdentityImpl.localStrategyVerifier
          * 
          * ### customizing example
          * verifier = (req: Request, username: string, password: string, done: LocalStrategyVerifyDone) => {
@@ -274,7 +274,7 @@ export class IdentityOptions {
 
         /**
          * the middleware next to authenticate
-         * the default value is FultonImpl.successMiddleware
+         * the default value is FultonIdentityImpl.successMiddleware
          */
         successMiddleware?: Middleware;
 
@@ -373,19 +373,19 @@ export class IdentityOptions {
             scopes: []
         }
 
-        this.defaultAuthenticate = FultonImpl.defaultAuthenticate;
+        this.defaultAuthenticate = FultonIdentityImpl.defaultAuthenticate;
         this.defaultAuthenticateErrorIfFailure = false;
 
         this.login = {
             enabled: true,
             path: "/auth/login",
             httpMethod: "post",
-            verifier: FultonImpl.localStrategyVerifier,
-            successMiddleware: FultonImpl.issueAccessToken
+            verifier: FultonIdentityImpl.localStrategyVerifier,
+            successMiddleware: FultonIdentityImpl.issueAccessToken
         };
 
         this.bearer = {
-            verifier: FultonImpl.tokenStrategyVerifier
+            verifier: FultonIdentityImpl.tokenStrategyVerifier
         }
 
         this.google = {
@@ -395,9 +395,9 @@ export class IdentityOptions {
             accessType: "online",
             scope: "profile email",
             strategyOptions: {},
-            verifierFn: FultonImpl.oauthVerifierFn,
-            authenticateFn: FultonImpl.oauthAuthenticateFn,
-            callbackAuthenticateFn: FultonImpl.oauthCallbackAuthenticateFn
+            verifierFn: FultonIdentityImpl.oauthVerifierFn,
+            authenticateFn: FultonIdentityImpl.oauthAuthenticateFn,
+            callbackAuthenticateFn: FultonIdentityImpl.oauthCallbackAuthenticateFn
         }
 
         this.github = {
@@ -406,9 +406,9 @@ export class IdentityOptions {
             callbackPath: "/auth/github/callback",
             scope: "read:user user:email",
             strategyOptions: {},
-            verifierFn: FultonImpl.oauthVerifierFn,
-            authenticateFn: FultonImpl.oauthAuthenticateFn,
-            callbackAuthenticateFn: FultonImpl.oauthCallbackAuthenticateFn
+            verifierFn: FultonIdentityImpl.oauthVerifierFn,
+            authenticateFn: FultonIdentityImpl.oauthAuthenticateFn,
+            callbackAuthenticateFn: FultonIdentityImpl.oauthCallbackAuthenticateFn
         }
 
         this.facebook = {
@@ -417,9 +417,9 @@ export class IdentityOptions {
             callbackPath: "/auth/facebook/callback",
             strategyOptions: {},
             profileFields: ['id', 'displayName', "profileUrl", 'email'],
-            verifierFn: FultonImpl.oauthVerifierFn,
-            authenticateFn: FultonImpl.oauthAuthenticateFn,
-            callbackAuthenticateFn: FultonImpl.oauthCallbackAuthenticateFn
+            verifierFn: FultonIdentityImpl.oauthVerifierFn,
+            authenticateFn: FultonIdentityImpl.oauthAuthenticateFn,
+            callbackAuthenticateFn: FultonIdentityImpl.oauthCallbackAuthenticateFn
         }
 
         if (this.appMode == "api") {

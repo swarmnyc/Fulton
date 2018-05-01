@@ -26,9 +26,9 @@ function setCallbackUrl(req: Request, options: OAuthStrategyOptions, target: Oau
 }
 
 /**
- * Default Fulton Implements
+ * Default Fulton Identity Implementations
  */
-export let FultonImpl = {
+export let FultonIdentityImpl = {
     /**
      * for LocalStrategyVerify like login
      */
@@ -70,6 +70,10 @@ export let FultonImpl = {
         res.send(accessToken);
     },
 
+
+    /**
+     * the default authenticate middleware
+     */
     defaultAuthenticate(req: Request, res: Response, next: NextFunction) {
         // authenticate every request to get user info.
         passport.authenticate(req.fultonApp.options.identity.defaultAuthSupportStrategies,
@@ -100,9 +104,9 @@ export let FultonImpl = {
         return (req: Request, res: Response, next: NextFunction) => {
             setCallbackUrl(req, options, options.authenticateOptions)
 
-            // if 
+            // if there is a user, put userId on state
             if (req.user) {
-                options.state = req.user.id;
+                options.authenticateOptions.state = req.user.id.toString();
             }
 
             passport.authenticate(options.name, options.authenticateOptions)(req, res, next);
@@ -123,6 +127,7 @@ export let FultonImpl = {
                 profile = options.profileTransformer(profile);
             }
 
+            // if the state has value, it should be userId
             var userId = req.query["state"];
 
             req.userService
@@ -156,7 +161,7 @@ export let FultonImpl = {
                             if (options.callbackSuccessMiddleware) {
                                 options.callbackSuccessMiddleware(req, res, next);
                             } else {
-                                FultonImpl.issueAccessToken(req, res);
+                                FultonIdentityImpl.issueAccessToken(req, res);
                             }
                         }
                     });

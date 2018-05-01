@@ -1,12 +1,14 @@
 import { HttpResult, HttpTester } from "../../src/test/http-tester";
 import { Request, Response } from "../../src/interfaces";
 
-import { AccessToken } from '../../src/identity/interfaces';
+import { AccessToken, IOauthProfile } from '../../src/identity/interfaces';
 import { FultonApp } from '../../src/fulton-app';
 import { FultonAppOptions } from '../../src/options/fulton-app-options';
 import { FultonLog } from '../../src/fulton-log';
 import { FultonUserService } from '../../src/identity/fulton-impl/fulton-user-service';
 import { ObjectId } from "bson";
+import { getMongoRepository } from "typeorm";
+import { FultonUser, FultonIdentity, FultonAccessToken } from "../../src/identity";
 
 class MyApp extends FultonApp {
     protected onInit(options: FultonAppOptions): void {
@@ -85,8 +87,8 @@ describe('Identity Integration Test', () => {
         });
         expect(result.response.statusCode).toEqual(400);
 
-        expect(result.body.error.detail.username).toEqual([ { code: 'existed', message: "the username is existed" }]);
-        expect(result.body.error.detail.email).toEqual([ { code: 'existed', message: "the email is existed" }]);
+        expect(result.body.error.detail.username).toEqual([{ code: 'existed', message: "the username is existed" }]);
+        expect(result.body.error.detail.email).toEqual([{ code: 'existed', message: "the email is existed" }]);
     });
 
     it('should login successfully', async () => {
@@ -145,7 +147,89 @@ describe('Identity Integration Test', () => {
         let payload = userService["decryptJwtToken"](token)
 
         expect(payload).toEqual({
-            id:new ObjectId("5ae7b4adefa5bd37d835d4ca") 
+            id: new ObjectId("5ae7b4adefa5bd37d835d4ca")
         } as any);
+    });
+
+    // for oauth 
+    it('should create a user by oauth login', async () => {
+        let userService = app.userService as FultonUserService
+        let accessToken: AccessToken = {
+            provider: "TEST",
+            access_token: "TTEESSTT"
+        }
+        let profile: IOauthProfile = {
+            id: "test",
+            username: "test",
+            email: "test@test.com"
+        }
+
+        var user = await userService.loginByOauth(null, accessToken, profile);
+        expect(user).not.toBeNull()
+    
+        var userRepository = getMongoRepository(FultonUser)
+        var identityRepository = getMongoRepository(FultonIdentity)
+
+        var userCount = await userRepository.count()
+        var identityCount = await identityRepository.count()
+
+        expect(userCount).toEqual(1)
+        expect(identityCount).toEqual(1)
+    })
+
+    it('should create link to the user by oauth login', async () => {
+        let userService = app.userService as FultonUserService
+
+        var user1 = await userService.register({
+            username: "test",
+            email: "test@test.com",
+            password: "test1234"
+        })
+
+        let accessToken: AccessToken = {
+            provider: "TEST",
+            access_token: "TTEESSTT"
+        }
+        let profile: IOauthProfile = {
+            id: "test",
+            username: "test",
+            email: "test@test.com"
+        }
+
+        let user2 = await userService.loginByOauth(user1.id, accessToken, profile);
+        expect(user1.id).toEqual(user2.id)
+    
+        var userRepository = getMongoRepository(FultonUser)
+        var identityRepository = getMongoRepository(FultonIdentity)
+
+        var userCount = await userRepository.count()
+        var identityCount = await identityRepository.count()
+
+        expect(userCount).toEqual(1)
+        expect(identityCount).toEqual(2)
+    })
+
+    fit('should create fail to link user by oauth login', async () => {
+        let userService = app.userService as FultonUserService
+
+        let accessToken: AccessToken = {
+            provider: "TEST",
+            access_token: "TTEESSTT"
+        }
+
+        let profile: IOauthProfile = {
+            id: "test",
+            username: "test",
+            email: "test@test.com"
+        }
+
+        await userService.loginByOauth(null, accessToken, profile);
+
+        try {
+            await userService.loginByOauth("test-2", accessToken, profile);
+            fail()            
+        } catch (e) {
+            expect(e.error.code).toEqual("existed")
+        }
     })
 });

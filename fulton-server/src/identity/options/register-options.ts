@@ -1,7 +1,7 @@
 import { AuthenticateOptions } from '../interfaces';
 import { BaseOptions } from '../../options/options';
 import { Env } from '../../helpers';
-import { FultonImpl } from '../fulton-impl/fulton-impl';
+import { FultonIdentityImpl } from '../fulton-impl/fulton-impl';
 import { HttpMethod, Middleware, PathIdentifier } from '../../interfaces';
 import { IdentityNotificationOptions } from './notification-Options';
 
@@ -81,15 +81,15 @@ export class RegisterOptions extends BaseOptions<RegisterOptions> {
 
     /**
      * the handler for register
-     * the default value is FultonImpl.registerHandler
+     * the default value is FultonIdentityImpl.registerHandler
      */
-    handler?: Middleware = FultonImpl.registerHandler;
+    handler?: Middleware = FultonIdentityImpl.registerHandler;
 
     /**
      * either use successCallback or responseOptions for response
-     * the default value is FultonImpl.sendAccessToken
+     * the default value is FultonIdentityImpl.sendAccessToken
      */
-    successCallback?: Middleware = FultonImpl.issueAccessToken;
+    successCallback?: Middleware = FultonIdentityImpl.issueAccessToken;
 
     /**
      * the options for response

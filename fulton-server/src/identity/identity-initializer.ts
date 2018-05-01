@@ -149,12 +149,12 @@ module.exports = async function identityInitializer(app: FultonApp) {
             )
         }
 
-        // register strategies to passport and express
-        for (const { options, strategy } of idOptions.strategies) {
-            if (!options.enabled) continue;
+        // first just prepare variables
+        for (const settings of idOptions.strategies) {
+            if (!settings.options.enabled) continue;
 
-            // register passport
-            let instance: Strategy;
+            let options = settings.options;
+            let strategy = settings.strategy;
 
             if (strategy instanceof Function) {
                 lodash.defaultsDeep(options, {
@@ -173,14 +173,27 @@ module.exports = async function identityInitializer(app: FultonApp) {
                     options.verifier = options.verifierFn(options);
                 }
 
-                instance = new strategy(options.strategyOptions, options.verifier);
-            } else {
-                instance = strategy
+                strategy = settings.strategy = new strategy(options.strategyOptions, options.verifier);
+            } 
+
+            options.name = options.name || strategy.name;
+        
+            if (options.addToDefaultAuthenticateList) {
+                idOptions.defaultAuthSupportStrategies.push(options.name);
             }
+        }
 
-            options.name = options.name || instance.name;
+        // make defaultAuthenticate first, so other strategies can get the current user
+        if (idOptions.defaultAuthenticate && idOptions.defaultAuthSupportStrategies.length > 0) {
+            app.express.use(idOptions.defaultAuthenticate);
+        }
 
-            passport.use(options.name, instance);
+        // register strategies to passport and express
+        for (const { options, strategy } of idOptions.strategies) {
+            if (!options.enabled) continue;
+            
+            // register to passport
+            passport.use(options.name, strategy as Strategy);
 
             // register to express
             if (options.path) {
@@ -232,14 +245,6 @@ module.exports = async function identityInitializer(app: FultonApp) {
                 let httpMethod = app.express[options.callbackHttpMethod || "get"];
                 httpMethod.apply(app.express, [options.callbackPath, args]);
             }
-
-            if (options.addToDefaultAuthenticateList) {
-                idOptions.defaultAuthSupportStrategies.push(options.name);
-            }
-        }
-
-        if (idOptions.defaultAuthenticate && idOptions.defaultAuthSupportStrategies.length > 0) {
-            app.express.use(idOptions.defaultAuthenticate);
         }
     }
 }

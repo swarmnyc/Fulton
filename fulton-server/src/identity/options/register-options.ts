@@ -5,6 +5,36 @@ import { FultonIdentityImpl } from '../fulton-impl/fulton-impl';
 import { HttpMethod, Middleware, PathIdentifier } from '../../interfaces';
 import { IdentityNotificationOptions } from './notification-Options';
 
+/**
+ * the setting for register, fulton doesn't have html for register, 
+ * 
+ * for render html, you have to add a router
+ * 
+ * ## example for web view
+ * ```
+ * @router("/auth")
+ * export class AuthRouter extends Router {
+ *     @httpGet("/register")
+ *     registerView(req: Request, res: Response) {
+ *         res.render("register");
+ *     }
+ * 
+ *     // if you want to put all logics altogether
+ *     // you can set options.identity.register.enabled = false
+ *     // and add this action.
+ *     @httpPost("/register"))
+ *     register(req: Request, res: Response) {
+ *         req.userService
+ *            .register(req.body)
+ *            .then(async(user)=> {
+ *                  res.redirect("/");
+ *            .catch(()=>{
+ *                  res.sendStatus(400);
+ *            });   
+ *     }
+ * }
+ * ```
+ */
 export class RegisterOptions extends BaseOptions<RegisterOptions> {
     /**
      * the default value is true

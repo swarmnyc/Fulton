@@ -53,25 +53,27 @@ describe('Email Service', () => {
         var service: IEmailService = app.container.get(DiKeys.EmailService)
 
         await service.send({
-            to: '"Wade" wade@swarmnyc.com',
+            to: process.env["tester_email"],
             subjectTemplate: "Hello {{username}}, this is testing email",
             bodyTemplate: "<h1>Hello {{username}}</h1><p>{{message}}</p>",
             variables: {
-                username: "Wade",
+                username: "Tester",
                 message: "Email Testing"
             }
         });
     });
 
-    it('should send email welcome email',  (done) => {
+    it('should send email welcome email', (done) => {
         app.userService.register({
-            username: "wade",
-            email: "wade@swarmnyc.com",
+            username: "Tester",
+            email: process.env["tester_email"],
             password: "abcd1234"
-        }).then(()=>{
-            setTimeout(function(){
+        }).then(() => {
+            setTimeout(function () {
                 done()
             }, 1000)
+        }).catch((err) => {
+            fail(err)
         })
     });
 });

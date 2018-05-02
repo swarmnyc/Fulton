@@ -1,5 +1,5 @@
 import { DiContainer, QueryParams } from "./interfaces";
-import { IUser, IUserService, OAuthStrategyVerifier } from "./identity";
+import { IUser, IUserService, OauthStrategyVerifier } from "./identity";
 
 import { IFultonApp } from "./fulton-app";
 import { RelatedToMetadata } from './entities/entity-decorators-helpers';
@@ -33,7 +33,7 @@ declare module "passport" {
     }
 
     interface OAuthStrategy {
-        _verify: OAuthStrategyVerifier
+        _verify: OauthStrategyVerifier
         userProfile(accessToken:string, done: (error: any, profile?: any) => void):void
     }
 }

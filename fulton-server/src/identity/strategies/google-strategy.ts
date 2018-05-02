@@ -1,14 +1,9 @@
-import * as https from 'https';
-import * as lodash from 'lodash';
-import * as querystring from 'querystring';
-import * as url from 'url';
-
-import { AccessToken, GoogleStrategyOptions, IUser, OAuthStrategyVerifier } from '../interfaces';
-
-import { OAuth2Client } from "google-auth-library";
+import { AccessToken, IUser, OauthStrategyVerifier } from '../interfaces';
+import { fultonDebug } from '../../helpers/debug';
+import { GoogleStrategyOptions } from '../options/google-strategy-options';
+import { OAuth2Client } from 'google-auth-library';
 import { Request } from '../../interfaces';
 import { Strategy } from 'passport-strategy';
-import { fultonDebug } from '../../helpers/debug';
 
 export class GoogleStrategy extends Strategy {
     // only require google-auth-library when options.google.enabled = true;
@@ -16,7 +11,7 @@ export class GoogleStrategy extends Strategy {
     private jws = require("jws");
 
     name: string = "google";
-    constructor(private options: GoogleStrategyOptions, private verify: OAuthStrategyVerifier) {
+    constructor(private options: GoogleStrategyOptions, private verify: OauthStrategyVerifier) {
         super();
     }
 

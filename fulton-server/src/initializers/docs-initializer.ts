@@ -8,7 +8,7 @@ import { FultonApp } from '../fulton-app';
 import { Helper } from '../helpers/helper';
 import { Middleware, NextFunction, PathIdentifier, Request, Response, Type } from '../interfaces';
 import { MimeTypes } from '../constants';
-import { OAuthStrategyOptions } from '../identity/interfaces';
+import { OauthStrategyOptions } from '../identity/options/oauth-strategy-options';
 
 module.exports = function (app: FultonApp) {
     let options = app.options.docs;
@@ -335,7 +335,7 @@ function generateAuthDefinitions(app: FultonApp, docs: OpenApiSpec) {
     let oauthes = ["google", "github"];
 
     for (const oauth of oauthes) {
-        let opts: OAuthStrategyOptions = (<any>options)[oauth];
+        let opts: OauthStrategyOptions = (<any>options)[oauth];
         if (opts.enabled) {
             let path = toPath(opts.path);
 

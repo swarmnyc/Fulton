@@ -1,17 +1,12 @@
-import * as lodash from 'lodash';
 import * as passport from 'passport';
-import * as url from 'url';
-
-import { AccessToken, IUser, OAuthStrategyOptions, OAuthStrategyVerifier, OauthAuthenticateOptions, StrategyOptions, StrategyVerifyDone } from "../interfaces";
-import { Middleware, NextFunction, Request, Response } from "../../interfaces";
-
-import { FultonApp } from '../../fulton-app';
+import { AccessToken, IUser, OauthAuthenticateOptions, OauthStrategyVerifier, StrategyVerifyDone } from '../interfaces';
 import { FultonError } from '../../common/fulton-error';
 import { FultonLog } from '../../fulton-log';
-import { FultonUser } from "./fulton-user";
 import { Helper } from '../../helpers/helper';
+import { Middleware, NextFunction, Request, Response } from '../../interfaces';
+import { OauthStrategyOptions } from '../options/oauth-strategy-options';
 
-function setCallbackUrl(req: Request, options: OAuthStrategyOptions, target: OauthAuthenticateOptions) {
+function setCallbackUrl(req: Request, options: OauthStrategyOptions, target: OauthAuthenticateOptions) {
     if (Helper.getBoolean(req.query.noRedirectUrl, false)) {
         // the callbackUrl have to null for mobile, at least for Google 
         target.callbackUrl = target.callbackURL = null
@@ -100,7 +95,7 @@ export let FultonIdentityImpl = {
      * the wrapper for passport.authenticate, the purpose of it is that generate callbackUrl dynamically
      * @param options 
      */
-    oauthAuthenticateFn(options: OAuthStrategyOptions): Middleware {
+    oauthAuthenticateFn(options: OauthStrategyOptions): Middleware {
         return (req: Request, res: Response, next: NextFunction) => {
             setCallbackUrl(req, options, options.authenticateOptions)
 
@@ -115,7 +110,7 @@ export let FultonIdentityImpl = {
     /**
      * the wrapper of auth verifier, the purpose of it is to call req.userService.loginByOauth with the formated parameters.
      */
-    oauthVerifierFn(options: OAuthStrategyOptions): OAuthStrategyVerifier {
+    oauthVerifierFn(options: OauthStrategyOptions): OauthStrategyVerifier {
         return (req: Request, access_token: string, fresh_token: string, profile: any, done: StrategyVerifyDone) => {
             let token: AccessToken = {
                 provider: options.name,
@@ -144,7 +139,7 @@ export let FultonIdentityImpl = {
      * the wrapper for passport.authenticate for oauth callback, the purpose of it is that generate callbackUrl dynamically
      * @param options 
      */
-    oauthCallbackAuthenticateFn(options: OAuthStrategyOptions): Middleware {
+    oauthCallbackAuthenticateFn(options: OauthStrategyOptions): Middleware {
         return (req: Request, res: Response, next: NextFunction) => {
             function finished(error: any, user: any, info: any) {
                 if (error) {

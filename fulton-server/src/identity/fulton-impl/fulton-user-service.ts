@@ -190,24 +190,28 @@ export class FultonUserService implements IUserService<FultonUser> {
         let registerOptions = this.options.register;
 
         // verify username, password, email
-        this.verifyUserName(error, input)
-        this.verifyPassword(error, input)
-        this.verifyEmail(error, input)
+        var username = input[registerOptions.usernameField]
+        var email = input[registerOptions.emailField]
+        var password = input[registerOptions.passwordField]
+
+        this.verifyUserName(error, username)
+        this.verifyPassword(error, password)
+        this.verifyEmail(error, email)
 
         if (error.hasError()) {
             throw error;
         }
 
         // verify existence
-        var username = input.username.toLocaleLowerCase();
-        let count = await this.runner.countUserName(username);
+        let lUsername = username.toLocaleLowerCase()
+        let count = await this.runner.countUserName(lUsername);
 
         if (count > 0) {
             error.addDetail("username", "existed", "the username is existed")
         }
 
-        var email = input.email.toLocaleLowerCase();
-        count = await this.runner.countUserEmail(email);
+        let lEmail = email.toLocaleLowerCase()
+        count = await this.runner.countUserEmail(lEmail);
 
         if (count > 0) {
             error.addDetail("email", "existed", "the email is existed")
@@ -218,21 +222,30 @@ export class FultonUserService implements IUserService<FultonUser> {
         }
 
         // add user
-        let fields = ["username", "portraitUrl"].concat(registerOptions.otherFields);
-        let userInput = lodash.pick(input, fields) as FultonUser;
-        userInput.emails = [input.email]
-        userInput.registeredAt = new Date()
+        let userInput = {
+            username,
+            emails: [input.email],
+            registeredAt: new Date()
+        } as FultonUser;
+
+        if (input["portraitUrl"]){
+            userInput.portraitUrl = input["portraitUrl"]
+        }
+
+        if (registerOptions.otherFields.length > 0){
+            Object.assign(userInput, lodash.pick(input, registerOptions.otherFields))
+        }      
 
         let user = await this.runner.addUser(userInput);
 
         // add local itentity
-        var hashedPassword = passwordHash.generate(input.password, registerOptions.passwordHashOptions);
+        var hashedPassword = passwordHash.generate(password, registerOptions.passwordHashOptions);
 
         await this.runner.addIdentity({
             type: "local",
             userId: user.id,
-            email: email,
-            username: username,
+            email: lEmail,
+            username: lUsername,
             hashedPassword: hashedPassword
         })
 
@@ -389,13 +402,13 @@ export class FultonUserService implements IUserService<FultonUser> {
         }
     }
 
-    private verifyUserName(error: FultonError, input: any) {
-        if (error.verifyRequired(input, "username")) {
+    private verifyUserName(error: FultonError, username: any) {
+        if (error.verifyRequired(username, "username")) {
             let unResult: boolean;
             if (this.options.register.usernameVerifier instanceof Function) {
-                unResult = this.options.register.usernameVerifier(input.username)
+                unResult = this.options.register.usernameVerifier(username)
             } else {
-                unResult = this.options.register.usernameVerifier.test(input.username)
+                unResult = this.options.register.usernameVerifier.test(username)
             }
 
             if (!unResult) {
@@ -404,13 +417,13 @@ export class FultonUserService implements IUserService<FultonUser> {
         }
     }
 
-    private verifyPassword(error: FultonError, input: any) {
-        if (error.verifyRequired(input, "password")) {
+    private verifyPassword(error: FultonError, password: any) {
+        if (error.verifyRequired(password, "password")) {
             let pwResult: boolean;
             if (this.options.register.passwordVerifier instanceof Function) {
-                pwResult = this.options.register.passwordVerifier(input.password)
+                pwResult = this.options.register.passwordVerifier(password)
             } else {
-                pwResult = this.options.register.passwordVerifier.test(input.password)
+                pwResult = this.options.register.passwordVerifier.test(password)
             }
 
             if (!pwResult) {
@@ -419,9 +432,9 @@ export class FultonUserService implements IUserService<FultonUser> {
         }
     }
 
-    private verifyEmail(error: FultonError, input: any) {
-        if (error.verifyRequired(input, "email")) {
-            if (!validator.isEmail(input.email)) {
+    private verifyEmail(error: FultonError, email: string) {
+        if (error.verifyRequired(email, "email")) {
+            if (!validator.isEmail(email)) {
                 error.addDetail("email", "invalid", "the email is invalid")
             }
         }

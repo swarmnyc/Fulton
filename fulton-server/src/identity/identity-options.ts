@@ -1,32 +1,21 @@
 import * as lodash from 'lodash';
-import {
-    AppMode,
-    HttpMethod,
-    Middleware,
-    PathIdentifier,
-    Type
-    } from '../interfaces';
-import { AuthenticateOptions } from 'passport';
-import { AuthorizeOptions } from './authorizes-middlewares';
-import {
-    CustomStrategySettings,
-    FacebookStrategyOptions,
-    GoogleStrategyOptions,
-    IUser,
-    IUserService,
-    LocalStrategyVerifier,
-    OAuthStrategyOptions,
-    OAuthStrategyVerifier,
-    StrategyOptions,
-    TokenStrategyVerifier
-    } from './interfaces';
+import { AccessTokenOptions } from './options/access-token-options';
+import { AppMode, Middleware, Type } from '../interfaces';
+import { BearerStrategyOptions } from './options/bearer-strategy-options';
 import { Env } from '../helpers/env';
-import { FultonAccessToken, FultonUser, FultonIdentity } from './fulton-impl/fulton-user';
+import { FacebookStrategyOptions } from './options/facebook-strategy-options';
+import { FultonAccessToken, FultonIdentity, FultonUser } from './fulton-impl/fulton-user';
 import { FultonIdentityImpl } from './fulton-impl/fulton-impl';
 import { FultonUserService } from './fulton-impl/fulton-user-service';
+import { GithubStrategyOptions } from './options/github-strategy-options';
+import { GoogleStrategyOptions } from './options/google-strategy-options';
+import { IUser, IUserService, Strategy } from './interfaces';
+import { LoginStrategyOptions } from './options/login-strategy-options';
+import { OauthStrategyOptions } from './options/oauth-strategy-options';
+import { Options } from '../options/options';
 import { RegisterOptions } from './options/register-options';
-import { Repository } from 'typeorm';
-import { Strategy } from 'passport';
+import { StrategyOptions } from './options/strategy-options';
+import { StrategySettings } from './options/strategy-settings';
 
 export class IdentityOptions {
     /**
@@ -59,36 +48,6 @@ export class IdentityOptions {
     userService: Type<IUserService<IUser>> | IUserService<IUser> = FultonUserService;
 
     /**
-     * the options for access token
-     */
-    accessToken: {
-        /**
-         * the type of access token
-         * default is bearer, it affect authenticate method for every in coming request
-         */
-        type?: string;
-
-        /**
-         * the duration of access token in seconds
-         * 
-         * default is a mouth = 2,592,000
-         */
-        duration?: number;
-
-        /**
-         * the scopes of access token, for examples, username, rolus, emails
-         * default is "[]"
-         */
-        scopes?: string[];
-
-        /**
-         * the secret for JWT Token
-         * default is app_name
-         */
-        secret?: string;
-    };
-
-    /**
      * the authenticate every request to get user info, enabled strategies like "bearer", "session"
      * for api mode, default is FultonImp.defaultAuthenticate
      * 
@@ -116,12 +75,12 @@ export class IdentityOptions {
      * }
      * ```
      */
-    defaultAuthenticate: Middleware;
+    defaultAuthenticate: Middleware = FultonIdentityImpl.defaultAuthenticate;
 
     /**
      * if true, throw error if a request don't have user certification (bearer token, cookie session id, etc)
      */
-    defaultAuthenticateErrorIfFailure: boolean;
+    defaultAuthenticateErrorIfFailure: boolean = false;
 
     /**
      * the authorizes apply to all router
@@ -154,7 +113,12 @@ export class IdentityOptions {
      * }
      * ```
      */
-    defaultAuthorizes: Middleware[];
+    defaultAuthorizes: Middleware[] = [];
+
+    /**
+     * the options for access token
+     */
+    readonly accessToken = new AccessTokenOptions(this.appName, this.appMode);
 
     /**
      * the setting for register, fulton doesn't have html for register, 
@@ -212,90 +176,12 @@ export class IdentityOptions {
      * }
      * ```
      */
-    login: {
-        /**
-         * the default value is true
-         * it can be overridden by process.env["{appName}.options.identity.login.enabled"]
-         */
-        enabled?: boolean;
+    readonly login = new LoginStrategyOptions(this.appName, this.appMode)
 
-        /**
-         * the default value is /auth/login
-         */
-        path?: PathIdentifier;
-
-        /**
-         * the default value is `post`
-         */
-        httpMethod?: HttpMethod;
-
-        /**
-         * the default value username
-         */
-        usernameField?: string;
-
-        /**
-         * the default value password
-         */
-        passwordField?: string;
-
-        /**
-         * the function to find the user
-         * 
-         * the default value is FultonIdentityImpl.localStrategyVerifier
-         * 
-         * ### customizing example
-         * verifier = (req: Request, username: string, password: string, done: LocalStrategyVerifyDone) => {
-         *     req.userService
-         *         .login(username, password)
-         *         .then((user) => {
-         *             done(null, user);
-         *         }).catch((error) => {
-         *             done(error);
-         *         });
-         * }
-         */
-        verifier?: LocalStrategyVerifier;
-
-        /**
-         * the middleware next to authenticate
-         * the default value is FultonIdentityImpl.successMiddleware
-         */
-        successMiddleware?: Middleware;
-
-        /**
-         * 
-         */
-        authenticateOptions?: AuthenticateOptions
-    }
-
-    bearer: {
-        /**
-         * default is true
-         * it can be overridden by process.env["{appName}.options.identity.bearer.enabled"]
-         */
-        enabled?: boolean;
-
-        /**
-         * the function to find the user
-         * 
-         * ### default value is
-         * async function fultonTokenStrategyVerify(req: Request, token: string, done: StrategyVerifyDone) {
-         *     if (!token) {
-         *         done(null, false);
-         *     }
-         * 
-         *     let user = await req.userService.findByAccessToken(token);
-         * 
-         *     if (user) {
-         *         return done(null, user);
-         *     } else {
-         *         return done(null, false);
-         *     }
-         * }
-         */
-        verifier?: TokenStrategyVerifier;
-    }
+    /**
+     * options for passport bearer stragery
+     */
+    readonly bearer = new BearerStrategyOptions(this.appName, this.appMode)
 
     /**
      * pre-defined google strategy
@@ -310,7 +196,7 @@ export class IdentityOptions {
      * clientId can be overridden by env["{appName}.options.identity.google.clientId"]
      * clientSecret can be overridden by env["{appName}.options.identity.google.clientSecret"]
      */
-    google: GoogleStrategyOptions;
+    readonly google = new GoogleStrategyOptions(this.appName, this.appMode);
 
     /**
      * pre-defined github strategy
@@ -324,7 +210,7 @@ export class IdentityOptions {
      * clientId can be overridden by env["{appName}.options.identity.github.clientId"]
      * clientSecret can be overridden by env["{appName}.options.identity.github.clientSecret"]
      */
-    github: OAuthStrategyOptions;
+    readonly github = new GithubStrategyOptions(this.appName, this.appMode);
 
     /**
      * pre-defined facebook strategy
@@ -339,127 +225,34 @@ export class IdentityOptions {
      * clientId can be overridden by env["{appName}.options.identity.facebook.clientId"]
      * clientSecret can be overridden by env["{appName}.options.identity.facebook.clientSecret"]
      */
-    facebook: FacebookStrategyOptions;
+    readonly facebook = new FacebookStrategyOptions(this.appName, this.appMode);
 
     /** other passport strategies */
-    readonly strategies: CustomStrategySettings[] = [];
+    readonly strategies: StrategySettings[] = [];
 
     /**
      * the strategies will be used by defaultAuthenticate. like bearer
      */
     readonly defaultAuthSupportStrategies: string[] = [];
 
-    constructor(private appName: string, private appMode: AppMode) {
-        this.defaultAuthorizes = [];
-
-        this.accessToken = {
-            duration: 2592000,
-            type: "bearer",
-            scopes: []
-        }
-
-        this.defaultAuthenticate = FultonIdentityImpl.defaultAuthenticate;
-        this.defaultAuthenticateErrorIfFailure = false;
-
-        this.login = {
-            enabled: true,
-            path: "/auth/login",
-            httpMethod: "post",
-            verifier: FultonIdentityImpl.localStrategyVerifier,
-            successMiddleware: FultonIdentityImpl.issueAccessToken
-        };
-
-        this.bearer = {
-            verifier: FultonIdentityImpl.tokenStrategyVerifier
-        }
-
-        this.google = {
-            enabled: false,
-            path: "/auth/google",
-            callbackPath: "/auth/google/callback",
-            accessType: "online",
-            scope: "profile email",
-            strategyOptions: {},
-            verifierFn: FultonIdentityImpl.oauthVerifierFn,
-            authenticateFn: FultonIdentityImpl.oauthAuthenticateFn,
-            callbackAuthenticateFn: FultonIdentityImpl.oauthCallbackAuthenticateFn
-        }
-
-        this.github = {
-            enabled: false,
-            path: "/auth/github",
-            callbackPath: "/auth/github/callback",
-            scope: "read:user user:email",
-            strategyOptions: {},
-            verifierFn: FultonIdentityImpl.oauthVerifierFn,
-            authenticateFn: FultonIdentityImpl.oauthAuthenticateFn,
-            callbackAuthenticateFn: FultonIdentityImpl.oauthCallbackAuthenticateFn
-        }
-
-        this.facebook = {
-            enabled: false,
-            path: "/auth/facebook",
-            callbackPath: "/auth/facebook/callback",
-            strategyOptions: {},
-            profileFields: ['id', 'displayName', "photos", 'email'],
-            verifierFn: FultonIdentityImpl.oauthVerifierFn,
-            authenticateFn: FultonIdentityImpl.oauthAuthenticateFn,
-            callbackAuthenticateFn: FultonIdentityImpl.oauthCallbackAuthenticateFn
-        }
-
-        if (this.appMode == "api") {
-            this.bearer.enabled = true;
-        } else if (this.appMode == "web-view") {
-            this.bearer.enabled = false;
-            this.register.responseOptions = {
-                failureRedirect: "/auth/register",
-                successRedirect: "/"
-            };
-
-            this.login.authenticateOptions = {
-                failureRedirect: "/auth/login",
-                successRedirect: "/"
-            };
-
-            this.google.callbackAuthenticateOptions = {
-                failureRedirect: "/auth/login",
-                successRedirect: "/"
-            }
-
-            this.github.callbackAuthenticateOptions = {
-                failureRedirect: "/auth/login",
-                successRedirect: "/"
-            }
-        }
-    }
+    constructor(private appName: string, private appMode: AppMode) {}
 
     /**
      * load options from environment to override the current options 
      */
     init() {
-        let prefix = `${this.appName}.options.identity`;
+        this.enabled = Env.getBoolean(`${this.appName}.options.identity.enabled`, this.enabled)
 
-        this.enabled = Env.getBoolean(`${prefix}.enabled`, this.enabled)
-        this.login.enabled = Env.getBoolean(`${prefix}.login.enabled`, this.login.enabled)
+        for (const name of Object.getOwnPropertyNames(this)) {
+            var prop: Options = lodash.get(this, name);
 
-        this.bearer.enabled = Env.getBoolean(`${prefix}.bearer.enabled`, this.bearer.enabled)
-
-        this.google.enabled = Env.getBoolean(`${prefix}.google.enabled`, this.google.enabled)
-        this.google.clientId = Env.get(`${prefix}.google.clientId`, this.google.clientId)
-        this.google.clientSecret = Env.get(`${prefix}.google.clientSecret`, this.google.clientSecret)
-
-        this.github.enabled = Env.getBoolean(`${prefix}.github.enabled`, this.github.enabled)
-        this.github.clientId = Env.get(`${prefix}.github.clientId`, this.github.clientId)
-        this.github.clientSecret = Env.get(`${prefix}.github.clientSecret`, this.github.clientSecret)
-
-        this.facebook.enabled = Env.getBoolean(`${prefix}.facebook.enabled`, this.facebook.enabled)
-        this.facebook.clientId = Env.get(`${prefix}.facebook.clientId`, this.facebook.clientId)
-        this.facebook.clientSecret = Env.get(`${prefix}.facebook.clientSecret`, this.facebook.clientSecret)
-
-        this.register.init()
+            if (prop && prop.init) {
+                prop.init();
+            }
+        }
     }
 
-    addStrategy(options: StrategyOptions | OAuthStrategyOptions, strategy: Strategy | Type<Strategy>) {
+    addStrategy(options: StrategyOptions | OauthStrategyOptions, strategy: Strategy | Type<Strategy>) {
         options.enabled = options.enabled == null ? true : options.enabled;
 
         this.strategies.push({

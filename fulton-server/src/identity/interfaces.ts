@@ -60,170 +60,6 @@ export interface AccessToken {
     [key: string]: any;
 }
 
-export interface StrategyOptions {
-    /**
-     * strategy name, if undefined, use Strategy.Name
-     */
-    name?: string;
-
-    /**
-     * the default value is get
-     */
-    httpMethod?: HttpMethod;
-
-    /**
-     * the default value is false,
-     */
-    enabled?: boolean;
-
-    /**
-     * the route path for example /auth/google
-     */
-    path?: PathIdentifier;
-
-    /**
-    * for passport, use it when create new Strategy object, like
-    * new LocalStrategy(options.strategyOptions, options.verifier)
-    * the default value is null
-    */
-    strategyOptions?: { [key: string]: any };
-
-    /**
-     * verify the oauth request.
-     */
-    verifier?: StrategyVerifier | LocalStrategyVerifier | any;
-
-    /**
-     * the middleware next to authenticate
-     * the default value is null
-     */
-    successMiddleware?: Middleware;
-
-    /**
-    * for passport
-    * the default value is null
-    */
-    authenticateOptions?: AuthenticateOptions;
-
-    /**
-      * if provided,call this function to get the middleware, like
-     * app.use(options.authenticateFn(options))
-     * 
-     * otherwise use
-     * app.use(passport.authenticate(options.name, options.authenticateOptions))
-     */
-    authenticateFn?: (options: OAuthStrategyOptions) => Middleware
-
-    /**
-     * if true, add to defaultAuthenticate support list. which means this strategy will be called by every incoming requests.
-     * the default value is false.
-     */
-    addToDefaultAuthenticateList?: boolean;
-}
-
-export interface OAuthStrategyOptions extends StrategyOptions {
-    /**
-    * the default value is get
-    */
-    callbackHttpMethod?: HttpMethod;
-
-    /**
-     * the route path for google auth callback
-     * the default value is /auth/google/callback
-     */
-    callbackPath?: string;
-
-    /**
-     * the callback url for redirection, for example `https://www.example.com/auth/google/callback`
-     * if it is empty, fulton will combine req.originUrl + callbackPath dynamically 
-     * this value is a shortcut of strategyOptions.callbackUrl and strategyOptions.callbackURL
-     */
-    callbackUrl?: string;
-
-    /**
-     * the clientId that provider(like google, facebook) provides to you,
-     * It can be overridden by process.env["{appName}.options.identity.{name}.clientId"]
-     * this value is a shortcut of strategyOptions.clientId and strategyOptions.clientID
-     */
-    clientId?: string;
-
-    /**
-     * the clientSecret that provider(like google, facebook) provides to you
-     * It can be overridden by process.env["{appName}.options.identity.{name}.clientSecret"]
-     * this value is a shortcut of strategyOptions.clientSecret
-     */
-    clientSecret?: string;
-
-    /**
-     * the permission scopes to request access to,
-     * this value is a shortcut of strategyOptions.scope
-     */
-    scope?: string | string[];
-
-    /**
-     * the data to carry
-     */
-    state?: string;
-
-    /**
-     * verify the oauth request.
-     */
-    verifier?: OAuthStrategyVerifier;
-
-    /**
-     * if provided, call this function to get the verifier
-     */
-    verifierFn?: (options: OAuthStrategyOptions) => OAuthStrategyVerifier;
-
-    /**
-     * transform the oauth profile to our user format
-     */
-    profileTransformer?: (profile: any) => any;
-
-    /**
-    * for passport
-    * the default value is null
-    */
-    authenticateOptions?: OauthAuthenticateOptions;
-
-    /**
-     * the middleware next to authenticate
-     * the default value is null
-     */
-    callbackSuccessMiddleware?: Middleware;
-
-    /**
-    * for passport
-    * the default value is null
-    */
-    callbackAuthenticateOptions?: OauthAuthenticateOptions;
-
-    /**
-     * if provided, call this function to get the middleware, like
-     * app.use(options.callbackAuthenticateFn(options))
-     * 
-     * otherwise use
-     * app.use(passport.authenticate(options.name, options.callbackAuthenticateOptions))
-     */
-    callbackAuthenticateFn?: (options: OAuthStrategyOptions) => Middleware
-}
-
-export interface GoogleStrategyOptions extends OAuthStrategyOptions {
-    /**
-     * Can be `online` (default) or `offline` (gets refresh_token)
-     * this value is a shortcut of strategyOptions.accessType
-     */
-    accessType?: "online" | "offline";
-}
-
-export interface FacebookStrategyOptions extends OAuthStrategyOptions {
-    /**
-     * the default value is ['id', 'displayName', 'profileUrl', 'email']
-     * this value is a shortcut of strategyOptions.profileFields
-     */
-    profileFields?: string[];
-}
-
 export interface OauthAuthenticateOptions extends AuthenticateOptions {
     /**
      * the callback url for redirection, for example `https://www.example.com/auth/google/callback`
@@ -236,14 +72,6 @@ export interface OauthAuthenticateOptions extends AuthenticateOptions {
      * the data to carry
      */
     state?: string;
-}
-
-export interface CustomStrategySettings {
-    options: OAuthStrategyOptions;
-    /**
-     * Custom passport-strategy
-     */
-    strategy: Strategy | Type<Strategy>;
 }
 
 export interface StrategyVerifyDone {
@@ -263,6 +91,6 @@ export interface TokenStrategyVerifier {
     (req: Request, accessToken: string, done: StrategyVerifyDone): void;
 }
 
-export interface OAuthStrategyVerifier {
+export interface OauthStrategyVerifier {
     (req: Request, access_token: string, refresh_token: string, profile: any, done: StrategyVerifyDone): void;
 }

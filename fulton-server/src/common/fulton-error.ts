@@ -74,12 +74,19 @@ export class FultonError {
         } else {
             this.error.detail[propertyName].push(item)
         }
-    
+
         return this;
     }
 
     verifyRequired(target: any, propertyName: string, errorMessage?: string): boolean {
-        if (!lodash.some(target[propertyName])) {
+        let value;
+        if (typeof target == "object") {
+            value = target[propertyName]
+        } else {
+            value = target
+        }
+
+        if (!lodash.some(value)) {
             this.addDetail(propertyName, "required", errorMessage || `${propertyName} is required`);
             return false;
         }

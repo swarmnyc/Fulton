@@ -2,7 +2,7 @@ import * as jws from 'jws';
 import * as lodash from 'lodash';
 import * as passwordHash from 'password-hash';
 import * as validator from 'validator';
-import { AccessToken, ForgotPasswordNotificationModel, IFultonUser, IOauthProfile, IUserService, RegisterModel, WelcomeNotificationModel } from '../interfaces';
+import { AccessToken, ForgotPasswordNotificationModel, IFultonUser, IOauthProfile, IUserService, RegisterModel, WelcomeNotificationModel, ForgotPasswordModel } from '../interfaces';
 import { codeGenerate, numberCodeGenerate } from '../../helpers/crypto-helper';
 import { DiKeys, EventKeys } from '../../keys';
 import { EntityMetadata } from 'typeorm/metadata/EntityMetadata';
@@ -18,7 +18,7 @@ import { ObjectId } from 'bson';
 interface JWTPayload {
     id: string;
     ts: number; // timestamp
-    
+
     username?: string;
     portraitUrl?: string;
     email?: string;
@@ -412,12 +412,13 @@ export class FultonUserService implements IUserService<FultonUser> {
         }
     }
 
-    async forgotPassword(usernameOrEmail: string, baseUrl: string): Promise<any> {
+    async forgotPassword(usernameOrEmail: string, baseUrl: string): Promise<ForgotPasswordModel> {
         let identity = await this.runner.findIdentityByLocal(usernameOrEmail);
         if (identity) {
             let token = identity.resetPasswordToken = codeGenerate()
             let code = identity.resetPasswordCode = numberCodeGenerate()
-            identity.resetPasswordExpiredAt = new Date(Date.now() + (this.options.forgotPassword.duration * 1000))
+
+            identity.resetPasswordExpiredAt = new Date(Date.now() + this.options.forgotPassword.duration * 1000)
 
             await this.runner.updateIdentity(identity);
 
@@ -431,6 +432,11 @@ export class FultonUserService implements IUserService<FultonUser> {
                 url: `${baseUrl}?token=${token}&code=${code}`,
                 code: code
             })
+
+            return {
+                token: token,
+                expires_in: this.options.forgotPassword.duration
+            }
         } else {
             throw new FultonError(ErrorCodes.NotExisted)
         }
@@ -452,7 +458,7 @@ export class FultonUserService implements IUserService<FultonUser> {
 
                 this.app.events.emit(EventKeys.UserDidResetPassword, identity);
             } else {
-                throw error.set(ErrorCodes.Invalid, "the reset token and code are invalid");    
+                throw error.set(ErrorCodes.Invalid, "the reset token and code are invalid");
             }
         } else {
             throw error;

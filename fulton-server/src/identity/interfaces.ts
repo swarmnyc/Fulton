@@ -45,7 +45,7 @@ export interface IUserService<T extends IUser> {
     loginByAccessToken(token: string): Promise<T>;
     register(input: RegisterModel): Promise<T>;
     issueAccessToken(user: T): Promise<AccessToken>;
-    forgotPassword(usernameOrEmail: string, baseUrl: string): Promise<void>;
+    forgotPassword(usernameOrEmail: string, baseUrl: string): Promise<ForgotPasswordModel>;
     resetPassword(token: string, code: string, password: string): Promise<void>;
     verifyResetPassword(token: string, code: string): Promise<void>;
     //refreshAccessToken(token: string): Promise<AccessToken>;
@@ -95,6 +95,11 @@ export interface TokenStrategyVerifier {
 
 export interface OauthStrategyVerifier {
     (req: Request, access_token: string, refresh_token: string, profile: any, done: StrategyVerifyDone): void;
+}
+
+export interface ForgotPasswordModel {
+    token: string,
+    expires_in: number
 }
 
 export interface WelcomeNotificationModel {

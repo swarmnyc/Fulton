@@ -243,9 +243,9 @@ export let FultonIdentityImpl = {
             // send notification
             req.userService
                 .forgotPassword(username || email, Helper.urlResolve(req, options.path))
-                .then(() => {
+                .then((result) => {
                     res.send({
-                        status: 200
+                        data: result
                     })
                 }).catch(next)
         } else if (token && code && password) {

@@ -1,8 +1,7 @@
-import { BaseOptions } from '../../options/options';
 import { Env } from '../../helpers';
 import { FultonIdentityImpl } from '../fulton-impl/fulton-impl';
-import { TokenStrategyVerifier } from '../interfaces';
 import { StrategyOptions } from './strategy-options';
+import { TokenStrategyVerifier } from '../interfaces';
 
 /**
  * options for passport bearer stragery
@@ -38,6 +37,6 @@ export class BearerStrategyOptions extends StrategyOptions {
     }
 
     init?(): void {
-        this.enabled = Env.getBoolean(`${this.appName}.options.identity.login.enabled`, this.enabled);
+        this.enabled = Env.getBoolean(`${this.appName}.options.identity.bearer.enabled`, this.enabled);
     }
 }

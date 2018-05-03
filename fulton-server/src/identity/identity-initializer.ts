@@ -38,6 +38,11 @@ module.exports = async function identityInitializer(app: FultonApp) {
             httpMethod.call(app.express, idOptions.register.path, idOptions.register.handler);
         }
 
+        // for forgot password
+        if (idOptions.forgotPassword.enabled) {
+            app.express.all(idOptions.forgotPassword.path, idOptions.forgotPassword.handler)
+        }
+
         // add pre-defined login strategy
         if (idOptions.login.enabled) {
             idOptions.addStrategy(idOptions.login, LocalStrategy);

@@ -25,13 +25,9 @@ class MyApp extends FultonApp {
             }
         });
 
-
-        options.identity.register.notiication.set({
-            email: {
-                enabled: true,
-                subjectTemplate: "Welcome to Fulton",
-                bodyTemplate: "<h1>Hello {{username}}</h1><p> Thanks for your registration.</p>",
-            }
+        options.identity.register.notiication.email.set({
+            subjectTemplate: "Welcome to Fulton",
+            bodyTemplate: "<h1>Hello {{username}}</h1><p> Thanks for your registration.</p>"
         })
     }
 }

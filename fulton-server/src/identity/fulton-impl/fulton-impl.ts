@@ -1,6 +1,6 @@
 import * as passport from 'passport';
 import { AccessToken, IUser, OauthAuthenticateOptions, OauthStrategyVerifier, StrategyVerifyDone } from '../interfaces';
-import { FultonError } from '../../common/fulton-error';
+import { FultonError, ErrorCodes } from '../../common/fulton-error';
 import { FultonLog } from '../../fulton-log';
 import { Helper } from '../../helpers/helper';
 import { Middleware, NextFunction, Request, Response } from '../../interfaces';
@@ -21,7 +21,7 @@ function setCallbackUrl(req: Request, options: OauthStrategyOptions, target: Oau
 }
 
 /**
- * Default Fulton Identity Implementations
+ * Default Fulton Identity Implementations for passport and middlewares
  */
 export let FultonIdentityImpl = {
     /**
@@ -182,7 +182,7 @@ export let FultonIdentityImpl = {
                         strategy._verify(req, req.query.access_token, req.query.refresh_token, profile, finished)
                     })
                 } else {
-                    res.sendStatus(400)
+                    next(new FultonError(ErrorCodes.Unknown));
                 }
             } else {
                 setCallbackUrl(req, options, options.callbackAuthenticateOptions)
@@ -220,12 +220,56 @@ export let FultonIdentityImpl = {
                     res.redirect(options.responseOptions.failureRedirect)
                 } else {
                     if (error instanceof FultonError) {
-                        res.status(400).send(error);
+                        next(error)
                     } else {
-                        res.sendStatus(400);
+                        next(new FultonError(ErrorCodes.Unknown));
                     }
                 }
             });
+    },
+
+    forgotPasswordHandler(req: Request, res: Response, next: NextFunction) {
+        let options = req.fultonApp.options.identity.forgotPassword;
+
+        let username = req.body.username || req.query.username;
+        let email = req.body.email || req.query.email;
+
+        let token = req.body.token || req.query.token;
+        let code = req.body.code || req.query.code;
+
+        let password = req.body.password || req.query.password;
+
+        if (username || email) {
+            // send notification
+            req.userService
+                .forgotPassword(username || email, Helper.urlResolve(req, options.path))
+                .then(() => {
+                    res.send({
+                        status: 200
+                    })
+                }).catch(next)
+        } else if (token && code && password) {
+            // reset password
+            req.userService
+                .resetPassword(token, code, password)
+                .then(() => {
+                    res.send({
+                        status: 200
+                    })
+                }).catch(next)
+        } else if (token && code) {
+            // verify the token and code
+            // reset password
+            req.userService
+                .verifyResetPassword(token, code)
+                .then(() => {
+                    res.send({
+                        status: 200
+                    })
+                }).catch(next)
+        } else {
+            next(new FultonError(ErrorCodes.Invalid))
+        }
     }
 }
 

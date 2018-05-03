@@ -23,6 +23,17 @@ class MyApp extends FultonApp {
             url: "mongodb://localhost:27017/fulton-test"
         });
 
+
+        options.notification.email.enabled = true        
+
+        options.identity.register.notiication.email.set({
+            bodyTemplate: "<h1>Hello {{username}}</h1><p> Thanks for your registration.</p>"
+        })
+
+        options.identity.forgotPassword.notiication.email.set({
+            bodyTemplate: "<h1>Hey {{username}}</h1><p> click this <a href='{{url}}'> link </a> to reset your password.</p>"
+        })
+
         // remove database
         this.events.once(EventKeys.AppDidInitDatabases, () => {
             //this.connections[0].dropDatabase();
@@ -45,6 +56,9 @@ test cases:
 - visit http://localhost:3000/auth/google and put the user token on headers
 - ok, if the google identity link to the user
 
-
+3. 
+- visit http://localhost:3000/auth/github
+- visit http://localhost:3000/auth/facebook
+- ok, if it return tokens
 
 */

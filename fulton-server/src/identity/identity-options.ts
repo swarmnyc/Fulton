@@ -16,6 +16,7 @@ import { Options } from '../options/options';
 import { RegisterOptions } from './options/register-options';
 import { StrategyOptions } from './options/strategy-options';
 import { StrategySettings } from './options/strategy-settings';
+import { ForgotPasswordOptions } from './options/forgot-password-options';
 
 export class IdentityOptions {
     /**
@@ -153,6 +154,21 @@ export class IdentityOptions {
     readonly register = new RegisterOptions(this.appName, this.appMode)
 
     /**
+     * options for forgot password
+     * there are three methods
+     * 1.
+     * /auth/forgot-password?username=username, for send reset code notification
+     * /auth/forgot-password?email=email, for send reset code notification
+     * 
+     * 2.  
+     * /auth/forgot-password?token=token&code=code, for just verfiy the token is valid or not
+     * 
+     * 3.  
+     * /auth/forgot-password?token=token&code=code&password=new-password, for reset password
+     */
+    readonly forgotPassword = new ForgotPasswordOptions(this.appName, this.appMode)
+
+    /**
      * the local strategy for login, fulton doesn't have html for login, 
      * 
      * for render html, you have to add a router
@@ -235,7 +251,7 @@ export class IdentityOptions {
      */
     readonly defaultAuthSupportStrategies: string[] = [];
 
-    constructor(private appName: string, private appMode: AppMode) {}
+    constructor(private appName: string, private appMode: AppMode) { }
 
     /**
      * load options from environment to override the current options 

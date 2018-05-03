@@ -91,9 +91,13 @@ export class MongoEntityRunner extends EntityRunner {
             });
     }
 
-    protected updateCore<T>(repository: Repository<T>, id: any, entity: T, replace?: boolean): Promise<any> {
+    protected updateCore<T extends any>(repository: Repository<T>, id: any, entity: T, replace?: boolean): Promise<any> {
+        delete entity["id"];
         return (<any>repository as MongoRepository<T>)
-            .updateOne({ _id: id }, replace ? entity : { $set: entity })
+            .updateOne({ _id: id }, replace ? entity : { $set: entity }).then(() => {
+                entity["id"] = id
+                return entity;
+            })
     }
 
     protected deleteCore<T>(repository: Repository<T>, id: any): Promise<any> {
@@ -118,7 +122,7 @@ export class MongoEntityRunner extends EntityRunner {
                 try {
                     return new ObjectId(value);
                 } catch  {
-                    errorTracker.add("object_id","must be an object id", true);
+                    errorTracker.add("object_id", "must be an object id", true);
                 }
             }
         }
@@ -161,26 +165,26 @@ export class MongoEntityRunner extends EntityRunner {
     }
 
 
-    protected adjustParams<T>(metadata: EntityMetadata, params: QueryParams = {}, onlyFilter:boolean = false): FultonError {
-        if (!onlyFilter){
+    protected adjustParams<T>(metadata: EntityMetadata, params: QueryParams = {}, onlyFilter: boolean = false): FultonError {
+        if (!onlyFilter) {
             if (params.select) {
                 params.projection = this.transformSelect(params.select);
             }
-    
+
             if (params.sort) {
                 this.adjustIdInOptions(metadata, params.sort);
             }
-    
+
             if (params.projection) {
                 this.adjustIdInOptions(metadata, params.projection);
             }
-    
+
             let projection = this.mergeProjection(metadata, params.projection)
             if (projection) {
                 params.projection = projection
             }
         }
-        
+
         return super.adjustParams(metadata, params)
     }
 

@@ -41,13 +41,15 @@ export interface IUserService<T extends IUser> {
      * 2. userId is not provided, add it is new oauth user, create a new user then, add the oauth info to his identity
      * 3. userId is not provided, add it is existed oauth user, update the oauth info
      */
-    loginByOauth(userId:string, token: AccessToken, profile: IOauthProfile): Promise<T>;
+    loginByOauth(userId: string, token: AccessToken, profile: IOauthProfile): Promise<T>;
     loginByAccessToken(token: string): Promise<T>;
     register(input: RegisterModel): Promise<T>;
     issueAccessToken(user: T): Promise<AccessToken>;
-    refreshAccessToken(token: string): Promise<AccessToken>;
+    forgotPassword(usernameOrEmail: string, baseUrl: string): Promise<void>;
+    resetPassword(token: string, code: string, password: string): Promise<void>;
+    verifyResetPassword(token: string, code: string): Promise<void>;
+    //refreshAccessToken(token: string): Promise<AccessToken>;
     //revokeAccessToken(user: T): Promise<any>;
-    //revokeAccessTokens(user: T): Promise<any>;
 }
 
 export interface AccessToken {
@@ -93,4 +95,16 @@ export interface TokenStrategyVerifier {
 
 export interface OauthStrategyVerifier {
     (req: Request, access_token: string, refresh_token: string, profile: any, done: StrategyVerifyDone): void;
+}
+
+export interface WelcomeNotificationModel {
+    username: string,
+    email: string
+}
+
+export interface ForgotPasswordNotificationModel {
+    username: string,
+    email: string,
+    url: string,
+    code: string
 }

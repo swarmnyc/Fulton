@@ -30,6 +30,9 @@ export enum EventKeys {
     AppDidInitStaticFile = "AppDidInitStaticFile",
 
     UserDidRegister = "UserDidRegister",
+    UserDidLogin = "UserDidLogin",
+    UserForgotPassword = "UserForgotPassword",
+    UserDidResetPassword = "UserDidResetPassword",
     
     OnInitJsonApi = "OnInitJsonApi",
 }

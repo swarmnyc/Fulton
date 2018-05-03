@@ -44,9 +44,11 @@ export class FultonIdentity {
     @Column({ length: 256 })
     hashedPassword?: string;
     @Column()
+    resetPasswordToken?: string;
+    @Column()
     resetPasswordCode?: string;
     @Column()
-    resetPasswordCodeExpiredAt?: Date;
+    resetPasswordExpiredAt?: Date;
 
     // for type is oauth, only keep last tokens
     @Column()    

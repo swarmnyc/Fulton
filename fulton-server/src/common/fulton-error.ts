@@ -1,6 +1,13 @@
 import * as lodash from 'lodash';
 import { FultonErrorObject, FultonErrorDetail, FultonErrorDetailItem } from '../interfaces';
 
+export enum ErrorCodes{
+    Unknown = "unknown_error",
+    Invalid = "invalid",
+    Existed = "existed",
+    NotExisted = "not-existed",
+}
+
 /**
  * The error that returns to client
  * 

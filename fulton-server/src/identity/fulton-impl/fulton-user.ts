@@ -9,14 +9,14 @@ export class FultonUser implements IFultonUser {
     @Column({ length: 256 })
     username: string; // only for display
 
+    @Column({ length: 256 })
+    email: string; // only for notification
+
     @Column()
     portraitUrl: string;
 
     @Column()
     roles: string[];
-
-    @Column()
-    emails: string[]; // only for notification
 
     @Column()
     registeredAt: Date;

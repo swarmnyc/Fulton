@@ -155,7 +155,7 @@ export class RegisterOptions extends BaseOptions<RegisterOptions> {
             this.notiication.email.subjectTemplate = `Welcome to ${this.appName}`
         }
 
-        if (this.notiication.email.subjectTemplate == null) {
+        if (this.notiication.email.bodyTemplate == null) {
             this.notiication.email.bodyTemplate = "./templates/email-welcome.html"
         }
     }

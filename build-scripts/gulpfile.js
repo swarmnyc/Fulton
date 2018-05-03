@@ -35,6 +35,16 @@ gulp.task('increase-version', function () {
         .pipe(gulp.dest('./'));
 });
 
+gulp.task('increase-version:prerelease', function () {
+    var option = {
+        type : "prerelease"
+    };
+
+    return gulp.src("./package.json")
+        .pipe(bump(option))
+        .pipe(gulp.dest('./'));
+});
+
 gulp.task('add-git-tag', function (callback) {
     let version = require("./package.json").version;
 
@@ -122,6 +132,8 @@ gulp.task("check-login", function (callback) {
 });
 
 gulp.task('build:try', sequence("clean", "build-fulton-server", "update-package.json"));
+
+gulp.task('build:prerelease', sequence("clean", "increase-version:prerelease", "build-fulton-server", "update-package.json"));
 
 gulp.task('build', sequence("clean", "increase-version", "add-git-tag", "build-fulton-server", "update-package.json"));
 

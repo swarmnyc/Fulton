@@ -15,7 +15,7 @@ export class AccessTokenOptions extends BaseOptions<AccessTokenOptions> {
     duration?: number = 2592000;
 
     /**
-     * the scopes of access token, for examples, username, rolus, emails
+     * the scopes of access token, for examples, username, rolus, email
      * default is "[]"
      */
     scopes?: string[] = [];

@@ -30,7 +30,6 @@ export class FacebookStrategyOptions extends OauthStrategyOptions {
 
         this.path = "/auth/facebook";
         this.callbackPath = "/auth/facebook/callback";
-        this.scope = "read:user user:email";
         this.profileFields = ['id', 'displayName', "photos", 'email']
 
         this.verifierFn = FultonIdentityImpl.oauthVerifierFn;

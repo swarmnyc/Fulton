@@ -17,10 +17,11 @@ import { ObjectId } from 'bson';
 
 interface JWTPayload {
     id: string;
-
+    ts: number; // timestamp
+    
     username?: string;
     portraitUrl?: string;
-    emails?: string;
+    email?: string;
     roles?: string[];
     [key: string]: any;
 }
@@ -253,7 +254,7 @@ export class FultonUserService implements IUserService<FultonUser> {
         // add user
         let userInput = {
             username,
-            emails: [input.email],
+            email: input.email,
             registeredAt: new Date()
         } as FultonUser;
 
@@ -354,7 +355,7 @@ export class FultonUserService implements IUserService<FultonUser> {
                 } as FultonUser
 
                 if (profile.email) {
-                    userInput.emails = [profile.email]
+                    userInput.email = profile.email
                 }
 
                 userInput.registeredAt = new Date()
@@ -553,7 +554,8 @@ export class FultonUserService implements IUserService<FultonUser> {
 
     private encodeJwtToken(user: IFultonUser): string {
         let payload: JWTPayload = {
-            id: user.id
+            id: user.id,
+            ts: Date.now()
         };
 
         this.options.accessToken.scopes.forEach(scope => {

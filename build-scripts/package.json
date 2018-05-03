@@ -1,6 +1,6 @@
 {
   "name": "fulton-build-scripts",
-  "version": "0.0.21-1",
+  "version": "0.0.23",
   "scripts": {
     "build": "gulp build",
     "build:major": "gulp build --increaseType major",
@@ -9,6 +9,7 @@
     "build:sp": "gulp build --snapshot",
     "publish": "gulp publish",
     "bp": "gulp build && gulp publish",
+    "bp:prerelease": "gulp build:prerelease && gulp publish",
     "clean": "gulp clean",
     "test": "echo \"Error: no test specified\" && exit 1"
   },

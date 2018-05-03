@@ -76,7 +76,15 @@ export class UserServiceMock implements IUserService<FultonUser> {
         });
     }
 
-    forgotPassword(usernameOrEmail: string): Promise<FultonUser> {
+    forgotPassword(usernameOrEmail: string, baseUrl: string): Promise<any> {
+        throw new Error("Method not implemented.");
+    }
+
+    resetPassword(token: string, code: string, password: string): Promise<void> {
+        throw new Error("Method not implemented.");
+    }
+    
+    verifyResetPassword(token: string, code: string): Promise<void> {
         throw new Error("Method not implemented.");
     }
 

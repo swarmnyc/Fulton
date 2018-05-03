@@ -27,7 +27,7 @@ export interface IFultonUser extends IUser {
     id?: string;
     username?: string;
     portraitUrl?: string;
-    emails?: string[];
+    email?: string;
     roles?: string[];
     registeredAt?: Date
 }

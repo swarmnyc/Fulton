@@ -58,7 +58,7 @@ export class ForgotPasswordOptions extends BaseOptions<ForgotPasswordOptions> {
             this.notiication.email.subjectTemplate = `${this.appName} Forgot Password`
         }
 
-        if (this.notiication.email.subjectTemplate == null) {
+        if (this.notiication.email.bodyTemplate == null) {
             this.notiication.email.bodyTemplate = "./templates/email-forgot-password.html"
         }
     }

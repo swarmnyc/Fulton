@@ -133,6 +133,6 @@ gulp.task("check-login", function (callback) {
 
 gulp.task('build', sequence("clean", "build-fulton-server", "update-package.json"));
 
-gulp.task('publish', sequence("add-git-tag", "check-login", "publish-fulton-server"));
+gulp.task('publish', sequence("check-login", "publish-fulton-server", "add-git-tag"));
 
 gulp.task('buildAndPublish', sequence("build", "publish"));

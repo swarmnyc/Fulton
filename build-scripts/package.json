@@ -1,6 +1,6 @@
 {
   "name": "fulton-build-scripts",
-  "version": "0.0.25-0",
+  "version": "0.0.25-1",
   "scripts": {
     "iv": "gulp increase-version",
     "iv:major": "gulp increase-version --increaseType major",

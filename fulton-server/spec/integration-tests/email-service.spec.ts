@@ -25,9 +25,17 @@ class MyApp extends FultonApp {
             }
         });
 
+        options.notification.extraVariables = {
+            extra1: "EXTRA1"
+        }
+
+        options.identity.register.notiication.extraVariables = {
+            extra2: "EXTRA2"
+        }
+
         options.identity.register.notiication.email.set({
             subjectTemplate: "Welcome to Fulton",
-            bodyTemplate: "<h1>Hello {{username}}</h1><p> Thanks for your registration.</p>"
+            bodyTemplate: "<h1>Hello {{username}}</h1><p> Thanks for your registration. {{extra1}} {{extra2}}</p>"
         })
     }
 }

@@ -490,6 +490,9 @@ export class FultonUserService implements IUserService<FultonUser> {
 
     private sendWelcomeNotification(model: WelcomeNotificationModel) {
         var opts = this.options.register.notiication
+        if (opts.extraVariables) {
+            Object.assign(model, opts.extraVariables)
+        }
         if (opts.email.enabled && model.email) {
             var message: NotificationMessage = {
                 email: {
@@ -506,6 +509,9 @@ export class FultonUserService implements IUserService<FultonUser> {
 
     private sendForgotPasswordNotification(model: ForgotPasswordNotificationModel) {
         var opts = this.options.forgotPassword.notiication
+        if (opts.extraVariables) {
+            Object.assign(model, opts.extraVariables)
+        }
         if (opts.email.enabled && model.email) {
             var message: NotificationMessage = {
                 email: {

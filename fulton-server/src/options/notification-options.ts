@@ -1,6 +1,6 @@
 import { BaseOptions } from './options';
 import { Env } from '../helpers';
-import { EmailMessage } from '../interfaces';
+import { EmailMessage, Dict } from '../interfaces';
 
 export class EmailOptions extends BaseOptions<EmailOptions>{
     /**
@@ -111,7 +111,15 @@ export class NotificationOptions extends BaseOptions<NotificationOptions> {
     readonly email = new EmailOptions(this.appName, this.appMode);
 
     //TODO: sms notification
-    readonly sms?: {}
+    readonly sms?: any
+
+    // TODO: pushNotification
+    readonly pushNotification?: any;
+
+    /**
+     * the extra variables pass to template engine
+     */
+    extraVariables?: Dict
 
     init?(): void {
         this.email.init();

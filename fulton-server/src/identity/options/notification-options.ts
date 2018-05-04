@@ -1,5 +1,6 @@
 import { BaseOptions } from '../../options/options';
 import { Env } from '../../helpers';
+import { Dict } from '../../interfaces';
 
 export class IdentityEmailNotificationOptions extends BaseOptions<IdentityEmailNotificationOptions> {
     /**
@@ -23,6 +24,11 @@ export class IdentityNotificationOptions extends BaseOptions<IdentityNotificatio
      * the options for email notification
      */
     readonly email = new IdentityEmailNotificationOptions(this.appName, this.appMode);
+
+    /**
+     * the extra variables pass to template engine
+     */
+    extraVariables?: Dict
 
     constructor(protected appName?: string, protected appMode?: string, protected type?: string) {
         super(appName, appMode);

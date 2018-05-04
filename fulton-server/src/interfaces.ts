@@ -23,6 +23,10 @@ export type RepositoryFactory<TEntity = any> = ((entity: Type<TEntity>) => Repos
 
 export type EntityServiceFactory<TEntity = any> = ((entity: Type<TEntity>) => IEntityService<TEntity>);
 
+export interface Dict {
+    [key: string]: any
+}
+
 export interface RouterDocOptions {
     title?: string;
     description?: string;
@@ -192,6 +196,9 @@ export interface NotificationMessage {
 
     // TODO: sms message
     sms?: any;
+
+    // TODO: pushNotification
+    pushNotification?: any;
 }
 
 export interface IEmailService {

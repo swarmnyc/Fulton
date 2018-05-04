@@ -38,7 +38,7 @@ describe('Email Service', () => {
     beforeAll(async () => {
         await app.init();
 
-        app.connections[0].dropDatabase()
+        app.dbConnections[0].dropDatabase()
     })
 
     afterAll(() => {

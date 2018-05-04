@@ -242,7 +242,7 @@ export let FultonIdentityImpl = {
         if (username || email) {
             // send notification
             req.userService
-                .forgotPassword(username || email, Helper.urlResolve(req, options.path))
+                .forgotPassword(username || email)
                 .then((result) => {
                     res.send({
                         data: result

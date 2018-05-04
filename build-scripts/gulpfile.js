@@ -131,12 +131,8 @@ gulp.task("check-login", function (callback) {
     });
 });
 
-gulp.task('build:try', sequence("clean", "build-fulton-server", "update-package.json"));
+gulp.task('build', sequence("clean", "build-fulton-server", "update-package.json"));
 
-gulp.task('build:prerelease', sequence("clean", "increase-version:prerelease", "build-fulton-server", "update-package.json"));
-
-gulp.task('build', sequence("clean", "increase-version", "add-git-tag", "build-fulton-server", "update-package.json"));
-
-gulp.task('publish', sequence("check-login", "publish-fulton-server"));
+gulp.task('publish', sequence("add-git-tag", "check-login", "publish-fulton-server"));
 
 gulp.task('buildAndPublish', sequence("build", "publish"));

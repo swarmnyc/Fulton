@@ -2,7 +2,7 @@ import * as jws from 'jws';
 import * as lodash from 'lodash';
 import * as passwordHash from 'password-hash';
 import * as validator from 'validator';
-import { AccessToken, ForgotPasswordNotificationModel, IFultonUser, IOauthProfile, IUserService, RegisterModel, WelcomeNotificationModel, ForgotPasswordModel } from '../interfaces';
+import { AccessToken, ForgotPasswordModel, ForgotPasswordNotificationModel, IFultonUser, IOauthProfile, IUserService, RegisterModel, WelcomeNotificationModel } from '../interfaces';
 import { codeGenerate, numberCodeGenerate } from '../../helpers/crypto-helper';
 import { DiKeys, EventKeys } from '../../keys';
 import { EntityMetadata } from 'typeorm/metadata/EntityMetadata';
@@ -10,6 +10,7 @@ import { ErrorCodes } from '../../common/fulton-error';
 import { FultonAccessToken, FultonIdentity, FultonUser } from './fulton-user';
 import { FultonError } from '../../common';
 import { getManager, MongoEntityManager, MongoRepository } from 'typeorm';
+import { Helper } from '../../helpers/helper';
 import { IdentityOptions } from '../identity-options';
 import { IFultonApp } from '../../fulton-app';
 import { inject, injectable, NotificationMessage, Request } from '../../interfaces';
@@ -412,7 +413,7 @@ export class FultonUserService implements IUserService<FultonUser> {
         }
     }
 
-    async forgotPassword(usernameOrEmail: string, baseUrl: string): Promise<ForgotPasswordModel> {
+    async forgotPassword(usernameOrEmail: string): Promise<ForgotPasswordModel> {
         let identity = await this.runner.findIdentityByLocal(usernameOrEmail);
         if (identity) {
             let token = identity.resetPasswordToken = codeGenerate()
@@ -426,10 +427,12 @@ export class FultonUserService implements IUserService<FultonUser> {
 
             this.app.events.emit(EventKeys.UserForgotPassword, identity);
 
+            var url = Helper.urlJoin(this.app.baseUrl, this.options.forgotPassword.path)
             this.sendForgotPasswordNotification({
                 username: user.username,
                 email: identity.email,
-                url: `${baseUrl}?token=${token}&code=${code}`,
+                url: `${url}?token=${token}&code=${code}`,
+                token: token,
                 code: code
             })
 

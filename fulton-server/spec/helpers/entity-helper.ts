@@ -10,9 +10,9 @@ export function createFakeConnection(app: IFultonApp) {
     });
 
     conn["buildMetadatas"]();
-    app.connections = [conn];
+    app.dbConnections = [conn];
     app.entityMetadatas = new Map();
-    app.connections[0].entityMetadatas.forEach((metadata) => {
+    app.dbConnections[0].entityMetadatas.forEach((metadata) => {
         metadata.relatedToMetadata = getRelatedToMetadata(metadata.target);
         app.entityMetadatas.set(metadata.target as Type, metadata);
     })

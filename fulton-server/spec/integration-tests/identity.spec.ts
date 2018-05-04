@@ -39,7 +39,7 @@ describe('Identity Integration Test', () => {
 
     beforeEach(() => {
         httpTester.setHeaders(null);
-        return app["connections"][0].dropDatabase();
+        return app["dbConnections"][0].dropDatabase();
     })
 
     beforeAll(async () => {

@@ -37,12 +37,12 @@ module.exports = async function (app: FultonApp): Promise<any> {
     });
 
 
-    app.connections = await createConnections(connOptions).catch((error) => {
+    app.dbConnections = await createConnections(connOptions).catch((error) => {
         FultonLog.error("initDatabases fails", error);
         throw error;
     });
 
-    for (const conn of app.connections) {
+    for (const conn of app.dbConnections) {
         for (const metadata of conn.entityMetadatas) {
             let type = metadata.target as Type;
             if (!app.entityMetadatas.has(type)) {

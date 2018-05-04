@@ -1,15 +1,14 @@
 {
   "name": "fulton-build-scripts",
-  "version": "0.0.24",
+  "version": "0.0.25-0",
   "scripts": {
+    "iv": "gulp increase-version",
+    "iv:major": "gulp increase-version --increaseType major",
+    "iv:minor": "gulp increase-version --increaseType minor",
+    "iv:pr": "gulp increase-version:prerelease",
     "build": "gulp build",
-    "build:major": "gulp build --increaseType major",
-    "build:minor": "gulp build --increaseType minor",
-    "build:try": "gulp build:try",
-    "build:sp": "gulp build --snapshot",
     "publish": "gulp publish",
     "bp": "gulp build && gulp publish",
-    "bp:prerelease": "gulp build:prerelease && gulp publish",
     "clean": "gulp clean",
     "test": "echo \"Error: no test specified\" && exit 1"
   },

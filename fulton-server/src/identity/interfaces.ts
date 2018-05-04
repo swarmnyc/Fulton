@@ -45,7 +45,7 @@ export interface IUserService<T extends IUser> {
     loginByAccessToken(token: string): Promise<T>;
     register(input: RegisterModel): Promise<T>;
     issueAccessToken(user: T): Promise<AccessToken>;
-    forgotPassword(usernameOrEmail: string, baseUrl: string): Promise<ForgotPasswordModel>;
+    forgotPassword(usernameOrEmail: string): Promise<ForgotPasswordModel>;
     resetPassword(token: string, code: string, password: string): Promise<void>;
     verifyResetPassword(token: string, code: string): Promise<void>;
     //refreshAccessToken(token: string): Promise<AccessToken>;
@@ -102,14 +102,16 @@ export interface ForgotPasswordModel {
     expires_in: number
 }
 
-export interface WelcomeNotificationModel {
+export interface NotificationModel {
     username: string,
     email: string
 }
 
-export interface ForgotPasswordNotificationModel {
-    username: string,
-    email: string,
+export interface WelcomeNotificationModel extends NotificationModel {
+}
+
+export interface ForgotPasswordNotificationModel  extends NotificationModel {
     url: string,
+    token: string,
     code: string
 }

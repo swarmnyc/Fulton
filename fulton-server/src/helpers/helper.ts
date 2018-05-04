@@ -1,4 +1,6 @@
-import * as escapeStringRegexp from "escape-string-regexp";
+import * as escapeStringRegexp from 'escape-string-regexp';
+import * as http from 'http';
+import * as tls from 'tls';
 import { Request } from '../interfaces';
 
 
@@ -64,15 +66,29 @@ export let Helper = {
         return new RegExp(escapeStringRegexp(input), flags);
     },
 
-    urlResolve(req: Request, ...pathes: string[]) {
+    baseUrl(req: Request) {
         // x-forwarded-proto is from proxy like AWS load balancer
         let protocol = req.header("x-forwarded-proto") || req.protocol;
-        let domain = `${protocol}://${req.get("host")}`;
+        return `${protocol}://${req.get("host")}`;
+    },
+
+    baseUrlRaw(req: http.IncomingMessage) {
+        // x-forwarded-proto is from proxy like AWS load balancer
+        let protocol = req.headers["x-forwarded-proto"];
+        if (!protocol){
+            protocol = (req.connection instanceof tls.TLSSocket) ? "https" : "http"
+        }
+
+        return `${protocol}://${req.headers["host"]}`;
+    },
+
+    urlResolve(req: Request, ...pathes: string[]) {
+        let baseUrl = req.fultonApp.baseUrl;
 
         if (pathes == null || pathes.length == 0) {
-            return domain;
+            return baseUrl;
         } else {
-            return urlJoin(domain, ...pathes)
+            return urlJoin(baseUrl, ...pathes)
         }
     },
 

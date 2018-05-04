@@ -12,7 +12,7 @@ import { Middleware } from '../../interfaces';
  * ALL /auth/forgot-password?email=email, for send reset code notification
  * 
  * 2.  
- * ALL /auth/forgot-password?token=token&code=code, for just verfiy the token is valid or not
+ * ALL /auth/forgot-password?token=token&code=code, for just verify the token is valid or not
  * 
  * 3.  
  * All /auth/forgot-password?token=token&code=code&password=new-password, for reset password
@@ -47,7 +47,7 @@ export class ForgotPasswordOptions extends BaseOptions<ForgotPasswordOptions> {
      * the default value for email.subjectTemplate is `{appName} Forgot Password`
      * the default value for email.bodyTemplate is `./templates/email-forgot-password.html`
      */
-    readonly notiication? = new IdentityNotificationOptions(this.appName, this.appMode, "forgot-password");
+    readonly notiication?= new IdentityNotificationOptions(this.appName, this.appMode, "forgot-password");
 
     init?(): void {
         this.enabled = Env.getBoolean(`${this.appName}.options.identity.forgot-password.enabled`, this.enabled);

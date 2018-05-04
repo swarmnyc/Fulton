@@ -65,9 +65,9 @@ class MyApp extends FultonApp {
         });
 
         conn["buildMetadatas"]();
-        this.connections = [conn];
+        this.dbConnections = [conn];
         this.entityMetadatas = new Map();
-        this.connections[0].entityMetadatas.forEach((metadata) => {
+        this.dbConnections[0].entityMetadatas.forEach((metadata) => {
             metadata.relatedToMetadata = getRelatedToMetadata(metadata.target);
             this.entityMetadatas.set(metadata.target as Type, metadata);
         })
@@ -87,7 +87,7 @@ describe('Doc Integration Test', () => {
     });
 
     afterAll(() => {
-        app.connections = [];
+        app.dbConnections = [];
         return httpTester.stop();
     });
 

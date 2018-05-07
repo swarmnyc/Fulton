@@ -1,62 +1,16 @@
-// read arguments
-const yargs = require('yargs');
-const argv = yargs
-    .alias("n", "newVersion")
-    .alias("i", "increaseType")
-    .choices("increaseType", ["major", "minor", "patch", "pre-release"])
-    .default({ increaseType: "patch" })
-    .argv
-
 const path = require('path');
 const exec = require('child_process').exec;
 
 const gulp = require('gulp');
 const gutil = require('gulp-util');
-const bump = require('gulp-bump');
 const rimraf = require('rimraf');
 const sequence = require('gulp-sequence');
 const replace = require('gulp-replace');
+const prompt = require('inquirer');
+const semver = require('semver')
 
 gulp.task('clean', function (callback) {
     rimraf("./dist", callback);
-});
-
-gulp.task('increase-version', function () {
-    var option = {};
-
-    if (argv.newVersion) {
-        option.version = argv.newVersion;
-    } else {
-        option.type = argv.increaseType;
-    }
-
-    return gulp.src("./package.json")
-        .pipe(bump(option))
-        .pipe(gulp.dest('./'));
-});
-
-gulp.task('increase-version:prerelease', function () {
-    var option = {
-        type : "prerelease"
-    };
-
-    return gulp.src("./package.json")
-        .pipe(bump(option))
-        .pipe(gulp.dest('./'));
-});
-
-gulp.task('add-git-tag', function (callback) {
-    let version = require("./package.json").version;
-
-    exec("cd ../ && git tag version/" + version, function (err, stdout, stderr) {
-        if (err) {
-            gutil.log("add-git-tag error:", err);            
-            callback("add-git-tag failed");
-            return;
-        }
-
-        callback()
-    });
 });
 
 gulp.task('build-fulton-server', function (callback) {
@@ -110,14 +64,20 @@ gulp.task('publish-fulton-server', function (callback) {
     });
 });
 
-gulp.task("update-package.json", function () {
-    // use version of build-script/package.json 
-    let version = require("./package.json").version;
+gulp.task("update-package.json", function (callback) {
+    getCurrentVersion()
+        .then((version) => {
+            gutil.log("The version is", version);
 
-    return gulp.src("./dist/*/package*.json")
-        .pipe(replace("0.0.0-PLACEHOLDER", version))
-        .pipe(replace("./build/", "./"))
-        .pipe(gulp.dest("./dist"));
+            gulp.src("./dist/*/package*.json")
+                .pipe(replace("0.0.0-PLACEHOLDER", version))
+                .pipe(replace("./build/", "./"))
+                .pipe(gulp.dest("./dist"))
+                .on("error", callback)
+                .on("end", callback);
+
+        })
+        .catch(callback);
 });
 
 gulp.task("check-login", function (callback) {
@@ -131,8 +91,66 @@ gulp.task("check-login", function (callback) {
     });
 });
 
-gulp.task('build', sequence("clean", "build-fulton-server", "update-package.json"));
+gulp.task("increase-version", function (callback) {
+    let version;
+    getCurrentVersion()
+        .then((v) => {
+            version = v;
+            return prompt.prompt({
+                type: 'list',
+                name: "type",
+                message: `What type of version level would you like to increase? (The current version is ${version})`,
+                choices: ['none', 'prerelease', 'patch', 'minor', 'major']
+            })
+        })
+        .then((result) => {
+            if (result.type != "none") {
+                return semver.inc(version, result.type)
+            }
+        })
+        .then((newVesion) => {
+            if (newVesion) {
+                return updateVersion(newVesion)
+            }
+        })
+        .then(callback)
+        .catch(callback)
+});
 
-gulp.task('publish', sequence("check-login", "publish-fulton-server", "add-git-tag"));
+gulp.task('build', sequence("increase-version", "clean", "build-fulton-server", "update-package.json"));
+
+gulp.task('publish', sequence("check-login", "publish-fulton-server"));
 
 gulp.task('buildAndPublish', sequence("build", "publish"));
+
+function getCurrentVersion() {
+    return new Promise((resolve, reject) => {
+        // use version from git tags
+        exec("git describe --tags --abbrev=0", function (err, stdout, stderr) {
+            if (err) {
+                gutil.log("get git tags error:", err);
+                reject("get git tags failed");
+                return;
+            }
+
+            resolve(stdout.split("/")[1].trim())
+        });
+    })
+}
+
+function updateVersion(version) {
+    return new Promise((resolve, reject) => {
+        // use version from git tags
+        exec(`git tag version/${version}`, function (err, stdout, stderr) {
+            if (err) {
+                gutil.log("set git tags error:", err);
+                reject("set git tags failed");
+                return;
+            }
+
+            gutil.log(`update version to ${version}`)
+
+            resolve()
+        });
+    })
+}

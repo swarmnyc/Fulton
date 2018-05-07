@@ -1,10 +1,13 @@
 {
 	"folders": [
 		{
+			"path": "build-scripts"
+		},
+		{
 			"path": "fulton-server"
 		},
 		{
-			"path": "build-scripts"
+			"path": "fulton-cli"
 		}
 	]
 }

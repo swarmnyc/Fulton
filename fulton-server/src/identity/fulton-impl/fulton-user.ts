@@ -1,4 +1,4 @@
-import { IFultonUser } from '../interfaces';
+import { IFultonUser, IFultonIdentity } from '../interfaces';
 import { Entity, ObjectIdColumn, Column, PrimaryColumn, PrimaryGeneratedColumn } from 'typeorm';
 
 @Entity("users")
@@ -26,7 +26,7 @@ export class FultonUser implements IFultonUser {
 }
 
 @Entity("users_identities")
-export class FultonIdentity {
+export class FultonIdentity implements IFultonIdentity {
     @PrimaryColumn()
     id?: any;
 

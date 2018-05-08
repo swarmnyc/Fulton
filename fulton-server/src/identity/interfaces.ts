@@ -32,6 +32,12 @@ export interface IFultonUser extends IUser {
     registeredAt?: Date
 }
 
+export interface IFultonIdentity {
+    id?: string;
+    type?: string;
+    [key: string]: any;
+}
+
 export interface IUserService<T extends IUser> {
     currentUser: IUser;
     login(username: string, password: string): Promise<T>;
@@ -48,8 +54,11 @@ export interface IUserService<T extends IUser> {
     forgotPassword(usernameOrEmail: string): Promise<ForgotPasswordModel>;
     resetPassword(token: string, code: string, password: string): Promise<void>;
     verifyResetPassword(token: string, code: string): Promise<void>;
+
+    getUserIdentities(user: T): Promise<IFultonIdentity[]>;
     //refreshAccessToken(token: string): Promise<AccessToken>;
-    //revokeAccessToken(user: T): Promise<any>;
+    //revokeAccessToken(token: string): Promise<any>;
+    //removeUserIdentities(...identities:IFultonIdentity[]): Promise<any>;
 }
 
 export interface AccessToken {
@@ -110,7 +119,7 @@ export interface NotificationModel {
 export interface WelcomeNotificationModel extends NotificationModel {
 }
 
-export interface ForgotPasswordNotificationModel  extends NotificationModel {
+export interface ForgotPasswordNotificationModel extends NotificationModel {
     url: string,
     token: string,
     code: string

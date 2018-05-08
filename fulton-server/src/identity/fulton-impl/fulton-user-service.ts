@@ -2,7 +2,7 @@ import * as jws from 'jws';
 import * as lodash from 'lodash';
 import * as passwordHash from 'password-hash';
 import * as validator from 'validator';
-import { AccessToken, ForgotPasswordModel, ForgotPasswordNotificationModel, IFultonUser, IOauthProfile, IUserService, RegisterModel, WelcomeNotificationModel } from '../interfaces';
+import { AccessToken, ForgotPasswordModel, ForgotPasswordNotificationModel, IFultonUser, IOauthProfile, IUserService, RegisterModel, WelcomeNotificationModel, IFultonIdentity } from '../interfaces';
 import { codeGenerate, numberCodeGenerate } from '../../helpers/crypto-helper';
 import { DiKeys, EventKeys } from '../../keys';
 import { EntityMetadata } from 'typeorm/metadata/EntityMetadata';
@@ -41,6 +41,7 @@ interface IRunner {
     findUserById(userId: any): Promise<FultonUser>;
     findUserByLocal(usernameOrEmail: string, password: string): Promise<FultonUser>;
     findUserByOauth(type: string, soruceUserId: string): Promise<FultonUser>;
+    findIdentities(user:IFultonUser): Promise<FultonIdentity[]>
     findIdentity(type: string, soruceUserId: string): Promise<FultonIdentity>;
     findIdentityByLocal(usernameOrEmail: string): Promise<FultonIdentity>;
     findIdentityByLocalResetToken(token: string, code: string): Promise<FultonIdentity>;
@@ -69,6 +70,7 @@ class MongoRunner implements IRunner {
     }
 
     updateMetadata(metadata: EntityMetadata) {
+        // make metadata is for mongo 
         let idColumn = metadata.ownColumns.find((c) => c.propertyName == "id")
 
         idColumn.isObjectId = true;
@@ -158,6 +160,12 @@ class MongoRunner implements IRunner {
         } as any)
 
         return this.userRepository.findOne(userToken.userId)
+    }
+
+    findIdentities(user:IFultonUser): Promise<FultonIdentity[]> {
+        return this.identityRepository.find({
+            "userId": user.id
+        });
     }
 
     findIdentity(type: string, sourceUserId: string): Promise<FultonIdentity> {
@@ -482,6 +490,10 @@ export class FultonUserService implements IUserService<FultonUser> {
 
     refreshAccessToken(token: string): Promise<AccessToken> {
         throw new Error("Method not implemented.");
+    }
+
+    getUserIdentities(user: IFultonUser): Promise<IFultonIdentity[]> {
+        return this.runner.findIdentities(user);
     }
 
     private get jwtSecret(): string | Buffer {

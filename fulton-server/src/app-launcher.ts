@@ -85,7 +85,9 @@ export class AppLauncher<TApp extends IFultonApp> {
             }
         }).catch((error) => {
             FultonLog.error("Launch Failed by", error)
-            return this.app.stop().then(() => Promise.reject(error))
+            this.app.stop().then(() => {
+                process.exit(1)
+            })
         });
     }
 
@@ -95,7 +97,6 @@ export class AppLauncher<TApp extends IFultonApp> {
                 let wokerNum = app.options.server.clusterWorkerNumber || os.cpus().length;
 
                 fultonDebug("launcher", `Master ${process.pid} is running with ${wokerNum} worker(s)`);
-
 
                 // Fork workers.
                 for (let i = 0; i < wokerNum; i++) {

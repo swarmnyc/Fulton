@@ -245,7 +245,7 @@ export abstract class FultonApp implements IFultonApp {
             fultonDebugMaster("app", "Initializing with options: %O\t", this.options)
         } catch (error) {
             fultonDebug("app", "App Init failed with: %O\t", this.options)
-            FultonLog.error("App Init failed by", error)
+            //FultonLog.error("App Init failed by", error)
             throw error;
         }
     }

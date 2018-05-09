@@ -237,7 +237,7 @@ export let FultonIdentityImpl = {
         let token = req.body.token || req.query.token;
         let code = req.body.code || req.query.code;
 
-        let password = req.body.password || req.query.password;
+        let password = req.body.password;
 
         if (username || email) {
             // send notification

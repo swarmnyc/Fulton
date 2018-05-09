@@ -248,7 +248,7 @@ function generateAuthDefinitions(app: FultonApp, docs: OpenApiSpec) {
     }
 
     // for register
-    if (options.register) {
+    if (options.register.enabled) {
         let path = toPath(options.register.path);
         let paths: PathsObject = docs.paths[path] = {}
 
@@ -296,8 +296,66 @@ function generateAuthDefinitions(app: FultonApp, docs: OpenApiSpec) {
         paths[options.register.httpMethod] = actionDoc;
     }
 
+    // for forgot-password
+    if (options.forgotPassword.enabled) {
+        let path = toPath(options.forgotPassword.path);
+        let paths: PathsObject = docs.paths[path] = {}
+
+        paths["get"] = {
+            summary: "forgot-password",
+            description: "send the reset password notifications to the user",
+            tags: ["Identity"],
+            parameters: [
+                {
+                    name: "email",
+                    in: "path",
+                    description: "the user's email, required either one of email or username",
+                    type: "string"
+                },
+                {
+                    name: "username",
+                    in: "path",
+                    description: "the user's username, required either one of email or username",
+                    type: "string"
+                }
+            ],
+            responses: {
+                "200": {
+                    description: "Reset Password Token",
+                    schema: {
+                        type: "object",
+                        properties: {
+                            token: { type: "string" },
+                            expires_in: { type: "number" }
+                        }
+                    }
+                }
+            }
+        };
+        paths["post"] = {
+            summary: "forgot-password",
+            description: "let the user reset password",
+            tags: ["Identity"],
+            parameters: [
+                {
+                    name: "body",
+                    in: "body",
+                    required: true,
+                    schema: {
+                        type: "object",
+                        properties: {
+                            token: { type: "string" },
+                            code: { type: "string" },
+                            password: { type: "string" }
+                        }
+                    }
+                }
+            ]
+        };
+    }
+
     // for login
-    if (options.login) {
+    if (options.login.enabled) {
         let path = toPath(options.login.path);
         let paths: PathsObject = docs.paths[path] = {}
         let body: SchemaObject = {

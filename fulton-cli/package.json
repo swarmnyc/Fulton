@@ -1,11 +1,39 @@
 {
   "name": "fulton-cli",
-  "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "version": "0.0.0-PLACEHOLDER",
+  "description": "the cli for fulton",
+  "main": "./fulton-cli.js",
+  "bin": {
+    "fulton": "./fulton"
+  },
   "scripts": {
+    "clean": "rimraf ./build",
+    "start": "ts-node ./src/fulton",
+    "build": "npm run clean && tsc -p tsconfig-prod.json",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "author": "",
-  "license": "ISC"
+  "author": {
+    "name": "SWARM",
+    "email": "dev@swarmnyc.com",
+    "url": "https://swarmnyc.com"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/swarmnyc/fulton.git"
+  },
+  "bugs": {
+    "url": "https://github.com/swarmnyc/fulton/issues"
+  },
+  "homepage": "https://github.com/swarmnyc/fulton",
+  "license": "MIT",
+  "dependencies": {
+    "angular-template": "^2.4.0",
+    "caporal": "^0.10.0"
+  },
+  "devDependencies": {
+    "@types/node": "^10.0.6",
+    "rimraf": "^2.6.2",
+    "ts-node": "^6.0.3",
+    "typescript": "^2.8.3"
+  }
 }

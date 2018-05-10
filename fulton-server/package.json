@@ -31,7 +31,6 @@
     "url": "https://github.com/swarmnyc/fulton/issues"
   },
   "homepage": "https://github.com/swarmnyc/fulton",
-  "readme": "readme.md",
   "license": "MIT",
   "devDependencies": {
     "@types/chalk": "^2.2.0",

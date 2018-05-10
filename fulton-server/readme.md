@@ -4,6 +4,10 @@
 
 Fulton Server is integrated many essential features and packages that a functional web server needs. Using Fulton Sever can accelerate a lot of time from building a state of art web server from scratch. 
 
+## CLI
+---
+Use Fulton Server will Fulton CLI, [see](https://www.npmjs.com/package/fulton-cli)
+
 ## Integration
 
 ### [typescript](https://typescriptlang.org/)

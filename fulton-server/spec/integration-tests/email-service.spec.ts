@@ -35,7 +35,7 @@ class MyApp extends FultonApp {
 
         options.identity.register.notiication.email.set({
             subjectTemplate: "Welcome to Fulton",
-            bodyTemplate: "<h1>Hello {{username}}</h1><p> Thanks for your registration. {{extra1}} {{extra2}}</p>"
+            bodyTemplate: "./spec/templates/welcome-template.html"
         })
     }
 }
@@ -58,8 +58,8 @@ describe('Email Service', () => {
 
         await service.send({
             to: process.env["tester_email"],
-            subjectTemplate: "Hello {{username}}, this is testing email",
-            bodyTemplate: "<h1>Hello {{username}}</h1><p>{{message}}</p>",
+            subjectTemplate: "Hello ${username}, this is testing email",
+            bodyTemplate: "<h1>Hello ${username}</h1><p>${message}</p>",
             variables: {
                 username: "Tester",
                 message: "Email Testing"

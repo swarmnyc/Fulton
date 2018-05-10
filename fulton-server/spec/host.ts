@@ -28,11 +28,11 @@ class MyApp extends FultonApp {
         options.notification.email.enabled = true        
 
         options.identity.register.notiication.email.set({
-            bodyTemplate: "<h1>Hello {{username}}</h1><p> Thanks for your registration.</p>"
+            bodyTemplate: "<h1>Hello ${username}</h1><p> Thanks for your registration.</p>"
         })
 
         options.identity.forgotPassword.notiication.email.set({
-            bodyTemplate: "<h1>Hey {{username}}</h1><p> click this <a href='{{url}}'> link </a> to reset your password.</p>"
+            bodyTemplate: "<h1>Hey ${username}</h1><p> click this <a href='${url}'> link </a> to reset your password.</p>"
         })
 
         // remove database

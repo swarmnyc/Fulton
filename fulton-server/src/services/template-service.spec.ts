@@ -3,7 +3,7 @@ import { TemplateService } from "./template-service";
 describe('Template Service', () => {
     var service = new TemplateService()
     it('should generate content by text', async () => {
-        var result = service.geneate("<h1>Hello {{username}}</h1>", { username: "Test" });
+        var result = service.geneate("<h1>Hello ${username}</h1>", { username: "Test" });
 
         expect(result).toEqual("<h1>Hello Test</h1>");
     });

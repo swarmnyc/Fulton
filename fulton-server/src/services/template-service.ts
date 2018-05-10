@@ -1,12 +1,24 @@
-import { Service } from "./service";
+import * as lodash from 'lodash';
 import { ITemplateService } from '../interfaces';
-
-declare type Templator = ((textOrFilePath: string, variables: any) => string)
-
-var templator: Templator = require("angular-template")
+import { Service } from './service';
+import * as fs from 'fs';
+import { TemplateExecutor } from 'lodash';
 
 export class TemplateService extends Service implements ITemplateService {
+    templates = new Map<string, TemplateExecutor>()
+
     geneate(textOrFilePath: string, variables: any = {}): string {
-        return templator(textOrFilePath, variables);
+        if (!this.templates.has(textOrFilePath)) {
+            let content: string = textOrFilePath;
+            if (textOrFilePath.startsWith(".") || textOrFilePath.startsWith("/")) {
+                if (fs.statSync(textOrFilePath).isFile()) {
+                    content = fs.readFileSync(textOrFilePath).toString();
+                }
+            }
+
+            this.templates.set(textOrFilePath, lodash.template(content))
+        }
+
+        return this.templates.get(textOrFilePath)(variables);
     }
 }

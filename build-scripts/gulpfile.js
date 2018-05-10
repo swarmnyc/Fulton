@@ -7,61 +7,43 @@ const rimraf = require('rimraf');
 const sequence = require('gulp-sequence');
 const replace = require('gulp-replace');
 const prompt = require('inquirer');
-const semver = require('semver')
+const semver = require('semver');
+
+const packages = [{
+    name: "cli",
+    extraFolders: ["templates"]
+},
+{
+    name: "server",
+    extraFolders: ["assets"]
+}]
 
 gulp.task('clean', function (callback) {
     rimraf("./dist", callback);
 });
 
-gulp.task('build-fulton-server', function (callback) {
-    exec("cd ../fulton-server/ && npm run build", function (err, stdout, stderr) {
-        if (err) {
-            gutil.log("build-fulton-server error:", err);
-            callback("build-fulton-server failed");
-            return;
-        }
+gulp.task('build-fulton-packages', function (callback) {
+    let tasks = Promise.resolve();
 
-        let tasks = [];
-
-        tasks.push(new Promise((resolve, reject) => {
-            gulp.src('../fulton-server/build/**/*')
-                .pipe(gulp.dest("./dist/fulton-server/"))
-                .on("error", reject)
-                .on("end", resolve);
-        }));
-
-        tasks.push(new Promise((resolve, reject) => {
-            gulp.src('../fulton-server/assets/**/*')
-                .pipe(gulp.dest("./dist/fulton-server/assets"))
-                .on("error", reject)
-                .on("end", resolve);
-        }));
-
-        tasks.push(new Promise((resolve, reject) => {
-            gulp.src(['../fulton-server/package*.json', '../fulton-server/readme.md'])
-                .pipe(gulp.dest("./dist/fulton-server/"))
-                .on("error", reject)
-                .on("end", resolve);
-        }));
-
-        Promise.all(tasks)
-            .then((test) => {
-                callback();
-            })
-            .catch(callback);
+    packages.forEach((package) => {
+        tasks = tasks.then(() => {
+            return buildPackage(package)
+        })
     });
+
+    tasks.then(callback).catch(callback)
 });
 
-gulp.task('publish-fulton-server', function (callback) {
-    exec("cd ./dist/fulton-server/ && npm publish", function (err, stdout, stderr) {
-        if (err) {
-            gutil.log("publish-fulton-server error:", err);
-            callback("publish-fulton-server failed");
-            return;
-        }
+gulp.task('publish-fulton-packages', function (callback) {
+    let tasks = Promise.resolve();
 
-        callback();
+    packages.forEach((package) => {
+        tasks = tasks.then(() => {
+            return publishPackage(package)
+        })
     });
+
+    tasks.then(callback).catch(callback)
 });
 
 gulp.task("update-package.json", function (callback) {
@@ -117,9 +99,9 @@ gulp.task("increase-version", function (callback) {
         .catch(callback)
 });
 
-gulp.task('build', sequence("increase-version", "clean", "build-fulton-server", "update-package.json"));
+gulp.task('build', sequence("increase-version", "clean", "build-fulton-packages", "update-package.json"));
 
-gulp.task('publish', sequence("check-login", "publish-fulton-server"));
+gulp.task('publish', sequence("check-login", "publish-fulton-packages"));
 
 gulp.task('buildAndPublish', sequence("build", "publish"));
 
@@ -151,6 +133,74 @@ function updateVersion(version) {
             gutil.log(`update version to ${version}`)
 
             resolve()
+        });
+    })
+}
+
+
+function buildPackage(package) {
+    const name = package.name;
+    const extraFolders = package.extraFolders;
+
+    return new Promise((resolve, reject) => {
+        gutil.log(`--> Start build fulton-${name}`)
+        exec(`cd ../fulton-${name}/ && npm run build`, function (err, stdout, stderr) {
+            if (err) {
+                gutil.log(`build-fulton-${name} error:`, err);
+                reject(`build-fulton-${name} failed`);
+                return;
+            }
+
+            let tasks = [];
+
+            tasks.push(new Promise((r, j) => {
+                gulp.src(`../fulton-${name}/build/**/*`)
+                    .pipe(gulp.dest(`./dist/fulton-${name}/`))
+                    .on("error", j)
+                    .on("end", r);
+            }));
+
+            extraFolders.forEach((folder) => {
+                tasks.push(new Promise((r, j) => {
+                    gulp.src(`../fulton-${name}/${folder}/**/*`)
+                        .pipe(gulp.dest(`./dist/fulton-${name}/${folder}/assets`))
+                        .on("error", j)
+                        .on("end", r);
+                }));
+            })
+
+            tasks.push(new Promise((r, j) => {
+                gulp.src([`../fulton-${name}/package*.json`, `../fulton-${name}/README.md`])
+                    .pipe(gulp.dest(`./dist/fulton-${name}/`))
+                    .on("error", j)
+                    .on("end", r);
+            }));
+
+            Promise.all(tasks)
+                .then(() => {
+                    gutil.log(`<-- Finish build fulton-${name}`)
+                    resolve();
+                })
+                .catch(reject);
+        });
+    });
+}
+
+function publishPackage(package) {
+    const name = package.name;
+    
+    return new Promise((resolve, reject) => {
+        gutil.log(`--> Start publish fulton-${name}`)
+        
+        exec(`cd ./dist/fulton-${name}/ && npm publish`, function (err, stdout, stderr) {
+            if (err) {
+                gutil.log(`publish-fulton-${name} error:`, err);
+                reject(`publish-fulton-${name} failed`);
+                return;
+            }
+
+            gutil.log(`<-- Finish publish fulton-${name}`)            
+            resolve();
         });
     })
 }

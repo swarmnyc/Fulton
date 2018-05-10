@@ -11,7 +11,7 @@ export class TemplateService extends Service implements ITemplateService {
         if (!this.templates.has(textOrFilePath)) {
             let content: string = textOrFilePath;
             if (textOrFilePath.startsWith(".") || textOrFilePath.startsWith("/")) {
-                if (fs.statSync(textOrFilePath).isFile()) {
+                if (fs.existsSync(textOrFilePath)) {
                     content = fs.readFileSync(textOrFilePath).toString();
                 }
             }

@@ -54,6 +54,7 @@
     "@types/request": "^2.47.0",
     "@types/validator": "^9.4.1",
     "@types/winston": "^2.3.9",
+    "class-validator": "^0.8.5",    
     "compression": "^1.7.2",
     "cors": "^2.8.4",
     "debug": "^3.1.0",
@@ -77,18 +78,17 @@
     "swagger-ui-express": "^3.0.8",
     "ts-node": "^6.0.3",
     "typeorm": "^0.2.5",
+    "validator": "^10.2.0",
     "typescript": "^2.8.3"
   },
   "dependencies": {
     "@types/node": "^10.0.6",
-    "class-validator": "^0.8.5",
     "escape-string-regexp": "^1.0.5",
     "express": "^4.16.3",
     "inversify": "^4.13.0",
     "lodash": "^4.17.10",
     "reflect-metadata": "^0.1.12",
-    "url-join": "^4.0.0",
-    "validator": "^10.2.0",
+    "url-join": "^4.0.0",    
     "winston": "^2.4.2",
     "zone.js": "^0.8.26"
   }

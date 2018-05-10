@@ -1,4 +1,5 @@
 import chalk from 'chalk';
+
 const caporal = require('caporal');
 const BaseError = require('caporal/lib/error/base-error');
 

@@ -183,7 +183,7 @@ function buildPackage(package) {
             extraFolders.forEach((folder) => {
                 tasks.push(new Promise((r, j) => {
                     gulp.src(`../fulton-${name}/${folder}/**/*`)
-                        .pipe(gulp.dest(`./dist/fulton-${name}/${folder}/assets`))
+                        .pipe(gulp.dest(`./dist/fulton-${name}/${folder}/`))
                         .on("error", j)
                         .on("end", r);
                 }));

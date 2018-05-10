@@ -3,6 +3,7 @@
     "declaration": true,
     "emitDecoratorMetadata": true,
     "experimentalDecorators": true,
+    "lib": ["es2017"],  
     "module": "commonjs",
     "moduleResolution": "node",
     "noFallthroughCasesInSwitch": true,
@@ -11,7 +12,6 @@
     "sourceMap": true,
     "strict": true,
     "strictNullChecks": false,
-    "lib": ["es2017"],  
     "target": "es2016" // TODO: zone.js don't support es2017 for now
   }
 }

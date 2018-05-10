@@ -1,4 +1,4 @@
-import * as chalk from 'chalk';
+import chalk from 'chalk';
 const caporal = require('caporal');
 const BaseError = require('caporal/lib/error/base-error');
 
@@ -17,13 +17,13 @@ Command.prototype._checkArgsRange = function (argsArr: any[]) {
     const argsCount = argsArr.length;
 
     if (argsCount > range.max) {
-        throw new BaseError(`Too many arguments for command ${chalk.default.yellowBright(this.name())}`, {}, this._program);
+        throw new BaseError(`Too many arguments for command ${chalk.yellowBright(this.name())}`, {}, this._program);
     }
 
     if (argsCount < range.min) {
         this._args.forEach((arg: any) => {
             if (arg.isRequired()) {
-                throw new BaseError(`The command ${chalk.default.yellowBright(this.name())} requires a ${chalk.default.yellowBright(arg.name())} argument.`, {}, this._program);
+                throw new BaseError(`The command ${chalk.yellowBright(this.name())} requires a ${chalk.yellowBright(arg.name())} argument.`, {}, this._program);
             }
         });
     }

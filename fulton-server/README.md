@@ -80,11 +80,7 @@ export class ExampleApp extends FultonApp {
 }
 ```
 
-Fulton Server has js-docs for almost all of public classes, functions and members on its typescript declaration files. Therefore, typescript supported IDEs such as Visual Studio Code can give you Auto-Complete with documents that can improve the coding experiences as this picture.
-
-![server-options-auto-complete](/assets/server-options-auto-complete.gif) 
-
-As you can see, the features of Fulton Server can be very easy to change. See [Options](https://swarmnyc.gitbooks.io/fulton/content/options.html) for more information.
+See [Options](https://swarmnyc.gitbooks.io/fulton/content/options.html) for more information.
 
 
 ## Dependencies 
@@ -106,34 +102,6 @@ when you install fulton-server, almost all of dependencies are installed expect 
 ## Issues
 
 There are some known issues, see the notes to avoid the issues.
-- Because typescript isn't really a programming language. The ts code will compiled to javascript. And javascript doesn't have interface and generic type and a lot features which only exists on typescript for helping coding experience. After compiling, they are all gone. For example.
-
-{% row %}
-{% col "lg-6"%}
-```typescript
-// typescript
-interface MyInterface{
-    p1: string;
-    p2: string;
-}
-
-class MyClass <T extends MyInterface> {
-    p1: T;
-    p2: T;
-}
-
-```
-{% col "lg-6"%}
-```javascript
-// the javascript that complied from typescript
-class MyClass {
-}
-// all others staff are gone.
-```
-{% endrow %}
-
-This is why interface cannot be used for dependency injection and we must use decorators to let typescript generates metadata to use.
-
-- typeorm has a problem for mongodb@3.0, use `npm install mongodb@2.2` to install previous version.
+- Because typescript isn't really a programming language. The ts code will compiled to javascript. And javascript doesn't have interface and generic type and a lot features which only exists on typescript for helping coding experience. After compiling, they are all gone.
 
 - zone.js has a problem for es2017. use es2016 for now.

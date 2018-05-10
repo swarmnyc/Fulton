@@ -99,11 +99,32 @@ gulp.task("increase-version", function (callback) {
         .catch(callback)
 });
 
+gulp.task("install-cli-in-local", function (callback) {
+    let install = function () {
+        exec(`cd ./dist/fulton-cli/ && npm pack && npm install -g fulton-cli-0.0.0-PLACEHOLDER.tgz`, function (err, stdout, stderr) {
+            if (err) {
+                gutil.log("install-cli-in-local error:", err);                
+                callback("install-cli-in-local failed");
+                return;
+            }
+
+            callback()
+        });
+    }
+    
+    let build = function () {
+        buildPackage(packages[0]).then(install).catch(callback)
+    }
+
+    rimraf("./dist", build);
+});
+
 gulp.task('build', sequence("increase-version", "clean", "build-fulton-packages", "update-package.json"));
 
 gulp.task('publish', sequence("check-login", "publish-fulton-packages"));
 
 gulp.task('buildAndPublish', sequence("build", "publish"));
+
 
 function getCurrentVersion() {
     return new Promise((resolve, reject) => {
@@ -136,7 +157,6 @@ function updateVersion(version) {
         });
     })
 }
-
 
 function buildPackage(package) {
     const name = package.name;
@@ -188,10 +208,10 @@ function buildPackage(package) {
 
 function publishPackage(package) {
     const name = package.name;
-    
+
     return new Promise((resolve, reject) => {
         gutil.log(`--> Start publish fulton-${name}`)
-        
+
         exec(`cd ./dist/fulton-${name}/ && npm publish`, function (err, stdout, stderr) {
             if (err) {
                 gutil.log(`publish-fulton-${name} error:`, err);
@@ -199,7 +219,7 @@ function publishPackage(package) {
                 return;
             }
 
-            gutil.log(`<-- Finish publish fulton-${name}`)            
+            gutil.log(`<-- Finish publish fulton-${name}`)
             resolve();
         });
     })

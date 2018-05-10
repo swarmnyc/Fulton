@@ -4,11 +4,11 @@
   "description": "the cli for fulton",
   "main": "./fulton-cli.js",
   "bin": {
-    "fulton": "./fulton"
+    "fulton": "./fulton-cli.js"
   },
   "scripts": {
     "clean": "rimraf ./build",
-    "start": "ts-node ./src/fulton",
+    "start": "ts-node ./src/fulton-cli.ts",
     "build": "npm run clean && tsc -p tsconfig-prod.json",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
@@ -28,7 +28,8 @@
   "license": "MIT",
   "dependencies": {
     "angular-template": "^2.4.0",
-    "caporal": "^0.10.0"
+    "caporal": "^0.10.0",
+    "chalk": "^2.4.1"
   },
   "devDependencies": {
     "@types/node": "^10.0.6",

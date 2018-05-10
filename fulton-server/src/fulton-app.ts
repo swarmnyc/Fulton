@@ -1,5 +1,3 @@
-import * as compression from 'compression';
-import * as cors from 'cors';
 import * as express from 'express';
 import * as fs from 'fs';
 import * as http from 'http';
@@ -414,14 +412,8 @@ export abstract class FultonApp implements IFultonApp {
     protected initIdentity(): void | Promise<void> {
         if (this.options.identity.enabled) {
             // won't load passport-* modules if it is not enabled;
-            let promise: Promise<any> = (require("./identity/identity-initializer")(this));
-
-            return promise.then(() => {
-                this.events.emit(EventKeys.AppDidInitIdentity, this);
-            })
-        } else {
-            return;
-        }
+            return require("./identity/identity-initializer")(this)
+        } 
     }
 
     protected async initRouters(): Promise<void> {
@@ -483,25 +475,15 @@ export abstract class FultonApp implements IFultonApp {
 
     protected initCors(): void | Promise<void> {
         if (this.options.cors.enabled) {
-            if (lodash.some(this.options.cors.middlewares)) {
-                this.express.use(...this.options.cors.middlewares);
-            } else {
-                this.express.use(cors(this.options.cors.options));
-            }
-
-            this.events.emit(EventKeys.AppDidInitCors, this);
+            // won't load cors module if it is not enabled;
+            return require('./initializers/cors-initializer')(this)
         }
     }
 
     protected initCompression(): void | Promise<void> {
         if (this.options.compression.enabled) {
-            if (lodash.some(this.options.compression.middlewares)) {
-                this.express.use(...this.options.compression.middlewares);
-            } else {
-                this.express.use(compression(this.options.compression.options))
-            }
-
-            this.events.emit(EventKeys.AppDidInitCompression, this);
+            // won't load compression module if it is not enabled;
+            return require('./initializers/compression-initializer')(this)
         }
     }
 

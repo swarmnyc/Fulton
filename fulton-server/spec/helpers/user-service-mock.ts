@@ -1,6 +1,6 @@
 import * as lodash from 'lodash';
 
-import { AccessToken, IUserService, RegisterModel, IOauthProfile } from '../../src/identity/interfaces';
+import { AccessToken, IUserService, RegisterModel, IOauthProfile, IFultonIdentity } from '../../src/identity/interfaces';
 import { inject, injectable } from "../../src/interfaces";
 
 import { FultonApp } from "../../src/fulton-app";
@@ -89,6 +89,10 @@ export class UserServiceMock implements IUserService<FultonUser> {
     }
 
     refreshAccessToken(token: string): Promise<AccessToken> {
+        throw new Error("Method not implemented.");
+    }
+
+    getUserIdentities(user: FultonUser): Promise<IFultonIdentity[]> {
         throw new Error("Method not implemented.");
     }
 }

@@ -1,11 +1,13 @@
 export interface CreateProjectOptions {
     name: string;
+    test: boolean;
     databases: string[];
     features: string[];
 }
 
 export interface PackageOptions {
-    name: string;
+    projectName: string;
+    appName: string;
 
     isCompressionEnabled: boolean;
     isCorsEnabled: boolean;

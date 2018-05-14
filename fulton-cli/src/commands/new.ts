@@ -37,7 +37,7 @@ let questionDefs = [
 ];
 
 module.exports = function () {
-    caporal
+    let command = caporal
         .command("new", "Creates a new directory and a new Fulton app.")
         .alias("n")
         .option("-n, --name [name]", "the name of the app", (value: any) => {
@@ -46,29 +46,35 @@ module.exports = function () {
             return value
         })
         .option("-d, --databases [databases]", "the database engine", caporal.LIST)
-        .option("-f, --features [features]", "enabled the features the app", caporal.LIST)
-        .action(function (args, options, logger) {
-            try {
-                let questions = generateQuestions(options, logger);
+        .option("-f, --features [features]", "enabled the features the app", caporal.LIST);
 
-                inquirer.prompt(questions).then((answers) => {
-                    logger.info("The project is been creating. It takes a while.");
+    if (process.env["NODE_ENV"] == "DEV") {
+        command.option("-t, --test", "open test mode", caporal.BOOLEAN, true);
+    }
 
-                    let opts = Object.assign(options, answers) as CreateProjectOptions
-                    // console.log(JSON.stringify(opts))
-                    
-                    createProject(opts).then(() => {
-                        logger.info(chalk.greenBright("\nThe project is created successfully."));
-                    }).catch((e) => {
-                        logger.error(chalk.red("\nError: " + (e.message || e)));
-                        process.exit(1);
-                    });
-                })
-            } catch (e) {
-                logger.error(e.message);
-                process.exit(1);
-            }
-        });
+    command.action(function (args, options, logger) {
+        try {
+            let questions = generateQuestions(options, logger);
+
+            inquirer.prompt(questions).then((answers) => {
+                logger.info("The project is been creating. It takes a while.");
+
+                let opts = Object.assign(options, answers) as CreateProjectOptions
+
+                if (opts.test) {
+                    console.log("Options", JSON.stringify(opts))
+                }
+
+                createProject(opts, logger).catch((e) => {
+                    logger.error(chalk.red("\nError: " + (e.message || e)));
+                    process.exit(1);
+                });
+            })
+        } catch (e) {
+            logger.error(e.message);
+            process.exit(1);
+        }
+    });
 };
 
 function generateQuestions(options: any, logger: Logger): inquirer.Question[] {

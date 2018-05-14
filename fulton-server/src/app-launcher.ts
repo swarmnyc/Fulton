@@ -14,9 +14,9 @@ export type LaunchTask<TApp> = (app: TApp) => Promise<any>
  * FultonApp launcher
  * 
  * you can start FultonApp http server, or just run a single task for a scheduled job
- * default tasks is ["app"]
+ * default tasks is "app"
  * the value can be overrided by process.env["{appName}.Launch"]
- * for example process.env["MyApp.Launch"] = "taskA, app"
+ * for example process.env["MyApp.launch"] = "taskA, app"
  */
 export class AppLauncher<TApp extends IFultonApp> {
     static create<TApp extends IFultonApp>(type: Type<TApp>): AppLauncher<TApp> {
@@ -41,7 +41,7 @@ export class AppLauncher<TApp extends IFultonApp> {
 
     /**
      * Launch Tasks based on process.env["{appName}.Launch"]
-     * @param stopAfterLaunch the default is based on task "App", if there is a task "App", the value is true
+     * @param stopAfterLaunch the default is based on task "app", if there is a task "app", the value is true
      */
     launch(tasks?: string[]): Promise<any> {
         if (tasks == null) {

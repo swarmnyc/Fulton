@@ -1,15 +1,4 @@
-const path = require('path');
-const exec = require('child_process').exec;
-
-const gulp = require('gulp');
-const gutil = require('gulp-util');
-const rimraf = require('rimraf');
-const sequence = require('gulp-sequence');
-const replace = require('gulp-replace');
-const prompt = require('inquirer');
-const semver = require('semver');
-
-const packages = [{
+let projects = [{
     name: "cli",
     extraFolders: ["templates"]
 },
@@ -18,26 +7,60 @@ const packages = [{
     extraFolders: ["assets"]
 }]
 
+// options
+const args = require("yargs")
+    .option('silent', {
+        alias: 's',
+        default: false
+    })
+    .option('version-type', {
+        alias: 'v',
+        choices: ['prerelease', 'patch', 'minor', 'major']
+    })
+    .option('projects', {
+        alias: 'p',
+        array: true,
+        choices: projects.map((p) => p.name)
+    }).argv
+
+// filter out projects
+if (args.projects) {
+    projects = projects.filter((project) => {
+        return args.projects.indexOf(project.name) > -1
+    });
+}
+
+const path = require('path');
+const exec = require('child_process').exec;
+
+const gulp = require('gulp');
+const gutil = require('gulp-util');
+const rimraf = require('rimraf');
+const sequence = require('gulp-sequence');
+const replace = require('gulp-replace');
+const inquirer = require('inquirer');
+const semver = require('semver');
+
 gulp.task('clean', function (callback) {
     rimraf("./dist", callback);
 });
 
-gulp.task('build-fulton-packages', function (callback) {
+gulp.task('build-projects', function (callback) {
     let tasks = Promise.resolve();
 
-    packages.forEach((package) => {
+    projects.forEach((project) => {
         tasks = tasks.then(() => {
-            return buildPackage(package)
+            return buildPackage(project)
         })
     });
 
     tasks.then(callback).catch(callback)
 });
 
-gulp.task('publish-fulton-packages', function (callback) {
+gulp.task('publish-projects', function (callback) {
     let tasks = Promise.resolve();
 
-    packages.forEach((package) => {
+    projects.forEach((package) => {
         tasks = tasks.then(() => {
             return publishPackage(package)
         })
@@ -74,20 +97,31 @@ gulp.task("check-login", function (callback) {
 });
 
 gulp.task("increase-version", function (callback) {
+    if (args.silent) {
+        callback()
+        return;
+    }
+
     let version;
     getCurrentVersion()
         .then((v) => {
             version = v;
-            return prompt.prompt({
-                type: 'list',
-                name: "type",
-                message: `What type of version level would you like to increase? (The current version is ${version})`,
-                choices: ['none', 'prerelease', 'patch', 'minor', 'major']
-            })
+            if (args["version-type"]) {
+                return {
+                    type: args["version-type"]
+                }
+            } else {
+                return inquirer.prompt({
+                    type: 'list',
+                    name: "type",
+                    message: `What type of version level would you like to increase? (The current version is ${version})`,
+                    choices: ['none', 'prerelease', 'patch', 'minor', 'major']
+                })
+            }
         })
         .then((result) => {
             if (result.type != "none") {
-                return semver.inc(version, result.type)
+                return semver.inc(version, result.type, 'beta')
             }
         })
         .then((newVesion) => {
@@ -103,7 +137,7 @@ gulp.task("install-cli-in-local", function (callback) {
     let install = function () {
         exec(`cd ./dist/fulton-cli/ && npm pack && npm install -g fulton-cli-0.0.0-PLACEHOLDER.tgz`, function (err, stdout, stderr) {
             if (err) {
-                gutil.log("install-cli-in-local error:", err);                
+                gutil.log("install-cli-in-local error:", err);
                 callback("install-cli-in-local failed");
                 return;
             }
@@ -111,20 +145,19 @@ gulp.task("install-cli-in-local", function (callback) {
             callback()
         });
     }
-    
+
     let build = function () {
-        buildPackage(packages[0]).then(install).catch(callback)
+        buildPackage(projects[0]).then(install).catch(callback)
     }
 
     rimraf("./dist", build);
 });
 
-gulp.task('build', sequence("increase-version", "clean", "build-fulton-packages", "update-package.json"));
+gulp.task('build', sequence("increase-version", "clean", "build-projects", "update-package.json"));
 
-gulp.task('publish', sequence("check-login", "publish-fulton-packages"));
+gulp.task('publish', sequence("check-login", "publish-projects"));
 
-gulp.task('buildAndPublish', sequence("build", "publish"));
-
+gulp.task('buildPublish', sequence("build", "publish"));
 
 function getCurrentVersion() {
     return new Promise((resolve, reject) => {

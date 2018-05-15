@@ -3,7 +3,7 @@
   "version": "0.0.0-PLACEHOLDER",
   "description": "Fulton is the best practical way to build web apis or websites we have done in our company. Basically, Fulton is integrated many popular libraries or frameworks seamlessly. By use Fulton, developers can build a completed web api or a websites quickly.",
   "main": "./build/main.js",
-  "types": "./build/main.d.ts",
+  "types": "./types/index.d.ts",
   "scripts": {
     "clean": "rimraf ./build",
     "build": "npm run clean && tsc -p tsconfig-prod.json && npm run copyTypes && circular-require ./build/main.js",

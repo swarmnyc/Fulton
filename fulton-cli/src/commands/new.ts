@@ -60,11 +60,7 @@ module.exports = function () {
                 logger.info("The project is been creating. It takes a while.");
 
                 let opts = Object.assign(options, answers) as CreateProjectOptions
-
-                if (opts.test) {
-                    console.log("Options", JSON.stringify(opts))
-                }
-
+                
                 createProject(opts, logger).catch((e) => {
                     logger.error(chalk.red("\nError: " + (e.message || e)));
                     process.exit(1);

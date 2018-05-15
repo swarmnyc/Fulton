@@ -8,7 +8,8 @@ export const AppVersion = require(`${debug ? ".." : "."}/package.json`).version
 export const DatabaseChoices = [
     { name: "MongoDB", value: "mongodb" },
     { name: "MySQL", value: "mysql" },
-    { name: "MS SQL", value: "mssql" }
+    { name: "MS SQL Server", value: "mssql" },
+    { name: "PostgreSQL", value: "postgres" },
 ]
 
 export const FeaturesChoices = [

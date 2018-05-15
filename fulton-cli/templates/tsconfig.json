@@ -16,6 +16,8 @@
       "target": "es2016"
     },
     "exclude": [
-      "build"
+      "build",
+      "templates",
+      "sample"
     ]
   }

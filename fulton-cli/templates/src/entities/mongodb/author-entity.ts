@@ -1,5 +1,4 @@
-import { entity, column, objectIdColumn } from 'fulton-server';
-import { ObjectId } from 'bson';
+import { entity, column, objectIdColumn, ObjectId } from 'fulton-server';
 
 /**
  * A example of entity for MongoDb, see http://typeorm.io/#/entities for more information

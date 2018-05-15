@@ -2,13 +2,12 @@ import * as fs from 'fs';
 import * as lodash from 'lodash';
 import * as path from 'path';
 import chalk from 'chalk';
-
-import { AppRoot } from '../constants';
+import { AppOptions, CreateProjectOptions } from '../interfaces';
+import { AppRoot, DatabaseList, DatabasePackages, DevPackages, FeatureList, Packages } from '../constants';
 import { classify } from '../utils/stings';
-import { CreateProjectOptions, AppOptions } from '../interfaces';
 import { exec } from 'child_process';
-import { setTimeout } from 'timers';
 import { Spinner } from 'cli-spinner';
+
 
 const TemplateRoot = path.join(AppRoot, "templates");
 
@@ -129,9 +128,40 @@ class Executor {
 
     installPackages() {
         return new Promise((resolve, reject) => {
-            exec(`cd ${this.root} && npm install fulton-server@latest`, (err, stdout, stderr) => {
-                err ? reject(err) : resolve()
+            var packages = new Set(Packages)
+            var devPackages = new Set(DevPackages)
+
+            if (this.appOptions.isDatabaseEnabled) {
+                DatabasePackages.forEach(p => packages.add(p))
+            }
+
+            this.createOptions.databases.forEach((selected) => {
+                var item = DatabaseList.find(d => d.value == selected);
+                if (item.packages) {
+                    item.packages.forEach(p => packages.add(p))
+                }
+
+                if (item.devPackages) {
+                    item.devPackages.forEach(p => devPackages.add(p))
+                }
+            });
+
+            this.createOptions.features.forEach((selected) => {
+                var item = FeatureList.find(f => f.value == selected);
+                if (item.packages) {
+                    item.packages.forEach(p => packages.add(p))
+                }
+
+                if (item.devPackages) {
+                    item.devPackages.forEach(p => devPackages.add(p))
+                }
             })
+
+            var packageString = Array.from(packages).join(" ")
+            var devPackageString = Array.from(devPackages).join(" ")
+            exec(`cd ${this.root} && npm install -D ${devPackageString} && npm install ${packageString}`, (err, stdout, stderr) => {
+                err ? reject(err) : resolve()
+            });
         })
     }
 

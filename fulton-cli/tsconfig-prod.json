@@ -8,6 +8,7 @@
   },
   "exclude": [
     "build",
+    "templates",
     "spec",
     "**/*.spec.ts"
   ]

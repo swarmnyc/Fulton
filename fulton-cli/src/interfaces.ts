@@ -5,13 +5,20 @@ export interface CreateProjectOptions {
     features: string[];
 }
 
+export interface Feature {
+    name: string;
+    value: string;
+    packages?: string[];
+    devPackages?: string[];
+}
+
 export interface AppOptions {
     projectName: string;
     appName: string;
 
     isCompressionEnabled: boolean;
     isCorsEnabled: boolean;
-    isJsonApiEnabled:boolean;
+    isJsonApiEnabled: boolean;
     isApiDocsEnabled: boolean;
 
     isDatabaseEnabled: boolean;

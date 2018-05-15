@@ -5,7 +5,7 @@ import chalk from 'chalk';
 import { createProject } from '../actions/create-project';
 import { CreateProjectOptions } from '../interfaces';
 import { Spinner } from 'cli-spinner';
-import { DatabaseChoices, FeaturesChoices } from '../constants';
+import { DatabaseList, FeatureList } from '../constants';
 
 const BaseError = require('caporal/lib/error/base-error');
 
@@ -26,13 +26,13 @@ let questionDefs = [
         name: "databases",
         type: "checkbox",
         message: "What kinds of databases does the app use?",
-        choices: DatabaseChoices
+        choices: DatabaseList
     },
     {
         name: "features",
         type: "checkbox",
         message: "What kinds of features does the app support?",
-        choices: FeaturesChoices
+        choices: FeatureList
     }
 ];
 

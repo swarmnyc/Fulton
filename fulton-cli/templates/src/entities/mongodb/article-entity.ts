@@ -1,6 +1,5 @@
 import { AuthorEntity } from './author-entity';
-import { column, entity, objectIdColumn, relatedTo } from 'fulton-server';
-import { ObjectId } from 'bson';
+import { column, entity, objectIdColumn, relatedTo, ObjectId } from 'fulton-server';
 
 /**
  * A example of entity for MongoDb, see http://typeorm.io/#/entities for more information

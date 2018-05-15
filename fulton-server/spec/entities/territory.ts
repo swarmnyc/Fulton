@@ -1,4 +1,4 @@
-import { entity, objectIdColumn, column } from "../../src/interfaces";
+import { entity, objectIdColumn, column } from "../../src/re-export";
 import { Category } from './category';
 import { relatedTo, idColumn } from '../../src/entities/entity-decorators';
 import { IsNumber } from "class-validator";

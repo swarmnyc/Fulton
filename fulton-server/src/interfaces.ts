@@ -2,8 +2,6 @@ import "reflect-metadata";
 import "./extensions"
 
 import { Repository } from "typeorm";
-import { EntityMetadata } from 'typeorm/metadata/EntityMetadata';
-import { ColumnMetadata } from 'typeorm/metadata/ColumnMetadata';
 import { FultonStackError } from './common/fulton-error';
 
 export * from "./re-export"

@@ -1,5 +1,4 @@
-import { entity, objectIdColumn, column } from "../../src/interfaces";
-import { ObjectId } from "bson";
+import { entity, objectIdColumn, column, ObjectId } from "../../src/re-export";
 
 @entity("categories")
 export class Category {

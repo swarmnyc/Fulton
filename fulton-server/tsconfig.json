@@ -2,8 +2,20 @@
   "extends": "../tsconfig-base.json",
   "compilerOptions": {
     "rootDir": "./",
-    "outDir": "./build"
+    "outDir": "./build",
+    "typeRoots": [
+      "./node_modules/@types/",
+      "./node_modules/zone.js/dist/"
+    ],
+    "types": [
+      "zone.js",
+      "jasmine"
+    ]
   },
+  "include": [
+    "./src",
+    "./types"
+  ],
   "exclude": [
     "build"
   ]

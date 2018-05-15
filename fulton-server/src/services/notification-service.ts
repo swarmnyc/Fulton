@@ -26,7 +26,7 @@ export class NotificationService extends Service implements INotificationService
                         // send email
 
                         if (this.options.extraVariables) {
-                            Object.assign(msg.email.variables, this.options.extraVariables)
+                            Object.assign(msg.email.variables || {}, this.options.extraVariables)
                         }
 
                         tasks.push(this.emailService.send(msg.email))

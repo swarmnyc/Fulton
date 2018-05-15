@@ -6,7 +6,7 @@
   "types": "./build/main.d.ts",
   "scripts": {
     "clean": "rimraf ./build",
-    "build": "npm run clean && tsc -p tsconfig-prod.json && circular-require ./build/main.js",
+    "build": "npm run clean && tsc -p tsconfig-prod.json && npm run copyTypes && circular-require ./build/main.js",
     "build:test": "npm run clean && tsc -p tsconfig.json",
     "build:live": "npm run clean && tsc -w -p tsconfig-prod.json",
     "test": "ts-node --typeCheck=true ./spec/test.ts",
@@ -16,6 +16,7 @@
     "test:debug": "node --inspect-brk=9229 -r ts-node/register ./spec/test.ts",
     "test:debug:it": "node --inspect-brk=9229 -r ts-node/register ./spec/test.ts --it",
     "test:debug:host": "node --inspect-brk=9229 -r ts-node/register ./spec/host.ts",
+    "copyTypes" : "cp -r ./types ./build",
     "coverage": "nyc npm test"
   },
   "author": {

@@ -1,4 +1,4 @@
-import { column, entity, objectIdColumn } from "../../src/interfaces";
+import { column, entity, objectIdColumn } from "../../src/re-export";
 
 import { Territory } from './territory';
 import { relatedTo, idColumn } from '../../src/entities/entity-decorators';

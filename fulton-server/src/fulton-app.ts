@@ -593,9 +593,6 @@ export abstract class FultonApp implements IFultonApp {
         return ids;
     }
 
-    notify(...messages: NotificationMessage[]) {
-    }
-
     /**
      * to init the app. Env values for options will be loaded after onInit.
      * @param options the options for start app

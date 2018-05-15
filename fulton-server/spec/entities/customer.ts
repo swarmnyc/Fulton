@@ -1,4 +1,4 @@
-import { entity, objectIdColumn, column } from "../../src/interfaces";
+import { entity, objectIdColumn, column } from "../../src/re-export";
 import { Territory } from './territory';
 import { IsInt, Min, Max, IsEmail, IsNotEmpty, ValidateNested, IsDefined } from "class-validator";
 import { idColumn } from '../../src/entities/entity-decorators';

@@ -1,5 +1,3 @@
-import * as passport from "passport";
-
 import { Middleware, NextFunction, Request, Response } from "../interfaces";
 
 import { AuthenticateOptions } from "./interfaces";
@@ -19,7 +17,7 @@ import { AuthenticateOptions } from "./interfaces";
  * @param name name of the strategy 
  */
 export function authenticate(name:string, options?: AuthenticateOptions, callback?: (...args: any[]) => any) : Middleware {
-    return passport.authenticate(name, options, callback)
+    return require("passport").authenticate(name, options, callback)
 }
 
 

@@ -1,12 +1,9 @@
 import { Container, interfaces } from 'inversify';
 import { DiKeys, EventKeys } from '../keys';
-import { EntityService } from '../entities';
-import { EntityServiceFactory, RepositoryFactory, Type } from '../interfaces';
-import { FultonApp } from '../fulton-app';
-import { getConnection, getRepository, MongoRepository, Repository } from 'typeorm';
-import { getRepositoryMetadata } from '../entities/repository-decorator-helper';
+import { EntityServiceFactory, Type } from '../interfaces';
+import { IFultonApp } from '../fulton-app';
 
-module.exports = function (app: FultonApp) {
+module.exports = function (app: IFultonApp) {
     app.container = new Container();
 
     // for FultonApp
@@ -30,7 +27,7 @@ module.exports = function (app: FultonApp) {
  */
 function entityServiceFactory<T>(ctx: interfaces.Context): EntityServiceFactory<T> {
     return (entity: Type<T>) => {
-        let service = new EntityService(entity);
+        let service = new (require("../entities/entity-service").EntityService)(entity);
         service["app"] = ctx.container.get(DiKeys.FultonApp);
 
         return service;

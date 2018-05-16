@@ -1,7 +1,8 @@
 import * as lodash from 'lodash';
 import { ColumnMetadata } from 'typeorm/metadata/ColumnMetadata';
 import { DiKeys } from '../keys';
-import { entity, FultonErrorObject, IEntityService, inject, injectable, OperationManyResult, OperationOneResult, OperationResult, QueryParams, Type } from '../interfaces';
+import { entity, inject, injectable } from '../re-export';
+import { FultonErrorObject, IEntityService, OperationManyResult, OperationOneResult, OperationResult, QueryParams, Type } from '../interfaces';
 import { EntityMetadata } from 'typeorm/metadata/EntityMetadata';
 import { EntityRunner } from './runner/entity-runner';
 import { FultonError, FultonStackError } from '../common/fulton-error';
@@ -22,7 +23,7 @@ export class EntityService<TEntity> extends Service implements IEntityService<TE
     constructor(mainRepository: Repository<TEntity>)
     constructor(input: Repository<TEntity> | Type<TEntity>) {
         super()
-        
+
         if (input instanceof Repository) {
             this.mainRepository = input
         } else {
@@ -305,7 +306,7 @@ export class EntityService<TEntity> extends Service implements IEntityService<TE
 
             if (error.constraints) {
                 for (const key in error.constraints) {
-                    fultonError.addDetail(property, key, error.constraints[key]);                    
+                    fultonError.addDetail(property, key, error.constraints[key]);
                 }
             }
         }

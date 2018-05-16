@@ -8,7 +8,7 @@ import { FultonLog } from '../../src/fulton-log';
 import { FultonUserService } from '../../src/identity/fulton-impl/fulton-user-service';
 import { ObjectId } from "bson";
 import { getMongoRepository } from "typeorm";
-import { FultonUser, FultonIdentity, FultonAccessToken } from "../../src/identity";
+import { FultonUser, FultonIdentity, FultonAccessToken } from "../../src/identity/fulton-impl/fulton-user";
 
 class MyApp extends FultonApp {
     protected onInit(options: FultonAppOptions): void {
@@ -156,7 +156,7 @@ describe('Identity Integration Test', () => {
 
         var user = await userService.loginByOauth(null, accessToken, profile);
         expect(user).not.toBeNull()
-    
+
         var userRepository = getMongoRepository(FultonUser)
         var identityRepository = getMongoRepository(FultonIdentity)
 
@@ -188,7 +188,7 @@ describe('Identity Integration Test', () => {
 
         let user2 = await userService.loginByOauth(user1.id, accessToken, profile);
         expect(user1.id).toEqual(user2.id)
-    
+
         var userRepository = getMongoRepository(FultonUser)
         var identityRepository = getMongoRepository(FultonIdentity)
 
@@ -217,7 +217,7 @@ describe('Identity Integration Test', () => {
 
         try {
             await userService.loginByOauth("test-2", accessToken, profile);
-            fail()            
+            fail()
         } catch (e) {
             expect(e.error.code).toEqual("existed")
         }

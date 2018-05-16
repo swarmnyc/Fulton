@@ -1,6 +1,6 @@
 import * as lodash from 'lodash';
 
-import { Connection, ConnectionOptions, createConnections } from "typeorm";
+import { Connection, ConnectionOptions } from "typeorm";
 import { Type } from '../interfaces';
 import { EventKeys } from "../keys"
 import { FultonApp } from '../fulton-app';
@@ -31,8 +31,7 @@ module.exports = async function (app: FultonApp): Promise<any> {
         connOptions.push(conn);
     });
 
-
-    app.dbConnections = await createConnections(connOptions);
+    app.dbConnections = await (require("typeorm").createConnections(connOptions));
 
     for (const conn of app.dbConnections) {
         for (const metadata of conn.entityMetadatas) {

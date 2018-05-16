@@ -1,6 +1,7 @@
 import { Column, Entity, ManyToMany, ManyToOne, ObjectIdColumn, OneToMany, OneToOne, PrimaryColumn, PrimaryGeneratedColumn } from 'typeorm';
 
 export * from "../main"
+export * from "../entities/entity-service"
 
 export const column: typeof Column;
 export const entity: typeof Entity;

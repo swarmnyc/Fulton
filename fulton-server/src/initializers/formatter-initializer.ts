@@ -1,13 +1,12 @@
 import * as express from 'express';
 import * as lodash from 'lodash';
-import { EntityService } from '../entities';
 import { EventKeys } from '../keys';
-import { FultonApp } from '../fulton-app';
+import { IFultonApp } from '../fulton-app';
 import { MimeTypes } from '../constants';
 import { queryParamsParser } from '../middlewares/query-params-parser';
 import { Type } from '../interfaces';
 
-module.exports = function (app: FultonApp) {
+module.exports = function (app: IFultonApp) {
     if (app.options.formatter.json) {
         let types = [MimeTypes.json]
 

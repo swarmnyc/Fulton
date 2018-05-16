@@ -1,3 +1,5 @@
+import * as inquirer from "inquirer";
+
 export interface CreateProjectOptions {
     name: string;
     test: boolean;
@@ -5,9 +7,8 @@ export interface CreateProjectOptions {
     features: string[];
 }
 
-export interface Feature {
-    name: string;
-    value: string;
+export interface Feature extends inquirer.objects.ChoiceOption {
+    short?: string;
     packages?: string[];
     devPackages?: string[];
 }

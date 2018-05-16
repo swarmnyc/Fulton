@@ -47,4 +47,4 @@ caporal._run = new Proxy(caporal._run, {
 
         run.apply(thisArg, args);
     }
-})
+});

@@ -119,10 +119,10 @@ class Executor {
         fs.mkdirSync(this.root);
         fs.mkdirSync(this.srcPath);
         fs.mkdirSync(this.routerPath);
+        fs.mkdirSync(this.servicePath);
 
         if (this.appOptions.isDatabaseEnabled) {
             fs.mkdirSync(this.entityPath);
-            fs.mkdirSync(this.servicePath);
         }
     }
 

@@ -41,6 +41,8 @@ const replace = require('gulp-replace');
 const inquirer = require('inquirer');
 const semver = require('semver');
 
+let currentVersion; // cached version
+
 gulp.task('clean', function (callback) {
     rimraf("./dist", callback);
 });
@@ -161,6 +163,10 @@ gulp.task('buildPublish', sequence("build", "publish"));
 
 function getCurrentVersion() {
     return new Promise((resolve, reject) => {
+        if (currentVersion) {
+            return resolve(currentVersion)
+        }
+
         // use version from git tags
         exec("git describe --tags --abbrev=0", function (err, stdout, stderr) {
             if (err) {
@@ -169,7 +175,8 @@ function getCurrentVersion() {
                 return;
             }
 
-            resolve(stdout.split("/")[1].trim())
+            currentVersion = stdout.split("/")[1].trim()
+            resolve(currentVersion)
         });
     })
 }
@@ -185,6 +192,7 @@ function updateVersion(version) {
             }
 
             gutil.log(`update version to ${version}`)
+            currentVersion = version;
 
             resolve()
         });

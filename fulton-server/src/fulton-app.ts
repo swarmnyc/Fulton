@@ -7,7 +7,7 @@ import * as path from 'path';
 import * as winston from 'winston';
 import { AppMode, DiContainer, INotificationService, NotificationMessage, Response, Type, TypeIdentifier } from './interfaces';
 import { ClassProvider, FactoryProvider, FunctionProvider, Provider, TypeProvider, ValueProvider } from './helpers/type-helpers';
-import { Connection, getRepository, Repository } from 'typeorm';
+import { Connection, Repository } from 'typeorm';
 import { defaultHttpLoggerHandler } from './middlewares/http-logger';
 import { DiKeys, EventKeys } from './keys';
 import { EntityMetadata } from 'typeorm/metadata/EntityMetadata';
@@ -205,6 +205,11 @@ export abstract class FultonApp implements IFultonApp {
             await this.onInit(this.options);
             this.options.init();
 
+            if (this.options.identity.enabled && this.options.identity.userService == null) {
+                // Initialize Identity to use FultonImpl if app.options.identity.userService is null
+                require("./identity/fulton-impl/fulton-impl-initializer")(this)
+            }
+
             await this.initLogging();
 
             await this.initProviders();
@@ -352,7 +357,7 @@ export abstract class FultonApp implements IFultonApp {
     }
 
     getRepository<T>(entity: Type, connectionName?: string): Repository<T> {
-        return getRepository<T>(entity, connectionName);
+        return require("typeorm").getRepository(entity, connectionName);
     }
 
     sendNotifications(...messages: NotificationMessage[]): Promise<void> {
@@ -413,7 +418,7 @@ export abstract class FultonApp implements IFultonApp {
         if (this.options.identity.enabled) {
             // won't load passport-* modules if it is not enabled;
             return require("./identity/identity-initializer")(this)
-        } 
+        }
     }
 
     protected async initRouters(): Promise<void> {

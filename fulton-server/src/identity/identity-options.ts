@@ -4,9 +4,6 @@ import { AppMode, Middleware, Type } from '../interfaces';
 import { BearerStrategyOptions } from './options/bearer-strategy-options';
 import { Env } from '../helpers/env';
 import { FacebookStrategyOptions } from './options/facebook-strategy-options';
-import { FultonAccessToken, FultonIdentity, FultonUser } from './fulton-impl/fulton-user';
-import { FultonIdentityImpl } from './fulton-impl/fulton-impl';
-import { FultonUserService } from './fulton-impl/fulton-user-service';
 import { GithubStrategyOptions } from './options/github-strategy-options';
 import { GoogleStrategyOptions } from './options/google-strategy-options';
 import { IUser, IUserService, Strategy } from './interfaces';
@@ -26,12 +23,6 @@ export class IdentityOptions {
     enabled: boolean = false;
 
     /**
-     * the types of entities for registion, 
-     * the default value is [FultonUser, FultonAccessToken, FultonIdentity]
-     */
-    entities: Type[] = [FultonUser, FultonAccessToken, FultonIdentity];
-
-    /**
      * the database connection name, the default value is "default"
      */
     databaseConnectionName: string;
@@ -46,7 +37,7 @@ export class IdentityOptions {
      * username-password and bearer token, then you don't need to change this value,
      * otherwise you have to custom your user service;
      */
-    userService: Type<IUserService<IUser>> | IUserService<IUser> = FultonUserService;
+    userService: Type<IUserService<IUser>> | IUserService<IUser>;
 
     /**
      * the authenticate every request to get user info, enabled strategies like "bearer", "session"
@@ -76,7 +67,7 @@ export class IdentityOptions {
      * }
      * ```
      */
-    defaultAuthenticate: Middleware = FultonIdentityImpl.defaultAuthenticate;
+    defaultAuthenticate: Middleware;
 
     /**
      * if true, throw error if a request don't have user certification (bearer token, cookie session id, etc)

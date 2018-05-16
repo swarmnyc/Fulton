@@ -7,22 +7,17 @@ import { FultonApp } from '../fulton-app';
 import { FultonLog } from "../fulton-log";
 import { getRelatedToMetadata } from '../entities/entity-decorators-helpers';
 
-module.exports = async function (app: FultonApp): Promise<any> { 
+module.exports = async function (app: FultonApp): Promise<any> {
     if (app.options.databases.size == 0) {
         // if databases = 0, skip initDatabases
         return;
-    }
-
-    if (app.options.identity.enabled) {
-        // add User Entities to typeorm if identity is enabled
-        app.options.entities.push(...app.options.identity.entities);
     }
 
     let connOptions: ConnectionOptions[] = [];
 
     app.options.databases.forEach((name, conn) => {
         lodash.set(conn, "name", name);
-        
+
         // extends entities
         if (lodash.some(app.options.entities)) {
             if (conn.entities) {

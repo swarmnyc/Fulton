@@ -1,22 +1,17 @@
 import * as lodash from 'lodash';
 import * as passport from 'passport';
-import { DiKeys, EventKeys } from '../keys';
-import { FultonApp } from '../fulton-app';
-import { getRepository } from 'typeorm';
-import { GoogleStrategy } from './strategies/google-strategy';
-import { Helper } from '../helpers/helper';
-import { IFultonUser, IUser, IUserService } from './interfaces';
-import { IStrategyOptionsWithRequest, Strategy as LocalStrategy } from 'passport-local';
-import { Strategy as BearerStrategy } from 'passport-http-bearer';
 import { Strategy } from 'passport';
+import { Strategy as BearerStrategy } from 'passport-http-bearer';
+import { Strategy as LocalStrategy } from 'passport-local';
+import { IFultonApp } from '../fulton-app';
 import { Type } from '../interfaces';
+import { EventKeys } from '../keys';
+import { FultonIdentityImpl } from './fulton-impl/fulton-impl';
+import { IUser, IUserService } from './interfaces';
+import { GoogleStrategy } from './strategies/google-strategy';
 
-module.exports = async function identityInitializer(app: FultonApp) {
+module.exports = async function identityInitializer(app: IFultonApp) {
     let idOptions = app.options.identity;
-
-    if (idOptions.userService == null) {
-        throw new Error("identity.userService can't be null when userService.enabled is true.");
-    }
 
     let userService: IUserService<IUser>;
 
@@ -24,6 +19,10 @@ module.exports = async function identityInitializer(app: FultonApp) {
         userService = app.container.resolve(idOptions.userService as Type);
     } else {
         userService = idOptions.userService as IUserService<IUser>;
+    }
+
+    if (idOptions.defaultAuthenticate == null) {
+        idOptions.defaultAuthenticate = FultonIdentityImpl.defaultAuthenticate;
     }
 
     // assign userService

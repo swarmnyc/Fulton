@@ -93,10 +93,6 @@ function generateDocs(app: FultonApp): OpenApiSpec {
 
 function generateDefinitions(app: FultonApp, definitions: DefinitionsObject) {
     app.entityMetadatas.forEach((metadata, entity) => {
-        if (app.options.identity.entities.includes(entity)) {
-            return;
-        }
-
         let schema: SchemaObject = {
             type: "object"
         };

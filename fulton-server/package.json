@@ -83,7 +83,6 @@
   "dependencies": {
     "@types/node": "^10.0.6",
     "@types/express": "^4.11.1",
-    "@types/inversify": "^2.0.33",
     "escape-string-regexp": "^1.0.5",
     "express": "^4.16.3",
     "inversify": "^4.13.0",

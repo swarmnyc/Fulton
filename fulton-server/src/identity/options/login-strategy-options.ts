@@ -1,7 +1,6 @@
 import { AuthenticateOptions, LocalStrategyVerifier } from '../interfaces';
 import { BaseOptions } from '../../options/options';
 import { Env } from '../../helpers';
-import { FultonIdentityImpl } from '../fulton-impl/fulton-impl';
 import { HttpMethod, Middleware, PathIdentifier } from '../../interfaces';
 import { StrategyOptions } from './strategy-options';
 import * as lodash from 'lodash';
@@ -65,9 +64,6 @@ export class LoginStrategyOptions extends StrategyOptions {
         this.enabled = true;
         this.path = "/auth/login";
         this.httpMethod = "post";
-
-        this.verifier = FultonIdentityImpl.localStrategyVerifier;
-        this.successMiddleware = FultonIdentityImpl.issueAccessToken;
     }
 
     init?(): void {

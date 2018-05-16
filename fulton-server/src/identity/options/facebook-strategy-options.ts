@@ -1,6 +1,5 @@
 import { Env } from '../../helpers';
 import { BaseOptions } from '../../options/options';
-import { FultonIdentityImpl } from '../fulton-impl/fulton-impl';
 import { OauthStrategyOptions } from './oauth-strategy-options';
 import { IFultonUser } from '../interfaces';
 import * as lodash from 'lodash';
@@ -31,10 +30,6 @@ export class FacebookStrategyOptions extends OauthStrategyOptions {
         this.path = "/auth/facebook";
         this.callbackPath = "/auth/facebook/callback";
         this.profileFields = ['id', 'displayName', "photos", 'email']
-
-        this.verifierFn = FultonIdentityImpl.oauthVerifierFn;
-        this.authenticateFn = FultonIdentityImpl.oauthAuthenticateFn;
-        this.callbackAuthenticateFn = FultonIdentityImpl.oauthCallbackAuthenticateFn;
 
         this.profileTransformer = (profile: any) => {
             let email;

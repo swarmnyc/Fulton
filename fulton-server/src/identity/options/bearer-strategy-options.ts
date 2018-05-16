@@ -1,5 +1,4 @@
 import { Env } from '../../helpers';
-import { FultonIdentityImpl } from '../fulton-impl/fulton-impl';
 import { StrategyOptions } from './strategy-options';
 import { TokenStrategyVerifier } from '../interfaces';
 
@@ -33,7 +32,6 @@ export class BearerStrategyOptions extends StrategyOptions {
         this.enabled = true;
         this.addToDefaultAuthenticateList = true;
 
-        this.verifier = FultonIdentityImpl.tokenStrategyVerifier;
     }
 
     init?(): void {

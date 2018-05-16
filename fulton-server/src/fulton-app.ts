@@ -205,7 +205,7 @@ export abstract class FultonApp implements IFultonApp {
             await this.onInit(this.options);
             this.options.init();
 
-            if (this.options.identity.enabled && this.options.identity.userService == null) {
+            if (this.options.identity.enabled) {
                 // Initialize Identity to use FultonImpl if app.options.identity.userService is null
                 require("./identity/fulton-impl/fulton-impl-initializer")(this)
             }

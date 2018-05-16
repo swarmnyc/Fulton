@@ -1,6 +1,5 @@
 import { Env } from '../../helpers';
 import { BaseOptions } from '../../options/options';
-import { FultonIdentityImpl } from '../fulton-impl/fulton-impl';
 import { OauthStrategyOptions } from './oauth-strategy-options';
 import * as lodash from 'lodash';
 
@@ -31,10 +30,6 @@ export class GoogleStrategyOptions extends OauthStrategyOptions {
         this.callbackPath = "/auth/google/callback";
         this.accessType = "online";
         this.scope = "profile email";
-
-        this.verifierFn = FultonIdentityImpl.oauthVerifierFn;
-        this.authenticateFn = FultonIdentityImpl.oauthAuthenticateFn;
-        this.callbackAuthenticateFn = FultonIdentityImpl.oauthCallbackAuthenticateFn;
     }
 
     init?(): void {

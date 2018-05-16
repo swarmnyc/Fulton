@@ -1,6 +1,5 @@
 import { BaseOptions } from '../../options/options';
 import { Env } from '../../helpers';
-import { FultonIdentityImpl } from '../fulton-impl/fulton-impl';
 import { IdentityNotificationOptions } from './notification-Options';
 import { Middleware } from '../../interfaces';
 
@@ -40,7 +39,7 @@ export class ForgotPasswordOptions extends BaseOptions<ForgotPasswordOptions> {
      * the handler for register
      * the default value is FultonIdentityImpl.forgotPasswordHandler
      */
-    handler?: Middleware = FultonIdentityImpl.forgotPasswordHandler;
+    handler?: Middleware;
 
     /**
      * the options for notification

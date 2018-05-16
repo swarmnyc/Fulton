@@ -1,14 +1,11 @@
 import * as lodash from 'lodash';
 import * as passport from 'passport';
-import { Strategy } from 'passport';
-import { Strategy as BearerStrategy } from 'passport-http-bearer';
-import { Strategy as LocalStrategy } from 'passport-local';
-import { IFultonApp } from '../fulton-app';
-import { Type } from '../interfaces';
 import { EventKeys } from '../keys';
-import { FultonIdentityImpl } from './fulton-impl/fulton-impl';
+import { IFultonApp } from '../fulton-app';
 import { IUser, IUserService } from './interfaces';
-import { GoogleStrategy } from './strategies/google-strategy';
+import { Type } from '../interfaces';
+
+type Strategy = passport.Strategy;
 
 module.exports = async function identityInitializer(app: IFultonApp) {
     let idOptions = app.options.identity;
@@ -19,10 +16,6 @@ module.exports = async function identityInitializer(app: IFultonApp) {
         userService = app.container.resolve(idOptions.userService as Type);
     } else {
         userService = idOptions.userService as IUserService<IUser>;
-    }
-
-    if (idOptions.defaultAuthenticate == null) {
-        idOptions.defaultAuthenticate = FultonIdentityImpl.defaultAuthenticate;
     }
 
     // assign userService
@@ -44,16 +37,20 @@ module.exports = async function identityInitializer(app: IFultonApp) {
 
     // add pre-defined login strategy
     if (idOptions.login.enabled) {
+        let LocalStrategy = require("passport-local").Strategy;
+
         idOptions.addStrategy(idOptions.login, LocalStrategy);
     }
 
     // add pre-defined bearer strategy
     if (idOptions.bearer.enabled) {
+        let BearerStrategy = require("passport-http-bearer").Strategy;
         idOptions.addStrategy(idOptions.bearer, BearerStrategy);
     }
 
     // add pre-defined google strategy
     if (idOptions.google.enabled) {
+        let GoogleStrategy = require('./strategies/google-strategy').GoogleStrategy
         idOptions.addStrategy(idOptions.google, GoogleStrategy)
     }
 

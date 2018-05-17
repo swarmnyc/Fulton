@@ -5,7 +5,7 @@
 ${appName}.options.compression.enabled=${isCompressionEnabled}
 ${appName}.options.cors.enabled=${isCorsEnabled}
 ${appName}.options.docs.enabled=${isApiDocsEnabled}
-${appName}.options.formatter.jsonApi=${isApiDocsEnabled}
+${appName}.options.formatter.jsonApi=${isJsonApiEnabled}
 
 
 <% if(isDatabaseEnabled) { %>## Databases<% } %><% databaseSettings.forEach(function(config){ %>

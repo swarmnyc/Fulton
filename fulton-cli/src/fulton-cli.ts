@@ -6,10 +6,13 @@ import './caporal';
 
 let commands = ["new", "generate"]
 
-
-caporal.name("fulton")
-caporal.bin("fulton")
+caporal.name("fulton");
+caporal.bin("fulton");
 caporal.version(AppVersion);
+
+if (process.env["NODE_ENV"] == "DEV") {
+    process.argv.push("--verbose");
+}
 
 commands.forEach((command) => {
     require("./commands/" + command)();

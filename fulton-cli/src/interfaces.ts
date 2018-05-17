@@ -15,7 +15,9 @@ export interface Feature extends inquirer.objects.ChoiceOption {
 
 export interface AppOptions {
     projectName: string;
+    projectNameSafe: string;
     appName: string;
+    appNameSafe: string;
 
     isCompressionEnabled: boolean;
     isCorsEnabled: boolean;
@@ -24,7 +26,7 @@ export interface AppOptions {
 
     isDatabaseEnabled: boolean;
     isMongoDbEnabled: boolean;
-    databaseSettings: string[];
+    databaseSettings?: string[];
 
     isIdentityEnabled?: boolean;
     isGoogleAuthEnabled: boolean;
@@ -32,4 +34,6 @@ export interface AppOptions {
     isFacebookAuthEnabled: boolean;
 
     isEmailNotificationEnabled: boolean;
+
+    isDockerEnabled: boolean;
 }

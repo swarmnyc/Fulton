@@ -33,12 +33,11 @@ class Executor {
     }
 
     async start(): Promise<void> {
-        if (this.createOptions.test) console.log("Options", JSON.stringify(this.appOptions, null, 2))
-
         this.spinner = new Spinner("Creating Project %s");
         this.spinner.start();
 
         this.createSubFolders();
+
         this.copyFiles();
 
         this.spinner.stop(true);
@@ -66,7 +65,9 @@ class Executor {
 
         let opts: AppOptions = {
             projectName: this.createOptions.name,
+            projectNameSafe: lodash.snakeCase(this.createOptions.name),
             appName: appName,
+            appNameSafe: lodash.snakeCase(appName),
             isDatabaseEnabled: this.createOptions.databases.length > 0,
             isMongoDbEnabled: lodash.includes(this.createOptions.databases, "mongodb"),
             isCompressionEnabled: lodash.includes(this.createOptions.features, "compression"),
@@ -78,8 +79,12 @@ class Executor {
             isGitHubAuthEnabled: lodash.includes(this.createOptions.features, "oauth-github"),
             isApiDocsEnabled: lodash.includes(this.createOptions.features, "api-docs"),
             isEmailNotificationEnabled: lodash.includes(this.createOptions.features, "email"),
-            databaseSettings: []
+            isDockerEnabled: lodash.includes(this.createOptions.features, "docker")
         }
+
+        this.logger.debug("Options:\n" + JSON.stringify(opts, null, 2))
+
+        opts.databaseSettings = []
 
         // to make .env.tl file easier, pre defined string here.
         this.createOptions.databases.forEach((database, index) => {
@@ -194,7 +199,14 @@ class Executor {
             fileToCopys.push({ source: "src/routers/author-router.ts", to: "src/routers/author-router.ts" })
         }
 
+        if (this.appOptions.isDockerEnabled) {
+            fileToCopys.push({ source: "Dockerfile.tl", to: "Dockerfile" })
+            fileToCopys.push({ source: ".dockerignore", to: ".dockerignore" })
+            fileToCopys.push({ source: "docker-compose.yml.tl", to: "docker-compose.yml" })
+        }
+
         fileToCopys.forEach((item) => {
+            // this.logger.debug(`Copying file : ${item.source}`)
 
             if (item.source.endsWith(".tl")) {
                 // templating the file

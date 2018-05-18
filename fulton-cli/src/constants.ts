@@ -19,7 +19,7 @@ export const DatabaseList: Feature[] = [
 
 export const FeatureList: Feature[] = [
     {
-        name: "Identity - for user register, login, authenticate, etc.",
+        name: "Identity - for user register, login, authentication and authorization.",
         short: "Identity",
         value: "identity",
         packages: ["jws", "passport", "passport-http-bearer", "passport-local", "password-hash"]
@@ -27,7 +27,7 @@ export const FeatureList: Feature[] = [
     { name: "Google login", value: "oauth-google", packages: ["google-auth-library"] },
     { name: "Facebook login", value: "oauth-facebook", packages: ["passport-facebook"] },
     { name: "GitHub login", value: "oauth-github", packages: ["passport-github"] },
-    { name: "Api docs - enabled Swagger", short: "Api docs", value: "api-docs", packages: ["swagger-ui-express"] },
+    { name: "Api docs - enabled Swagger UI documentation", short: "Api docs", value: "api-docs", packages: ["swagger-ui-express"] },
     { name: "Http response GZip compression", short: "Compression", value: "compression", packages: ["compression"] },
     { name: "Http CORS", short: "CORS", value: "cors", packages: ["cors"] },
     { name: "Send email", value: "email", packages: ["nodemailer"] },

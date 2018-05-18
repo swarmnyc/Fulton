@@ -45,8 +45,8 @@ module.exports = function () {
             if (value == true) throw ""
             return value
         })
-        .option("-d, --databases [databases]", "the database engine", caporal.LIST)
-        .option("-f, --features [features]", "enabled the features the app", caporal.LIST);
+        .option("-d, --databases [databases]", "the database engines the app uses", caporal.LIST)
+        .option("-f, --features [features]", "enabled the features of the app", caporal.LIST);
 
     if (process.env["NODE_ENV"] == "DEV") {
         command.option("-t, --test", "open test mode", caporal.BOOLEAN, true);

@@ -15,7 +15,7 @@ type `fulton` or `fulton help <command>` to see the all usages. all commands sup
 ### New
 **new command** helps you create a new web project powered by fulton-server
 
-![fulton-new](/assets/fulton-new.gif)
+![fulton-new](assets/fulton-new.gif)
 
 #### Options:
 

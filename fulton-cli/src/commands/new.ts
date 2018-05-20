@@ -40,11 +40,7 @@ module.exports = function () {
     let command = caporal
         .command("new", "Creates a new directory and a new Fulton app.")
         .alias("n")
-        .option("-n, --name [name]", "the name of the app", (value: any) => {
-            // this code try to fix caporal bug for error message
-            if (value == true) throw ""
-            return value
-        })
+        .argument("[name]", "the name of the app")
         .option("-d, --databases [databases]", "the database engines the app uses", caporal.LIST)
         .option("-f, --features [features]", "enabled the features of the app", caporal.LIST);
 
@@ -54,8 +50,10 @@ module.exports = function () {
 
     command.action(function (args, options, logger) {
         try {
+            options.name = args.name;
+            
             let questions = generateQuestions(options, logger);
-
+            
             inquirer.prompt(questions).then((answers) => {
                 logger.info("The project is been creating. It takes a while.");
 

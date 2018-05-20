@@ -1,4 +1,4 @@
-# Fulton Cli
+# Fulton CLI
 
 CLI tool for Fulton that help you get start with Fulton.
 
@@ -17,9 +17,12 @@ type `fulton` or `fulton help <command>` to see the all usages. all commands sup
 
 ![fulton-new](assets/fulton-new.gif)
 
+#### Usage:
+* `fulton new [name]` or `fulton n [name]`
+    * `[name]` the name of the app*
+
 #### Options:
 
-* `-n, --name <name>` the name of the app* 
 * `-d, --databases <engine,engine,engine,...>` the database engines the app uses
     * the support engines are: 
         * mongodb
@@ -40,9 +43,16 @@ type `fulton` or `fulton help <command>` to see the all usages. all commands sup
     * docker - this feature is involved supporting docker.
 
 ### Generate
+**generate command** helps you scaffolding files
 
-### Build
+#### Schematic
+Supported schematics:
+* `e, entity` scaffolding a entity of Database ORM file.
+    * `-c, connection` the name of datatbase connection, the default value is "default"
+    * `-d, database` the type of database, the CLI will try to detect the type  the default value is "mongodb"
+* `r, router` scaffolding a router file.
+* `s, service` scaffolding a service file.
 
-### Serve
 
-### Test
+### Features
+**generate command** helps you create a file 

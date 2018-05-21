@@ -1,15 +1,14 @@
 import * as fs from 'fs';
 import * as lodash from 'lodash';
 import * as path from 'path';
-import chalk from 'chalk';
+
 import { AppOptions, CreateProjectOptions } from '../interfaces';
-import { AppRoot, DatabaseList, DatabasePackages, DevPackages, FeatureList, Packages } from '../constants';
+import { AppRoot, TemplateRoot, DatabaseList, DatabasePackages, DevPackages, FeatureList, Packages } from '../constants';
+
+import { Spinner } from 'cli-spinner';
+import chalk from 'chalk';
 import { classify } from '../utils/stings';
 import { exec } from 'child_process';
-import { Spinner } from 'cli-spinner';
-
-
-const TemplateRoot = path.join(AppRoot, "templates");
 
 export function createProject(options: CreateProjectOptions, logger: Logger): Promise<void> {
     return new Executor(options, logger).start()
@@ -188,11 +187,11 @@ class Executor {
         if (this.appOptions.isDatabaseEnabled) {
             let database = this.createOptions.databases[0];
             if (database == "mongodb") {
-                fileToCopys.push({ source: "src/entities/mongodb/article-entity.ts", to: "src/entities/article-entity.ts" })
-                fileToCopys.push({ source: "src/entities/mongodb/author-entity.ts", to: "src/entities/author-entity.ts" })
+                fileToCopys.push({ source: "src/entities/mongodb/article.ts", to: "src/entities/article.ts" })
+                fileToCopys.push({ source: "src/entities/mongodb/author.ts", to: "src/entities/author.ts" })
             } else {
-                fileToCopys.push({ source: "src/entities/sql/article-entity.ts", to: "src/entities/article-entity.ts" })
-                fileToCopys.push({ source: "src/entities/sql/author-entity.ts", to: "src/entities/author-entity.ts" })
+                fileToCopys.push({ source: "src/entities/sql/article.ts", to: "src/entities/article.ts" })
+                fileToCopys.push({ source: "src/entities/sql/author.ts", to: "src/entities/author.ts" })
             }
 
             fileToCopys.push({ source: "src/routers/article-router.ts", to: "src/routers/article-router.ts" })

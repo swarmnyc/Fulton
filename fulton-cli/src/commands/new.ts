@@ -1,11 +1,14 @@
 import * as caporal from 'caporal';
 import * as inquirer from 'inquirer';
 import * as lodash from 'lodash';
-import chalk from 'chalk';
-import { createProject } from '../actions/create-project';
+
+import { DatabaseList, FeatureList } from '../constants';
+
 import { CreateProjectOptions } from '../interfaces';
 import { Spinner } from 'cli-spinner';
-import { DatabaseList, FeatureList } from '../constants';
+import chalk from 'chalk';
+import { createProject } from '../actions/create-project';
+import { generateQuestions } from '../utils/questions';
 
 const BaseError = require('caporal/lib/error/base-error');
 
@@ -51,14 +54,14 @@ module.exports = function () {
     command.action(function (args, options, logger) {
         try {
             options.name = args.name;
-            
-            let questions = generateQuestions(options, logger);
-            
+
+            let questions = generateQuestions(questionDefs, options, logger);
+
             inquirer.prompt(questions).then((answers) => {
                 logger.info("The project is been creating. It takes a while.");
 
                 let opts = Object.assign(options, answers) as CreateProjectOptions
-                
+
                 createProject(opts, logger).catch((e) => {
                     logger.error(chalk.red("\nError: " + (e.message || e)));
                     process.exit(1);
@@ -71,29 +74,3 @@ module.exports = function () {
     });
 };
 
-function generateQuestions(options: any, logger: Logger): inquirer.Question[] {
-    let questions: inquirer.Question[] = []
-
-    questionDefs.forEach((question) => {
-        let value = options[question.name];
-        if (options[question.name] == null) {
-            questions.push(question)
-        } else if (question.validate) {
-            if (!question.validate(value)) {
-                throw new BaseError(chalk.redBright(`Invaild value ${chalk.yellowBright(value)} for option ${chalk.yellowBright(question.name)}`), {}, caporal)
-            }
-        } else if (question.choices) {
-            if (value instanceof Array) {
-                let sources = question.choices.map((c) => c.value);
-                let errorValues = lodash.difference(value, sources);
-                if (errorValues.length > 0) {
-                    throw new BaseError(chalk.redBright(`Invaild value ${chalk.yellowBright(errorValues.join())} for option ${chalk.yellowBright(question.name)}`), {}, caporal)
-                }
-            } else {
-                throw new BaseError(chalk.redBright(`Invaild value ${chalk.yellowBright(value)} for option ${chalk.yellowBright(question.name)}`), {}, caporal)
-            }
-        }
-    })
-
-    return questions;
-}

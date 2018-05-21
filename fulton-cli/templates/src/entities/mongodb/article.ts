@@ -1,19 +1,19 @@
-import { AuthorEntity } from './author-entity';
+import { Author } from './author';
 import { column, entity, objectIdColumn, relatedTo, ObjectId } from 'fulton-server';
 
 /**
  * A example of entity for MongoDb, see http://typeorm.io/#/entities for more information
  */
 @entity("articles")
-export class ArticleEntity {
+export class Article {
     @objectIdColumn()
     id: ObjectId;
 
     @column()
     releasedAt: Date;
 
-    @relatedTo(AuthorEntity)
-    author: AuthorEntity;
+    @relatedTo(Author)
+    author: Author;
 
     @column()
     tags: string[];

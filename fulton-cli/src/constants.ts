@@ -5,6 +5,7 @@ let debug = path.extname(__filename) == ".ts"
 
 export const AppRoot = path.normalize(path.resolve(path.join(__dirname, debug ? ".." : ".")))
 export const AppVersion = require(`${debug ? ".." : "."}/package.json`).version
+export const TemplateRoot = path.join(AppRoot, "templates");
 
 export const DatabasePackages = ["typeorm", "validator", "class-validator"]
 export const Packages = ["fulton-server"]

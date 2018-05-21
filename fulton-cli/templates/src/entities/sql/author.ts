@@ -4,7 +4,7 @@ import { entity, column, primaryGeneratedColumn } from 'fulton-server';
  * A example of entity for Sql, see http://typeorm.io/#/entities for more information
  */
 @entity("authors")
-export class AuthorEntity {
+export class Author {
     @primaryGeneratedColumn("uuid")
     id: string;
 

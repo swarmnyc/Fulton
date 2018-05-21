@@ -2,13 +2,32 @@ import * as lodash from 'lodash';
 
 /**
  Returns the UpperCamelCase form of a string.
- ```javascript
- 'innerHTML'.classify();          // 'InnerHTML'
- 'action_name'.classify();        // 'ActionName'
- 'css-class-name'.classify();     // 'CssClassName'
- 'my favorite items'.classify();  // 'MyFavoriteItems'
+ ```typescript
+ classify('innerHTML');          // 'InnerHTML'
+ classify('action_name');        // 'ActionName'
+ classify('css-class-name');     // 'CssClassName'
+ classify('my favorite items');  // 'MyFavoriteItems'
  ```
  */
 export function classify(str: string): string {
-    return str.split('.').map(part => lodash.upperFirst(lodash.camelCase(part))).join('.');
-  }
+  return str.split('.').map(part => lodash.upperFirst(lodash.camelCase(part))).join('.');
+}
+
+/**
+ normalize input to the filename with path
+ ```typescript
+ normalizeFilename("MyRouter") // ["my-router"]
+ normalizeFilename("my-router") // ["my-router"]
+ normalizeFilename("my_router") // ["my_router"]
+ normalizeFilename("folder/my-router") // ["folder", "my-router"]
+ normalizeFilename("folder\my-router") // ["folder", "my-router"]
+ ```
+ */
+export function normalizeFilename(str: string): string[] {
+  let result = str.split(/[/\\]/);
+  let name = result[result.length - 1];
+
+  result[result.length - 1] = lodash.kebabCase(name)
+
+  return result;
+}

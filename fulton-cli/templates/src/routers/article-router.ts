@@ -1,6 +1,6 @@
-import { ArticleEntity } from '../entities/article-entity';
+import { Article } from '../entities/article';
 import { entityRouter, EntityRouter, Request, Response } from 'fulton-server';
 
-@entityRouter("/articles", ArticleEntity)
-export class ArticleRouter extends EntityRouter<ArticleEntity> {
+@entityRouter("/articles", Article)
+export class ArticleRouter extends EntityRouter<Article> {
 }

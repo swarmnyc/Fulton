@@ -1,6 +1,6 @@
 import { FultonApp, FultonAppOptions } from "fulton-server"
-<% if(isDatabaseEnabled) { %>import { ArticleEntity } from "./entities/article-entity"
-import { AuthorEntity } from "./entities/author-entity"
+<% if(isDatabaseEnabled) { %>import { Article } from "./entities/article"
+import { Author } from "./entities/author"
 import { ArticleRouter } from "./routers/article-router"
 import { AuthorRouter } from "./routers/author-router"<% } %>
 import { SampleRouter } from "./routers/sample-router"
@@ -15,8 +15,8 @@ export class ${appName} extends FultonApp {
 
         <% if(isDatabaseEnabled) { %> // register entities
         options.entities = [
-            ArticleEntity,
-            AuthorEntity
+            Article,
+            Author
         ];<% } %>
 
         // register routers

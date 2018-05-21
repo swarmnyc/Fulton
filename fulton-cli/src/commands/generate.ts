@@ -5,12 +5,13 @@ import * as lodash from 'lodash';
 import chalk from 'chalk';
 import { generateQuestions } from '../utils/questions';
 import { GenerateFileOptions } from '../interfaces';
-import { generateFile } from '../actions/geneateFile';
+import { generateFile } from '../actions/generate-file';
 
 const supportSchematics = [
-    ["e", "entity", "scaffolding a entity of Database ORM file"],
-    ["r", "router", "scaffolding a router file"],
-    ["s", "service", "scaffolding a service file"]
+    ["e", "entity", "a entity of Database ORM file", "Entity"],
+    ["r", "router", "a router file", "Router"],
+    ["n", "entity-router", "a entity router file", "EntityRouter"],
+    ["s", "service", "a service file", "Service"]
 ]
 
 let questionDefs = [
@@ -19,10 +20,9 @@ let questionDefs = [
         type: "list",
         message: "What is the schematic that you want to generate?",
         choices: supportSchematics.map((s) => {
-            let name = lodash.capitalize(s[1])
             return {
-                name: `${name} - ${s[2]}`,
-                short: name,
+                name: `${s[3]} - ${s[2]}`,
+                short: s[3],
                 value: s[1]
 
             };
@@ -75,19 +75,22 @@ module.exports = function () {
         .alias("g");
 
     command.argument("[schematic]", `The schematic that you want to generate.\nAvailable schematics are\n${schematicsHelp(command)}`, verifySchematic)
-        .argument("[name]", "The name of file.");
-
-    command.option("-f, --force", "override file if it exists");
+        .argument("[name]", "The name of file.")
+        .option("-f, --force", "override file if it exists")
+        .option("-n, --not-open", "not open the file after it is generated")
+        .option("--db-conn", "[entity] the database connection name", caporal.STRING)
+        .option("--db-engine", "[entity] the engine database", caporal.STRING);
 
     command.action(function (args, options, logger) {
         try {
-            options.schematic = args.schematic;
-            options.name = args.name;
+            let opts = options as GenerateFileOptions;
+            opts.schematic = args.schematic;
+            opts.name = args.name;
 
             let questions = generateQuestions(questionDefs, options, logger);
 
             inquirer.prompt(questions).then((answers) => {
-                let opts = Object.assign(options, answers) as GenerateFileOptions
+                Object.assign(opts, answers)
 
                 generateFile(opts, logger).catch((e) => {
                     logger.error(chalk.red("\nError: " + (e.message || e)));

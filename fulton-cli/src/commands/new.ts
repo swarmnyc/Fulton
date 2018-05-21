@@ -2,7 +2,7 @@ import * as caporal from 'caporal';
 import * as inquirer from 'inquirer';
 import * as lodash from 'lodash';
 
-import { DatabaseList, FeatureList } from '../constants';
+import { DatabaseList, FeatureList, InDevMode } from '../constants';
 
 import { CreateProjectOptions } from '../interfaces';
 import { Spinner } from 'cli-spinner';
@@ -47,8 +47,8 @@ module.exports = function () {
         .option("-d, --databases [databases]", "the database engines the app uses", caporal.LIST)
         .option("-f, --features [features]", "enabled the features of the app", caporal.LIST);
 
-    if (process.env["NODE_ENV"] == "DEV") {
-        command.option("-t, --test", "open test mode", caporal.BOOLEAN, true);
+    if (InDevMode) {
+        command.option("--dry", "don't run npm install", caporal.BOOLEAN, true);
     }
 
     command.action(function (args, options, logger) {

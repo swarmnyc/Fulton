@@ -8,8 +8,8 @@ ${appName}.options.docs.enabled=${isApiDocsEnabled}
 ${appName}.options.formatter.jsonApi=${isJsonApiEnabled}
 
 
-<% if(isDatabaseEnabled) { %>## Databases<% } %><% databaseSettings.forEach(function(config){ %>
-${config} 
+<% if(isDatabaseEnabled) { %>## Databases<% } %><% databases.forEach(function(db){ %>
+${db.options} 
 <% }) %>
 
 ## Identity

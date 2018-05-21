@@ -1,15 +1,25 @@
 import * as path from 'path';
-import { Feature } from './interfaces';
+import { Feature, IFultonConfig } from './interfaces';
+import { existsSync, readFileSync } from 'fs';
 
-let debug = path.extname(__filename) == ".ts"
+// if the execution file is .ts, root is ../
+let ts = path.extname(__filename) == ".ts"
 
-export const AppRoot = path.normalize(path.resolve(path.join(__dirname, debug ? ".." : ".")))
-export const AppVersion = require(`${debug ? ".." : "."}/package.json`).version
+export const InDevMode = /dev/i.exec(process.env["NODE_ENV"])
+export const AppRoot = path.normalize(path.resolve(path.join(__dirname, ts ? ".." : ".")))
+export const AppVersion = require(`${ts ? ".." : "."}/package.json`).version
 export const TemplateRoot = path.join(AppRoot, "templates");
+export const CWD = process.env["CWD"] || "."
 
 export const DatabasePackages = ["typeorm", "validator", "class-validator"]
 export const Packages = ["fulton-server"]
 export const DevPackages = ["@types/node", "rimraf", "ts-node", "typescript"]
+
+export const FultonConfig: IFultonConfig = loadFultonConfig();
+
+if (InDevMode) {
+    console.log(".fulton", FultonConfig)
+}
 
 export const DatabaseList: Feature[] = [
     { name: "MongoDB", value: "mongodb", packages: ["mongodb"] },
@@ -35,3 +45,21 @@ export const FeatureList: Feature[] = [
     { name: "json-api -support input and output as json-api format", short: "json-api", value: "json-api", packages: [] },
     { name: "docker - add dockerfile and docker compose", short: "Docker", value: "docker", packages: [] }
 ]
+
+
+function loadFultonConfig(): IFultonConfig {
+    let configPath = path.join(CWD, ".fulton")
+
+    if (existsSync(configPath)) {
+        let buffer = readFileSync(configPath)
+        return JSON.parse(buffer.toString());
+    } else {
+        return {
+            version: AppVersion,
+            databases: {
+                "default": "mongodb"
+            },
+            features: []
+        };
+    }
+}

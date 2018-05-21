@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 import * as caporal from 'caporal';
-import { AppVersion } from './constants';
+import { AppVersion, InDevMode } from './constants';
 import './caporal';
 
 let commands = ["new", "generate"]
@@ -10,7 +10,7 @@ caporal.name("fulton");
 caporal.bin("fulton");
 caporal.version(AppVersion);
 
-if (process.env["NODE_ENV"] == "DEV") {
+if (InDevMode) {
     process.argv.push("--verbose");
 }
 

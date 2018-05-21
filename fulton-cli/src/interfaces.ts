@@ -1,8 +1,17 @@
 import * as inquirer from "inquirer";
 
+export interface IFultonConfig {
+    version: string,
+    databases: {
+        [key: string]: string;
+    };
+
+    features: string[];
+}
+
 export interface CreateProjectOptions {
     name: string;
-    test: boolean;
+    dry: boolean;
     databases: string[];
     features: string[];
 }
@@ -11,6 +20,12 @@ export interface Feature extends inquirer.objects.ChoiceOption {
     short?: string;
     packages?: string[];
     devPackages?: string[];
+}
+
+export interface DatabaseOptions {
+    name: string;
+    type: string;
+    options: string;
 }
 
 export interface AppOptions {
@@ -26,7 +41,7 @@ export interface AppOptions {
 
     isDatabaseEnabled: boolean;
     isMongoDbEnabled: boolean;
-    databaseSettings?: string[];
+    databases?: DatabaseOptions[];
 
     isIdentityEnabled?: boolean;
     isGoogleAuthEnabled: boolean;
@@ -36,4 +51,53 @@ export interface AppOptions {
     isEmailNotificationEnabled: boolean;
 
     isDockerEnabled: boolean;
+}
+
+export interface GenerateFileOptions {
+    schematic: "entity" | "entity-router" | "router" | "service";
+
+    /**
+     * the name typed by users
+     */
+    name: string;
+
+    /**
+     * the class name normalized by name
+     */
+    className: string;
+
+    /**
+     * the file name normalized by name
+     */
+    fileName: string;
+
+    /**
+     * the file path normalized by name
+     */
+    filePath: string;
+
+    force: boolean;
+
+    notOpen: boolean;
+
+    templatePath: string;
+
+    // options for entity
+    dbConn: string;
+    dbEngine: string;
+    dbTableName: string;
+
+    // options for entity, entity-router
+    entityName: string;
+    entityFileName: string;
+
+    // options for entity-router, router
+    routerPath: string;
+}
+
+export interface SchematicOptions {
+    folder: string;
+    suffix: string;
+    templatePath?: string;
+    action: (opts: GenerateFileOptions) => void;
 }

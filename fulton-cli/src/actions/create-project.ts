@@ -2,13 +2,14 @@ import * as fs from 'fs';
 import * as lodash from 'lodash';
 import * as path from 'path';
 
-import { AppOptions, CreateProjectOptions } from '../interfaces';
-import { AppRoot, TemplateRoot, DatabaseList, DatabasePackages, DevPackages, FeatureList, Packages } from '../constants';
+import { AppOptions, CreateProjectOptions, IFultonConfig } from '../interfaces';
+import { CWD, DatabaseList, DatabasePackages, DevPackages, FeatureList, Packages, TemplateRoot, AppVersion } from '../constants';
 
 import { Spinner } from 'cli-spinner';
 import chalk from 'chalk';
 import { classify } from '../utils/stings';
 import { exec } from 'child_process';
+import { templateFile } from '../utils/template';
 
 export function createProject(options: CreateProjectOptions, logger: Logger): Promise<void> {
     return new Executor(options, logger).start()
@@ -23,7 +24,7 @@ class Executor {
     routerPath: string;
     servicePath: string;
     constructor(private createOptions: CreateProjectOptions, private logger: Logger) {
-        this.root = path.join(".", createOptions.name);
+        this.root = path.join(CWD, createOptions.name);
         this.srcPath = path.join(this.root, "src");
         this.entityPath = path.join(this.srcPath, "entities");
         this.routerPath = path.join(this.srcPath, "routers");
@@ -36,7 +37,7 @@ class Executor {
         this.spinner.start();
 
         this.createSubFolders();
-
+        this.generateFultonConfigFile();
         this.copyFiles();
 
         this.spinner.stop(true);
@@ -45,8 +46,8 @@ class Executor {
 
         this.spinner.setSpinnerTitle("Installing packages %s")
 
-        if (!this.createOptions.test) {
-            // skip install package if in test mode
+        if (!this.createOptions.dry) {
+            // skip install package if in dry mode
             await this.installPackages();
         }
 
@@ -83,33 +84,40 @@ class Executor {
 
         this.logger.debug("Options:\n" + JSON.stringify(opts, null, 2))
 
-        opts.databaseSettings = []
+        opts.databases = []
 
         // to make .env.tl file easier, pre defined string here.
         this.createOptions.databases.forEach((database, index) => {
             let name = index == 0 ? "default" : `conn${index + 1}`;
             let prefix = `${appName}.options.databases.${name}`
+            let options;
             switch (database) {
                 case 'mongodb':
-                    opts.databaseSettings.push(
+                    options =
                         `${prefix}.type=${database}\n` +
-                        `${prefix}.url=mongodb://localhost:27017/${this.createOptions.name}`);
+                        `${prefix}.url=mongodb://localhost:27017/${this.createOptions.name}`;
                     break
                 case 'mysql':
-                    opts.databaseSettings.push(
+                    options =
                         `${prefix}.type=${database}\n` +
                         `${prefix}.host=localhost\n` +
                         `${prefix}.port=3306\n` +
                         `${prefix}.username=username\n` +
                         `${prefix}.password=password\n` +
-                        `${prefix}.database=database`);
+                        `${prefix}.database=database`;
                     break
                 case 'mssql':
-                    opts.databaseSettings.push(
+                    options =
                         `${prefix}.type=${database}\n` +
-                        `${prefix}.url=Server=localhost;Database=database;User Id=username;Password=password;`);
+                        `${prefix}.url=Server=localhost;Database=database;User Id=username;Password=password;`;
                     break
             }
+
+            opts.databases.push({
+                name: name,
+                type: database,
+                options: options
+            });
         });
 
         return opts
@@ -117,7 +125,7 @@ class Executor {
 
     createSubFolders() {
         if (fs.existsSync(this.root)) {
-            throw new Error(`The sub-folder '${this.root}' is exsited in the current folder.`);
+            throw new Error(`The sub-folder '${this.root}' is existed in the current folder.`);
         }
 
         fs.mkdirSync(this.root);
@@ -174,7 +182,7 @@ class Executor {
      */
     copyFiles() {
         // files to copy
-        let fileToCopys = [
+        let filesToCopy = [
             { source: "package.json.tl", to: "package.json" },
             { source: "tsconfig.json", to: "tsconfig.json" },
             { source: ".env.tl", to: ".env" },
@@ -187,38 +195,40 @@ class Executor {
         if (this.appOptions.isDatabaseEnabled) {
             let database = this.createOptions.databases[0];
             if (database == "mongodb") {
-                fileToCopys.push({ source: "src/entities/mongodb/article.ts", to: "src/entities/article.ts" })
-                fileToCopys.push({ source: "src/entities/mongodb/author.ts", to: "src/entities/author.ts" })
+                filesToCopy.push({ source: "src/entities/mongodb/article.ts", to: "src/entities/article.ts" })
+                filesToCopy.push({ source: "src/entities/mongodb/author.ts", to: "src/entities/author.ts" })
             } else {
-                fileToCopys.push({ source: "src/entities/sql/article.ts", to: "src/entities/article.ts" })
-                fileToCopys.push({ source: "src/entities/sql/author.ts", to: "src/entities/author.ts" })
+                filesToCopy.push({ source: "src/entities/sql/article.ts", to: "src/entities/article.ts" })
+                filesToCopy.push({ source: "src/entities/sql/author.ts", to: "src/entities/author.ts" })
             }
 
-            fileToCopys.push({ source: "src/routers/article-router.ts", to: "src/routers/article-router.ts" })
-            fileToCopys.push({ source: "src/routers/author-router.ts", to: "src/routers/author-router.ts" })
+            filesToCopy.push({ source: "src/routers/article-router.ts", to: "src/routers/article-router.ts" })
+            filesToCopy.push({ source: "src/routers/author-router.ts", to: "src/routers/author-router.ts" })
         }
 
         if (this.appOptions.isDockerEnabled) {
-            fileToCopys.push({ source: "Dockerfile.tl", to: "Dockerfile" })
-            fileToCopys.push({ source: ".dockerignore", to: ".dockerignore" })
-            fileToCopys.push({ source: "docker-compose.yml.tl", to: "docker-compose.yml" })
+            filesToCopy.push({ source: "Dockerfile.tl", to: "Dockerfile" })
+            filesToCopy.push({ source: ".dockerignore", to: ".dockerignore" })
+            filesToCopy.push({ source: "docker-compose.yml.tl", to: "docker-compose.yml" })
         }
 
-        fileToCopys.forEach((item) => {
-            // this.logger.debug(`Copying file : ${item.source}`)
-
-            if (item.source.endsWith(".tl")) {
-                // templating the file
-                let content = fs.readFileSync(path.join(TemplateRoot, item.source)).toString()
-                let template = lodash.template(content)
-                let result = template(this.appOptions);
-
-                fs.writeFileSync(path.join(this.root, item.to), result)
-            } else {
-                // copy the file
-                fs.copyFileSync(path.join(TemplateRoot, item.source), path.join(this.root, item.to))
-            }
+        filesToCopy.forEach((item) => {
+            templateFile(item.source, path.join(this.root, item.to), this.appOptions);
         })
+    }
+
+    generateFultonConfigFile() {
+        let config: IFultonConfig = {
+            version: AppVersion,
+            databases: {},
+            features: this.createOptions.features
+        }
+
+        this.appOptions.databases.forEach((database) => {
+            config.databases[database.name] = database.type
+        })
+
+        fs.writeFileSync(path.join(this.root, ".fulton"), JSON.stringify(config, null, 2));
     }
 }
 

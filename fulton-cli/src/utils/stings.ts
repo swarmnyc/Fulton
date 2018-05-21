@@ -24,10 +24,14 @@ export function classify(str: string): string {
  ```
  */
 export function normalizeFilename(str: string): string[] {
-  let result = str.split(/[/\\]/);
+  let result = pathToArray(str);
   let name = result[result.length - 1];
 
   result[result.length - 1] = lodash.kebabCase(name)
 
   return result;
+}
+
+export function pathToArray(str: string): string[] {
+  return str.split(/[/\\]/);;
 }

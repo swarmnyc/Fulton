@@ -51,12 +51,15 @@ const schematics: ({ [key: string]: SchematicOptions }) = {
     router: {
         folder: "src/routers",
         suffix: "-router",
+        templatePath: "src/routers/template.ts.tl",
         action: (opts: GenerateFileOptions) => {
+            opts.routerPath = opts.fileName.replace("-router", "");
         }
     },
     service: {
         folder: "src/services",
         suffix: "-service",
+        templatePath: "src/services/template.ts.tl",
         action: (opts: GenerateFileOptions) => {
 
         }

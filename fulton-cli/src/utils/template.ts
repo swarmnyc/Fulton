@@ -4,7 +4,7 @@ import * as path from 'path';
 import { TemplateRoot } from '../constants';
 
 export function templateFile(templatePath: string, targetPath: string, options: any) {
-    // console.log(`Copying file : ${item.source}`)
+    // console.log(`Copying file : ${templatePath}`)
     templatePath = path.join(TemplateRoot, templatePath);
 
     if (templatePath.endsWith(".tl")) {

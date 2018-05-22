@@ -50,16 +50,9 @@ export const FeatureList: Feature[] = [
 function loadFultonConfig(): IFultonConfig {
     let configPath = path.join(CWD, ".fulton")
 
+    // TODO: check values
     if (existsSync(configPath)) {
         let buffer = readFileSync(configPath)
         return JSON.parse(buffer.toString());
-    } else {
-        return {
-            version: AppVersion,
-            databases: {
-                "default": "mongodb"
-            },
-            features: []
-        };
-    }
+    } 
 }

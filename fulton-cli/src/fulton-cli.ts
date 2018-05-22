@@ -3,6 +3,7 @@
 import * as caporal from 'caporal';
 import { AppVersion, InDevMode } from './constants';
 import './caporal';
+import { BaseCommand } from './commands/base-command';
 
 let commands = ["new", "generate"]
 
@@ -15,7 +16,7 @@ if (InDevMode) {
 }
 
 commands.forEach((command) => {
-    require("./commands/" + command)();
-})
+    (new (require("./commands/" + command)) as BaseCommand).init();
+});
 
 caporal.parse(process.argv);

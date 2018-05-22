@@ -1,10 +1,6 @@
-import * as caporal from 'caporal';
-import * as inquirer from 'inquirer';
-import * as lodash from 'lodash';
-
-import chalk from 'chalk';
-import { generateQuestions } from '../utils/questions';
+import { BaseCommand } from './base-command';
 import { GenerateFileOptions } from '../interfaces';
+import chalk from 'chalk';
 import { generateFile } from '../actions/generate-file';
 
 const supportSchematics = [
@@ -13,41 +9,6 @@ const supportSchematics = [
     ["n", "entity-router", "a entity router file", "EntityRouter"],
     ["s", "service", "a service file", "Service"]
 ]
-
-let questionDefs = [
-    {
-        name: "schematic",
-        type: "list",
-        message: "What is the schematic that you want to generate?",
-        choices: supportSchematics.map((s) => {
-            return {
-                name: `${s[3]} - ${s[2]}`,
-                short: s[3],
-                value: s[1]
-
-            };
-        }),
-        validate: (value: any) => {
-            if (value) {
-                return true
-            } else {
-                return "Please enter the name";
-            }
-        }
-    },
-    {
-        name: "name",
-        type: "input",
-        message: "What is the name of the file?",
-        validate: (value: any) => {
-            if (value) {
-                return true
-            } else {
-                return "Please enter the name";
-            }
-        }
-    },
-];
 
 function schematicsHelp(command: any) {
     let table = command["_program"]["_helper"]["_getSimpleTable"]();
@@ -69,37 +30,63 @@ function verifySchematic(input: string) {
     throw new Error(`Unknown schematic "${input}"`)
 }
 
-module.exports = function () {
-    let command = caporal
-        .command("generate", "Generates files based on a schematic.")
-        .alias("g");
+module.exports = class GenerateCommand extends BaseCommand {
+    needToBeFultonProject = true;
+    
+    action = generateFile;
 
-    command.argument("[schematic]", `The schematic that you want to generate.\nAvailable schematics are\n${schematicsHelp(command)}`, verifySchematic)
-        .argument("[name]", "The name of file.")
-        .option("-f, --force", "override file if it exists")
-        .option("-n, --not-open", "not open the file after it is generated")
-        .option("--db-conn", "[entity] the database connection name", caporal.STRING)
-        .option("--db-engine", "[entity] the engine database", caporal.STRING);
+    questionDefs = [
+        {
+            name: "schematic",
+            type: "list",
+            message: "What is the schematic that you want to generate?",
+            choices: supportSchematics.map((s) => {
+                return {
+                    name: `${s[3]} - ${s[2]}`,
+                    short: s[3],
+                    value: s[1]
 
-    command.action(function (args, options, logger) {
-        try {
-            let opts = options as GenerateFileOptions;
-            opts.schematic = args.schematic;
-            opts.name = args.name;
+                };
+            }),
+            validate: (value: any) => {
+                if (value) {
+                    return true
+                } else {
+                    return "Please enter the name";
+                }
+            }
+        },
+        {
+            name: "name",
+            type: "input",
+            message: "What is the name of the file?",
+            validate: (value: any) => {
+                if (value) {
+                    return true
+                } else {
+                    return "Please enter the name";
+                }
+            }
+        },
+    ];
 
-            let questions = generateQuestions(questionDefs, options, logger);
+    createCommand(caporal: Caporal) {
+        let command = caporal
+            .command("generate", "Generates files based on a schematic.")
+            .alias("g");
 
-            inquirer.prompt(questions).then((answers) => {
-                Object.assign(opts, answers)
+        command.argument("[schematic]", `The schematic that you want to generate.\nAvailable schematics are\n${schematicsHelp(command)}`, verifySchematic)
+            .argument("[name]", "The name of file.")
+            .option("-f, --force", "override file if it exists")
+            .option("-n, --not-open", "not open the file after it is generated")
+            .option("--db-conn", "[entity] the database connection name", caporal.STRING)
+            .option("--db-engine", "[entity] the engine database", caporal.STRING);
 
-                generateFile(opts, logger).catch((e) => {
-                    logger.error(chalk.red("\nError: " + (e.message || e)));
-                    process.exit(1);
-                });
-            })
-        } catch (e) {
-            logger.error(e.message);
-            process.exit(1);
-        }
-    });
+        return command;
+    }
+
+    beforeGenerateQuestion(args: any, options: GenerateFileOptions) {
+        options.schematic = args.schematic;
+        options.name = args.name;
+    }
 }

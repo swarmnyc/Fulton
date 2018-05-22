@@ -10,6 +10,7 @@ import { classify, normalizeFilename, pathToArray } from '../utils/stings';
 import chalk from 'chalk';
 import { templateFile } from '../utils/template';
 import { exec } from 'child_process';
+import { ensureDirSync } from '../utils/fs';
 
 export function generateFile(options: GenerateFileOptions, logger: Logger): Promise<void> {
     return new Executor(options, logger).start()
@@ -109,6 +110,8 @@ class Executor {
             if (!this.options.force) {
                 throw new Error(`The folder '${this.options.filePath}' is existed. If you want to override it, execute the command with "--force".`);
             }
+        } else {
+            ensureDirSync(path.dirname(this.options.filePath))
         }
     }
 }

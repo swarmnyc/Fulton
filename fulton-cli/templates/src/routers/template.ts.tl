@@ -1,5 +1,4 @@
-import { httpGet, httpPost, Request, Response, router, Router } from 'fulton-server';
-import { SampleService } from '../services/sample-service';
+import { httpGet, Request, Response, router, Router } from 'fulton-server';
 
 @router("/${routerPath}")
 export class ${className} extends Router {

@@ -19,6 +19,7 @@ export function generateFile(options: GenerateFileOptions, logger: Logger): Prom
 const schematics: ({ [key: string]: SchematicOptions }) = {
     entity: {
         folder: "src/entities",
+        property: "entities",
         suffix: "",
         action: (opts: GenerateFileOptions) => {
             if (!opts.dbConn) {
@@ -40,6 +41,7 @@ const schematics: ({ [key: string]: SchematicOptions }) = {
     },
     "entity-router": {
         folder: "src/routers",
+        property: "routers",
         suffix: "-router",
         templatePath: "src/routers/entity-router.ts.tl",
         action: (opts: GenerateFileOptions) => {
@@ -52,6 +54,7 @@ const schematics: ({ [key: string]: SchematicOptions }) = {
     router: {
         folder: "src/routers",
         suffix: "-router",
+        property: "routers",
         templatePath: "src/routers/template.ts.tl",
         action: (opts: GenerateFileOptions) => {
             opts.routerPath = opts.fileName.replace("-router", "");
@@ -60,10 +63,9 @@ const schematics: ({ [key: string]: SchematicOptions }) = {
     service: {
         folder: "src/services",
         suffix: "-service",
+        property: "services",
         templatePath: "src/services/template.ts.tl",
-        action: (opts: GenerateFileOptions) => {
-
-        }
+        action: (opts: GenerateFileOptions) => { }
     }
 }
 
@@ -80,6 +82,10 @@ class Executor {
         templateFile(this.options.templatePath, this.options.filePath, this.options)
 
         this.logger.info(chalk.greenBright(`The file is generated successfully on ${this.options.filePath}`));
+
+        if (!this.options.notImport) {
+            require('../utils/insertReference')(this.options.className, this.options.fileName, this.options.filePath, this.schematic.property)
+        }
 
         if (!this.options.notOpen) {
             exec(`start "" "${this.options.filePath}"`)

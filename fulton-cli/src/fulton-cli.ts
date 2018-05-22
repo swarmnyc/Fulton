@@ -13,6 +13,9 @@ caporal.version(AppVersion);
 
 if (InDevMode) {
     process.argv.push("--verbose");
+} else {
+    // don't show any node warning
+    process.emitWarning = function () { }
 }
 
 commands.forEach((command) => {

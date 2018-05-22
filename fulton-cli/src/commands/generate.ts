@@ -75,10 +75,12 @@ module.exports = class GenerateCommand extends BaseCommand {
             .command("generate", "Generates files based on a schematic.")
             .alias("g");
 
+        //TODO: add more options
         command.argument("[schematic]", `The schematic that you want to generate.\nAvailable schematics are\n${schematicsHelp(command)}`, verifySchematic)
             .argument("[name]", "The name of file.")
             .option("-f, --force", "override file if it exists")
-            .option("-n, --not-open", "not open the file after it is generated")
+            .option("--not-open", "not open the file after it is generated")
+            .option("--not-import", "not import the decoration into app.ts after it is generated")
             .option("--db-conn", "[entity] the database connection name", caporal.STRING)
             .option("--db-engine", "[entity] the engine database", caporal.STRING);
 
@@ -88,5 +90,6 @@ module.exports = class GenerateCommand extends BaseCommand {
     beforeGenerateQuestion(args: any, options: GenerateFileOptions) {
         options.schematic = args.schematic;
         options.name = args.name;
+        
     }
 }

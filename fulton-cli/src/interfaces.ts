@@ -80,6 +80,8 @@ export interface GenerateFileOptions {
 
     notOpen: boolean;
 
+    notImport: boolean;
+
     templatePath: string;
 
     // options for entity
@@ -97,6 +99,7 @@ export interface GenerateFileOptions {
 
 export interface SchematicOptions {
     folder: string;
+    property: string;
     suffix: string;
     templatePath?: string;
     action: (opts: GenerateFileOptions) => void;

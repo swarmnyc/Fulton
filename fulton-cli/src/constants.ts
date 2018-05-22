@@ -18,7 +18,12 @@ export const DevPackages = ["@types/node", "rimraf", "ts-node", "typescript"]
 export const FultonConfig: IFultonConfig = loadFultonConfig();
 
 if (InDevMode) {
-    console.log(".fulton", FultonConfig)
+    console.log("In Dev Mode")
+    if (FultonConfig) {
+        console.log(".fulton is ", FultonConfig)
+    } else {
+        console.log("no .fulton file")
+    }
 }
 
 export const DatabaseList: Feature[] = [
@@ -54,5 +59,5 @@ function loadFultonConfig(): IFultonConfig {
     if (existsSync(configPath)) {
         let buffer = readFileSync(configPath)
         return JSON.parse(buffer.toString());
-    } 
+    }
 }

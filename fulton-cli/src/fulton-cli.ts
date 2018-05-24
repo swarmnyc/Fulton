@@ -5,7 +5,7 @@ import { AppVersion, InDevMode } from './constants';
 import './caporal';
 import { BaseCommand } from './commands/base-command';
 
-let commands = ["new", "generate"]
+let commands = ["new", "generate", "feature"]
 
 caporal.name("fulton");
 caporal.bin("fulton");

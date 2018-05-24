@@ -11,6 +11,7 @@
     "start": "ts-node ./src/fulton-cli.ts",
     "start:new": "rimraf ./sample && ts-node ./src/fulton-cli.ts new sample",
     "start:g": "set CWD=sample&& ts-node ./src/fulton-cli.ts g",
+    "start:f": "set CWD=sample&& ts-node ./src/fulton-cli.ts f",
     "debug": "npm run clean && node --inspect-brk=9229 -r ts-node/register ./src/fulton-cli.ts",
     "build": "npm run clean && tsc -p tsconfig-prod.json",
     "test": "echo \"Error: no test specified\" && exit 1"

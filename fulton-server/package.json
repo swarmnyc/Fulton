@@ -6,7 +6,7 @@
   "types": "./types/index.d.ts",
   "scripts": {
     "clean": "rimraf ./build",
-    "build": "npm run clean && tsc -p tsconfig-prod.json && npm run copyTypes && circular-require ./build/main.js",
+    "build": "npm run clean && tsc -p tsconfig-prod.json && npm run copyTypes",
     "build:test": "npm run clean && tsc -p tsconfig.json",
     "build:live": "npm run clean && tsc -w -p tsconfig-prod.json",
     "test": "ts-node --typeCheck=true ./spec/test.ts",
@@ -76,8 +76,8 @@
     "swagger-ui-express": "^3.0.8",
     "ts-node": "^6.0.3",
     "typeorm": "^0.2.5",
-    "validator": "^10.2.0",
-    "typescript": "^2.8.3"
+    "typescript": "^2.8.3",
+    "validator": "^10.2.0"
   },
   "dependencies": {
     "@types/node": "^10.0.6",

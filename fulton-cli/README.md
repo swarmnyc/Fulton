@@ -22,7 +22,6 @@ type `fulton` or `fulton help <command>` to see the all usages. all commands sup
     * `[name]` the name of the app*
 
 #### Options:
-
 * `-d, --databases <engine,engine,engine,...>` the database engines the app uses
     * the support engines are: 
         * mongodb
@@ -45,14 +44,25 @@ type `fulton` or `fulton help <command>` to see the all usages. all commands sup
 ### Generate
 **generate command** helps you scaffolding files
 
+![fulton-new](assets/fulton-new.gif)
+
 #### Schematic
 Supported schematics:
 * `e, entity` scaffolding a entity of Database ORM file.
-    * `-c, connection` the name of datatbase connection, the default value is "default"
-    * `-d, database` the type of database, the CLI will try to detect the type  the default value is "mongodb"
+* `n, entity-router` scaffolding a router file.
 * `r, router` scaffolding a router file.
 * `s, service` scaffolding a service file.
 
+#### Options:
+* `-f, --force` override the file if it exists.
+* `--not-open` not open the file after it is generated.
+* `--not-import` not import the reference into app.ts after it is generated.
 
-### Features
-**generate command** helps you create a file 
+### Feature
+**feature command** helps you add or remove features
+
+![fulton-feature](assets/fulton-feature.gif)
+
+### Global Options
+* `-h, --help` Display help.
+* `--no-color` Disable colors.

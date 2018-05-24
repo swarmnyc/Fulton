@@ -1,7 +1,7 @@
 import { BaseCommand } from './base-command';
+import { GenerateFileAction } from '../actions/generate-file-action';
 import { GenerateFileOptions } from '../interfaces';
 import chalk from 'chalk';
-import { generateFile } from '../actions/generate-file';
 
 const supportSchematics = [
     ["e", "entity", "a entity of Database ORM file", "Entity"],
@@ -31,9 +31,9 @@ function verifySchematic(input: string) {
 }
 
 module.exports = class GenerateCommand extends BaseCommand {
+    Action = GenerateFileAction;
+
     needToBeFultonProject = true;
-    
-    action = generateFile;
 
     questionDefs = [
         {
@@ -77,10 +77,10 @@ module.exports = class GenerateCommand extends BaseCommand {
 
         //TODO: add more options
         command.argument("[schematic]", `The schematic that you want to generate.\nAvailable schematics are\n${schematicsHelp(command)}`, verifySchematic)
-            .argument("[name]", "The name of file.")
-            .option("-f, --force", "override file if it exists")
+            .argument("[name]", "The name of the file.")
+            .option("-f, --force", "override the file if it exists")
             .option("--not-open", "not open the file after it is generated")
-            .option("--not-import", "not import the decoration into app.ts after it is generated")
+            .option("--not-import", "not import the reference into app.ts after it is generated")
             .option("--db-conn", "[entity] the database connection name", caporal.STRING)
             .option("--db-engine", "[entity] the engine database", caporal.STRING);
 

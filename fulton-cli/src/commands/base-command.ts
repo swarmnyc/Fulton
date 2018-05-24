@@ -2,7 +2,9 @@ import * as caporal from 'caporal';
 import * as inquirer from 'inquirer';
 import * as lodash from 'lodash';
 
+import { BaseAction } from '../actions/base-action';
 import { FultonConfig } from '../constants';
+import { Type } from '../interfaces';
 import chalk from 'chalk';
 
 const BaseError = require('caporal/lib/error/base-error');
@@ -13,7 +15,7 @@ export abstract class BaseCommand {
 
     abstract createCommand(caporal: Caporal): Command;
 
-    abstract action: ((opts: any, logger: Logger) => Promise<any>);
+    abstract Action: Type<BaseAction>;
 
     command: Command;
 
@@ -40,7 +42,8 @@ export abstract class BaseCommand {
                 inquirer.prompt(questions).then((answers) => {
                     Object.assign(options, answers)
 
-                    this.action(options, logger).catch((e) => {
+                    let action = new this.Action(options, logger);
+                    action.start().catch((e) => {
                         logger.error(chalk.red("\nError: " + (e.message || e)));
                         process.exit(1);
                     });

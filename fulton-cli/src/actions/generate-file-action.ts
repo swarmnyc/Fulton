@@ -11,10 +11,7 @@ import chalk from 'chalk';
 import { templateFile } from '../utils/template';
 import { exec } from 'child_process';
 import { ensureDirSync } from '../utils/fs';
-
-export function generateFile(options: GenerateFileOptions, logger: Logger): Promise<void> {
-    return new Executor(options, logger).start()
-}
+import { BaseAction } from './base-action';
 
 const schematics: ({ [key: string]: SchematicOptions }) = {
     entity: {
@@ -69,9 +66,10 @@ const schematics: ({ [key: string]: SchematicOptions }) = {
     }
 }
 
-class Executor {
+export class GenerateFileAction extends BaseAction {
     schematic: SchematicOptions
-    constructor(private options: GenerateFileOptions, private logger: Logger) {
+    constructor(private options: GenerateFileOptions, logger: Logger) {
+        super(logger)
         this.schematic = schematics[this.options.schematic];
         this.checkOptions();
     }
@@ -98,9 +96,9 @@ class Executor {
 
         if (!this.options.fileName.endsWith(this.schematic.suffix)) {
             this.options.fileName += this.schematic.suffix
-
-            arr[arr.length - 1] = this.options.fileName
         }
+
+        arr[arr.length - 1] = this.options.fileName        
 
         this.options.className = classify(this.options.fileName);
         this.options.filePath = path.join(CWD, this.schematic.folder, arr.join("/") + ".ts");

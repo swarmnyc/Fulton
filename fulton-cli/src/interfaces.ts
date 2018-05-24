@@ -1,12 +1,16 @@
 import * as inquirer from "inquirer";
 
+export interface Type<T=any> extends Function {
+    new(...args: any[]): T;
+}
+
 export interface IFultonConfig {
-    version: string,
-    databases: {
+    version?: string,
+    databases?: {
         [key: string]: string;
     };
 
-    features: string[];
+    features?: string[];
 }
 
 export interface CreateProjectOptions {
@@ -103,4 +107,12 @@ export interface SchematicOptions {
     suffix: string;
     templatePath?: string;
     action: (opts: GenerateFileOptions) => void;
+}
+
+export interface UpdateFeatureOptions {
+    features: string[]
+    dry: boolean;    
+    addPackages: Set<string>
+    addDevPackages: Set<string>
+    removePackages: Set<string>
 }

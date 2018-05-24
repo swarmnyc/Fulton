@@ -89,8 +89,8 @@ class MongoRunner implements IRunner {
         });
     }
 
-    addAccessToken(accesstoken: FultonAccessToken): Promise<any> {
-        return this.tokenRepository.insertOne(accesstoken);
+    addAccessToken(accessToken: FultonAccessToken): Promise<any> {
+        return this.tokenRepository.insertOne(accessToken);
     }
 
     addIdentity(identity: FultonIdentity): Promise<any> {
@@ -277,7 +277,7 @@ export class FultonUserService implements IUserService<FultonUser> {
 
         let user = await this.runner.addUser(userInput);
 
-        // add local itentity
+        // add local identity
         var hashedPassword = passwordHash.generate(password, registerOptions.passwordHashOptions);
 
         await this.runner.addIdentity({

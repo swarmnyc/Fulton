@@ -2,10 +2,10 @@ import { DatabaseList, FeatureList, InDevMode } from '../constants';
 
 import { BaseCommand } from './base-command';
 import { CreateProjectOptions } from '../interfaces';
-import { createProject } from '../actions/create-project';
+import { NewProjectAction } from '../actions/new-project-action';
 
 module.exports = class NewCommand extends BaseCommand {
-    action = createProject;
+    Action = NewProjectAction;
     questionDefs = [
         {
             name: "name",

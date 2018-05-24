@@ -5,25 +5,21 @@ import * as path from 'path';
 import { AppOptions, CreateProjectOptions, IFultonConfig } from '../interfaces';
 import { CWD, DatabaseList, DatabasePackages, DevPackages, FeatureList, Packages, TemplateRoot, AppVersion } from '../constants';
 
-import { Spinner } from 'cli-spinner';
 import chalk from 'chalk';
 import { classify } from '../utils/stings';
 import { exec } from 'child_process';
 import { templateFile } from '../utils/template';
+import { BaseAction } from './base-action';
 
-export function createProject(options: CreateProjectOptions, logger: Logger): Promise<void> {
-    return new Executor(options, logger).start()
-}
-
-class Executor {
+export class NewProjectAction extends BaseAction {
     root: string;
     appOptions: AppOptions;
-    spinner: Spinner;
     srcPath: string;
     entityPath: string;
     routerPath: string;
     servicePath: string;
-    constructor(private createOptions: CreateProjectOptions, private logger: Logger) {
+    constructor(private createOptions: CreateProjectOptions, logger: Logger) {
+        super(logger)
         this.root = path.join(CWD, createOptions.name);
         this.srcPath = path.join(this.root, "src");
         this.entityPath = path.join(this.srcPath, "entities");
@@ -33,7 +29,7 @@ class Executor {
     }
 
     async start(): Promise<void> {
-        this.spinner = new Spinner("Creating Project %s");
+        this.spinner.setSpinnerTitle("Creating Project %s");
         this.spinner.start();
 
         this.createSubFolders();
@@ -46,10 +42,7 @@ class Executor {
 
         this.spinner.setSpinnerTitle("Installing packages %s")
 
-        if (!this.createOptions.dry) {
-            // skip install package if in dry mode
-            await this.installPackages();
-        }
+        await this.installPackages();
 
         this.spinner.stop(true);
 
@@ -171,9 +164,17 @@ class Executor {
 
             var packageString = Array.from(packages).join(" ")
             var devPackageString = Array.from(devPackages).join(" ")
-            exec(`cd ${this.root} && npm install -D ${devPackageString} && npm install ${packageString}`, (err, stdout, stderr) => {
-                err ? reject(err) : resolve()
-            });
+            var commandStr = `cd ${this.root} && npm install -D ${devPackageString} && npm install ${packageString}`
+
+            if (this.createOptions.dry) {
+                // skip install package if in dry mode
+                console.log(`\nexec ${commandStr}`);
+                resolve()
+            } else {
+                exec(commandStr, (err, stdout, stderr) => {
+                    err ? reject(err) : resolve()
+                });
+            }
         })
     }
 
@@ -219,7 +220,6 @@ class Executor {
 
     generateFultonConfigFile() {
         let config: IFultonConfig = {
-            version: AppVersion,
             databases: {},
             features: this.createOptions.features
         }
@@ -228,7 +228,7 @@ class Executor {
             config.databases[database.name] = database.type
         })
 
-        fs.writeFileSync(path.join(this.root, ".fulton"), JSON.stringify(config, null, 2));
+        this.updateFultonConfig(config, this.root);
     }
 }
 

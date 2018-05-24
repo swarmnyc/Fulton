@@ -14,15 +14,6 @@ class MyApp extends FultonApp {
             url: "mongodb://localhost:27017/fulton-test"
         });
 
-        options.notification.email.smtp.set({
-            host: "email-smtp.us-east-1.amazonaws.com",
-            secure: true,
-            auth: {
-                username: process.env["stmp_username"],
-                password: process.env["stmp_password"]
-            }
-        });
-
         options.notification.extraVariables = {
             extra1: "EXTRA1"
         }

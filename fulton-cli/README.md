@@ -15,7 +15,7 @@ type `fulton` or `fulton help <command>` to see the all usages. all commands sup
 ### New
 **new command** helps you create a new web project powered by fulton-server
 
-![fulton-new](assets/fulton-new.gif)
+![fulton-new](/screenshots/fulton-new.gif)
 
 #### Usage:
 * `fulton new [name]` or `fulton n [name]`
@@ -44,7 +44,7 @@ type `fulton` or `fulton help <command>` to see the all usages. all commands sup
 ### Generate
 **generate command** helps you scaffolding files
 
-![fulton-new](assets/fulton-new.gif)
+![fulton-new](/screenshots/fulton-new.gif)
 
 #### Schematic
 Supported schematics:
@@ -61,7 +61,7 @@ Supported schematics:
 ### Feature
 **feature command** helps you add or remove features
 
-![fulton-feature](assets/fulton-feature.gif)
+![fulton-feature](/assets/fulton-feature.gif)
 
 ### Global Options
 * `-h, --help` Display help.

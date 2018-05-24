@@ -130,7 +130,7 @@ export class RegisterOptions extends BaseOptions<RegisterOptions> {
      * the default value for email.subjectTemplate is `Welcome to {appName}`
      * the default value for email.bodyTemplate is `./templates/email-welcome.html`
      */
-    readonly notiication?= new IdentityNotificationOptions(this.appName, this.appMode, "register");
+    readonly notification?= new IdentityNotificationOptions(this.appName, this.appMode, "register");
 
     init?(): void {
         this.enabled = Env.getBoolean(`${this.appName}.options.identity.register.enabled`, this.enabled);
@@ -148,14 +148,14 @@ export class RegisterOptions extends BaseOptions<RegisterOptions> {
             };
         }
 
-        this.notiication.init()
+        this.notification.init()
 
-        if (this.notiication.email.subjectTemplate == null) {
-            this.notiication.email.subjectTemplate = `Welcome to ${this.appName}`
+        if (this.notification.email.subjectTemplate == null) {
+            this.notification.email.subjectTemplate = `Welcome to ${this.appName}`
         }
 
-        if (this.notiication.email.bodyTemplate == null) {
-            this.notiication.email.bodyTemplate = "./templates/email-welcome.html"
+        if (this.notification.email.bodyTemplate == null) {
+            this.notification.email.bodyTemplate = "./templates/email-welcome.html"
         }
     }
 }

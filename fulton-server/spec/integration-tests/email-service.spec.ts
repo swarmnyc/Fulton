@@ -14,8 +14,6 @@ class MyApp extends FultonApp {
             url: "mongodb://localhost:27017/fulton-test"
         });
 
-        options.notification.email.sender = process.env["stmp_sender"]
-
         options.notification.email.smtp.set({
             host: "email-smtp.us-east-1.amazonaws.com",
             secure: true,
@@ -29,11 +27,11 @@ class MyApp extends FultonApp {
             extra1: "EXTRA1"
         }
 
-        options.identity.register.notiication.extraVariables = {
+        options.identity.register.notification.extraVariables = {
             extra2: "EXTRA2"
         }
 
-        options.identity.register.notiication.email.set({
+        options.identity.register.notification.email.set({
             subjectTemplate: "Welcome to Fulton",
             bodyTemplate: "./spec/templates/welcome-template.html"
         })

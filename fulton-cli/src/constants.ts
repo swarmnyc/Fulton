@@ -38,7 +38,8 @@ export const FeatureList: Feature[] = [
         name: "Identity - for user register, login, authentication and authorization.",
         short: "Identity",
         value: "identity",
-        packages: ["jws", "passport", "passport-http-bearer", "passport-local", "password-hash"]
+        packages: ["jws", "passport", "passport-http-bearer", "passport-local", "password-hash"],
+        devPackages: ["@types/passport"]
     },
     { name: "Google login", value: "oauth-google", packages: ["google-auth-library"] },
     { name: "Facebook login", value: "oauth-facebook", packages: ["passport-facebook"] },

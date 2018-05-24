@@ -46,19 +46,19 @@ export class ForgotPasswordOptions extends BaseOptions<ForgotPasswordOptions> {
      * the default value for email.subjectTemplate is `{appName} Forgot Password`
      * the default value for email.bodyTemplate is `./templates/email-forgot-password.html`
      */
-    readonly notiication?= new IdentityNotificationOptions(this.appName, this.appMode, "forgot-password");
+    readonly notification?= new IdentityNotificationOptions(this.appName, this.appMode, "forgot-password");
 
     init?(): void {
         this.enabled = Env.getBoolean(`${this.appName}.options.identity.forgot-password.enabled`, this.enabled);
 
-        this.notiication.init()
+        this.notification.init()
 
-        if (this.notiication.email.subjectTemplate == null) {
-            this.notiication.email.subjectTemplate = `${this.appName} Forgot Password`
+        if (this.notification.email.subjectTemplate == null) {
+            this.notification.email.subjectTemplate = `${this.appName} Forgot Password`
         }
 
-        if (this.notiication.email.bodyTemplate == null) {
-            this.notiication.email.bodyTemplate = "./templates/email-forgot-password.html"
+        if (this.notification.email.bodyTemplate == null) {
+            this.notification.email.bodyTemplate = "./templates/email-forgot-password.html"
         }
     }
 }

@@ -40,9 +40,9 @@ interface IRunner {
     updateIdentity(identify: FultonIdentity): Promise<any>
     findUserById(userId: any): Promise<FultonUser>;
     findUserByLocal(usernameOrEmail: string, password: string): Promise<FultonUser>;
-    findUserByOauth(type: string, soruceUserId: string): Promise<FultonUser>;
+    findUserByOauth(type: string, sourceUserId: string): Promise<FultonUser>;
     findIdentities(user:IFultonUser): Promise<FultonIdentity[]>
-    findIdentity(type: string, soruceUserId: string): Promise<FultonIdentity>;
+    findIdentity(type: string, sourceUserId: string): Promise<FultonIdentity>;
     findIdentityByLocal(usernameOrEmail: string): Promise<FultonIdentity>;
     findIdentityByLocalResetToken(token: string, code: string): Promise<FultonIdentity>;
     findUserByToken(token: string): Promise<FultonUser>;
@@ -501,7 +501,7 @@ export class FultonUserService implements IUserService<FultonUser> {
     }
 
     private sendWelcomeNotification(model: WelcomeNotificationModel) {
-        var opts = this.options.register.notiication
+        var opts = this.options.register.notification
         if (opts.extraVariables) {
             Object.assign(model, opts.extraVariables)
         }
@@ -520,7 +520,7 @@ export class FultonUserService implements IUserService<FultonUser> {
     }
 
     private sendForgotPasswordNotification(model: ForgotPasswordNotificationModel) {
-        var opts = this.options.forgotPassword.notiication
+        var opts = this.options.forgotPassword.notification
         if (opts.extraVariables) {
             Object.assign(model, opts.extraVariables)
         }

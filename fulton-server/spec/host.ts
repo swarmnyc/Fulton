@@ -27,11 +27,11 @@ class MyApp extends FultonApp {
 
         options.notification.email.enabled = true        
 
-        options.identity.register.notiication.email.set({
+        options.identity.register.notification.email.set({
             bodyTemplate: "<h1>Hello ${username}</h1><p> Thanks for your registration.</p>"
         })
 
-        options.identity.forgotPassword.notiication.email.set({
+        options.identity.forgotPassword.notification.email.set({
             bodyTemplate: "<h1>Hey ${username}</h1><p> click this <a href='${url}'> link </a> to reset your password.</p>"
         })
 

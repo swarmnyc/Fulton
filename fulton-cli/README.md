@@ -61,7 +61,7 @@ Supported schematics:
 ### Feature
 **feature command** helps you add or remove features
 
-![fulton-feature](/assets/fulton-feature.gif)
+![fulton-feature](/screenshots/fulton-feature.gif)
 
 ### Global Options
 * `-h, --help` Display help.

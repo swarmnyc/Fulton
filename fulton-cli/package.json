@@ -6,6 +6,10 @@
   "bin": {
     "fulton": "./fulton-cli.js"
   },
+  "keywords": [
+    "fulton",
+    "cli"
+  ],
   "scripts": {
     "clean": "rimraf ./build && rimraf ./sample",
     "start": "ts-node ./src/fulton-cli.ts",

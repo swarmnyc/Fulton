@@ -18,7 +18,7 @@ export function classify(str: string): string {
  ```typescript
  normalizeFilename("MyRouter") // ["my-router"]
  normalizeFilename("my-router") // ["my-router"]
- normalizeFilename("my_router") // ["my_router"]
+ normalizeFilename("my_router") // ["my-router"]
  normalizeFilename("folder/my-router") // ["folder", "my-router"]
  normalizeFilename("folder\my-router") // ["folder", "my-router"]
  ```

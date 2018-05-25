@@ -5,14 +5,14 @@ import chalk from "chalk";
 
 import Project, { SyntaxKind, Node, ArrayLiteralExpression } from "ts-simple-ast"
 
-module.exports = function insertReferenceIntoApp(className: string, fileName: string, filePath: string, type: string) {
+module.exports = function insertReferenceIntoApp(className: string, fileName: string, filePath: string, type: string, sourceDir: string = "src", appFileName: string = "app.ts", save: boolean = true) {
     try {
         let project = new Project();
-        let sourcePath = path.join(CWD, "src")
-        let appPath = path.join(CWD, "src", "app.ts")
+        let sourcePath = path.posix.join(CWD, sourceDir)
+        let appPath = path.posix.join(sourcePath, appFileName)
         let appFile = project.addExistingSourceFile(appPath);
 
-        let reference = "./" + path.relative(sourcePath, path.dirname(filePath)).replace(/\\/g, "/") + "/" + fileName;
+        let reference = "./" + path.relative(sourcePath, path.dirname(filePath)) + "/" + fileName;
 
         // add import
         appFile.addImportDeclaration({
@@ -35,7 +35,11 @@ module.exports = function insertReferenceIntoApp(className: string, fileName: st
             array.addElement(className)
         }
 
-        appFile.saveSync()
+        if (save) {
+            appFile.saveSync()
+        } else {
+            return appFile.getFullText()
+        }
     } catch (error) {
         console.log(chalk.yellow(`We can't insert the reference of "${className}" into ./src/app.ts, you have to add the reference on App.onInit in order to work properly.`))
         if (InDevMode) {

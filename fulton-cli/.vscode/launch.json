@@ -6,6 +6,18 @@
     "configurations": [
         {
             "type": "node",
+            "request": "launch",
+            "name": "Launch test:debug",
+            "cwd": "${workspaceFolder}",
+            "runtimeExecutable": "npm",
+            "runtimeArgs": [
+                "run-script",
+                "test:debug"
+            ],
+            "port": 9229
+        },
+        {
+            "type": "node",
             "request": "attach",
             "name": "Attach",
             "port": 9229

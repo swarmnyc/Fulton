@@ -6,13 +6,13 @@ Fulton Server is integrated many essential features and packages that a function
 
 ## CLI
 ---
-Use Fulton Server will Fulton CLI, [see](https://www.npmjs.com/package/fulton-cli)
+Using Fulton Server with [Fulton CLI](https://www.npmjs.com/package/fulton-cli) can helps you get started with Fulton
 
 ## Integration
 
 ### [typescript](https://typescriptlang.org/)
 
-we encourage you use Fulton Server with typescript because typescript provide many features and experiences that pure javascript doesn't have. And Fulton takes the advantage of decoration of typescript. 
+we encourage you use Fulton Server with typescript because typescript provide better experiences than pure javascript. Also, Fulton Server takes the advantage of decoration of typescript. 
 
 For Example, 
 ``` typescript
@@ -28,7 +28,7 @@ here `@router` and `@httpGet` are the decorators. As you can see, it make your c
 
 ### [express](https://expressjs.com/) 
 
-Fulton Server is based on express. express is a very lite web server package and it is also most popular package for nodejs. And we use the feature of decoration of typescript to build Router. See [Router](https://swarmnyc.gitbooks.io/fulton/content/features/router.html) for more information.
+Fulton Server is based on express. express is a very lite and the most popular web framework for nodejs. And we use the feature of decoration of typescript to build Router. See [Router](https://swarmnyc.gitbooks.io/fulton/content/features/router.html) for more information.
 
 
 ### [inversify](http://inversify.io/) 
@@ -37,7 +37,7 @@ Dependency Injection(DI) and inversion of control(IoC) are a good developing pat
 
 ### [passport](http://www.passportjs.org/)
 
-Authentication is a basic feature of a functional web server. Fulton Server providers this feature definitely. Authentication is somehow complicated, so Fulton Server integrates passport, a useful authentication package, to help your web server authenticate users. See [Identity](https://swarmnyc.gitbooks.io/fulton/content/identity.html) for more information.
+Authentication is a basic feature of a web server. Fulton Server providers this feature definitely. Authentication is somehow complicated, so Fulton Server integrates passport, a useful authentication package, to help your web server authenticate users. See [Identity](https://swarmnyc.gitbooks.io/fulton/content/identity.html) for more information.
 
 ### [typeorm](http://typeorm.io)
 
@@ -81,18 +81,6 @@ export class ExampleApp extends FultonApp {
 ```
 
 See [Options](https://swarmnyc.gitbooks.io/fulton/content/options.html) for more information.
-
-
-## Dependencies 
-
-when you install fulton-server, almost all of dependencies are installed expect of some optional dependencies. When you enable the features, you have to install these packages, too.
-
-- Database drivers:
-    - for mongodb : run `npm install mongodb@2.2`
-    - for SQLite : run `npm install sqlite3`
-- For Google Auth : run `npm install google-auth-library`
-- For Github Auth : run `npm install passport-github`
-- For Swagger Docs : run `npm install swagger-ui-express`
     
 
 ## Requirements

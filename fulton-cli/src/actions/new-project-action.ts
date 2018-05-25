@@ -3,13 +3,13 @@ import * as lodash from 'lodash';
 import * as path from 'path';
 
 import { AppOptions, CreateProjectOptions, IFultonConfig } from '../interfaces';
-import { CWD, DatabaseList, DatabasePackages, DevPackages, FeatureList, Packages, TemplateRoot, AppVersion } from '../constants';
+import { CWD, DatabaseList, DatabasePackages, DevPackages, FeatureList, Packages } from '../constants';
 
+import { BaseAction } from './base-action';
 import chalk from 'chalk';
-import { classify } from '../utils/stings';
+import { classify } from '../utils/strings';
 import { exec } from 'child_process';
 import { templateFile } from '../utils/template';
-import { BaseAction } from './base-action';
 
 export class NewProjectAction extends BaseAction {
     root: string;
@@ -18,8 +18,8 @@ export class NewProjectAction extends BaseAction {
     entityPath: string;
     routerPath: string;
     servicePath: string;
-    constructor(private createOptions: CreateProjectOptions, logger: Logger) {
-        super(logger)
+    constructor(private createOptions: CreateProjectOptions) {
+        super()
         this.root = path.join(CWD, createOptions.name);
         this.srcPath = path.join(this.root, "src");
         this.entityPath = path.join(this.srcPath, "entities");
@@ -166,9 +166,10 @@ export class NewProjectAction extends BaseAction {
             var devPackageString = Array.from(devPackages).join(" ")
             var commandStr = `cd ${this.root} && npm install -D ${devPackageString} && npm install ${packageString}`
 
+            this.logger.debug(`\nexec ${commandStr}`);
+        
             if (this.createOptions.dry) {
                 // skip install package if in dry mode
-                console.log(`\nexec ${commandStr}`);
                 resolve()
             } else {
                 exec(commandStr, (err, stdout, stderr) => {

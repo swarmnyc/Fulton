@@ -3,9 +3,10 @@ import * as inquirer from 'inquirer';
 import * as lodash from 'lodash';
 
 import { BaseAction } from '../actions/base-action';
-import { FultonConfig } from '../constants';
+import { FultonConfig, Logger } from '../constants';
 import { Type } from '../interfaces';
 import chalk from 'chalk';
+import { LoggerInstance } from 'winston';
 
 const BaseError = require('caporal/lib/error/base-error');
 
@@ -23,8 +24,7 @@ export abstract class BaseCommand {
 
     init() {
         this.command = this.createCommand(caporal)
-
-        this.command.action((args, options, logger) => {
+        this.command.action((args, options) => {
             if (this.needToBeFultonProject) {
                 if (FultonConfig == null) {
                     console.log(chalk.red("This folder doesn't contain a Fulton project."))
@@ -35,21 +35,21 @@ export abstract class BaseCommand {
             try {
                 this.beforeGenerateQuestion(args, options)
 
-                let questions = this.generateQuestions(this.questionDefs, options, logger);
+                let questions = this.generateQuestions(this.questionDefs, options);
 
                 this.beforePrompt(questions, options)
 
                 inquirer.prompt(questions).then((answers) => {
                     Object.assign(options, answers)
 
-                    let action = new this.Action(options, logger);
+                    let action = new this.Action(options);
                     action.start().catch((e) => {
-                        logger.error(chalk.red("\nError: " + (e.message || e)));
+                        Logger.error(chalk.red("\nError: " + (e.message || e)));
                         process.exit(1);
                     });
                 })
             } catch (e) {
-                logger.error(e.message);
+                Logger.error(e.message);
                 process.exit(1);
             }
         })
@@ -59,7 +59,7 @@ export abstract class BaseCommand {
 
     beforePrompt(questionDefs: inquirer.Question[], options: any) {}
 
-    private generateQuestions(questionDefs: inquirer.Question[], options: any, logger: Logger): inquirer.Question[] {
+    private generateQuestions(questionDefs: inquirer.Question[], options: any): inquirer.Question[] {
         let questions: inquirer.Question[] = []
 
         questionDefs.forEach((question) => {

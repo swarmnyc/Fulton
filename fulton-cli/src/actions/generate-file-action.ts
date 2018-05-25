@@ -5,7 +5,7 @@ import * as pluralize from 'pluralize';
 
 import { CWD, FultonConfig } from '../constants';
 import { GenerateFileOptions, SchematicOptions } from '../interfaces';
-import { classify, normalizeFilename, pathToArray } from '../utils/stings';
+import { classify, normalizeFilename, pathToArray } from '../utils/strings';
 
 import chalk from 'chalk';
 import { templateFile } from '../utils/template';
@@ -68,8 +68,8 @@ const schematics: ({ [key: string]: SchematicOptions }) = {
 
 export class GenerateFileAction extends BaseAction {
     schematic: SchematicOptions
-    constructor(private options: GenerateFileOptions, logger: Logger) {
-        super(logger)
+    constructor(private options: GenerateFileOptions) {
+        super()
         this.schematic = schematics[this.options.schematic];
         this.checkOptions();
     }
@@ -101,7 +101,7 @@ export class GenerateFileAction extends BaseAction {
         arr[arr.length - 1] = this.options.fileName        
 
         this.options.className = classify(this.options.fileName);
-        this.options.filePath = path.join(CWD, this.schematic.folder, arr.join("/") + ".ts");
+        this.options.filePath = path.posix.join(CWD, this.schematic.folder, arr.join("/") + ".ts");
         this.options.templatePath = this.schematic.templatePath;
 
         this.schematic.action(this.options);

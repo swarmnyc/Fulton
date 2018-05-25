@@ -1,14 +1,18 @@
+import * as caporal from 'caporal';
 import * as path from 'path';
+
 import { Feature, IFultonConfig } from './interfaces';
 import { existsSync, readFileSync } from 'fs';
+
+import { LoggerInstance } from 'winston';
 
 // if the execution file is .ts, root is ../
 let ts = path.extname(__filename) == ".ts"
 
 export const InDevMode = /dev/i.exec(process.env["NODE_ENV"])
-export const AppRoot = path.normalize(path.resolve(path.join(__dirname, ts ? ".." : ".")))
+export const AppRoot = path.posix.normalize(path.posix.resolve(path.posix.join(__dirname, ts ? ".." : ".")))
 export const AppVersion = require(`${ts ? ".." : "."}/package.json`).version
-export const TemplateRoot = path.join(AppRoot, "templates");
+export const TemplateRoot = path.posix.join(AppRoot, "templates");
 export const CWD = process.env["CWD"] || "."
 
 export const DatabasePackages = ["typeorm", "validator", "class-validator"]
@@ -17,13 +21,15 @@ export const DevPackages = ["@types/node", "rimraf", "ts-node", "typescript"]
 
 export const FultonConfig: IFultonConfig = loadFultonConfig();
 
-if (InDevMode) {
-    console.log("In Dev Mode")
-    if (FultonConfig) {
-        console.log(".fulton is ", FultonConfig)
-    } else {
-        console.log("no .fulton file")
-    }
+export const Logger = <any>caporal["logger"]() as LoggerInstance;
+Logger.level = process.env["LOG_LEVEL"] ? process.env["LOG_LEVEL"] : (InDevMode ? "debug" : "info");
+Logger.transports["caporal"].level = Logger.level;
+
+Logger.debug("Mode is " + (InDevMode ? "DEV" : "PROD"))
+if (FultonConfig) {
+    Logger.debug(".fulton is", FultonConfig)
+} else {
+    Logger.debug("no .fulton file")
 }
 
 export const DatabaseList: Feature[] = [

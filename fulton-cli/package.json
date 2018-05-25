@@ -18,7 +18,11 @@
     "start:f": "set CWD=sample&& ts-node ./src/fulton-cli.ts f",
     "debug": "npm run clean && node --inspect-brk=9229 -r ts-node/register ./src/fulton-cli.ts",
     "build": "npm run clean && tsc -p tsconfig-prod.json",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "ts-node ./spec/test.ts",
+    "test:it": "ts-node ./spec/test.ts --it",
+    "test:all": "npm run test && npm run test:it",
+    "test:debug": "node --inspect-brk=9229 -r ts-node/register ./spec/test.ts",
+    "test:debug:it": "node --inspect-brk=9229 -r ts-node/register ./spec/test.ts --it"
   },
   "author": {
     "name": "SWARM",
@@ -41,14 +45,18 @@
     "inquirer": "^5.2.0",
     "lodash": "^4.17.10",
     "pluralize": "^7.0.0",
-    "ts-simple-ast": "^11.2.0"
+    "ts-simple-ast": "^11.2.0",
+    "winston": "^2.4.2"
   },
   "devDependencies": {
     "@types/cli-spinner": "^0.2.0",
     "@types/inquirer": "0.0.41",
+    "@types/jasmine": "^2.8.7",
     "@types/lodash": "^4.14.108",
     "@types/node": "^10.0.6",
     "@types/pluralize": "0.0.28",
+    "@types/winston": "^2.3.9",    
+    "jasmine": "^3.1.0",
     "rimraf": "^2.6.2",
     "ts-node": "^6.0.3",
     "typescript": "^2.8.3"

@@ -1,20 +1,13 @@
-import * as fs from 'fs';
-import * as lodash from 'lodash';
-import * as path from 'path';
+import { CWD, FeatureList, FultonConfig } from '../constants';
 
-import { AppOptions, CreateProjectOptions, IFultonConfig, UpdateFeatureOptions } from '../interfaces';
-import { CWD, DatabaseList, DatabasePackages, DevPackages, FeatureList, Packages, TemplateRoot, AppVersion, FultonConfig, InDevMode } from '../constants';
-
-import { Spinner } from 'cli-spinner';
-import chalk from 'chalk';
-import { classify } from '../utils/stings';
-import { exec } from 'child_process';
-import { templateFile } from '../utils/template';
 import { BaseAction } from './base-action';
+import { UpdateFeatureOptions } from '../interfaces';
+import chalk from 'chalk';
+import { exec } from 'child_process';
 
 export class UpdateFeatureAction extends BaseAction {
-    constructor(private options: UpdateFeatureOptions, logger: Logger) {
-        super(logger)
+    constructor(private options: UpdateFeatureOptions) {
+        super()
         this.updateOptions();
     }
 
@@ -87,9 +80,10 @@ export class UpdateFeatureAction extends BaseAction {
             }
 
             let commandStr = commandArr.join(" && ")
+            this.logger.debug(`\nexec ${commandStr}`);
+
             if (this.options.dry) {
                 // skip install package if in dry mode
-                console.log(`\nexec ${commandStr}`);
                 resolve()
             } else {
 

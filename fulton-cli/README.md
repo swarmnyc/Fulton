@@ -1,6 +1,6 @@
 # Fulton CLI
 
-CLI tool for Fulton that help you get start with Fulton.
+CLI tool for [Fulton](https://www.npmjs.com/package/fulton-server) that help you get start with Fulton.
 
 
 ## Installation

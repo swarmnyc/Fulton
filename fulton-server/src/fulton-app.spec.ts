@@ -216,7 +216,7 @@ describe('Fulton Start will https', () => {
         });
     })
 
-    it('should start https with localhost.crt', async () => {
+    xit('should start https with localhost.crt', async () => {
         let app = new MyFultonApp()
         app["assetFolder"] = "../assets"
         

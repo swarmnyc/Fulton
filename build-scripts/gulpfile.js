@@ -1,8 +1,8 @@
 let projects = [{
-    name: "cli",
-    extraFolders: ["templates"]
-},
-{
+//     name: "cli",
+//     extraFolders: ["templates"]
+// },
+// {
     name: "server",
     extraFolders: ["assets"]
 }]

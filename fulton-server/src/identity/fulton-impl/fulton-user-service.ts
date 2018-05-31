@@ -153,14 +153,17 @@ class MongoRunner implements IRunner {
     }
 
     async findUserByToken(token: string): Promise<FultonUser> {
-        let payload = jws.decode(token).payload
-        let userToken = await this.tokenRepository.findOne({
-            "userId": payload.id,
+        let payload = JSON.parse(jws.decode(token).payload)
+        let userTokens = await this.tokenRepository.find({
+            "userId": new ObjectId(payload.id),
             "revoked": false,
             "expiredAt": { "$gt": new Date() }
         } as any)
 
-        if (timingSafeEqual(token, userToken.token)) {
+        let userToken = userTokens.find( userToken => {
+            return timingSafeEqual(token, userToken.token)
+        })
+        if (userToken != null) {
             return this.userRepository.findOne(userToken.userId);
         } else {
             return null;

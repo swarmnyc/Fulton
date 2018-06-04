@@ -2,7 +2,7 @@ import { AuthenticateOptions } from '../interfaces';
 import { BaseOptions } from '../../options/options';
 import { Env } from '../../helpers';
 import { HttpMethod, Middleware, PathIdentifier } from '../../interfaces';
-import { IdentityNotificationOptions } from './notification-Options';
+import { IdentityNotificationOptions } from './notification-options';
 
 /**
  * the setting for register, fulton doesn't have html for register, 

@@ -3,7 +3,7 @@ import * as lodash from 'lodash';
 import * as passwordHash from 'password-hash';
 import * as validator from 'validator';
 import { AccessToken, ForgotPasswordModel, ForgotPasswordNotificationModel, IFultonUser, IOauthProfile, IUserService, RegisterModel, WelcomeNotificationModel, IFultonIdentity } from '../interfaces';
-import { codeGenerate, numberCodeGenerate } from '../../helpers/crypto-helper';
+import { codeGenerate, numberCodeGenerate, timingSafeEqual } from '../../helpers/crypto-helper';
 import { DiKeys, EventKeys } from '../../keys';
 import { EntityMetadata } from 'typeorm/metadata/EntityMetadata';
 import { ErrorCodes } from '../../common/fulton-error';
@@ -153,13 +153,22 @@ class MongoRunner implements IRunner {
     }
 
     async findUserByToken(token: string): Promise<FultonUser> {
-        let userToken = await this.tokenRepository.findOne({
-            "token": token,
+        let payload = JSON.parse(jws.decode(token).payload)
+        let userTokens = await this.tokenRepository.find({
+            "userId": new ObjectId(payload.id),
             "revoked": false,
             "expiredAt": { "$gt": new Date() }
         } as any)
 
-        return this.userRepository.findOne(userToken.userId)
+        let userToken = userTokens.find( userToken => {
+            return timingSafeEqual(token, userToken.token)
+        })
+        if (userToken != null) {
+            return this.userRepository.findOne(userToken.userId);
+        } else {
+            return null;
+        }
+
     }
 
     findIdentities(user:IFultonUser): Promise<FultonIdentity[]> {

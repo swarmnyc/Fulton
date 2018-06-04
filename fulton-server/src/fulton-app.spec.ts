@@ -222,6 +222,7 @@ describe('Fulton Start will https', () => {
         
         Env.isProduction = false
         app.options.server.httpsEnabled = true
+        app.options.server.httpsPort = 8443
 
         await app.start().catch(fail)
         await app.stop()

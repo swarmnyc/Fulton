@@ -1,6 +1,6 @@
 import { BaseOptions } from '../../options/options';
 import { Env } from '../../helpers';
-import { IdentityNotificationOptions } from './notification-Options';
+import { IdentityNotificationOptions } from './notification-options';
 import { Middleware } from '../../interfaces';
 
 /**

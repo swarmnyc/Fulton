@@ -216,12 +216,13 @@ describe('Fulton Start will https', () => {
         });
     })
 
-    xit('should start https with localhost.crt', async () => {
+    it('should start https with localhost.crt', async () => {
         let app = new MyFultonApp()
         app["assetFolder"] = "../assets"
         
         Env.isProduction = false
         app.options.server.httpsEnabled = true
+        app.options.server.httpsPort = 8443
 
         await app.start().catch(fail)
         await app.stop()

@@ -42,15 +42,10 @@ export class ForgotPasswordOptions extends BaseOptions<ForgotPasswordOptions> {
     handler?: Middleware;
 
     /**
-     * the default value is /auth/forgot-password/revoke
+     * the try limits for failure,
+     * the default value is 3
      */
-    revokePath?: string = "/auth/forgot-password/revoke";
-
-    /**
-     * the handler for revoke forgot password
-     * the default value is FultonIdentityImpl.forgotPasswordRevokeHandler
-     */
-    revokeHandler?: Middleware;
+    tryLimits?: number = 3;
 
     /**
      * the options for notification

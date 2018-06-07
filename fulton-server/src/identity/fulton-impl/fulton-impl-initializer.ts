@@ -42,10 +42,6 @@ module.exports = async function (app: IFultonApp) {
         idOptions.forgotPassword.handler = FultonIdentityImpl.forgotPasswordHandler;
     }
 
-    if (idOptions.forgotPassword.revokeHandler == null) {
-        idOptions.forgotPassword.revokeHandler = FultonIdentityImpl.forgotPasswordRevokeHandler;
-    }
-
     if (idOptions.bearer.verifier == null) {
         idOptions.bearer.verifier = FultonIdentityImpl.tokenStrategyVerifier;
     }

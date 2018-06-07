@@ -13,3 +13,8 @@ export const MimeTypes = {
     json: "application/json",
     jsonApi: "application/vnd.api+json",
 }
+
+export const TimeInMillSeconds = {
+    Second: 1000,
+    Minute: 60_000
+}

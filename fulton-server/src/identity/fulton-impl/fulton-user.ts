@@ -49,6 +49,8 @@ export class FultonIdentity implements IFultonIdentity {
     resetPasswordCode?: string;
     @Column()
     resetPasswordExpiredAt?: Date;
+    @Column()
+    resetPasswordCodeTryCount?: number;
 
     // for type is oauth, only keep last tokens
     @Column()    

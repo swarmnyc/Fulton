@@ -270,23 +270,6 @@ export let FultonIdentityImpl = {
         } else {
             next(new FultonError(ErrorCodes.Invalid))
         }
-    },
-
-    forgotPasswordRevokeHandler(req: Request, res: Response, next: NextFunction) {
-        let token = req.query.token;
-
-        if (token) {
-            // send notification
-            req.userService
-                .revokeResetPassword(token)
-                .then(() => {
-                    res.send({
-                        status: 200
-                    })
-                }).catch(next)
-        } else {
-            next(new FultonError(ErrorCodes.Invalid))
-        }
     }
 }
 

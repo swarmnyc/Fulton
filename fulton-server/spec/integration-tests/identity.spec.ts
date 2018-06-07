@@ -226,7 +226,7 @@ describe('Identity Integration Test', () => {
 
         let code = "123456"
 
-        spyOn( cryptoHelper, "numberCodeGenerate").and.returnValue(code)
+        spyOn(cryptoHelper, "numberCodeGenerate").and.returnValue(code)
 
         let result = await httpTester.post("/auth/forgot-password", {
             username: "test"
@@ -265,7 +265,9 @@ describe('Identity Integration Test', () => {
     it('should revoke reset password token', async () => {
         await prepareUser();
 
-        // to get two tokens
+        var identityRepository = getMongoRepository(FultonIdentity)
+        let code = "0000"
+
         let result = await httpTester.post("/auth/forgot-password", {
             username: "test"
         });
@@ -275,10 +277,35 @@ describe('Identity Integration Test', () => {
 
         let token = result.body.data.token
 
-        result = await httpTester.get("/auth/forgot-password/revoke", {
-            token: token
+        result = await httpTester.post("/auth/forgot-password", {
+            token: token,
+            code: code
         });
 
-        expect(result.response.statusCode).toEqual(200);
+        expect(result.response.statusCode).toEqual(400);
+
+        let id = await identityRepository.findOne({ resetPasswordToken: token })
+        expect(id.resetPasswordCodeTryCount).toEqual(1);
+
+
+        result = await httpTester.post("/auth/forgot-password", {
+            token: token,
+            code: code
+        });
+
+        expect(result.response.statusCode).toEqual(400);
+
+        id = await identityRepository.findOne({ resetPasswordToken: token })
+        expect(id.resetPasswordCodeTryCount).toEqual(2);
+
+        result = await httpTester.post("/auth/forgot-password", {
+            token: token,
+            code: code
+        });
+
+        expect(result.response.statusCode).toEqual(400);
+
+        id = await identityRepository.findOne({ resetPasswordToken: token })
+        expect(id).toBeFalsy();
     });
 });

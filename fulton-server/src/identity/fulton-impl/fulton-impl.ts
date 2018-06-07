@@ -231,11 +231,11 @@ export let FultonIdentityImpl = {
     forgotPasswordHandler(req: Request, res: Response, next: NextFunction) {
         let options = req.fultonApp.options.identity.forgotPassword;
 
-        let username = req.body.username || req.query.username;
-        let email = req.body.email || req.query.email;
+        let username = req.body.username;
+        let email = req.body.email;
 
-        let token = req.body.token || req.query.token;
-        let code = req.body.code || req.query.code;
+        let token = req.body.token;
+        let code = req.body.code;
 
         let password = req.body.password;
 
@@ -262,6 +262,23 @@ export let FultonIdentityImpl = {
             // reset password
             req.userService
                 .verifyResetPassword(token, code)
+                .then(() => {
+                    res.send({
+                        status: 200
+                    })
+                }).catch(next)
+        } else {
+            next(new FultonError(ErrorCodes.Invalid))
+        }
+    },
+
+    forgotPasswordRevokeHandler(req: Request, res: Response, next: NextFunction) {
+        let token = req.query.token;
+
+        if (token) {
+            // send notification
+            req.userService
+                .revokeResetPassword(token)
                 .then(() => {
                     res.send({
                         status: 200

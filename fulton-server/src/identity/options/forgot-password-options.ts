@@ -24,7 +24,7 @@ export class ForgotPasswordOptions extends BaseOptions<ForgotPasswordOptions> {
     enabled?: boolean = true;
 
     /**
-     * the default value is /auth/login
+     * the default value is /auth/forgot-password
      */
     path?: string = "/auth/forgot-password";
 
@@ -36,10 +36,21 @@ export class ForgotPasswordOptions extends BaseOptions<ForgotPasswordOptions> {
     duration?: number = 1800;
 
     /**
-     * the handler for register
+     * the handler for revoke forgot password
      * the default value is FultonIdentityImpl.forgotPasswordHandler
      */
     handler?: Middleware;
+
+    /**
+     * the default value is /auth/forgot-password/revoke
+     */
+    revokePath?: string = "/auth/forgot-password/revoke";
+
+    /**
+     * the handler for revoke forgot password
+     * the default value is FultonIdentityImpl.forgotPasswordRevokeHandler
+     */
+    revokeHandler?: Middleware;
 
     /**
      * the options for notification

@@ -37,9 +37,13 @@ module.exports = async function (app: IFultonApp) {
     if (idOptions.login.successMiddleware == null) {
         idOptions.login.successMiddleware = FultonIdentityImpl.issueAccessToken;
     }
-    
+
     if (idOptions.forgotPassword.handler == null) {
         idOptions.forgotPassword.handler = FultonIdentityImpl.forgotPasswordHandler;
+    }
+
+    if (idOptions.forgotPassword.revokeHandler == null) {
+        idOptions.forgotPassword.revokeHandler = FultonIdentityImpl.forgotPasswordRevokeHandler;
     }
 
     if (idOptions.bearer.verifier == null) {

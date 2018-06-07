@@ -32,7 +32,8 @@ module.exports = async function identityInitializer(app: IFultonApp) {
 
     // for forgot password
     if (idOptions.forgotPassword.enabled) {
-        app.express.all(idOptions.forgotPassword.path, idOptions.forgotPassword.handler)
+        app.express.get(idOptions.forgotPassword.revokePath, idOptions.forgotPassword.revokeHandler)        
+        app.express.post(idOptions.forgotPassword.path, idOptions.forgotPassword.handler)
     }
 
     // add pre-defined login strategy

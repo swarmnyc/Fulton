@@ -41,13 +41,14 @@ interface IRunner {
     findUserById(userId: any): Promise<FultonUser>;
     findUserByLocal(usernameOrEmail: string, password: string): Promise<FultonUser>;
     findUserByOauth(type: string, sourceUserId: string): Promise<FultonUser>;
-    findIdentities(user:IFultonUser): Promise<FultonIdentity[]>
+    findIdentities(user: IFultonUser): Promise<FultonIdentity[]>
     findIdentity(type: string, sourceUserId: string): Promise<FultonIdentity>;
     findIdentityByLocal(usernameOrEmail: string): Promise<FultonIdentity>;
     findIdentityByLocalResetToken(token: string, code: string): Promise<FultonIdentity>;
     findUserByToken(token: string): Promise<FultonUser>;
     countUserName(name: string): Promise<number>;
     countUserEmail(email: string): Promise<number>;
+    revokeResetToken(token: string): Promise<any>;
 }
 
 class MongoRunner implements IRunner {
@@ -160,7 +161,7 @@ class MongoRunner implements IRunner {
             "expiredAt": { "$gt": new Date() }
         } as any)
 
-        let userToken = userTokens.find( userToken => {
+        let userToken = userTokens.find(userToken => {
             return timingSafeEqual(token, userToken.token)
         })
         if (userToken != null) {
@@ -171,7 +172,7 @@ class MongoRunner implements IRunner {
 
     }
 
-    findIdentities(user:IFultonUser): Promise<FultonIdentity[]> {
+    findIdentities(user: IFultonUser): Promise<FultonIdentity[]> {
         return this.identityRepository.find({
             "userId": user.id
         });
@@ -201,6 +202,10 @@ class MongoRunner implements IRunner {
             "resetPasswordToken": token,
             "resetPasswordExpiredAt": { "$gt": new Date() }
         } as any);
+    }
+
+    revokeResetToken(token: string): Promise<any> {
+        return this.identityRepository.updateMany({ "resetPasswordToken": token }, { $set: { resetPasswordToken: "REVOKED", resetPasswordExpiredAt: new Date(2000, 1, 1) } })
     }
 }
 
@@ -495,6 +500,10 @@ export class FultonUserService implements IUserService<FultonUser> {
                 }
             }).catch(reject);
         })
+    }
+
+    revokeResetPassword(token: string): Promise<void> {
+        return this.runner.revokeResetToken(token);
     }
 
     refreshAccessToken(token: string): Promise<AccessToken> {

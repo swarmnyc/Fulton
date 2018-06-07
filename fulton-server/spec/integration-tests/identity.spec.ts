@@ -1,14 +1,16 @@
+import * as cryptoHelper from '../../src/helpers/crypto-helper';
+
+import { AccessToken, IOauthProfile } from '../../src/identity/interfaces';
+import { FultonAccessToken, FultonIdentity, FultonUser } from "../../src/identity/fulton-impl/fulton-user";
 import { HttpResult, HttpTester } from "../../src/test/http-tester";
 import { Request, Response } from "../../src/interfaces";
 
-import { AccessToken, IOauthProfile } from '../../src/identity/interfaces';
 import { FultonApp } from '../../src/fulton-app';
 import { FultonAppOptions } from '../../src/options/fulton-app-options';
 import { FultonLog } from '../../src/fulton-log';
 import { FultonUserService } from '../../src/identity/fulton-impl/fulton-user-service';
 import { ObjectId } from "bson";
 import { getMongoRepository } from "typeorm";
-import { FultonUser, FultonIdentity, FultonAccessToken } from "../../src/identity/fulton-impl/fulton-user";
 
 class MyApp extends FultonApp {
     protected onInit(options: FultonAppOptions): void {
@@ -26,10 +28,6 @@ class MyApp extends FultonApp {
                 res.send("no user");
             }
         };
-    }
-
-    initIdentity(): void {
-        super.initIdentity()
     }
 }
 
@@ -222,4 +220,65 @@ describe('Identity Integration Test', () => {
             expect(e.error.code).toEqual("existed")
         }
     })
+
+    it('should get reset password token and verify and reset password', async () => {
+        await prepareUser();
+
+        let code = "123456"
+
+        spyOn( cryptoHelper, "numberCodeGenerate").and.returnValue(code)
+
+        let result = await httpTester.post("/auth/forgot-password", {
+            username: "test"
+        });
+
+        expect(result.response.statusCode).toEqual(200);
+        expect(result.body.data.token).toBeTruthy();
+
+        let token = result.body.data.token
+
+        result = await httpTester.post("/auth/forgot-password", {
+            token: token,
+            code: code
+        });
+
+        expect(result.response.statusCode).toEqual(200);
+
+
+        result = await httpTester.post("/auth/forgot-password", {
+            token: token,
+            code: code,
+            password: "123456"
+        });
+
+        expect(result.response.statusCode).toEqual(200);
+    });
+
+    it('should not get forget password token', async () => {
+        let result = await httpTester.post("/auth/forgot-password", {
+            username: "no-user"
+        });
+
+        expect(result.response.statusCode).toEqual(400);
+    });
+
+    it('should revoke reset password token', async () => {
+        await prepareUser();
+
+        // to get two tokens
+        let result = await httpTester.post("/auth/forgot-password", {
+            username: "test"
+        });
+
+        expect(result.response.statusCode).toEqual(200);
+        expect(result.body.data.token).toBeTruthy();
+
+        let token = result.body.data.token
+
+        result = await httpTester.get("/auth/forgot-password/revoke", {
+            token: token
+        });
+
+        expect(result.response.statusCode).toEqual(200);
+    });
 });

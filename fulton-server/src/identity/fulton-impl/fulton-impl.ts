@@ -6,20 +6,6 @@ import { Helper } from '../../helpers/helper';
 import { Middleware, NextFunction, Request, Response } from '../../interfaces';
 import { OauthStrategyOptions } from '../options/oauth-strategy-options';
 
-function setCallbackUrl(req: Request, options: OauthStrategyOptions, target: OauthAuthenticateOptions) {
-    if (Helper.getBoolean(req.query.noRedirectUrl, false)) {
-        // the callbackUrl have to null for mobile, at least for Google 
-        target.callbackUrl = target.callbackURL = null
-    } else {
-        if (options.callbackUrl) {
-            target.callbackUrl = target.callbackURL = options.callbackUrl;
-        } else {
-            // if the callbackUrl is null, use current Url + callbackPath
-            target.callbackUrl = target.callbackURL = Helper.urlResolve(req, options.callbackPath);
-        }
-    }
-}
-
 /**
  * Default Fulton Identity Implementations for passport and middlewares
  */
@@ -228,6 +214,51 @@ export let FultonIdentityImpl = {
             });
     },
 
+    logoutHandler(req: Request, res: Response, next: NextFunction) {
+        let options = req.fultonApp.options.identity.logout;
+
+        if (req.user) {
+            let all = Helper.getBoolean(req.query.all, false);
+
+            let task: Promise<void>;
+
+            if (all) {
+                task = req.userService.revokeAllAccessTokens(req.user.id)
+            } else {
+                let token = getToken(req);
+
+                if (token == null) {
+                    return next(new FultonError(ErrorCodes.Unknown));
+                }
+
+                task = req.userService.revokeAccessToken(req.user.id, token)
+            }
+
+            task.then(() => {
+                req.logout();
+
+                if (options.responseOptions && options.responseOptions.successRedirect) {
+                    res.redirect(options.responseOptions.successRedirect)
+                } else {
+                    res.sendStatus(200)
+                }
+            }).catch((error: any) => {
+                FultonLog.warn("user logout failed by", error)
+                if (options.responseOptions && options.responseOptions.failureRedirect) {
+                    res.redirect(options.responseOptions.failureRedirect)
+                } else {
+                    if (error instanceof FultonError) {
+                        next(error)
+                    } else {
+                        next(new FultonError(ErrorCodes.Unknown));
+                    }
+                }
+            });
+        } else {
+            res.sendStatus(403)
+        }
+    },
+
     forgotPasswordHandler(req: Request, res: Response, next: NextFunction) {
         let options = req.fultonApp.options.identity.forgotPassword;
 
@@ -273,3 +304,30 @@ export let FultonIdentityImpl = {
     }
 }
 
+function setCallbackUrl(req: Request, options: OauthStrategyOptions, target: OauthAuthenticateOptions) {
+    if (Helper.getBoolean(req.query.noRedirectUrl, false)) {
+        // the callbackUrl have to null for mobile, at least for Google 
+        target.callbackUrl = target.callbackURL = null
+    } else {
+        if (options.callbackUrl) {
+            target.callbackUrl = target.callbackURL = options.callbackUrl;
+        } else {
+            // if the callbackUrl is null, use current Url + callbackPath
+            target.callbackUrl = target.callbackURL = Helper.urlResolve(req, options.callbackPath);
+        }
+    }
+}
+
+
+function getToken(req: Request) {
+    if (req.headers && req.headers.authorization) {
+        var parts = req.headers.authorization.split(' ');
+        if (parts.length == 2 && /^Bearer$/i.test(parts[0])) {
+            return parts[1];
+        }
+    } else if (req.body && req.body.access_token) {
+        return req.body.access_token;
+    } else if (req.query && req.query.access_token) {
+        return req.query.access_token;
+    }
+}

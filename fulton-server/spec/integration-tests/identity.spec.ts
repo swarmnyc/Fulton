@@ -255,6 +255,8 @@ describe('Identity Integration Test', () => {
     });
 
     it('should not get forget password token', async () => {
+        await prepareUser();
+
         let result = await httpTester.post("/auth/forgot-password", {
             username: "no-user"
         });
@@ -307,5 +309,51 @@ describe('Identity Integration Test', () => {
 
         id = await identityRepository.findOne({ resetPasswordToken: token })
         expect(id).toBeFalsy();
+    });
+
+
+    it('should logout', async () => {
+        let tokenRes = await prepareUser();
+
+        httpTester.setHeaders({
+            Authorization: `Bearer ${tokenRes.body.access_token}`
+        });
+
+        let result = await httpTester.post("/auth/logout");
+
+        expect(result.response.statusCode).toEqual(200);
+
+        var tokenRepository = getMongoRepository(FultonAccessToken)
+
+        var count = await tokenRepository.count({
+            revoked: true
+        })
+
+        expect(count).toEqual(1);
+    });
+
+    fit('should logout all', async () => {
+        let tokenRes = await prepareUser();
+
+        await httpTester.post("/auth/login", {
+            username: "test",
+            password: "test123"
+        });
+
+        httpTester.setHeaders({
+            Authorization: `Bearer ${tokenRes.body.access_token}`
+        });
+
+        let result = await httpTester.get("/auth/logout?all=true");
+
+        expect(result.response.statusCode).toEqual(200);
+
+        var tokenRepository = getMongoRepository(FultonAccessToken)
+
+        var count = await tokenRepository.count({
+            revoked: true
+        })
+
+        expect(count).toEqual(2);
     });
 });

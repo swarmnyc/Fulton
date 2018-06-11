@@ -48,6 +48,8 @@ interface IRunner {
     findUserByToken(token: string): Promise<FultonUser>;
     countUserName(name: string): Promise<number>;
     countUserEmail(email: string): Promise<number>;
+    revokeAccessToken(userId: string, token: string): Promise<any>;
+    revokeAllAccessTokens(userId: string): Promise<any>;
 }
 
 class MongoRunner implements IRunner {
@@ -213,6 +215,14 @@ class MongoRunner implements IRunner {
                 this.identityRepository.updateMany({ "resetPasswordToken": token }, { $inc: { resetPasswordCodeTryCount: 1 } })
             }
         }
+    }
+
+    revokeAccessToken(userId: string, token: string): Promise<any> {
+        return this.tokenRepository.updateMany({ userId: userId, token: token }, { $set: { revoked: true } })
+    }
+
+    revokeAllAccessTokens(userId: string): Promise<any> {
+        return this.tokenRepository.updateMany({ userId: userId }, { $set: { revoked: true } })
     }
 }
 
@@ -517,6 +527,14 @@ export class FultonUserService implements IUserService<FultonUser> {
 
     getUserIdentities(user: IFultonUser): Promise<IFultonIdentity[]> {
         return this.runner.findIdentities(user);
+    }
+
+    revokeAccessToken(userId: string, token: string): Promise<any> {
+        return this.runner.revokeAccessToken(userId, token);
+    }
+    
+    revokeAllAccessTokens(userId: string): Promise<any> {
+        return this.runner.revokeAllAccessTokens(userId);
     }
 
     private get jwtSecret(): string | Buffer {

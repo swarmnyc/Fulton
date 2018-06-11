@@ -55,8 +55,9 @@ export interface IUserService<T extends IUser> {
     resetPassword(token: string, code: string, password: string): Promise<void>;
     verifyResetPassword(token: string, code: string): Promise<void>;
     getUserIdentities(user: T): Promise<IFultonIdentity[]>;
+    revokeAccessToken(userId: string, token: string): Promise<void>;
+    revokeAllAccessTokens(userId: string): Promise<void>;
     //refreshAccessToken(token: string): Promise<AccessToken>;
-    //revokeAccessToken(token: string): Promise<any>;
     //removeUserIdentities(...identities:IFultonIdentity[]): Promise<any>;
 }
 

@@ -3,7 +3,7 @@ import { StrategyOptions } from './strategy-options';
 import { TokenStrategyVerifier } from '../interfaces';
 
 /**
- * options for passport bearer stragery
+ * options for passport bearer strategy
  */
 export class BearerStrategyOptions extends StrategyOptions {
     /**

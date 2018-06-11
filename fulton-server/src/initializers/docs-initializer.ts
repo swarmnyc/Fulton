@@ -297,40 +297,9 @@ function generateAuthDefinitions(app: FultonApp, docs: OpenApiSpec) {
         let path = toPath(options.forgotPassword.path);
         let paths: PathsObject = docs.paths[path] = {}
 
-        paths["get"] = {
-            summary: "forgot-password",
-            description: "send the reset password notifications to the user",
-            tags: ["Identity"],
-            parameters: [
-                {
-                    name: "email",
-                    in: "path",
-                    description: "the user's email, required either one of email or username",
-                    type: "string"
-                },
-                {
-                    name: "username",
-                    in: "path",
-                    description: "the user's username, required either one of email or username",
-                    type: "string"
-                }
-            ],
-            responses: {
-                "200": {
-                    description: "Reset Password Token",
-                    schema: {
-                        type: "object",
-                        properties: {
-                            token: { type: "string" },
-                            expires_in: { type: "number" }
-                        }
-                    }
-                }
-            }
-        };
         paths["post"] = {
             summary: "forgot-password",
-            description: "let the user reset password",
+            description: "let the user reset password. There are three steps. Step 1, send username or email to get reset token and code. Step 2[optional], send token and code to verify them. Step 3, send token, code and password to reset password",
             tags: ["Identity"],
             parameters: [
                 {
@@ -340,6 +309,14 @@ function generateAuthDefinitions(app: FultonApp, docs: OpenApiSpec) {
                     schema: {
                         type: "object",
                         properties: {
+                            email: {
+                                description: "the user's email, required either one of email or username",
+                                type: "string"
+                            },
+                            username: {
+                                description: "the user's username, required either one of email or username",
+                                type: "string"
+                            },
                             token: { type: "string" },
                             code: { type: "string" },
                             password: { type: "string" }
@@ -384,6 +361,37 @@ function generateAuthDefinitions(app: FultonApp, docs: OpenApiSpec) {
         }
 
         paths[options.login.httpMethod] = actionDoc;
+    }
+
+
+    // for logout
+    if (options.logout.enabled) {
+        let path = toPath(options.logout.path);
+        let paths: PathsObject = docs.paths[path] = {}
+
+        let actionDoc: OperationObject = {
+            summary: "logout",
+            description: "user logout",
+            tags: ["Identity"],
+            parameters: [
+                authorizationHeader,
+                {
+                    name: "all",
+                    in: "query",
+                    description: "if true, this operation will revoke all access tokens of the user",
+                    required: false,
+                }
+            ],
+            responses: {
+                "200": {
+                    description: "success",
+                    schema: {}
+                },
+                "400": errorResponse
+            }
+        }
+
+        paths["post"] = actionDoc;
     }
 
     let oauthes = ["google", "github"];
@@ -518,6 +526,13 @@ function getBodyParameter(type: Type): ParameterObject {
             }
         }
     }
+}
+
+let authorizationHeader: ParameterObject = {
+    name: "authorization",
+    in: "header",
+    description: "user access token",
+    required: true,
 }
 
 let errorResponse: ResponseObject = {

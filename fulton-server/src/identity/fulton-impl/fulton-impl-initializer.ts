@@ -26,6 +26,10 @@ module.exports = async function (app: IFultonApp) {
         idOptions.register.handler = FultonIdentityImpl.registerHandler;
     }
 
+    if (idOptions.logout.handler == null) {
+        idOptions.logout.handler = FultonIdentityImpl.logoutHandler;
+    }
+
     if (idOptions.register.successCallback == null) {
         idOptions.register.successCallback = FultonIdentityImpl.issueAccessToken;
     }

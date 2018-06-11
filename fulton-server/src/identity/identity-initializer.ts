@@ -107,6 +107,12 @@ module.exports = async function identityInitializer(app: IFultonApp) {
         app.express.use(idOptions.defaultAuthenticate);
     }
 
+    // for logout, if have to after defaultAuthenticate in order to get the current user
+    if (idOptions.logout.enabled) {
+        app.express.get(idOptions.logout.path, idOptions.logout.handler)
+        app.express.post(idOptions.logout.path, idOptions.logout.handler)
+    }
+
     // register strategies to passport and express
     for (const { options, strategy } of idOptions.strategies) {
         if (!options.enabled) continue;

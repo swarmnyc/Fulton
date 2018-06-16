@@ -28,13 +28,19 @@ class FoodEntityService extends EntityService<Food> {
 
 @entityRouter("/A", Food)
 class EntityRouterA extends EntityRouter<Food> {
-
+    onInit(){
+        this.metadata.actions.get("detail").middlewares = [() => { return "A" }]
+    }
 }
 
 @entityRouter("/B", Food)
 class EntityRouterB extends EntityRouter<Food> {
     constructor(protected entityService: FoodEntityService) {
         super(entityService);
+    }
+
+    onInit(){
+        this.metadata.actions.get("list").middlewares = [() => { return "B" }]
     }
 }
 
@@ -57,7 +63,6 @@ describe('Fulton Entity Router', () => {
     })
 
     it('should create instances for EntityRouterA for style 1', async () => {
-
         let app = new MyApp();
         await app.init();
 
@@ -74,5 +79,19 @@ describe('Fulton Entity Router', () => {
         let router = app.container.get(EntityRouterB);
         expect(router).toBeTruthy();
         expect(router["entityService"]).toBeTruthy();
+    });
+
+    it('should create instances for EntityRouterB for style 2', async () => {
+        let app = new MyApp();
+        await app.init();
+
+        let routerA = app.container.get(EntityRouterA);
+
+        expect(routerA.metadata.actions.get("detail").middlewares[0](null, null, null)).toEqual("A")
+        expect(routerA.metadata.actions.get("list").middlewares.length).toEqual(0)
+
+        let routerB = app.container.get(EntityRouterB);
+        expect(routerB.metadata.actions.get("list").middlewares[0](null, null, null)).toEqual("B")
+        expect(routerB.metadata.actions.get("detail").middlewares.length).toEqual(0)
     });
 });

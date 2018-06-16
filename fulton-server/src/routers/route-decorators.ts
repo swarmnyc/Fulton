@@ -152,6 +152,8 @@ export function httpAction(method: HttpMethod, path: PathIdentifier = "/", ...ar
                 doc = args[0];
                 middlewares = args.slice(1);
             }
+        }else{
+            middlewares = []
         }
 
         path = ensurePath(path);

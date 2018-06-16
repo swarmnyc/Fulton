@@ -83,7 +83,7 @@ export class UserServiceMock implements IUserService<FultonUser> {
     resetPassword(token: string, code: string, password: string): Promise<void> {
         throw new Error("Method not implemented.");
     }
-    
+
     verifyResetPassword(token: string, code: string): Promise<void> {
         throw new Error("Method not implemented.");
     }
@@ -100,5 +100,11 @@ export class UserServiceMock implements IUserService<FultonUser> {
         throw new Error("Method not implemented.");
     }
 
+    revokeAccessToken(userId: string, token: string): Promise<void> {
+        throw new Error("Method not implemented.");
+    }
 
+    revokeAllAccessTokens(userId: string): Promise<void> {
+        throw new Error("Method not implemented.");
+    }
 }

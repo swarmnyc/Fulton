@@ -73,11 +73,19 @@ function getAllRouterActionMetadata(target: any, type: AbstractType): AllRouterA
 
     // get metadata from parent class recursively
     while (target.prototype instanceof type) {
-        let metadata = getRouterActionMetadataList(target);
-        for (const method of metadata) {
+        let metadataList = getRouterActionMetadataList(target);
+        for (const metadata of metadataList) {
             // skip if exists
-            if (!actions.has(method.property)) {
-                actions.set(method.property, method);
+            if (!actions.has(metadata.property)) {
+                // clone it, to make every actions have it own instance
+                // so change one of these actions won't effect all of them.
+                actions.set(metadata.property, {
+                    doc: metadata.doc,
+                    middlewares: metadata.middlewares,
+                    method: metadata.method,
+                    path : metadata.path,
+                    property: metadata.property
+                });
             }
         }
 

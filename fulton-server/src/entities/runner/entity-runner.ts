@@ -118,73 +118,84 @@ export abstract class EntityRunner {
                 let val = match[2]
 
                 filter[name] = this.convertValue(type, val, errorTracker);
-            } else if (["$regex", "$where", "$text", "$like", "$option", "$expr"].includes(name)) {
-                // entity service do nothing, but runner might have
-                this.extendedAdjustFilter(filter, name, value, targetColumn, errorTracker);
-            } else if (["$or", "$and", "$not", "$nor"].includes(name)) {
-                // { filter: { $or: [ object, object ]}}
-                if (value instanceof Array) {
-                    errorTracker.forEach(value, (item) => {
-                        this.adjustFilter(metadata, item, null, errorTracker);
-                    });
-                }
-            } else if (name == "$elemMatch") {
-                // { filter: { tags: { $elemMatch: object }}}
-                this.adjustFilter(metadata, value, null, errorTracker)
-            } else if (["$size", "$minDistance", "$maxDistance"].includes(name)) {
-                // { filter: { tags: { $size: number }}}
-                filter[name] = this.convertValue("number", value, errorTracker);
-            } else if (name == "$exists") {
-                // { filter: { tags: { $exists: boolean }}}
-                filter[name] = this.convertValue("boolean", value, errorTracker);
-            } else if (name == "$all") {
-                if (value instanceof Array && value.length > 0) {
-                    if (typeof value[0] == "object") {
-                        // { filter: { tags: { $all: [ object, object, object] }}}
-                        // might not work because embedded document don't have metadata.
-                        errorTracker.forEach(value, (item, i) => this.adjustFilter(metadata, item, targetColumn, errorTracker));
-                    } else {
-                        // { filter: { tags: { $all: [ value, value, value] }}}
-                        filter[name] = errorTracker.map(value, (item) => this.convertValue(targetColumn, item, errorTracker));
-                    }
-                }
-            } else if (["$in", "$nin"].includes(name)) {
-                // { filter: { name: { $in: [ value, value, value] }}}
-                if (value instanceof Array) {
-                    filter[name] = errorTracker.map(value, (item) => this.convertValue(targetColumn, item, errorTracker));
-                }
-            } else if (["$eq", "$gt", "$gte", "$lt", "$lte", "$ne"].includes(name)) {
-                // { filter: { price: { $gte: value }}}
-                filter[name] = this.convertValue(targetColumn, value, errorTracker);
-            } else if (["$near", "$nearSphere", "$center", "$centerSphere", "$box", "$polygon", "$mod"].includes(name)) {
-                // { filter: { location : { $near : [ number, number ]}}}
-                // { filter: { location : { $box : [[ number, number ], [ number, number ]]}}}
-                let convert = (v: any): any => {
-                    if (v instanceof Array) {
-                        return errorTracker.map(v, convert);
-                    } else {
-                        return this.convertValue("number", v, errorTracker)
-                    }
-                }
+            } else if (name.startsWith("$")) {
+                // for operators
+                switch (name) {
+                    case "$regex": case "$where": case "$text": case "$like": case "$option": case "$expr":
+                        // entity service do nothing, but runner might have
+                        this.extendedAdjustFilter(filter, name, value, targetColumn, errorTracker);
+                        break;
+                    case "$or": case "$and": case "$not": case "$nor":
+                        // { filter: { $or: [ object, object ]}}
+                        if (value instanceof Array) {
+                            errorTracker.forEach(value, (item) => {
+                                this.adjustFilter(metadata, item, null, errorTracker);
+                            });
+                        }
+                        break;
+                    case "$size": case "$minDistance": case "$maxDistance":
+                        // { filter: { tags: { $size: number }}}
+                        filter[name] = this.convertValue("number", value, errorTracker);
+                        break;
+                    case "$exists":
+                        // { filter: { tags: { $exists: boolean }}}
+                        filter[name] = this.convertValue("boolean", value, errorTracker);
+                        break;
+                    case "$all":
+                        if (value instanceof Array && value.length > 0) {
+                            if (typeof value[0] == "object") {
+                                // { filter: { tags: { $all: [ object, object, object] }}}
+                                // might not work because embedded document don't have metadata.
+                                errorTracker.forEach(value, (item, i) => this.adjustFilter(metadata, item, targetColumn, errorTracker));
+                            } else {
+                                // { filter: { tags: { $all: [ value, value, value] }}}
+                                filter[name] = errorTracker.map(value, (item) => this.convertValue(targetColumn, item, errorTracker));
+                            }
+                        }
+                        break;
+                    case "$in": case "$nin":
+                        // { filter: { name: { $in: [ value, value, value] }}}
+                        if (value instanceof Array) {
+                            filter[name] = errorTracker.map(value, (item) => this.convertValue(targetColumn, item, errorTracker));
+                        }
+                        break;
+                    case "$eq": case "$gt": case "$gte": case "$lt": case "$lte": case "$ne":
+                        // { filter: { price: { $gte: value }}}
+                        filter[name] = this.convertValue(targetColumn, value, errorTracker);
+                        break;
+                    case "$near": case "$nearSphere": case "$center": case "$centerSphere": case "$box": case "$polygon": case "$mod":
+                        // { filter: { location : { $near : [ number, number ]}}}
+                        // { filter: { location : { $box : [[ number, number ], [ number, number ]]}}}
+                        let convert = (v: any): any => {
+                            if (v instanceof Array) {
+                                return errorTracker.map(v, convert);
+                            } else {
+                                return this.convertValue("number", v, errorTracker)
+                            }
+                        }
 
-                if (value instanceof Array) {
-                    filter[name] = errorTracker.map(value, convert);
+                        if (value instanceof Array) {
+                            filter[name] = errorTracker.map(value, convert);
+                        }
+                        break;
                 }
             } else {
                 let embeddedMetadata = metadata ? metadata.findEmbeddedWithPropertyPath(name) : null;
 
                 if (embeddedMetadata) {
+                    // for embedded object column
                     let targetMetadata = this.entityMetadatas.get(embeddedMetadata.type as Type);
                     if (targetMetadata) {
                         this.adjustFilter(targetMetadata, value, null, errorTracker);
                     }
                 } else {
+                    // for normal column
                     let columnMetadata = this.getColumnMetadata(metadata, name);
                     if (columnMetadata) {
                         // { filter: { name: object }}
                         if (typeof value == "object") {
                             // skip non-literal object or array like bson.ObjectId, 
-                            if (value.constructor.name == "Object" || value.constructor.name == "Array"){
+                            if (value.constructor.name == "Object" || value.constructor.name == "Array") {
                                 let targetMetadata = metadata;
                                 if (columnMetadata.relationMetadata) {
                                     // for sql relationships
@@ -196,7 +207,7 @@ export abstract class EntityRunner {
                                     columnMetadata = null;
                                     level = level + 1;
                                 }
-    
+
                                 this.adjustFilter(targetMetadata, value, columnMetadata, errorTracker, level);
                             }
                         } else {

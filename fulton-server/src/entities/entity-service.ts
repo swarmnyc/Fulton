@@ -62,7 +62,7 @@ export class EntityService<TEntity> extends Service implements IEntityService<TE
         if (queryParams && queryParams.needAdjust == null) {
             queryParams.needAdjust = true
         }
-        
+
         return this.runner
             .find(this.mainRepository, queryParams)
             .then((result) => {
@@ -98,6 +98,8 @@ export class EntityService<TEntity> extends Service implements IEntityService<TE
             queryParams = {
                 needAdjust: true
             }
+        } else if (queryParams.needAdjust == null) {
+            queryParams.needAdjust = true
         }
 
         queryParams.filter = {

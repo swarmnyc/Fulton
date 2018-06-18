@@ -20,7 +20,7 @@ module.exports = function (app: FultonApp) {
         docs = generateDocs(app);
     }
 
-    app.events.emit(EventKeys.AppDidInitDocs, app);
+    app.events.emit(EventKeys.AppDidInitDocs, app, docs);
 
     let docsMiddlewares: Middleware[] = [];
     let jsonMiddlewares: Middleware[] = [];

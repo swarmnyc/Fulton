@@ -1,6 +1,5 @@
 import * as express from "express";
 
-import { IUser, IUserService } from "./identity";
 import { inject as inversifyInject, injectable as inversifyInjectable, optional as inversifyOptional, interfaces } from "inversify";
 
 /**
@@ -64,3 +63,9 @@ try {
     module.exports.oneToOne = OneToOne
 } catch (error) { }
 
+// alias bson.ObjectId
+try {
+    let { ObjectId } = require("bson")
+
+    module.exports.ObjectId = ObjectId
+} catch (error) { }

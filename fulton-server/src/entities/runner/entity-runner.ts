@@ -183,19 +183,22 @@ export abstract class EntityRunner {
                     if (columnMetadata) {
                         // { filter: { name: object }}
                         if (typeof value == "object") {
-                            let targetMetadata = metadata;
-                            if (columnMetadata.relationMetadata) {
-                                // for sql relationships
-                                targetMetadata = columnMetadata.relationMetadata.inverseEntityMetadata;
-                                level = level + 1;
-                            } else if (metadata.relatedToMetadata[name]) {
-                                // for mongo relationships
-                                targetMetadata = this.entityMetadatas.get(metadata.relatedToMetadata[name]);
-                                columnMetadata = null;
-                                level = level + 1;
+                            // skip non-literal object or array like bson.ObjectId, 
+                            if (value.constructor.name == "Object" || value.constructor.name == "Array"){
+                                let targetMetadata = metadata;
+                                if (columnMetadata.relationMetadata) {
+                                    // for sql relationships
+                                    targetMetadata = columnMetadata.relationMetadata.inverseEntityMetadata;
+                                    level = level + 1;
+                                } else if (metadata.relatedToMetadata[name]) {
+                                    // for mongo relationships
+                                    targetMetadata = this.entityMetadatas.get(metadata.relatedToMetadata[name]);
+                                    columnMetadata = null;
+                                    level = level + 1;
+                                }
+    
+                                this.adjustFilter(targetMetadata, value, columnMetadata, errorTracker, level);
                             }
-
-                            this.adjustFilter(targetMetadata, value, columnMetadata, errorTracker, level);
                         } else {
                             // { filter: { name: value }}
                             filter[name] = this.convertValue(columnMetadata, value, errorTracker);
@@ -206,7 +209,7 @@ export abstract class EntityRunner {
                             this.extendedAdjustFilter(filter, name, filter[name], columnMetadata, errorTracker);
                         }
                     } else {
-                        // for embeded object, but cannot find the metadata
+                        // for embedded object, but cannot find the metadata
                         this.adjustFilter(null, value, null, errorTracker, level + 1);
                     }
                 }

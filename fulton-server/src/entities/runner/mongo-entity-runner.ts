@@ -192,7 +192,7 @@ export class MongoEntityRunner extends EntityRunner {
      * adjust options like change id to _id
      */
     private adjustIdInOptions<T>(metadata: EntityMetadata, options: any) {
-        // TODO: should move this code to typeorm        
+        // TODO: should move this code to typeorm
         let idName = metadata.objectIdColumn.propertyName;
 
         for (const name of Object.getOwnPropertyNames(options)) {

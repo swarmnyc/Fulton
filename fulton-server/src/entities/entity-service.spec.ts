@@ -656,4 +656,47 @@ describe('entity service', () => {
             }
         });
     });
+
+    it('should not convert query params for ObjectId object', async () => {
+        let queryParams: QueryParams = {
+            needAdjust: true,
+            filter: {
+                categoryId: new ObjectId("000000000000000000000003"),
+                name: {
+                    $like: "test"
+                },
+                $or: [
+                    { categoryId: new ObjectId("000000000000000000000003") },
+                    { categoryId: "000000000000000000000003" },
+                    {
+                        name: {
+                            $like: "test"
+                        }
+                    }
+                ]
+            }
+        };
+
+        service["runner"]["adjustParams"](categoryMetadata, queryParams);
+
+        expect(queryParams).toEqual({
+            filter: {
+                _id: new ObjectId("000000000000000000000003"),
+                name: {
+                    $regex: "test",
+                    $options: "i"
+                },
+                $or: [
+                    { _id: new ObjectId("000000000000000000000003") },
+                    { _id: new ObjectId("000000000000000000000003") },
+                    {
+                        name: {
+                            $regex: "test",
+                            $options: "i"
+                        }
+                    }
+                ]
+            }
+        })
+    });
 });

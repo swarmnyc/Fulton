@@ -59,6 +59,10 @@ export class EntityService<TEntity> extends Service implements IEntityService<TE
     }
 
     find(queryParams?: QueryParams): Promise<OperationManyResult<TEntity>> {
+        if (queryParams && queryParams.needAdjust == null) {
+            queryParams.needAdjust = true
+        }
+        
         return this.runner
             .find(this.mainRepository, queryParams)
             .then((result) => {
@@ -75,6 +79,10 @@ export class EntityService<TEntity> extends Service implements IEntityService<TE
     }
 
     findOne(queryParams?: QueryParams): Promise<OperationOneResult<TEntity>> {
+        if (queryParams && queryParams.needAdjust == null) {
+            queryParams.needAdjust = true
+        }
+
         return this.runner
             .findOne(this.mainRepository, queryParams)
             .then((data) => {

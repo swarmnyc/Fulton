@@ -332,7 +332,7 @@ describe('Identity Integration Test', () => {
         expect(count).toEqual(1);
     });
 
-    fit('should logout all', async () => {
+    it('should logout all', async () => {
         let tokenRes = await prepareUser();
 
         await httpTester.post("/auth/login", {

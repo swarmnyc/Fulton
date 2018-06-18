@@ -3,6 +3,7 @@ import "./extensions"
 
 import { Repository } from "typeorm";
 import { FultonStackError } from './common/fulton-error';
+import { PathItemObject, OpenApiSpec } from "@loopback/openapi-spec";
 
 export * from "./re-export"
 
@@ -28,12 +29,12 @@ export interface Dict {
 export interface RouterDocOptions {
     title?: string;
     description?: string;
-    // TODO: RouterDocOptions
 }
 
 export interface RouterActionDocOptions {
     title?: string;
     description?: string;
+    custom?: ((path: PathItemObject, docs: OpenApiSpec) => void);
 }
 
 export interface FultonErrorDetailItem {

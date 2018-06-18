@@ -146,10 +146,10 @@ function generatePath(app: FultonApp, docs: OpenApiSpec) {
         let root = toPath(router.metadata.router.path);
         router.metadata.actions.forEach((action) => {
             let path = toPath(root, action.path);
-            let doc = docs.paths[path];
+            let pathObject = docs.paths[path];
 
-            if (doc == null) {
-                doc = docs.paths[path] = {};
+            if (pathObject == null) {
+                pathObject = docs.paths[path] = {};
             }
 
             let actionDoc: PathItemObject = {
@@ -209,8 +209,14 @@ function generatePath(app: FultonApp, docs: OpenApiSpec) {
                 }
             }
 
-            doc[action.method] = actionDoc;
+            pathObject[action.method] = actionDoc;
+
+            if (action.doc.custom) {
+                action.doc.custom(pathObject, docs);
+            }
         })
+
+        router["onDocument"].call(router, docs);
     }
 }
 

@@ -210,9 +210,9 @@ class MongoRunner implements IRunner {
             if (id.resetPasswordCode == code) {
                 return id;
             } else if (id.resetPasswordCodeTryCount >= this.options.forgotPassword.tryLimits - 1) {
-                this.identityRepository.updateMany({ "resetPasswordToken": token }, { $set: { resetPasswordToken: null } })
+               await this.identityRepository.updateMany({ "resetPasswordToken": token }, { $set: { resetPasswordToken: null } })
             } else {
-                this.identityRepository.updateMany({ "resetPasswordToken": token }, { $inc: { resetPasswordCodeTryCount: 1 } })
+                await this.identityRepository.updateMany({ "resetPasswordToken": token }, { $inc: { resetPasswordCodeTryCount: 1 } })
             }
         }
     }

@@ -1,12 +1,13 @@
 import * as assert from "assert";
 import * as lodash from "lodash";
 
-import { ErrorMiddleware, Request, Response, Middleware, TypeIdentifier } from "../interfaces";
-import { DiKeys } from "../keys"
-import { FullRouterMetadata, RouterMetadata, getFullRouterActionMetadata } from "./route-decorators-helpers";
-import { DiContainer, PathIdentifier, inject, injectable } from "../interfaces";
-import { IRouterMatcher, Router as ExpressRouter } from "express";
+import { Router as ExpressRouter, IRouterMatcher } from "express";
+import { FullRouterMetadata, getFullRouterActionMetadata } from "./route-decorators-helpers";
+import { Middleware, inject, injectable } from "../interfaces";
+
+import { DiKeys } from "../keys";
 import { IFultonApp } from '../fulton-app';
+import { OpenApiSpec } from "@loopback/openapi-spec";
 
 /**
  * Express Router Wrap
@@ -35,7 +36,7 @@ import { IFultonApp } from '../fulton-app';
 export abstract class Router {
     public metadata: FullRouterMetadata
     protected router: Router;
-    
+
     @inject(DiKeys.FultonApp)
     protected app: IFultonApp;
 
@@ -82,5 +83,13 @@ export abstract class Router {
         this.app.express.use(this.metadata.router.path, router);
     }
 
+    /**
+     * custom function for initialization 
+     */
     protected onInit() { }
+
+    /**
+     * custom function for documentation
+     */
+    protected onDocument(docs: OpenApiSpec) { }
 }

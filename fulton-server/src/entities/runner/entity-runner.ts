@@ -133,6 +133,10 @@ export abstract class EntityRunner {
                             });
                         }
                         break;
+                    case "$elemMatch":
+                        // { filter: { tags: { $elemMatch: object }}}
+                        this.adjustFilter(metadata, value, null, errorTracker)
+                        break;
                     case "$size": case "$minDistance": case "$maxDistance":
                         // { filter: { tags: { $size: number }}}
                         filter[name] = this.convertValue("number", value, errorTracker);

@@ -111,14 +111,7 @@ export abstract class EntityRunner {
 
             errorTracker.push(name);
 
-            let match;
-            if (typeof value == "string" && (match = funcReg.exec(value))) {
-                // functions like num(), date(), bool(), ObjectId()
-                let type = match[1].toLocaleLowerCase()
-                let val = match[2]
-
-                filter[name] = this.convertValue(type, val, errorTracker);
-            } else if (name.startsWith("$")) {
+            if (name.startsWith("$")) {
                 // for operators
                 switch (name) {
                     case "$regex": case "$where": case "$text": case "$like": case "$option": case "$expr":
@@ -223,9 +216,12 @@ export abstract class EntityRunner {
                             // call runner in case it have to do some things
                             this.extendedAdjustFilter(filter, name, filter[name], columnMetadata, errorTracker);
                         }
-                    } else {
+                    } else if (typeof value == "object") {
                         // for embedded object, but cannot find the metadata
                         this.adjustFilter(null, value, null, errorTracker, level + 1);
+                    } else if (typeof value == "string") {
+                        // try to convert string
+                        filter[name] = this.convertValue(columnMetadata, value, errorTracker);
                     }
                 }
             }
@@ -237,6 +233,13 @@ export abstract class EntityRunner {
     /** Convert Value base on the type or ColumnMetadata */
     convertValue(metadata: string | ColumnMetadata, value: any, errorTracker: FultonStackError): any {
         let newValue = value;
+        let match;
+        if (typeof value == "string" && (match = funcReg.exec(value))) {
+            // functions like num(), date(), bool(), ObjectId()
+            metadata = match[1].toLocaleLowerCase()
+            value = match[2]
+        }
+
         if (metadata != null && value != null) {
             let type;
             if (metadata instanceof ColumnMetadata) {
@@ -281,7 +284,6 @@ export abstract class EntityRunner {
                 // try use runner to convertValue
                 newValue = this.extendedConvertValue(metadata, value, errorTracker);
             }
-
         }
 
         return newValue;

@@ -618,6 +618,9 @@ describe('entity service', () => {
         let queryParams: QueryParams = {
             needAdjust: true,
             filter: {
+                in: {
+                    "$in": ["ObjectId(000000000000000000000001)", "ObjectId(000000000000000000000002)"]
+                },
                 a1: "int(1)",
                 a2: "date(2018-03-01T10:20:30.400Z)",
                 a3: "num(100.20)",
@@ -639,6 +642,9 @@ describe('entity service', () => {
 
         expect(queryParams).toEqual({
             filter: {
+                in: {
+                    "$in": [new ObjectId("000000000000000000000001"), new ObjectId("000000000000000000000002")]
+                },
                 a1: 1,
                 a2: new Date("2018-03-01T10:20:30.400Z"),
                 a3: 100.20,

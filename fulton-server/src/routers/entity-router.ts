@@ -109,15 +109,21 @@ export abstract class EntityRouter<TEntity> extends Router {
             } else {
                 let status = (<OperationResult>result).status;
                 if (status) {
-                    res.status(status).end();
-                } else if ((<OperationManyResult>result).data) {
+                    res.status(status);
+                }
+                
+                if ((<OperationManyResult>result).data) {
                     res.send(result);
                 } else {
-                    res.status(400).send({
-                        error: {
-                            "message": "no data"
-                        }
-                    });
+                    if (status){
+                        res.end()
+                    }else{
+                        res.status(400).send({
+                            error: {
+                                "message": "no data"
+                            }
+                        });
+                    }
                 }
             }
         }

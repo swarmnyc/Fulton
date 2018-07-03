@@ -134,6 +134,7 @@ export class EntityService<TEntity> extends Service implements IEntityService<TE
                     .create(this.mainRepository, entity)
                     .then((newEntity) => {
                         return {
+                            status: 201,
                             data: newEntity
                         }
                     })

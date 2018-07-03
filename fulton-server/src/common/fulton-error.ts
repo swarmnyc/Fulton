@@ -1,7 +1,7 @@
 import * as lodash from 'lodash';
 import { FultonErrorObject, FultonErrorDetail, FultonErrorDetailItem } from '../interfaces';
 
-export enum ErrorCodes{
+export enum ErrorCodes {
     Unknown = "unknown_error",
     Invalid = "invalid",
     Existed = "existed",
@@ -19,17 +19,16 @@ export enum ErrorCodes{
  */
 export class FultonError {
     error: FultonErrorObject;
+    status: number;
 
     constructor()
-    constructor(code: string, message?: string)
-    constructor(input?: FultonErrorObject)
+    constructor(code: string, message?: string, status?: number)
+    constructor(input?: FultonErrorObject, status?: number)
     constructor(...args: any[]) {
-        if (args.length == 2) {
-            this.error = {
-                code: args[0],
-                message: args[1]
-            }
-        } else if (args.length == 1) {
+
+        if (args.length == 0) {
+            this.error = {};
+        } else {
             if (typeof args[0] == "string") {
                 this.error = {
                     code: args[0]
@@ -37,10 +36,23 @@ export class FultonError {
             } else {
                 this.error = args[0] || {};
             }
-        } else {
-            this.error = {};
+
+            if (args.length > 1) {
+                if (typeof args[1] == "string") {
+                    this.error.message = args[1]
+                } else if (typeof args[1] == "number") {
+                    this.status = args[1];
+                }
+
+                if (args.length > 2) {
+                    this.status = args[2];
+                }
+            }
         }
 
+        if (this.status == null) {
+            this.status = 400
+        }
     }
 
     set(code: string, message?: string) {
@@ -101,7 +113,7 @@ export class FultonError {
         return true;
     }
 
-    verifyRequireds(target: any, propertyNames: string[], errorMessages?: string[]): boolean {
+    verifyRequiredList(target: any, propertyNames: string[], errorMessages?: string[]): boolean {
         let result: boolean = true;
 
         propertyNames.forEach((name: string, i: number) => {

@@ -1,11 +1,13 @@
+import { FultonError } from './common/fulton-error';
 import { FultonApp } from './fulton-app';
 import { FultonLog } from './fulton-log';
 import { Env, Factory } from './helpers';
 import { DiContainer, inject, injectable } from './interfaces';
 import { DiKeys } from './keys';
 import { FultonAppOptions } from './options/fulton-app-options';
-import { Router, router } from './routers';
+import { httpGet, Router, router } from './routers';
 import { Service } from './services/service';
+import { HttpTester, HttpResult } from './test/http-tester';
 
 @injectable()
 class ServiceA extends Service {
@@ -67,6 +69,23 @@ class RouterB extends Router {
     }
 }
 
+@router("/Test")
+class RouterTest extends Router {
+    constructor(public serviceA: ServiceA) {
+        super();
+    }
+
+    @httpGet("/error1")
+    error1() {
+        throw new FultonError("test")
+    }
+
+    @httpGet("/error2")
+    error2() {
+        throw new FultonError("test_code", "test_message", 401)
+    }
+}
+
 class MyFultonApp extends FultonApp {
     protected onInit(options: FultonAppOptions): void | Promise<void> {
         options.miscellaneous.zoneEnabled = false;
@@ -112,7 +131,8 @@ class MyFultonApp extends FultonApp {
 
         options.routers = [
             RouterA,
-            RouterB
+            RouterB,
+            RouterTest
         ];
     }
 
@@ -188,7 +208,7 @@ describe('Fulton App', () => {
     });
 
     it('should create routers', async () => {
-        expect(app.routers.length).toEqual(2);
+        expect(app.routers.length).toEqual(3);
         expect(app.routers[0]["app"]).toBeTruthy();
         expect(app.routers[0]["metadata"].router.path).toEqual("/A");
         expect((app.routers[1] as RouterB).serviceB.value).toEqual("b");
@@ -219,7 +239,7 @@ describe('Fulton Start will https', () => {
     it('should start https with localhost.crt', async () => {
         let app = new MyFultonApp()
         app["assetFolder"] = "../assets"
-        
+
         Env.isProduction = false
         app.options.server.httpsEnabled = true
         app.options.server.httpsPort = 8443
@@ -237,5 +257,27 @@ describe('Fulton Start will https', () => {
         await app.start().then(fail).catch(() => { })
         await app.stop()
         Env.isProduction = false
+    });
+});
+
+describe('Fulton handles error', () => {
+    fit('should return custom error', async () => {
+        let httpTester = new HttpTester(new MyFultonApp())
+        await httpTester.start()
+        let result: HttpResult
+
+        result = await httpTester.get("/test/error1");
+
+        expect(result.response.statusCode).toEqual(400);
+
+        result = await httpTester.get("/test/error2");
+
+        expect(result.response.statusCode).toEqual(401);
+        expect(result.body.error).toEqual({
+            code: "test_code",
+            message: "test_message"
+        });
+
+        await httpTester.stop()
     });
 });

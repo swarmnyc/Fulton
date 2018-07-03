@@ -180,7 +180,7 @@ function generatePath(app: FultonApp, docs: OpenApiSpec) {
                     case "create":
                         actionDoc.parameters.push(getBodyParameter(entity));
 
-                        actionDoc.responses["200"] = getOperationOneResultResponse(entity);
+                        actionDoc.responses["201"] = getOperationOneResultResponse(entity);
                         break;
                     case "update":
                         actionDoc.parameters.push({
@@ -189,7 +189,7 @@ function generatePath(app: FultonApp, docs: OpenApiSpec) {
 
                         actionDoc.parameters.push(getBodyParameter(entity));
 
-                        actionDoc.responses["201"] = {
+                        actionDoc.responses["202"] = {
                             description: "accept"
                         }
                         break;
@@ -198,7 +198,7 @@ function generatePath(app: FultonApp, docs: OpenApiSpec) {
                             $ref: "#parameters/Id"
                         })
 
-                        actionDoc.responses["201"] = {
+                        actionDoc.responses["202"] = {
                             description: "accept"
                         }
                         break;

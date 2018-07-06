@@ -166,6 +166,8 @@ export abstract class FultonApp implements IFultonApp {
 
     isInitialized: boolean = false;
 
+    notificationService: INotificationService;
+
     /**
      * @param mode There are some different default values for api and web-view. 
      */
@@ -361,9 +363,13 @@ export abstract class FultonApp implements IFultonApp {
     }
 
     sendNotifications(...messages: NotificationMessage[]): Promise<void> {
-        var service = this.container.get<INotificationService>(DiKeys.NotificationService);
+        if (!this.options.notification.enabled) return
 
-        return service.send(...messages);
+        if (this.notificationService == null) {
+            this.notificationService = this.getProvider(this.options.notification.service, DiKeys.NotificationService)
+        }
+
+        return this.notificationService.send(...messages);
     }
 
     protected initServer(): void | Promise<void> {
@@ -596,6 +602,18 @@ export abstract class FultonApp implements IFultonApp {
         }
 
         return ids;
+    }
+
+    getProvider(type: (Type | object), diKey: any): any {
+        if (type == null) {
+            return this.container.get(diKey);
+        }
+
+        if (type instanceof Function) {
+            return this.container.get(type);
+        } else {
+            return type;
+        }
     }
 
     /**

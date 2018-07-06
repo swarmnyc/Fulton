@@ -7,7 +7,7 @@ import { TemplateExecutor } from 'lodash';
 export class TemplateService extends Service implements ITemplateService {
     templates = new Map<string, TemplateExecutor>()
 
-    geneate(textOrFilePath: string, variables: any = {}): string {
+    generate(textOrFilePath: string, variables: any = {}): string {
         if (!this.templates.has(textOrFilePath)) {
             let content: string = textOrFilePath;
             if (textOrFilePath.startsWith(".") || textOrFilePath.startsWith("/")) {

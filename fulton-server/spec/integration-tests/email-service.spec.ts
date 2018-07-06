@@ -6,6 +6,7 @@ import { IEmailService } from '../../src/interfaces';
 class MyApp extends FultonApp {
     protected onInit(options: FultonAppOptions): void {
         // use aws ses
+        options.notification.enabled = true
         options.notification.email.enabled = true
         options.identity.enabled = true
 

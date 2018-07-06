@@ -261,7 +261,7 @@ describe('Fulton Start will https', () => {
 });
 
 describe('Fulton handles error', () => {
-    fit('should return custom error', async () => {
+    it('should return custom error', async () => {
         let httpTester = new HttpTester(new MyFultonApp())
         await httpTester.start()
         let result: HttpResult

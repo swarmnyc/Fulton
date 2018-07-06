@@ -54,6 +54,7 @@ export const FeatureList: Feature[] = [
     { name: "Http response GZip compression", short: "Compression", value: "compression", packages: ["compression"] },
     { name: "Http CORS", short: "CORS", value: "cors", packages: ["cors"] },
     { name: "Send email", value: "email", packages: ["nodemailer"] },
+    { name: "Push notification", value: "push notification", packages: ["google-auth-library"] },
     { name: "json-api -support input and output as json-api format", short: "json-api", value: "json-api", packages: [] },
     { name: "docker - add dockerfile and docker compose", short: "Docker", value: "docker", packages: [] }
 ]

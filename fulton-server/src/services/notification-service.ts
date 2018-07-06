@@ -1,19 +1,24 @@
+import { FultonApp } from '../fulton-app';
+import { IEmailService, INotificationService, IPushNotificationService, NotificationMessage } from '../interfaces';
 import { DiKeys } from '../keys';
-import { EmailMessage, IEmailService, ITemplateService, INotificationService, inject, NotificationMessage } from '../interfaces';
-import { FultonLog } from '../fulton-log';
-import { Service } from './service';
-import { EmailService } from './email-service';
 import { NotificationOptions } from '../options/notification-options';
+import { Service } from './service';
 
 export class NotificationService extends Service implements INotificationService {
     emailService: IEmailService
+    pushNotificationService: IPushNotificationService
+
     options: NotificationOptions
 
     onInit() {
         this.options = this.app.options.notification;
 
         if (this.options.email.enabled) {
-            this.emailService = this.app.container.get(DiKeys.EmailService)
+            this.emailService = (<FultonApp>this.app).getProvider(this.options.email.service, DiKeys.EmailService)
+        }
+
+        if (this.options.pushNotification.enabled) {
+            this.pushNotificationService = (<FultonApp>this.app).getProvider(this.options.pushNotification.service, DiKeys.PushNotificationService)
         }
     }
 
@@ -35,8 +40,9 @@ export class NotificationService extends Service implements INotificationService
                     // if (msg.sms) {
                     // }
 
-                    // if (msg.pushNotification) {
-                    // }
+                    if (msg.pushNotification) {
+                        tasks.push(this.pushNotificationService.send(msg.pushNotification))
+                    }
                 }
             });
 

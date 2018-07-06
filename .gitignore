@@ -6,3 +6,4 @@
 **/coverage
 
 fulton-server/spec/secret.env
+fulton-server/spec/google-firebase.json

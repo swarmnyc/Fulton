@@ -183,7 +183,7 @@ export interface QueryParams {
 }
 
 export interface ITemplateService {
-    geneate(contentOrFilePath: string, variables: any): string;
+    generate(contentOrFilePath: string, variables: any): string;
 }
 
 export interface INotificationService {
@@ -202,6 +202,10 @@ export interface NotificationMessage {
 
 export interface IEmailService {
     send(message: EmailMessage): Promise<void>
+}
+
+export interface IPushNotificationService {
+    send(payload: any): Promise<void>
 }
 
 export interface EmailMessage {

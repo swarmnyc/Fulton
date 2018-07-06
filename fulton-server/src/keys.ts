@@ -1,16 +1,17 @@
 export enum DiKeys {
+    EmailService = "EmailService",
     EntityServiceFactory = "EntityServiceFactory",
     FultonApp = "FultonApp",
     MongoEntityRunner = "MongoEntityRunner",
     NotificationService = "NotificationService",
-    EmailService = "EmailService",
+    PushNotificationService = "PushNotificationService",
     TemplateService = "TemplateService",
 }
 
 export enum EventKeys {
     AppDidInit = "AppDidInit",
-    AppDidInitCors = "AppDidInitCors",
     AppDidInitCompression = "AppDidInitCompression",
+    AppDidInitCors = "AppDidInitCors",
     AppDidInitDatabases = "AppDidInitDatabases",
     AppDidInitDiContainer = "AppDidInitDiContainer",
     AppDidInitDocs = "AppDidInitDocs",

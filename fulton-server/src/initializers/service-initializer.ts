@@ -1,8 +1,7 @@
 import * as path from 'path';
-import { EventKeys, DiKeys } from '../keys';
 import { FultonApp } from '../fulton-app';
 import { Provider } from '../helpers';
-import { EmailService } from '../services/email-service';
+import { DiKeys, EventKeys } from '../keys';
 import { Service } from '../services/service';
 
 module.exports = async function (app: FultonApp) {
@@ -15,38 +14,7 @@ module.exports = async function (app: FultonApp) {
 
     var ids = app["registerTypes"](providers, true);
 
-    // add these services if one of notifications are enabled
-    if (app.options.notification.email.enabled) {
-        // add the default TemplateService if there is no TemplateService registered    
-        if (!app.container.isBound(DiKeys.TemplateService)) {
-            app.container
-                .bind(DiKeys.TemplateService)
-                .to(require("../services/template-service").TemplateService)
-                .inSingletonScope();
-
-            ids.push(DiKeys.TemplateService)
-        }
-
-        // add the default EMailService if there is no EMailService registered
-        if (!app.container.isBound(DiKeys.EmailService)) {
-            app.container
-                .bind(DiKeys.EmailService)
-                .to(require("../services/email-service").EmailService)
-                .inSingletonScope();
-
-            ids.push(DiKeys.EmailService)
-        }
-    }
-
-    // add the default NotificationService if there is no NotificationService registered
-    if (!app.container.isBound(DiKeys.NotificationService)) {
-        app.container
-            .bind(DiKeys.NotificationService)
-            .to(require("../services/notification-service").NotificationService)
-            .inSingletonScope();
-
-        ids.push(DiKeys.NotificationService)
-    }
+    initNotificationServices(app, ids);
 
     // init services
     ids.forEach((id) => {
@@ -57,4 +25,49 @@ module.exports = async function (app: FultonApp) {
     });
 
     app.events.emit(EventKeys.AppDidInitServices, this);
+}
+
+function initNotificationServices(app: FultonApp, ids: any[]) {
+    // add these services if notification are enabled
+    if (app.options.notification.enabled) {
+        // add the default TemplateService
+        if (app.options.notification.templateService == null) {
+            app.container
+                .bind(DiKeys.TemplateService)
+                .to(require("../services/template-service").TemplateService)
+                .inSingletonScope();
+
+            ids.push(DiKeys.TemplateService)
+        }
+
+        // add the default EMailService
+        if (app.options.notification.email.enabled && app.options.notification.email.service == null) {
+            app.container
+                .bind(DiKeys.EmailService)
+                .to(require("../services/email-service").EmailService)
+                .inSingletonScope();
+
+            ids.push(DiKeys.EmailService)
+        }
+
+        // add the default EMailService
+        if (app.options.notification.pushNotification.enabled && app.options.notification.pushNotification.service == null) {
+            app.container
+                .bind(DiKeys.PushNotificationService)
+                .to(require("../services/fcm-push-notification-service").FcmPushNotificationService)
+                .inSingletonScope();
+
+            ids.push(DiKeys.PushNotificationService)
+        }
+
+        // add the default NotificationService if there is no NotificationService registered
+        if (app.options.notification.service == null) {
+            app.container
+                .bind(DiKeys.NotificationService)
+                .to(require("../services/notification-service").NotificationService)
+                .inSingletonScope();
+
+            ids.push(DiKeys.NotificationService)
+        }
+    }
 }

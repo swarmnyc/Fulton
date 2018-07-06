@@ -36,13 +36,13 @@ export class NotificationService extends Service implements INotificationService
 
                         tasks.push(this.emailService.send(msg.email))
                     }
+                }
 
-                    // if (msg.sms) {
-                    // }
+                // if (msg.sms) {
+                // }
 
-                    if (msg.pushNotification) {
-                        tasks.push(this.pushNotificationService.send(msg.pushNotification))
-                    }
+                if (this.pushNotificationService && msg.pushNotification) {
+                    tasks.push(this.pushNotificationService.send(msg.pushNotification))
                 }
             });
 

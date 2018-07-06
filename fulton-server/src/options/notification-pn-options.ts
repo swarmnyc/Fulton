@@ -23,7 +23,7 @@ export class PushNotificationOptions extends BaseOptions<PushNotificationOptions
      * the value can be overridden by
      * `env["{appName}.options.notification.push_notification.config.{name}"]`
      */
-    config?: any;
+    config?: any = {};
 
     init?(): void {
         this.enabled = Env.getBoolean(`${this.appName}.options.notification.push_notification.enabled`, this.enabled);

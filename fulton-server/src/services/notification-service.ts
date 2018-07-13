@@ -26,16 +26,13 @@ export class NotificationService extends Service implements INotificationService
         return new Promise((resolve, reject) => {
             var tasks: Promise<any>[] = []
             messages.forEach((msg) => {
-                if (this.emailService) {
-                    if (msg.email) {
-                        // send email
-
-                        if (this.options.extraVariables) {
-                            Object.assign(msg.email.variables || {}, this.options.extraVariables)
-                        }
-
-                        tasks.push(this.emailService.send(msg.email))
+                if (this.emailService && msg.email) {
+                    // send email
+                    if (this.options.extraVariables) {
+                        Object.assign(msg.email.variables || {}, this.options.extraVariables)
                     }
+
+                    tasks.push(this.emailService.send(msg.email))
                 }
 
                 // if (msg.sms) {

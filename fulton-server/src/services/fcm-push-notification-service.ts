@@ -86,7 +86,6 @@ export class FcmPushNotificationService extends Service implements IPushNotifica
                 })
 
                 req.write(body)
-
                 req.end()
             })
         });
@@ -109,6 +108,7 @@ export class FcmPushNotificationService extends Service implements IPushNotifica
             jwtClient.authorize((err, result) => {
                 if (err) {
                     FultonLog.error("FCM Auth Failed", err)
+                    reject(err)
                     return;
                 }
 

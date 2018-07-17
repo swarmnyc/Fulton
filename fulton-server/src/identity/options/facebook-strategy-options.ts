@@ -30,6 +30,7 @@ export class FacebookStrategyOptions extends OauthStrategyOptions {
         this.path = "/auth/facebook";
         this.callbackPath = "/auth/facebook/callback";
         this.profileFields = ['id', 'displayName', "photos", 'email']
+        this.scope  = "email"
 
         this.profileTransformer = (profile: any) => {
             let email;

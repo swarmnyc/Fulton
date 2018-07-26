@@ -71,9 +71,9 @@ export interface IEntityService<TEntity> {
 
     count(queryParams?: QueryParams): Promise<OperationOneResult<number>>;
 
-    create(entity: TEntity): Promise<OperationOneResult<TEntity>>;
+    create(entity: TEntity | Partial<TEntity>): Promise<OperationOneResult<TEntity>>;
 
-    update(id: any, entity: TEntity): Promise<OperationResult>;
+    update(id: any, entity: TEntity | Partial<TEntity>): Promise<OperationResult>;
 
     delete(id: any): Promise<OperationResult>;
 }

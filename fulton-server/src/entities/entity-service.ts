@@ -46,6 +46,10 @@ export class EntityService<TEntity> extends Service implements IEntityService<TE
         return this._runner;
     }
 
+    get entityType(): Type {
+        return this.mainRepository.target as Type;
+    }
+
     get currentUser(): IUser {
         return this.app.userService.currentUser;
     }
@@ -127,7 +131,7 @@ export class EntityService<TEntity> extends Service implements IEntityService<TE
             .catch(this.errorHandler);
     }
 
-    create(input: TEntity): Promise<OperationOneResult<TEntity>> {
+    create(input: TEntity | Partial<TEntity>): Promise<OperationOneResult<TEntity>> {
         return this.convertAndVerifyEntity(this.mainRepository.metadata, input)
             .then((entity) => {
                 return this.runner
@@ -142,7 +146,7 @@ export class EntityService<TEntity> extends Service implements IEntityService<TE
             .catch(this.errorHandler);
     }
 
-    update(id: any, input: TEntity): Promise<OperationResult> {
+    update(id: any, input: TEntity | Partial<TEntity>): Promise<OperationResult> {
         return this
             .convertAndVerifyEntity(this.mainRepository.metadata, input)
             .then((entity) => {

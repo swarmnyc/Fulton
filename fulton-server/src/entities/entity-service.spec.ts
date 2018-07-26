@@ -20,7 +20,7 @@ class MyApp extends FultonApp {
 
 
 describe('entity service', () => {
-    let service: EntityService<any>;
+    let service: EntityService<Employee>;
     let employeeMetadata: EntityMetadata;
     let categoryMetadata: EntityMetadata;
     let customerMetadata: EntityMetadata;
@@ -704,5 +704,21 @@ describe('entity service', () => {
                 ]
             }
         })
+    });
+
+    it('should allow partial input', async () => {
+        service.create = () => { return null }
+        service.update = () => { return null }
+
+        var partial: Partial<Employee> = {
+            lastName: "test"
+        }
+
+        service.create(partial)
+        service.update(1, partial)
+    });
+
+    it('should get entity type', async () => {
+        expect(service.entityType).toEqual(Employee);
     });
 });

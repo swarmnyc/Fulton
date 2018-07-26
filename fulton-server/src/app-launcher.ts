@@ -47,8 +47,16 @@ export class AppLauncher<TApp extends IFultonApp> {
         if (tasks == null) {
             if (process.argv.length > 2) {
                 // from args
-                tasks = process.argv.slice(2)
-            } else {
+                tasks = []
+                process.argv.slice(2).forEach(arg => {
+                    // to skip arg with =, for example dotenv_options_path=path for dotenv.
+                    if (arg.includes("=")) return
+
+                    tasks.push(...arg.split(","))
+                })
+            }
+            
+            if (tasks == null || tasks.length == 0){
                 // from env
                 tasks = Env.get(`${this.app.appName}.launch`, "app").split(",")
             }
@@ -64,7 +72,7 @@ export class AppLauncher<TApp extends IFultonApp> {
                 let task = this.tasks.get(taskName);
 
                 if (task == null) {
-                    FultonLog.error(`The launcher doesn't have task name called ${taskName}`)
+                    FultonLog.error(`This project doesn't have task called ${taskName}`)
                     return;
                 }
 

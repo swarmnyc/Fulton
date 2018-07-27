@@ -2,7 +2,7 @@ import { DiKeys } from '../keys';
 import { EntityService } from '../entities/entity-service';
 import { EntityServiceFactory, IEntityService, injectable, NextFunction, OperationManyResult, OperationOneResult, OperationResult, Request, Response } from '../interfaces';
 import { FullEntityRouterMetadata, getFullEntityRouterActionMetadata } from './route-decorators-helpers';
-import { httpDelete, httpGet, httpPatch, httpPost } from './route-decorators';
+import { httpDelete, httpGet, httpPatch, httpPost, httpPut } from './route-decorators';
 import { Router } from './router';
 
 @injectable()
@@ -74,6 +74,7 @@ export abstract class EntityRouter<TEntity> extends Router {
         }
     }
 
+    @httpPut("/:id")
     @httpPatch("/:id")
     update(req: Request, res: Response) {
         // TODO: determine who can update

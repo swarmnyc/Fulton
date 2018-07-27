@@ -8,6 +8,9 @@
 		},
 		{
 			"path": "fulton-cli"
+		},
+		{
+			"path": "fulton-android"
 		}
 	]
 }

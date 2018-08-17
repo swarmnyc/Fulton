@@ -10,7 +10,7 @@ import { LoggerInstance } from 'winston';
 let ts = path.extname(__filename) == ".ts"
 
 export const InDevMode = /dev/i.exec(process.env["NODE_ENV"])
-export const AppRoot = path.posix.normalize(path.posix.resolve(path.posix.join(__dirname, ts ? ".." : ".")))
+export const AppRoot = path.posix.join(__dirname, ts ? ".." : ".")
 export const AppVersion = require(`${ts ? ".." : "."}/package.json`).version
 export const TemplateRoot = path.posix.join(AppRoot, "templates");
 export const CWD = process.env["CWD"] || "."
@@ -58,7 +58,6 @@ export const FeatureList: Feature[] = [
     { name: "json-api -support input and output as json-api format", short: "json-api", value: "json-api", packages: [] },
     { name: "docker - add dockerfile and docker compose", short: "Docker", value: "docker", packages: [] }
 ]
-
 
 function loadFultonConfig(): IFultonConfig {
     let configPath = path.join(CWD, ".fulton")

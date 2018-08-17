@@ -8,11 +8,11 @@ export * from "./fulton-log";
 export * from "./app-launcher";
 export * from "./options/fulton-app-options";
 
-export * from "./helpers/index";
-export * from "./common/index";
-export * from "./identity/index";
-export * from "./services/index";
-export * from "./routers/index";
+export * from "./helpers";
+export * from "./common";
+export * from "./identity";
+export * from "./services";
+export * from "./routers";
 
 export * from "./entities/entity-decorators";
 

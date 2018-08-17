@@ -207,10 +207,7 @@ export abstract class FultonApp implements IFultonApp {
             await this.onInit(this.options);
             this.options.init();
 
-            if (this.options.identity.enabled) {
-                // Initialize Identity to use FultonImpl if app.options.identity.userService is null
-                require("./identity/fulton-impl/fulton-impl-initializer")(this)
-            }
+            await this.initPreIdentity();
 
             await this.initLogging();
 
@@ -416,8 +413,14 @@ export abstract class FultonApp implements IFultonApp {
         return require('./initializers/database-initializer')(this);
     }
 
-    protected async initServices(): Promise<void> {
+    protected initServices(): Promise<void> {
         return require('./initializers/service-initializer')(this);
+    }
+
+    protected initPreIdentity(): Promise<void> {
+        if (this.options.identity.enabled) {
+            return require("./identity/identity-pre-initializer")(this)
+        }
     }
 
     protected initIdentity(): void | Promise<void> {

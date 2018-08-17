@@ -295,41 +295,97 @@ function generateAuthDefinitions(app: FultonApp, docs: OpenApiSpec) {
             responses: responses
         }
 
-        paths[options.register.httpMethod] = actionDoc;
+        paths["post"] = actionDoc;
     }
 
     // for forgot-password
     if (options.forgotPassword.enabled) {
-        let path = toPath(options.forgotPassword.path);
-        let paths: PathsObject = docs.paths[path] = {}
+        let requirePath = toPath(options.forgotPassword.requirePath);
 
-        paths["post"] = {
-            summary: "forgot-password",
-            description: "let the user reset password. There are three steps. Step 1, send username or email to get reset token and code. Step 2[optional], send token and code to verify them. Step 3, send token, code and password to reset password",
-            tags: ["Identity"],
-            parameters: [
-                {
-                    name: "body",
-                    in: "body",
-                    required: true,
-                    schema: {
-                        type: "object",
-                        properties: {
-                            email: {
-                                description: "the user's email, required either one of email or username",
-                                type: "string"
-                            },
-                            username: {
-                                description: "the user's username, required either one of email or username",
-                                type: "string"
-                            },
-                            token: { type: "string" },
-                            code: { type: "string" },
-                            password: { type: "string" }
+        docs.paths[requirePath] = {
+            post:{
+                summary: "forgot-password",
+                description: "require reset password by sending username or email to get reset token and code.",
+                tags: ["Identity"],
+                parameters: [
+                    {
+                        name: "body",
+                        in: "body",
+                        required: true,
+                        schema: {
+                            type: "object",
+                            properties: {
+                                email: {
+                                    description: "the user's email, required either one of email or username",
+                                    type: "string"
+                                },
+                                username: {
+                                    description: "the user's username, required either one of email or username",
+                                    type: "string"
+                                }
+                            }
                         }
                     }
-                }
-            ]
+                ]
+            }
+        };
+
+        let verifyPath = toPath(options.forgotPassword.verifyPath);
+
+        docs.paths[verifyPath] = {
+            post:{
+                summary: "verify-reset-password",
+                description: "verify token and code",
+                tags: ["Identity"],
+                parameters: [
+                    {
+                        name: "body",
+                        in: "body",
+                        required: true,
+                        schema: {
+                            type: "object",
+                            properties: {
+                                token: { type: "string" },
+                                code: { type: "string" }
+                            }
+                        }
+                    }
+                ]
+            }
+        };
+
+        let resetPath = toPath(options.forgotPassword.resetPath);
+
+        docs.paths[resetPath] = {
+            post:{
+                summary: "reset-password",
+                description: "let the user reset password",
+                tags: ["Identity"],
+                parameters: [
+                    {
+                        name: "body",
+                        in: "body",
+                        required: true,
+                        schema: {
+                            type: "object",
+                            properties: {
+                                email: {
+                                    description: "the user's email, required either one of email or username",
+                                    type: "string"
+                                },
+                                username: {
+                                    description: "the user's username, required either one of email or username",
+                                    type: "string"
+                                },
+                                token: { type: "string" },
+                                code: { type: "string" },
+                                password: { type: "string" }
+                            }
+                        }
+                    }
+                ]
+            }
+            
         };
     }
 

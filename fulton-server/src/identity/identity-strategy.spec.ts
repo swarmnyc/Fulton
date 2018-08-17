@@ -20,9 +20,7 @@ class MyApp extends FultonApp {
         this.options.identity.addStrategy({
             name: "login",
             path: "/test/login",
-            httpMethod: "post",
-            verifier: FultonIdentityImpl.localStrategyVerifier,
-            successMiddleware: FultonIdentityImpl.issueAccessToken
+            httpMethod: "post"
         }, LocalStrategy);
 
         this.options.identity.addStrategy({
@@ -30,10 +28,7 @@ class MyApp extends FultonApp {
             callbackPath: "/test/google/callback",
             scope: "profile email",
             clientId: "test",
-            clientSecret: "test",
-            verifierFn: FultonIdentityImpl.oauthVerifierFn,
-            authenticateFn: FultonIdentityImpl.oauthAuthenticateFn,
-            callbackAuthenticateFn: FultonIdentityImpl.oauthCallbackAuthenticateFn
+            clientSecret: "test"
         }, GoogleStrategy);
 
         this.options.identity.addStrategy({
@@ -44,12 +39,9 @@ class MyApp extends FultonApp {
                 clientID: "test",
                 clientSecret: "test"
             },
-            verifierFn: FultonIdentityImpl.oauthVerifierFn,
-            authenticateFn: FultonIdentityImpl.oauthAuthenticateFn,
             callbackAuthenticateOptions: {
                 successRedirect: "/"
-            },
-            callbackAuthenticateFn: FultonIdentityImpl.oauthCallbackAuthenticateFn
+            }
         }, require("passport-github").Strategy);
     }
 }

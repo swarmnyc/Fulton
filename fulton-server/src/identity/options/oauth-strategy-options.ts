@@ -67,23 +67,8 @@ export class OauthStrategyOptions extends StrategyOptions {
     authenticateOptions?: OauthAuthenticateOptions;
 
     /**
-     * the middleware next to authenticate
-     * the default value is null
-     */
-    callbackSuccessMiddleware?: Middleware;
-
-    /**
     * for passport
     * the default value is {}
     */
     callbackAuthenticateOptions?: OauthAuthenticateOptions = {};
-
-    /**
-     * if provided, call this function to get the middleware, like
-     * app.use(options.callbackAuthenticateFn(options))
-     * 
-     * otherwise use
-     * app.use(passport.authenticate(options.name, options.callbackAuthenticateOptions))
-     */
-    callbackAuthenticateFn?: (options: OauthStrategyOptions) => Middleware
 }

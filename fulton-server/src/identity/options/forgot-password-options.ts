@@ -7,14 +7,16 @@ import { Middleware } from '../../interfaces';
  * options for forgot password
  * there are three methods
  * 1.
- * ALL /auth/forgot-password?username=username, for send reset code notification
- * ALL /auth/forgot-password?email=email, for send reset code notification
+ * POST /auth/forgot-password, for send reset code notification
+ * BODY { username?, email? }
  * 
  * 2.  
- * ALL /auth/forgot-password?token=token&code=code, for just verify the token is valid or not
+ * POST /auth/verify-reset-password
+ * BODY { token, code}
  * 
  * 3.  
- * All /auth/forgot-password?token=token&code=code&password=new-password, for reset password
+ * POST /auth/reset-password
+ * BODY { token, code, password}
  */
 export class ForgotPasswordOptions extends BaseOptions<ForgotPasswordOptions> {
     /**
@@ -24,9 +26,22 @@ export class ForgotPasswordOptions extends BaseOptions<ForgotPasswordOptions> {
     enabled?: boolean = true;
 
     /**
+     * the path for require password
      * the default value is /auth/forgot-password
      */
-    path?: string = "/auth/forgot-password";
+    requirePath?: string = "/auth/forgot-password";
+
+    /**
+     * the path for require password
+     * the default value is /auth/verify-reset-password-code
+     */
+    verifyPath?: string = "/auth/verify-reset-password";
+
+    /**
+     * the path for require password
+     * the default value is /auth/verify-reset-password-code
+     */
+    resetPath?: string = "/auth/reset-password";
 
     /**
      * the duration of reset password token in seconds

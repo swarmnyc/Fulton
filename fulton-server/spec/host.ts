@@ -23,9 +23,7 @@ class MyApp extends FultonApp {
             url: "mongodb://localhost:27017/fulton-test"
         });
 
-        options.docs.enabled = true;
-
-        options.notification.email.enabled = true        
+        options.docs.enabled = true;      
 
         options.identity.register.notification.email.set({
             bodyTemplate: "<h1>Hello ${username}</h1><p> Thanks for your registration.</p>"

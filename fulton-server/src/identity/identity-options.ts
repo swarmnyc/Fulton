@@ -1,7 +1,7 @@
 import * as lodash from 'lodash';
 
 import { AppMode, Middleware, Type } from '../interfaces';
-import { IUser, IUserService, Strategy } from './interfaces';
+import { IUser, IUserService, Strategy, IIdentityRouter } from './interfaces';
 
 import { AccessTokenOptions } from './options/access-token-options';
 import { BearerStrategyOptions } from './options/bearer-strategy-options';
@@ -41,6 +41,13 @@ export class IdentityOptions {
      * otherwise you have to custom your user service;
      */
     userService: Type<IUserService<IUser>> | IUserService<IUser>;
+
+    /**
+     * the instance or type of IdentityRouter
+     * the default is FultonIdentityRouter which handles requests and responses.
+     * if you want to behave differently, you can use your own router and update this value.
+     */
+    router: Type<IIdentityRouter> | IIdentityRouter
 
     /**
      * the authenticate every request to get user info, enabled strategies like "bearer", "session"
@@ -155,7 +162,7 @@ export class IdentityOptions {
      * /auth/forgot-password?email=email, for send reset code notification
      * 
      * 2.  
-     * /auth/forgot-password?token=token&code=code, for just verfiy the token is valid or not
+     * /auth/forgot-password?token=token&code=code, for just verify the token is valid or not
      * 
      * 3.  
      * /auth/forgot-password?token=token&code=code&password=new-password, for reset password

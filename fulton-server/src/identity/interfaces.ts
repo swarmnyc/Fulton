@@ -1,5 +1,9 @@
 import * as passport from 'passport';
-import { Request, PathIdentifier, Middleware, Type, HttpMethod } from "../interfaces";
+import { IFultonApp } from '../fulton-app';
+import { Request } from "../interfaces";
+import { NextFunction, Response, Middleware } from '../re-export';
+import { IdentityOptions } from './identity-options';
+import { OauthStrategyOptions } from './options/oauth-strategy-options';
 
 export type Strategy = passport.Strategy;
 export type AuthenticateOptions = passport.AuthenticateOptions;
@@ -38,8 +42,25 @@ export interface IFultonIdentity {
     [key: string]: any;
 }
 
+export interface IIdentityRouter {
+    init(app: IFultonApp, options: IdentityOptions): void;
+    register(req: Request, res: Response, next: NextFunction): void
+    forgotPassword(req: Request, res: Response, next: NextFunction): void
+    verifyResetPassword(req: Request, res: Response, next: NextFunction): void
+    resetPassword(req: Request, res: Response, next: NextFunction): void
+    issueAccessToken(req: Request, res: Response): void
+
+    /** generate the authenticate middleware for oauth strategies */
+    oauthFn(options: OauthStrategyOptions): Middleware
+
+    /** generate the callback middleware for oauth strategies */
+    oauthCallbackFn(options: OauthStrategyOptions): Middleware
+}
+
 export interface IUserService<T extends IUser> {
     currentUser: IUser;
+    init(app: IFultonApp): void;
+
     login(username: string, password: string): Promise<T>;
     /**
      * There are 3 scenarios
@@ -74,7 +95,7 @@ export interface AccessToken {
 export interface OauthAuthenticateOptions extends AuthenticateOptions {
     /**
      * the callback url for redirection, for example `https://www.example.com/auth/google/callback`
-     * if it is identity.{name}.callbackUrl is empty, fultion will generate the value by combining req.originUrl + callbackPath
+     * if it is identity.{name}.callbackUrl is empty, fulton will generate the value by combining req.originUrl + callbackPath
      * so don't set this value manually
      */
     callbackUrl?: string;

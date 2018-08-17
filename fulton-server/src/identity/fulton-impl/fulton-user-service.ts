@@ -229,12 +229,15 @@ class MongoRunner implements IRunner {
 @injectable()
 export class FultonUserService implements IUserService<FultonUser> {
     private runner: IRunner;
+    private app: IFultonApp;
 
-    constructor(@inject(DiKeys.FultonApp) protected app: IFultonApp) {
-        let manager = getManager(app.options.identity.databaseConnectionName)
+    init(app: IFultonApp) {
+        this.app = app;
+
+        let manager = getManager(app.options.identity.databaseConnectionName);
 
         if (manager instanceof MongoEntityManager) {
-            this.runner = new MongoRunner(app, manager)
+            this.runner = new MongoRunner(app, manager);
         } else {
             //this.runner = new SqlRunner(manager)
         }
@@ -467,7 +470,7 @@ export class FultonUserService implements IUserService<FultonUser> {
 
             this.app.events.emit(EventKeys.UserForgotPassword, identity);
 
-            var url = Helper.urlJoin(this.app.baseUrl, this.options.forgotPassword.path);
+            var url = Helper.urlJoin(this.app.baseUrl, this.options.forgotPassword.verifyPath);
             this.sendForgotPasswordNotification({
                 username: user.username,
                 email: identity.email,
@@ -486,7 +489,7 @@ export class FultonUserService implements IUserService<FultonUser> {
     }
 
     async resetPassword(token: string, code: string, password: string): Promise<void> {
-        let error = new FultonError("ErrorCodes.Invalid")
+        let error = new FultonError(ErrorCodes.Invalid)
 
         if (this.verifyPassword(error, password)) {
             let identity = await this.runner.findIdentityByLocalResetToken(token, code)

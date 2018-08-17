@@ -31,29 +31,14 @@ export class StrategyOptions extends BaseOptions<StrategyOptions> {
     strategyOptions?: { [key: string]: any } = {};
 
     /**
-     * verify the oauth request.
+     * the verifier is for passport strategy.
      */
     verifier?: StrategyVerifier | LocalStrategyVerifier | any;
-
-    /**
-     * the middleware next to authenticate
-     * the default value is null
-     */
-    successMiddleware?: Middleware;
 
     /**
      * the options to pass to passport when call passport.authenticate()
      */
     authenticateOptions?: AuthenticateOptions = {};
-
-    /**
-      * if provided,call this function to get the middleware, like
-     * app.use(options.authenticateFn(options))
-     * 
-     * otherwise use
-     * app.use(passport.authenticate(options.name, options.authenticateOptions))
-     */
-    authenticateFn?: (options: StrategyOptions) => Middleware
 
     /**
      * if true, add to defaultAuthenticate support list. which means this strategy will be called by every incoming requests.

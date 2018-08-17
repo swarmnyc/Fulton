@@ -75,7 +75,7 @@
     "rimraf": "^2.6.2",
     "swagger-ui-express": "^3.0.8",
     "ts-node": "^6.0.3",
-    "typeorm": "^0.2.5",
+    "typeorm": "^0.2.7",
     "typescript": "^2.8.3",
     "validator": "^10.2.0"
   },

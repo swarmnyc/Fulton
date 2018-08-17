@@ -1,11 +1,9 @@
 import * as lodash from 'lodash';
-
-import { Connection, ConnectionOptions } from "typeorm";
-import { Type } from '../interfaces';
-import { EventKeys } from "../keys"
-import { FultonApp } from '../fulton-app';
-import { FultonLog } from "../fulton-log";
+import { ConnectionOptions } from "typeorm";
 import { getRelatedToMetadata } from '../entities/entity-decorators-helpers';
+import { FultonApp } from '../fulton-app';
+import { Type } from '../interfaces';
+import { EventKeys } from "../keys";
 
 module.exports = async function (app: FultonApp): Promise<any> {
     if (app.options.databases.size == 0) {

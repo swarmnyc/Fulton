@@ -47,11 +47,6 @@ export class RegisterOptions extends BaseOptions<RegisterOptions> {
     path?: PathIdentifier = "/auth/register";
 
     /**
-     * the default value is `post`
-     */
-    httpMethod?: HttpMethod = "post";
-
-    /**
      * the default value email
      */
     emailField?: string = "email";
@@ -107,18 +102,6 @@ export class RegisterOptions extends BaseOptions<RegisterOptions> {
      * the default value is /.{6,64}/, any 6 to 64 characters
      */
     passwordVerifier?: RegExp | ((pw: string) => boolean) = /.{6,64}/;
-
-    /**
-     * the handler for register
-     * the default value is FultonIdentityImpl.registerHandler
-     */
-    handler?: Middleware;
-
-    /**
-     * either use successCallback or responseOptions for response
-     * the default value is FultonIdentityImpl.sendAccessToken
-     */
-    successCallback?: Middleware;
 
     /**
      * the options for response

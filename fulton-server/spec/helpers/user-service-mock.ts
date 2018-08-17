@@ -13,6 +13,10 @@ export class UserServiceMock implements IUserService<FultonUser> {
     constructor(public app: FultonApp) {
     }
 
+    init(){
+        
+    }
+
     login(username: string, password: string): Promise<FultonUser> {
         let error = new FultonError();
 

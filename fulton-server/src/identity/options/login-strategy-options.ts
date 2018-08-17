@@ -43,8 +43,6 @@ export class LoginStrategyOptions extends StrategyOptions {
     /**
      * the function to find the user
      * 
-     * the default value is FultonIdentityImpl.localStrategyVerifier
-     * 
      * ### customizing example
      * verifier = (req: Request, username: string, password: string, done: LocalStrategyVerifyDone) => {
      *     req.userService

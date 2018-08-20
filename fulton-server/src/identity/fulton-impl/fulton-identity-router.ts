@@ -3,12 +3,11 @@ import * as passport from 'passport';
 import { ErrorCodes, FultonError } from "../../common";
 import { IFultonApp } from "../../fulton-app";
 import { FultonLog } from "../../fulton-log";
-import { NextFunction, Request, Response, Middleware } from "../../interfaces";
+import { Helper } from '../../helpers';
+import { Middleware, NextFunction, Request, Response } from "../../interfaces";
 import { IdentityOptions } from "../identity-options";
 import { IIdentityRouter, IUser, OauthAuthenticateOptions } from "../interfaces";
 import { OauthStrategyOptions } from '../options/oauth-strategy-options';
-import { Helper } from '../../helpers';
-import { LoginStrategyOptions } from '../options/login-strategy-options';
 
 type Strategy = passport.Strategy;
 

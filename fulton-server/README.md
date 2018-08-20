@@ -6,7 +6,7 @@ Fulton Server is integrated many essential features and packages that a function
 
 ## CLI
 ---
-Using Fulton Server with [Fulton CLI](https://www.npmjs.com/package/fulton-cli) can helps you get started with Fulton
+Using Fulton Server with [Fulton CLI](https://www.npmjs.com/package/fulton-cli) can helps you get started with Fulton.
 
 ## Integration
 

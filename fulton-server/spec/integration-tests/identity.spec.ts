@@ -1,16 +1,12 @@
-import * as cryptoHelper from '../../src/helpers/crypto-helper';
-
-import { AccessToken, IOauthProfile } from '../../src/identity/interfaces';
-import { FultonAccessToken, FultonIdentity, FultonUser } from "../../src/identity/fulton-impl/fulton-user";
-import { HttpResult, HttpTester } from "../../src/test/http-tester";
-import { Request, Response } from "../../src/interfaces";
-
-import { FultonApp } from '../../src/fulton-app';
-import { FultonAppOptions } from '../../src/options/fulton-app-options';
-import { FultonLog } from '../../src/fulton-log';
-import { FultonUserService } from '../../src/identity/fulton-impl/fulton-user-service';
-import { ObjectId } from "bson";
 import { getMongoRepository } from "typeorm";
+import { FultonApp } from '../../src/fulton-app';
+import * as cryptoHelper from '../../src/helpers/crypto-helper';
+import { FultonAccessToken, FultonIdentity, FultonUser } from "../../src/identity/fulton-impl/fulton-user";
+import { FultonUserService } from '../../src/identity/fulton-impl/fulton-user-service';
+import { AccessToken, IOauthProfile } from '../../src/identity/interfaces';
+import { Request, Response } from "../../src/interfaces";
+import { FultonAppOptions } from '../../src/options/fulton-app-options';
+import { HttpResult, HttpTester } from "../../src/test/http-tester";
 
 class MyApp extends FultonApp {
     protected onInit(options: FultonAppOptions): void {
@@ -143,7 +139,7 @@ describe('Identity Integration Test', () => {
                 expect(result.response.statusCode).toEqual(400);
                 expect(result.body.error.message).toContain("account locked");
 
-                setTimeout(async() => {
+                setTimeout(async () => {
                     try {
                         let result = await httpTester.post("/auth/login", {
                             username: "Test",
@@ -410,5 +406,56 @@ describe('Identity Integration Test', () => {
         })
 
         expect(count).toEqual(2);
+    });
+
+    it('should update profile', async () => {
+        let tokenRes = await prepareUser();
+
+        httpTester.setHeaders({
+            Authorization: `Bearer ${tokenRes.body.access_token}`
+        });
+
+        let result = await httpTester.post("/auth/profile", { displayName: "Test2", email: "Test2@email.com" });
+
+        expect(result.response.statusCode).toEqual(200);
+
+        result = await httpTester.get("/auth/profile");
+
+        expect(result.body.displayName).toEqual("Test2");
+        expect(result.body.email).toEqual("Test2@email.com");
+    });
+
+    it('should update local identity', async () => {
+        let tokenRes = await prepareUser();
+
+        httpTester.setHeaders({
+            Authorization: `Bearer ${tokenRes.body.access_token}`
+        });
+
+        let result = await httpTester.post("/auth/profile/local", { username: "test", email: "Test2@email.com", password: "Abcdef1234" });
+
+        expect(result.response.statusCode).toEqual(200);
+    });
+
+    it('should update local identity failed', async () => {
+        httpTester.post("/auth/register", {
+            email: "test2@test.com",
+            username: "test2",
+            password: "test123"
+        })
+
+        let tokenRes = await prepareUser();
+
+        httpTester.setHeaders({
+            Authorization: `Bearer ${tokenRes.body.access_token}`
+        });
+
+        let result = await httpTester.post("/auth/profile/local", { username: "test", email: "test@email.com", password: "Abcdef1234" });
+
+        expect(result.response.statusCode).toEqual(200);
+
+        result = await httpTester.post("/auth/profile/local", { username: "test2"});
+
+        expect(result.response.statusCode).toEqual(400);
     });
 });

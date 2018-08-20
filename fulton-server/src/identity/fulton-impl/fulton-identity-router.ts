@@ -26,9 +26,11 @@ export class FultonIdentityRouter implements IIdentityRouter {
 
         this.initLogout();
 
-        // TODO Profile
+        this.initProfile();
 
         this.initStrategy();
+
+        // todo: OAuth disconnection 
     }
 
     initRegister() {
@@ -49,6 +51,20 @@ export class FultonIdentityRouter implements IIdentityRouter {
         if (this.options.logout.enabled) {
             this.app.express.get(this.options.logout.path, this.logout.bind(this))
             this.app.express.post(this.options.logout.path, this.logout.bind(this))
+        }
+    }
+
+    initProfile() {
+        if (this.options.profile.enabled) {
+            this.app.express.get(this.options.profile.path, this.profile.bind(this))
+        }
+
+        if (this.options.profile.updateEnabled) {
+            this.app.express.post(this.options.profile.path, this.updateProfile.bind(this))
+        }
+
+        if (this.options.profile.updateLocalIdentityEnabled) {
+            this.app.express.post(this.options.profile.updateLocalIdentityPath, this.updateLocalIdentity.bind(this))
         }
     }
 
@@ -192,7 +208,85 @@ export class FultonIdentityRouter implements IIdentityRouter {
         } else {
             next(new FultonError(ErrorCodes.Invalid, "the one of parameters, token, code or password, was missed."))
         }
+    }
 
+    logout(req: Request, res: Response, next: NextFunction) {
+        let options = req.fultonApp.options.identity.logout;
+
+        if (req.user) {
+            let all = Helper.getBoolean(req.query.all, false);
+
+            let task: Promise<void>;
+
+            if (all) {
+                task = req.userService.revokeAllAccessTokens(req.user.id)
+            } else {
+                let token = req.user.currentToken;
+
+                if (token == null) {
+                    return next(new FultonError(ErrorCodes.Unknown));
+                }
+
+                task = req.userService.revokeAccessToken(req.user.id, token)
+            }
+
+            task.then(() => {
+                req.logout();
+
+                if (options.responseOptions && options.responseOptions.successRedirect) {
+                    res.redirect(options.responseOptions.successRedirect)
+                } else {
+                    res.send({
+                        status: 200
+                    })
+                }
+            }).catch((error: any) => {
+                FultonLog.warn("user logout failed by", error)
+                if (options.responseOptions && options.responseOptions.failureRedirect) {
+                    res.redirect(options.responseOptions.failureRedirect)
+                } else {
+                    if (error instanceof FultonError) {
+                        next(error)
+                    } else {
+                        next(new FultonError(ErrorCodes.Unknown));
+                    }
+                }
+            });
+        } else {
+            res.sendStatus(403)
+        }
+    }
+
+    profile(req: Request, res: Response, next: NextFunction) {
+        if (req.isAuthenticated()) {
+            return res.send(lodash.pick(req.user, this.options.profile.readableFields))
+        } else {
+            res.sendStatus(401)
+        }
+    }
+
+    updateProfile(req: Request, res: Response, next: NextFunction) {
+        if (req.isAuthenticated()) {
+            req.userService.updateProfile(req.user.id, req.body).then(() => {
+                res.send({
+                    status: 200
+                })
+            }).catch(next)
+        } else {
+            res.sendStatus(401)
+        }
+    }
+
+    updateLocalIdentity(req: Request, res: Response, next: NextFunction) {
+        if (req.isAuthenticated()) {
+            req.userService.updateLocalStrategy(req.user.id, req.body).then(() => {
+                res.send({
+                    status: 200
+                })
+            }).catch(next)
+        } else {
+            res.sendStatus(401)
+        }
 
     }
 
@@ -264,53 +358,6 @@ export class FultonIdentityRouter implements IIdentityRouter {
                 // normal flow, providers return a code, use the code to get access_token and profile
                 passport.authenticate(options.name, options.callbackAuthenticateOptions, finished)(req, res, next);
             }
-        }
-    }
-
-    logout(req: Request, res: Response, next: NextFunction) {
-        let options = req.fultonApp.options.identity.logout;
-
-        if (req.user) {
-            let all = Helper.getBoolean(req.query.all, false);
-
-            let task: Promise<void>;
-
-            if (all) {
-                task = req.userService.revokeAllAccessTokens(req.user.id)
-            } else {
-                let token = req.user.currentToken;
-
-                if (token == null) {
-                    return next(new FultonError(ErrorCodes.Unknown));
-                }
-
-                task = req.userService.revokeAccessToken(req.user.id, token)
-            }
-
-            task.then(() => {
-                req.logout();
-
-                if (options.responseOptions && options.responseOptions.successRedirect) {
-                    res.redirect(options.responseOptions.successRedirect)
-                } else {
-                    res.send({
-                        status: 200
-                    })
-                }
-            }).catch((error: any) => {
-                FultonLog.warn("user logout failed by", error)
-                if (options.responseOptions && options.responseOptions.failureRedirect) {
-                    res.redirect(options.responseOptions.failureRedirect)
-                } else {
-                    if (error instanceof FultonError) {
-                        next(error)
-                    } else {
-                        next(new FultonError(ErrorCodes.Unknown));
-                    }
-                }
-            });
-        } else {
-            res.sendStatus(403)
         }
     }
 

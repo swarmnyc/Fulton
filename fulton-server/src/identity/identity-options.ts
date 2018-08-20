@@ -1,11 +1,10 @@
 import * as lodash from 'lodash';
-
+import { Env } from '../helpers/env';
 import { AppMode, Middleware, Type } from '../interfaces';
-import { IUser, IUserService, Strategy, IIdentityRouter } from './interfaces';
-
+import { Options } from '../options/options';
+import { IIdentityRouter, IUser, IUserService, Strategy } from './interfaces';
 import { AccessTokenOptions } from './options/access-token-options';
 import { BearerStrategyOptions } from './options/bearer-strategy-options';
-import { Env } from '../helpers/env';
 import { FacebookStrategyOptions } from './options/facebook-strategy-options';
 import { ForgotPasswordOptions } from './options/forgot-password-options';
 import { GithubStrategyOptions } from './options/github-strategy-options';
@@ -13,10 +12,12 @@ import { GoogleStrategyOptions } from './options/google-strategy-options';
 import { LoginStrategyOptions } from './options/login-strategy-options';
 import { LogoutOptions } from './options/logout-options';
 import { OauthStrategyOptions } from './options/oauth-strategy-options';
-import { Options } from '../options/options';
+import { ProfileOptions } from './options/profile-options';
 import { RegisterOptions } from './options/register-options';
 import { StrategyOptions } from './options/strategy-options';
 import { StrategySettings } from './options/strategy-settings';
+
+
 
 export class IdentityOptions {
     /**
@@ -199,6 +200,11 @@ export class IdentityOptions {
      * the setting for logout to revoke access token
      */
     readonly logout = new LogoutOptions(this.appName, this.appMode)
+
+    /**
+     * the setting for profile
+     */
+    readonly profile = new ProfileOptions(this.appName, this.appMode)
 
     /**
      * options for passport bearer strategy

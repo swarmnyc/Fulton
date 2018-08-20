@@ -9,7 +9,7 @@ describe('Template Service', () => {
     });
 
     it('should generate content by file', async () => {
-        var result = service.generate("./spec/templates/hello.html", { username: "Test" });
+        var result = service.generate("./spec/templates/hello.html", { displayName: "Test" });
 
         expect(result).toEqual("<h1>Hello Test!</h1>");
     });

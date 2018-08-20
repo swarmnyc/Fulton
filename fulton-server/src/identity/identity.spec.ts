@@ -58,10 +58,6 @@ class MyApp extends FultonApp {
             }
         });
 
-        this.express.get("/profile", authorized(), (req, res) => {
-            res.send(req.user);
-        });
-
         return null;
     }
 }
@@ -121,7 +117,7 @@ describe('Identity local and bearer on UserServiceMock', () => {
             "Authorization": "bearer test2-accessToken"
         })
 
-        let result = await httpTester.get("/profile")
+        let result = await httpTester.get("/auth/profile")
 
         expect((<IFultonUser>result.body).displayName).toEqual("test2");
     });
@@ -131,7 +127,7 @@ describe('Identity local and bearer on UserServiceMock', () => {
             "Authorization": "bearer failure"
         })
 
-        let result = await httpTester.get("/profile")
+        let result = await httpTester.get("/auth/profile")
 
         expect(result.response.statusCode).toEqual(401);
     });
@@ -141,7 +137,7 @@ describe('Identity local and bearer on UserServiceMock', () => {
             "Authorization": "bearer "
         })
 
-        let result = await httpTester.get("/profile")
+        let result = await httpTester.get("/auth/profile")
 
         expect(result.response.statusCode).toEqual(401);
     });

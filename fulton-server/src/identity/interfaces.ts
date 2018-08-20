@@ -28,6 +28,12 @@ export interface RegisterModel {
     [key: string]: any;
 }
 
+export interface UpdateLocalModel {
+    email?: string;
+    username?: string;
+    password?: string;
+}
+
 export interface IFultonUser extends IUser {
     id?: string;
     displayName?: string;
@@ -49,6 +55,11 @@ export interface IIdentityRouter {
     forgotPassword(req: Request, res: Response, next: NextFunction): void
     verifyResetPassword(req: Request, res: Response, next: NextFunction): void
     resetPassword(req: Request, res: Response, next: NextFunction): void
+    logout(req: Request, res: Response, next: NextFunction): void
+    profile(req: Request, res: Response, next: NextFunction): void
+    updateProfile(req: Request, res: Response, next: NextFunction): void
+    updateLocalIdentity(req: Request, res: Response, next: NextFunction): void
+
     issueAccessToken(req: Request, res: Response): void
 
     /** generate the authenticate middleware for oauth strategies */
@@ -72,6 +83,8 @@ export interface IUserService<T extends IUser> {
     loginByOauth(userId: string, token: AccessToken, profile: IOauthProfile): Promise<T>;
     loginByAccessToken(token: string): Promise<T>;
     register(input: RegisterModel): Promise<T>;
+    updateProfile(userId: any, input:T): Promise<void>;
+    updateLocalStrategy(userId: any, input:UpdateLocalModel): Promise<void>;
     issueAccessToken(user: T): Promise<AccessToken>;
     forgotPassword(usernameOrEmail: string): Promise<ForgotPasswordModel>;
     resetPassword(token: string, code: string, password: string): Promise<void>;

@@ -24,21 +24,24 @@ export class ProfileOptions extends BaseOptions<ProfileOptions> {
     /**
      * the fields of output, the default value is ["id", "username", "email"]
      */
-    readFields?: string[];
+    readableFields?: string[];
 
     /**
-     * the fields of output, the default value is ["id", "username", "email", "password"]
+     * the fields of output, the default value is ["username", "email"]
+     * the username and email are only for display, not 
      */
-    writeFields?: string[]
+    writableFields?: string[]
 
     constructor(protected appName?: string, protected appMode?: string, protected type?: string) {
         super(appName, appMode);
 
         this.enabled = true;
         this.path = "/auth/profile";
+        this.readableFields = ["id", "username", "email"];
+        this.writableFields = ["password"];
     }
 
     init?(): void {
-        this.enabled = Env.getBoolean(`${this.appName}.options.identity.login.enabled`, this.enabled)
+        this.enabled = Env.getBoolean(`${this.appName}.options.identity.profile.enabled`, this.enabled)
     }
 }

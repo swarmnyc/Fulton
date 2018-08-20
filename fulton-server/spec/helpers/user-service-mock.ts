@@ -13,8 +13,8 @@ export class UserServiceMock implements IUserService<FultonUser> {
     constructor(public app: FultonApp) {
     }
 
-    init(){
-        
+    init() {
+
     }
 
     login(username: string, password: string): Promise<FultonUser> {
@@ -38,7 +38,7 @@ export class UserServiceMock implements IUserService<FultonUser> {
         } else {
             let user = new FultonUser();
             user.id = username;
-            user.username = username;
+            user.displayName = username;
             return Promise.resolve(user);
         }
     }
@@ -52,7 +52,7 @@ export class UserServiceMock implements IUserService<FultonUser> {
         if (info[1] == "accessToken") {
             let user = new FultonUser();
             user.id = info[0];
-            user.username = info[0];
+            user.displayName = info[0];
             user.roles = [info[0]];
             return Promise.resolve(user);
         } else {
@@ -63,10 +63,13 @@ export class UserServiceMock implements IUserService<FultonUser> {
     register(input: RegisterModel): Promise<FultonUser> {
         let error = new FultonError();
 
-        let newUser = lodash.pick(input, ["username", "password", "email"]);
-
         if (error.verifyRequiredList(input, ["username", "password", "email"])) {
-            return Promise.resolve(input as FultonUser);
+            var user = Object.assign(new FultonUser(), {
+                displayName: input.username,
+                email: input.email
+            })
+            
+            return Promise.resolve(user);
         } else {
             return Promise.reject(error);
         }
@@ -74,7 +77,7 @@ export class UserServiceMock implements IUserService<FultonUser> {
 
     issueAccessToken(user: FultonUser): Promise<AccessToken> {
         return Promise.resolve({
-            access_token: `${user.username}-accessToken`,
+            access_token: `${user.displayName}-accessToken`,
             token_type: this.app.options.identity.accessToken.type,
             expires_in: this.app.options.identity.accessToken.duration
         });

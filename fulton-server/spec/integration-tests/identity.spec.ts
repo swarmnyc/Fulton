@@ -25,7 +25,7 @@ class MyApp extends FultonApp {
 
         options.index.handler = (req: Request, res: Response) => {
             if (req.isAuthenticated()) {
-                res.send("user:" + req.user.username);
+                res.send("user:" + req.user.displayName);
             } else {
                 res.send("no user");
             }

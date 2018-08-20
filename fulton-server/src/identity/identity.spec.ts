@@ -4,7 +4,7 @@ import { Request, Response } from "../interfaces";
 import { Router, httpGet, router } from '../routers';
 import { authorized, authorizedByRole, authorizedByRoles } from './authorizes-middlewares';
 
-import { AccessToken } from './interfaces';
+import { AccessToken, IFultonUser } from './interfaces';
 import { FultonApp } from "../fulton-app";
 import { FultonAppOptions } from "../options/fulton-app-options";
 import { HttpTester } from "../test/http-tester";
@@ -52,7 +52,7 @@ class MyApp extends FultonApp {
 
         this.express.all("/", (req, res) => {
             if (req.isAuthenticated()) {
-                res.send("with user:" + req.user.username);
+                res.send("with user:" + (<IFultonUser>req.user).displayName);
             } else {
                 res.send("no user");
             }
@@ -123,7 +123,7 @@ describe('Identity local and bearer on UserServiceMock', () => {
 
         let result = await httpTester.get("/profile")
 
-        expect(result.body.username).toEqual("test2");
+        expect((<IFultonUser>result.body).displayName).toEqual("test2");
     });
 
     it('should access profile failure', async () => {

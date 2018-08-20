@@ -1,4 +1,4 @@
-import { AccessToken, IUser, OauthStrategyVerifier } from '../interfaces';
+import { AccessToken, IUser, OauthStrategyVerifier, IFultonUser } from '../interfaces';
 import { fultonDebug } from '../../helpers/debug';
 import { GoogleStrategyOptions } from '../options/google-strategy-options';
 import { OAuth2Client } from 'google-auth-library';
@@ -44,7 +44,7 @@ export class GoogleStrategy extends Strategy {
                     this.success(user, info);
                 }
 
-                let profile;
+                let profile: IFultonUser;
 
                 if (token.id_token) {
                     let jwt = this.jws.decode(token.id_token);
@@ -59,7 +59,7 @@ export class GoogleStrategy extends Strategy {
                     profile = {
                         id: payload.sub,
                         email: payload.email,
-                        username: payload.name,
+                        displayName: payload.name,
                         portraitUrl: payload.picture
                     }
                 } else {

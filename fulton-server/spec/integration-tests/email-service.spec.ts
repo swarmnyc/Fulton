@@ -48,10 +48,10 @@ describe('Email Service', () => {
 
         await service.send({
             to: process.env["tester_email"],
-            subjectTemplate: "Hello ${username}, this is testing email",
-            bodyTemplate: "<h1>Hello ${username}</h1><p>${message}</p>",
+            subjectTemplate: "Hello ${displayName}, this is testing email",
+            bodyTemplate: "<h1>Hello ${displayName}</h1><p>${message}</p>",
             variables: {
-                username: "Tester",
+                displayName: "Tester",
                 message: "Email Testing"
             }
         });

@@ -1,5 +1,5 @@
-import { IFultonUser, IFultonIdentity } from '../interfaces';
-import { Entity, ObjectIdColumn, Column, PrimaryColumn, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, Entity, PrimaryColumn } from 'typeorm';
+import { IFultonIdentity, IFultonUser } from '../interfaces';
 
 @Entity("users")
 export class FultonUser implements IFultonUser {
@@ -7,10 +7,10 @@ export class FultonUser implements IFultonUser {
     id: any;
 
     @Column({ length: 256 })
-    username: string; // only for display
+    displayName: string;
 
     @Column({ length: 256 })
-    email: string; // only for notification
+    email: string;
 
     @Column()
     portraitUrl: string;

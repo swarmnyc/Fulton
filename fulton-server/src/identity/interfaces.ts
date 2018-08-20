@@ -24,12 +24,13 @@ export interface RegisterModel {
     email?: string;
     username?: string;
     password?: string;
+    portraitUrl?: string;
     [key: string]: any;
 }
 
 export interface IFultonUser extends IUser {
     id?: string;
-    username?: string;
+    displayName?: string;
     portraitUrl?: string;
     email?: string;
     roles?: string[];
@@ -133,7 +134,7 @@ export interface ForgotPasswordModel {
 }
 
 export interface NotificationModel {
-    username: string,
+    displayName: string,
     email: string
 }
 

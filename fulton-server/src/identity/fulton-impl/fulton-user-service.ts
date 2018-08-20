@@ -279,14 +279,11 @@ export class FultonUserService implements IUserService<FultonUser> {
 
         // add user
         let userInput = {
-            username,
+            displayName: input.username,
             email: input.email,
+            portraitUrl: input.portraitUrl,
             registeredAt: new Date()
         } as FultonUser;
-
-        if (input["portraitUrl"]) {
-            userInput.portraitUrl = input["portraitUrl"]
-        }
 
         if (registerOptions.otherFields.length > 0) {
             Object.assign(userInput, lodash.pick(input, registerOptions.otherFields))
@@ -306,7 +303,7 @@ export class FultonUserService implements IUserService<FultonUser> {
         })
 
         this.sendWelcomeNotification({
-            username: user.username,
+            displayName: user.displayName,
             email: email
         });
 
@@ -412,7 +409,7 @@ export class FultonUserService implements IUserService<FultonUser> {
             } else {
                 // create user
                 let userInput = {
-                    username: profile.username,
+                    displayName: profile.username,
                     portraitUrl: profile.portraitUrl
                 } as FultonUser
 
@@ -491,7 +488,7 @@ export class FultonUserService implements IUserService<FultonUser> {
 
             var url = Helper.urlJoin(this.app.baseUrl, this.options.forgotPassword.verifyPath);
             this.sendForgotPasswordNotification({
-                username: user.username,
+                displayName: user.displayName,
                 email: identity.email,
                 url: `${url}?token=${token}&code=${code}`,
                 token: token,

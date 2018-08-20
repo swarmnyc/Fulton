@@ -21,6 +21,8 @@ class MyApp extends FultonApp {
             url: "mongodb://localhost:27017/fulton-test"
         });
 
+        options.identity.login.lockTime = 1000
+
         options.index.handler = (req: Request, res: Response) => {
             if (req.isAuthenticated()) {
                 res.send("user:" + req.user.username);
@@ -75,7 +77,7 @@ describe('Identity Integration Test', () => {
         expect(at.expires_in).toEqual(2592000);
     });
 
-    it('should register failure register wiht the same name and email', async () => {
+    it('should register failure register with the same name and email', async () => {
         await prepareUser()
 
         let result = await httpTester.post("/auth/register", {
@@ -111,6 +113,59 @@ describe('Identity Integration Test', () => {
 
         expect(result.response.statusCode).toEqual(400);
         expect(result.body.error.message).toEqual("username or password isn't correct");
+    });
+
+    it('should lock and release the lock', () => {
+        return new Promise(async (resolve, reject) => {
+            try {
+                await prepareUser();
+
+                var identityRepository = getMongoRepository(FultonIdentity)
+
+                await httpTester.post("/auth/login", { username: "test", password: "test321" });
+
+                await httpTester.post("/auth/login", { username: "test", password: "test321" });
+
+                await httpTester.post("/auth/login", { username: "test", password: "test321" });
+
+                var id = await identityRepository.findOne({ "type": "local", username: "test" })
+                expect(id.loginTryCount).toEqual(3);
+                expect(id.loginLockReleaseAt).toBeFalsy();
+
+                await httpTester.post("/auth/login", { username: "test", password: "test321" });
+
+                id = await identityRepository.findOne({ "type": "local", username: "test" })
+                expect(id.loginTryCount).toEqual(4);
+                expect(id.loginLockReleaseAt).toBeTruthy();
+
+                var result = await httpTester.post("/auth/login", { username: "test", password: "test123" });
+
+                expect(result.response.statusCode).toEqual(400);
+                expect(result.body.error.message).toContain("account locked");
+
+                setTimeout(async() => {
+                    try {
+                        let result = await httpTester.post("/auth/login", {
+                            username: "Test",
+                            password: "test123"
+                        });
+                
+                        expect(result.response.statusCode).toEqual(200);
+                        expect(result.body.access_token).toBeTruthy();    
+
+                        resolve()
+
+                    } catch (error) {
+                        reject(error)
+                    }
+                }, 2000);
+            } catch (error) {
+                reject(error)
+            }
+        })
+
+
+
     });
 
     it('should access with token', async () => {

@@ -41,6 +41,18 @@ export class LoginStrategyOptions extends StrategyOptions {
     passwordField?: string;
 
     /**
+     * the try limits for failure,
+     * the default value is 3
+     */
+    tryLimits?: number = 3;
+
+    /**
+     * if users try login over the tryLimits, than lock for the given time.
+     * the default value is 10 seconds, not long because it only punishes bots. 
+     */
+    lockTime?: number = 10_000
+
+    /**
      * the function to find the user
      * 
      * ### customizing example

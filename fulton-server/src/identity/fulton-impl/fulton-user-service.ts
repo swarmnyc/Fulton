@@ -39,13 +39,12 @@ interface IRunner {
     addIdentity(identify: FultonIdentity): Promise<any>
     updateIdentity(identify: FultonIdentity): Promise<any>
     findUserById(userId: any): Promise<FultonUser>;
-    findUserByLocal(usernameOrEmail: string, password: string): Promise<FultonUser>;
     findUserByOauth(type: string, sourceUserId: string): Promise<FultonUser>;
+    findUserByToken(token: string): Promise<FultonUser>;
     findIdentities(user: IFultonUser): Promise<FultonIdentity[]>
     findIdentity(type: string, sourceUserId: string): Promise<FultonIdentity>;
     findIdentityByLocal(usernameOrEmail: string): Promise<FultonIdentity>;
     findIdentityByLocalResetToken(token: string, code: string): Promise<FultonIdentity>;
-    findUserByToken(token: string): Promise<FultonUser>;
     countUserName(name: string): Promise<number>;
     countUserEmail(email: string): Promise<number>;
     revokeAccessToken(userId: string, token: string): Promise<any>;
@@ -127,22 +126,6 @@ class MongoRunner implements IRunner {
         return this.userRepository.findOne(userId);
     }
 
-    async findUserByLocal(nameOrEmail: string, password: string): Promise<FultonUser> {
-        var id = await this.identityRepository.findOne({
-            "type": "local",
-            "$or": [
-                { username: nameOrEmail },
-                { email: nameOrEmail }
-            ]
-        } as any)
-
-        if (id && passwordHash.verify(password, id.hashedPassword)) {
-            return this.userRepository.findOne(id.userId)
-        } else {
-            return null;
-        }
-    }
-
     async findUserByOauth(type: string, sourceUserId: string): Promise<FultonUser> {
         var id = await this.identityRepository.findOne({
             "type": type,
@@ -210,7 +193,7 @@ class MongoRunner implements IRunner {
             if (id.resetPasswordCode == code) {
                 return id;
             } else if (id.resetPasswordCodeTryCount >= this.options.forgotPassword.tryLimits - 1) {
-               await this.identityRepository.updateMany({ "resetPasswordToken": token }, { $set: { resetPasswordToken: null } })
+                await this.identityRepository.updateMany({ "resetPasswordToken": token }, { $set: { resetPasswordToken: null } })
             } else {
                 await this.identityRepository.updateMany({ "resetPasswordToken": token }, { $inc: { resetPasswordCodeTryCount: 1 } })
             }
@@ -347,12 +330,48 @@ export class FultonUserService implements IUserService<FultonUser> {
             throw error;
         }
 
-        let user = await this.runner.findUserByLocal(username.toLocaleLowerCase(), password);
+        var user;
+        let id = await this.runner.findIdentityByLocal(username.toLocaleLowerCase())
+
+        if (id) {
+            // for locking
+            if (id.loginLockReleaseAt) {
+                let lock = id.loginLockReleaseAt.valueOf() - Date.now();
+                if (lock > 0) {
+                    throw error.set("login_failed", `account locked, try ${lock / 1000.0} seconds later`);
+                }
+
+                id.loginLockReleaseAt = null;
+            }
+
+            if (passwordHash.verify(password, id.hashedPassword)) {
+                user = await this.runner.findUserById(id.userId);
+                id.loginTryCount = 0
+                id.loginFailedAt = null
+            } else {
+                // login failed 
+                if (id.loginFailedAt && (Date.now() - id.loginFailedAt.valueOf() < this.options.login.lockTime)) {
+                    id.loginTryCount++
+                } else {
+                    // reset
+                    id.loginTryCount = 1;
+                }
+
+                id.loginFailedAt = new Date()
+
+                if (id.loginTryCount > this.options.login.tryLimits) {
+                    id.loginLockReleaseAt = new Date(Date.now() + this.options.login.lockTime)
+                }
+            }
+
+            //update identity
+            await this.runner.updateIdentity(id)
+        }
 
         if (user) {
             this.app.events.emit(EventKeys.UserDidLogin, user);
 
-            return user;
+            return user
         } else {
             throw error.set("login_failed", "username or password isn't correct");
         }
@@ -535,7 +554,7 @@ export class FultonUserService implements IUserService<FultonUser> {
     revokeAccessToken(userId: string, token: string): Promise<any> {
         return this.runner.revokeAccessToken(userId, token);
     }
-    
+
     revokeAllAccessTokens(userId: string): Promise<any> {
         return this.runner.revokeAllAccessTokens(userId);
     }

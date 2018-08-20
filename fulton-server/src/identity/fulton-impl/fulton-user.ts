@@ -30,10 +30,10 @@ export class FultonIdentity implements IFultonIdentity {
     @PrimaryColumn()
     id?: any;
 
-    @Column()    
+    @Column()
     userId: any;
 
-    @Column()    
+    @Column()
     type: string;
 
     // for type is local
@@ -43,6 +43,16 @@ export class FultonIdentity implements IFultonIdentity {
     username?: string;
     @Column({ length: 256 })
     hashedPassword?: string;
+
+    // for login fail
+    @Column()
+    loginTryCount?: number
+    @Column()
+    loginFailedAt?: Date
+    @Column()
+    loginLockReleaseAt?: Date
+
+    // for reset password
     @Column()
     resetPasswordToken?: string;
     @Column()
@@ -53,15 +63,15 @@ export class FultonIdentity implements IFultonIdentity {
     resetPasswordCodeTryCount?: number;
 
     // for type is oauth, only keep last tokens
-    @Column()    
+    @Column()
     sourceUserId?: string;
-    @Column()    
+    @Column()
     accessToken?: string;
-    @Column()    
+    @Column()
     refreshToken?: string;
-    @Column()    
+    @Column()
     issuedAt?: Date;
-    @Column()    
+    @Column()
     expiredAt?: Date;
 }
 
@@ -70,15 +80,15 @@ export class FultonAccessToken {
     @PrimaryColumn()
     id?: any;
 
-    @Column()    
+    @Column()
     token?: string;
-    @Column()    
+    @Column()
     issuedAt?: Date;
-    @Column()    
+    @Column()
     expiredAt?: Date;
-    @Column()    
+    @Column()
     revoked?: boolean;
 
-    @Column()    
+    @Column()
     userId?: string;
 }

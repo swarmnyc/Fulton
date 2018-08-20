@@ -1,18 +1,16 @@
+import { validate, ValidationError } from 'class-validator';
 import * as lodash from 'lodash';
+import { getMongoRepository, getRepository, MongoRepository, Repository } from 'typeorm';
 import { ColumnMetadata } from 'typeorm/metadata/ColumnMetadata';
-import { DiKeys } from '../keys';
-import { entity, inject, injectable } from '../re-export';
-import { FultonErrorObject, IEntityService, OperationManyResult, OperationOneResult, OperationResult, QueryParams, Type } from '../interfaces';
 import { EntityMetadata } from 'typeorm/metadata/EntityMetadata';
-import { EntityRunner } from './runner/entity-runner';
 import { FultonError, FultonStackError } from '../common/fulton-error';
 import { FultonLog } from '../fulton-log';
-import { getMongoRepository, getRepository, MongoRepository, Repository } from 'typeorm';
-import { Helper } from '../helpers/helper';
-import { IFultonApp } from '../fulton-app';
 import { IUser } from '../identity';
+import { IEntityService, OperationManyResult, OperationOneResult, OperationResult, QueryParams, Type } from '../interfaces';
+import { DiKeys } from '../keys';
+import { injectable } from '../re-export';
 import { Service } from '../services';
-import { validate, ValidationError } from 'class-validator';
+import { EntityRunner } from './runner/entity-runner';
 
 @injectable()
 export class EntityService<TEntity> extends Service implements IEntityService<TEntity> {

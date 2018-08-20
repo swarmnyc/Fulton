@@ -237,7 +237,7 @@ describe('Identity Integration Test', () => {
 
         let token = result.body.data.token
 
-        result = await httpTester.post("/auth/forgot-password", {
+        result = await httpTester.post("/auth/verify-reset-password", {
             token: token,
             code: code
         });
@@ -245,7 +245,7 @@ describe('Identity Integration Test', () => {
         expect(result.response.statusCode).toEqual(200);
 
 
-        result = await httpTester.post("/auth/forgot-password", {
+        result = await httpTester.post("/auth/reset-password", {
             token: token,
             code: code,
             password: "123456"
@@ -279,7 +279,7 @@ describe('Identity Integration Test', () => {
 
         let token = result.body.data.token
 
-        result = await httpTester.post("/auth/forgot-password", {
+        result = await httpTester.post("/auth/verify-reset-password", {
             token: token,
             code: code
         });
@@ -290,7 +290,7 @@ describe('Identity Integration Test', () => {
         expect(id.resetPasswordCodeTryCount).toEqual(1);
 
 
-        result = await httpTester.post("/auth/forgot-password", {
+        result = await httpTester.post("/auth/verify-reset-password", {
             token: token,
             code: code
         });
@@ -300,7 +300,7 @@ describe('Identity Integration Test', () => {
         id = await identityRepository.findOne({ resetPasswordToken: token })
         expect(id.resetPasswordCodeTryCount).toEqual(2);
 
-        result = await httpTester.post("/auth/forgot-password", {
+        result = await httpTester.post("/auth/verify-reset-password", {
             token: token,
             code: code
         });

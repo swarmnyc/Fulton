@@ -31,7 +31,12 @@ describe('entity service', () => {
 
         createFakeConnection(app);
 
-        service = new EntityService<Employee>(new Repository<Employee>())
+        let repo = new Repository<Employee>()
+        Object.assign(repo, {
+            metadata: app.entityMetadatas.get(Employee)
+        })
+        service = new EntityService<Employee>(repo)
+
         service["app"] = app;
         service["_runner"] = new MongoEntityRunner();
         service["_runner"].entityMetadatas = app.entityMetadatas;

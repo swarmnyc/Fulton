@@ -173,7 +173,7 @@ describe('EntityRouter Integration Test', () => {
             data: data
         })
 
-        expect(result.response.statusCode).toEqual(200);
+        expect(result.response.statusCode).toEqual(201);
 
         let queryResult: OperationOneResult<Employee> = result.body;
         expect(queryResult.data).toEqual(data);

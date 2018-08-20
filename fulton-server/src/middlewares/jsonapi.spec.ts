@@ -13,6 +13,8 @@ import { queryParamsParser } from "./query-params-parser";
 import { sampleData } from "../../spec/support/sample-data";
 
 class EmployeeEntityService implements IEntityService<Employee> {
+    entityType: Type<Employee> = Employee
+
     find(queryParams: QueryParams): Promise<OperationManyResult<Employee>> {
         let data: Employee[] = [];
 

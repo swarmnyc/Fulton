@@ -1,10 +1,10 @@
 import * as lodash from 'lodash';
 import * as passport from 'passport';
-import { EventKeys } from '../keys';
 import { IFultonApp } from '../fulton-app';
-import { IUser, IUserService, IIdentityRouter, StrategyVerifyDone, OauthStrategyVerifier, AccessToken } from './interfaces';
-import { Request, Response, NextFunction } from '../interfaces';
-import { FultonLog } from '../fulton-log';
+import { EventKeys } from '../keys';
+import { defaultAuthenticate } from './authenticate-middlewares';
+import { defaultBearerStrategyVerifier, defaultLoginStrategyVerifier, defaultOauthStrategyVerifierFn } from './identity-defaults';
+import { IIdentityRouter, IUser, IUserService } from './interfaces';
 import { OauthStrategyOptions } from './options/oauth-strategy-options';
 import { StrategyOptions } from './options/strategy-options';
 
@@ -118,86 +118,4 @@ module.exports = async function identityInitializer(app: IFultonApp) {
     router.init(app, opts)
 
     app.events.emit(EventKeys.AppDidInitIdentity, this);
-}
-
-function defaultAuthenticate(req: Request, res: Response, next: NextFunction) {
-    // authenticate every request to get user info.
-    let fn = passport.authenticate(req.fultonApp.options.identity.defaultAuthSupportStrategies, function (error, user, _) {
-        if (error) {
-            next(error);
-        } else if (user) {
-            req.logIn(user, { session: false }, (err) => {
-                next(err);
-            });
-        } else {
-            if (req.fultonApp.options.identity.defaultAuthenticateErrorIfFailure) {
-                // TODO: web-view
-                res.sendStatus(401);
-            } else {
-                next();
-            }
-        }
-
-    });
-
-    fn(req, res, next);
-}
-
-function defaultLoginStrategyVerifier(req: Request, username: string, password: string, done: StrategyVerifyDone) {
-    req.userService
-        .login(username, password)
-        .then((user: IUser) => {
-            done(null, user);
-        }).catch((error: any) => {
-            FultonLog.warn("login failed by", error)
-            done(error);
-        });
-}
-
-/**
- * for TokenStrategyVerify like bearer
- */
-async function defaultBearerStrategyVerifier(req: Request, token: string, done: StrategyVerifyDone) {
-    try {
-        let user = await req.userService.loginByAccessToken(token);
-
-        if (user) {
-            user.currentToken = token
-
-            return done(null, user);
-        } else {
-            return done(null, false);
-        }
-    } catch (error) {
-        FultonLog.warn("loginByAccessToken failed by", error)
-        return done(null, false);
-    }
-}
-
-/**
- * the wrapper of auth verifier, the purpose of it is to call req.userService.loginByOauth with the formated parameters.
- */
-function defaultOauthStrategyVerifierFn(options: OauthStrategyOptions): OauthStrategyVerifier {
-    return (req: Request, access_token: string, fresh_token: string, profile: any, done: StrategyVerifyDone) => {
-        let token: AccessToken = {
-            provider: options.name,
-            access_token: access_token,
-            refresh_token: fresh_token
-        }
-
-        if (options.profileTransformer) {
-            profile = options.profileTransformer(profile);
-        }
-
-        // if the state has value, it should be userId
-        var userId = req.query["state"];
-
-        req.userService
-            .loginByOauth(userId, token, profile)
-            .then((user: IUser) => {
-                done(null, user);
-            }).catch((error: any) => {
-                done(error);
-            });
-    }
 }

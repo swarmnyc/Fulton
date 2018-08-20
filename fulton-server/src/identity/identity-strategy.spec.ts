@@ -4,10 +4,11 @@ import { Request, Response } from "../interfaces";
 import { AccessToken } from './interfaces';
 import { FultonApp } from "../fulton-app";
 import { FultonAppOptions } from "../options/fulton-app-options";
-import { FultonIdentityImpl } from './fulton-impl/fulton-impl';
 import { GoogleStrategy } from "./strategies/google-strategy";
 import { HttpTester } from "../test/http-tester";
 import { UserServiceMock } from "../../spec/helpers/user-service-mock";
+import { defaultLoginStrategyVerifier, defaultOauthStrategyVerifierFn } from './identity-defaults';
+import { OauthStrategyOptions } from './options/oauth-strategy-options';
 
 class MyApp extends FultonApp {
     protected onInit(options: FultonAppOptions): void | Promise<void> {
@@ -20,18 +21,20 @@ class MyApp extends FultonApp {
         this.options.identity.addStrategy({
             name: "login",
             path: "/test/login",
-            httpMethod: "post"
+            httpMethod: "post",
+            verifier: defaultLoginStrategyVerifier
         }, LocalStrategy);
 
-        this.options.identity.addStrategy({
+        this.options.identity.addStrategy(Object.assign(new OauthStrategyOptions("", ""), {
             path: "/test/google",
             callbackPath: "/test/google/callback",
             scope: "profile email",
             clientId: "test",
-            clientSecret: "test"
-        }, GoogleStrategy);
+            clientSecret: "test",
+            verifierFn: defaultOauthStrategyVerifierFn
+        }), GoogleStrategy);
 
-        this.options.identity.addStrategy({
+        this.options.identity.addStrategy(Object.assign(new OauthStrategyOptions("", ""), {
             path: "/test/github",
             callbackPath: "/test/github/callback",
             scope: "read:user user:email",
@@ -41,8 +44,9 @@ class MyApp extends FultonApp {
             },
             callbackAuthenticateOptions: {
                 successRedirect: "/"
-            }
-        }, require("passport-github").Strategy);
+            },
+            verifierFn: defaultOauthStrategyVerifierFn
+        }), require("passport-github").Strategy);
     }
 }
 

@@ -15,6 +15,8 @@ import { FultonAppOptions } from '../../src/options/fulton-app-options';
 
 @injectable()
 class FakeEntityService implements IEntityService<any>{
+    entityType: Type<any>;
+
     find(queryParams: QueryParams): Promise<OperationManyResult<any>> {
         throw new Error("Method not implemented.");
     }

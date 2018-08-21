@@ -1,6 +1,6 @@
 import { IFultonApp } from '../fulton-app';
 import { FultonIdentityRouter } from './fulton-impl/fulton-identity-router';
-import { FultonAccessToken, FultonIdentity, FultonUser } from './fulton-impl/fulton-user';
+import { FultonUserAccessToken, FultonUserClaims, FultonUser } from './fulton-impl/fulton-user';
 import { FultonUserService } from './fulton-impl/fulton-user-service';
 import * as passport from 'passport';
 
@@ -14,7 +14,7 @@ module.exports = async function (app: IFultonApp) {
     if (idOptions.userService == null) {
         idOptions.userService = FultonUserService
 
-        app.options.entities.push(FultonUser, FultonAccessToken, FultonIdentity)
+        app.options.entities.push(FultonUser, FultonUserAccessToken, FultonUserClaims)
     }
 
     if (idOptions.router == null) {

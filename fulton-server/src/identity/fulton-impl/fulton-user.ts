@@ -1,5 +1,5 @@
 import { Column, Entity, PrimaryColumn } from 'typeorm';
-import { IFultonIdentity, IFultonUser } from '../interfaces';
+import { IFultonUserClaims, IFultonUser } from '../interfaces';
 
 @Entity("users")
 export class FultonUser implements IFultonUser {
@@ -25,8 +25,8 @@ export class FultonUser implements IFultonUser {
     status: string;
 }
 
-@Entity("users_identities")
-export class FultonIdentity implements IFultonIdentity {
+@Entity("users_claims")
+export class FultonUserClaims implements IFultonUserClaims {
     @PrimaryColumn()
     id?: any;
 
@@ -76,7 +76,7 @@ export class FultonIdentity implements IFultonIdentity {
 }
 
 @Entity("user_access_tokens")
-export class FultonAccessToken {
+export class FultonUserAccessToken {
     @PrimaryColumn()
     id?: any;
 

@@ -43,7 +43,7 @@ export interface IFultonUser extends IUser {
     registeredAt?: Date
 }
 
-export interface IFultonIdentity {
+export interface IFultonUserClaims {
     id?: string;
     type?: string;
     [key: string]: any;
@@ -58,7 +58,7 @@ export interface IIdentityRouter {
     logout(req: Request, res: Response, next: NextFunction): void
     profile(req: Request, res: Response, next: NextFunction): void
     updateProfile(req: Request, res: Response, next: NextFunction): void
-    updateLocalIdentity(req: Request, res: Response, next: NextFunction): void
+    updateLocalClaim(req: Request, res: Response, next: NextFunction): void
 
     issueAccessToken(req: Request, res: Response): void
 
@@ -84,12 +84,12 @@ export interface IUserService<T extends IUser> {
     loginByAccessToken(token: string): Promise<T>;
     register(input: RegisterModel): Promise<T>;
     updateProfile(userId: any, input:T): Promise<void>;
-    updateLocalStrategy(userId: any, input:UpdateLocalModel): Promise<void>;
+    updateLocalClaim(userId: any, input:UpdateLocalModel): Promise<void>;
     issueAccessToken(user: T): Promise<AccessToken>;
     forgotPassword(usernameOrEmail: string): Promise<ForgotPasswordModel>;
     resetPassword(token: string, code: string, password: string): Promise<void>;
     verifyResetPassword(token: string, code: string): Promise<void>;
-    getUserIdentities(user: T): Promise<IFultonIdentity[]>;
+    getUserIdentities(user: T): Promise<IFultonUserClaims[]>;
     revokeAccessToken(userId: string, token: string): Promise<void>;
     revokeAllAccessTokens(userId: string): Promise<void>;
     //refreshAccessToken(token: string): Promise<AccessToken>;

@@ -63,7 +63,7 @@ export class FultonIdentityRouter implements IIdentityRouter {
         }
 
         if (this.options.profile.updateLocalIdentityEnabled) {
-            this.app.express.post(this.options.profile.updateLocalIdentityPath, this.updateLocalIdentity.bind(this))
+            this.app.express.post(this.options.profile.updateLocalIdentityPath, this.updateLocalClaim.bind(this))
         }
     }
 
@@ -276,9 +276,9 @@ export class FultonIdentityRouter implements IIdentityRouter {
         }
     }
 
-    updateLocalIdentity(req: Request, res: Response, next: NextFunction) {
+    updateLocalClaim(req: Request, res: Response, next: NextFunction) {
         if (req.isAuthenticated()) {
-            req.userService.updateLocalStrategy(req.user.id, req.body).then(() => {
+            req.userService.updateLocalClaim(req.user.id, req.body).then(() => {
                 res.send({
                     status: 200
                 })

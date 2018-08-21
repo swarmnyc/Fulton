@@ -1,7 +1,7 @@
 import { getMongoRepository } from "typeorm";
 import { FultonApp } from '../../src/fulton-app';
 import * as cryptoHelper from '../../src/helpers/crypto-helper';
-import { FultonAccessToken, FultonIdentity, FultonUser } from "../../src/identity/fulton-impl/fulton-user";
+import { FultonUserAccessToken, FultonUserClaims, FultonUser } from "../../src/identity/fulton-impl/fulton-user";
 import { FultonUserService } from '../../src/identity/fulton-impl/fulton-user-service';
 import { AccessToken, IOauthProfile } from '../../src/identity/interfaces';
 import { Request, Response } from "../../src/interfaces";
@@ -116,7 +116,7 @@ describe('Identity Integration Test', () => {
             try {
                 await prepareUser();
 
-                var identityRepository = getMongoRepository(FultonIdentity)
+                var claimRepository = getMongoRepository(FultonUserClaims)
 
                 await httpTester.post("/auth/login", { username: "test", password: "test321" });
 
@@ -124,15 +124,15 @@ describe('Identity Integration Test', () => {
 
                 await httpTester.post("/auth/login", { username: "test", password: "test321" });
 
-                var id = await identityRepository.findOne({ "type": "local", username: "test" })
-                expect(id.loginTryCount).toEqual(3);
-                expect(id.loginLockReleaseAt).toBeFalsy();
+                var claim = await claimRepository.findOne({ "type": "local", username: "test" })
+                expect(claim.loginTryCount).toEqual(3);
+                expect(claim.loginLockReleaseAt).toBeFalsy();
 
                 await httpTester.post("/auth/login", { username: "test", password: "test321" });
 
-                id = await identityRepository.findOne({ "type": "local", username: "test" })
-                expect(id.loginTryCount).toEqual(4);
-                expect(id.loginLockReleaseAt).toBeTruthy();
+                claim = await claimRepository.findOne({ "type": "local", username: "test" })
+                expect(claim.loginTryCount).toEqual(4);
+                expect(claim.loginLockReleaseAt).toBeTruthy();
 
                 var result = await httpTester.post("/auth/login", { username: "test", password: "test123" });
 
@@ -207,13 +207,13 @@ describe('Identity Integration Test', () => {
         expect(user).not.toBeNull()
 
         var userRepository = getMongoRepository(FultonUser)
-        var identityRepository = getMongoRepository(FultonIdentity)
+        var claimRepository = getMongoRepository(FultonUserClaims)
 
         var userCount = await userRepository.count()
-        var identityCount = await identityRepository.count()
+        var claimCount = await claimRepository.count()
 
         expect(userCount).toEqual(1)
-        expect(identityCount).toEqual(1)
+        expect(claimCount).toEqual(1)
     })
 
     it('should create link to the user by oauth login', async () => {
@@ -239,13 +239,13 @@ describe('Identity Integration Test', () => {
         expect(user1.id).toEqual(user2.id)
 
         var userRepository = getMongoRepository(FultonUser)
-        var identityRepository = getMongoRepository(FultonIdentity)
+        var claimRepository = getMongoRepository(FultonUserClaims)
 
         var userCount = await userRepository.count()
-        var identityCount = await identityRepository.count()
+        var claimCount = await claimRepository.count()
 
         expect(userCount).toEqual(1)
-        expect(identityCount).toEqual(2)
+        expect(claimCount).toEqual(2)
     })
 
     it('should create fail to link user by oauth login', async () => {
@@ -318,7 +318,7 @@ describe('Identity Integration Test', () => {
     it('should revoke reset password token', async () => {
         await prepareUser();
 
-        var identityRepository = getMongoRepository(FultonIdentity)
+        var claimRepository = getMongoRepository(FultonUserClaims)
         let code = "0000"
 
         let result = await httpTester.post("/auth/forgot-password", {
@@ -337,8 +337,8 @@ describe('Identity Integration Test', () => {
 
         expect(result.response.statusCode).toEqual(400);
 
-        let id = await identityRepository.findOne({ resetPasswordToken: token })
-        expect(id.resetPasswordCodeTryCount).toEqual(1);
+        let claim = await claimRepository.findOne({ resetPasswordToken: token })
+        expect(claim.resetPasswordCodeTryCount).toEqual(1);
 
 
         result = await httpTester.post("/auth/verify-reset-password", {
@@ -348,8 +348,8 @@ describe('Identity Integration Test', () => {
 
         expect(result.response.statusCode).toEqual(400);
 
-        id = await identityRepository.findOne({ resetPasswordToken: token })
-        expect(id.resetPasswordCodeTryCount).toEqual(2);
+        claim = await claimRepository.findOne({ resetPasswordToken: token })
+        expect(claim.resetPasswordCodeTryCount).toEqual(2);
 
         result = await httpTester.post("/auth/verify-reset-password", {
             token: token,
@@ -358,8 +358,8 @@ describe('Identity Integration Test', () => {
 
         expect(result.response.statusCode).toEqual(400);
 
-        id = await identityRepository.findOne({ resetPasswordToken: token })
-        expect(id).toBeFalsy();
+        claim = await claimRepository.findOne({ resetPasswordToken: token })
+        expect(claim).toBeFalsy();
     });
 
 
@@ -374,7 +374,7 @@ describe('Identity Integration Test', () => {
 
         expect(result.response.statusCode).toEqual(200);
 
-        var tokenRepository = getMongoRepository(FultonAccessToken)
+        var tokenRepository = getMongoRepository(FultonUserAccessToken)
 
         var count = await tokenRepository.count({
             revoked: true
@@ -399,7 +399,7 @@ describe('Identity Integration Test', () => {
 
         expect(result.response.statusCode).toEqual(200);
 
-        var tokenRepository = getMongoRepository(FultonAccessToken)
+        var tokenRepository = getMongoRepository(FultonUserAccessToken)
 
         var count = await tokenRepository.count({
             revoked: true

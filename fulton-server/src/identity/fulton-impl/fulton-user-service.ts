@@ -2,12 +2,12 @@ import * as jws from 'jws';
 import * as lodash from 'lodash';
 import * as passwordHash from 'password-hash';
 import * as validator from 'validator';
-import { AccessToken, ForgotPasswordModel, ForgotPasswordNotificationModel, IFultonUser, IOauthProfile, IUserService, RegisterModel, WelcomeNotificationModel, IFultonIdentity, UpdateLocalModel } from '../interfaces';
+import { AccessToken, ForgotPasswordModel, ForgotPasswordNotificationModel, IFultonUser, IOauthProfile, IUserService, RegisterModel, WelcomeNotificationModel, IFultonUserClaims, UpdateLocalModel } from '../interfaces';
 import { codeGenerate, numberCodeGenerate, timingSafeEqual } from '../../helpers/crypto-helper';
 import { DiKeys, EventKeys } from '../../keys';
 import { EntityMetadata } from 'typeorm/metadata/EntityMetadata';
 import { ErrorCodes } from '../../common/fulton-error';
-import { FultonAccessToken, FultonIdentity, FultonUser } from './fulton-user';
+import { FultonUserAccessToken, FultonUserClaims, FultonUser } from './fulton-user';
 import { FultonError } from '../../common';
 import { getManager, MongoEntityManager, MongoRepository } from 'typeorm';
 import { Helper } from '../../helpers/helper';
@@ -35,17 +35,17 @@ interface IRunner {
     convertUserId(userId: any): any;
     updateMetadata(metadata: EntityMetadata): void;
     addUser(user: FultonUser): Promise<FultonUser>
-    addAccessToken(accessToken: FultonAccessToken): Promise<any>
-    addIdentity(identify: FultonIdentity): Promise<any>
+    addAccessToken(accessToken: FultonUserAccessToken): Promise<any>
+    addClaim(claim: FultonUserClaims): Promise<any>
     updateUser(userId: any, fields: any): Promise<any>;
-    updateIdentity(identifyId: any, update: Partial<FultonIdentity>): Promise<any>
+    updateClaim(claimId: any, update: Partial<FultonUserClaims>): Promise<any>
     findUserById(userId: any): Promise<FultonUser>;
     findUserByOauth(type: string, sourceUserId: string): Promise<FultonUser>;
     findUserByToken(token: string): Promise<FultonUser>;
-    findIdentities(user: IFultonUser): Promise<FultonIdentity[]>
-    findIdentity(type: string, sourceUserId: string): Promise<FultonIdentity>;
-    findIdentityByLocal(usernameOrEmail: string): Promise<FultonIdentity>;
-    findIdentityByLocalResetToken(token: string, code: string): Promise<FultonIdentity>;
+    findClaims(user: IFultonUser): Promise<FultonUserClaims[]>
+    findClaim(type: string, sourceUserId: string): Promise<FultonUserClaims>;
+    findClaimByLocal(usernameOrEmail: string): Promise<FultonUserClaims>;
+    findClaimByResetPasswordToken(token: string, code: string): Promise<FultonUserClaims>;
     countUserName(name: string): Promise<number>;
     countUserEmail(email: string): Promise<number>;
     revokeAccessToken(userId: string, token: string): Promise<any>;
@@ -55,17 +55,17 @@ interface IRunner {
 class MongoRunner implements IRunner {
     options: IdentityOptions;
     userRepository: MongoRepository<FultonUser>;
-    identityRepository: MongoRepository<FultonIdentity>;
-    tokenRepository: MongoRepository<FultonAccessToken>;
+    claimRepository: MongoRepository<FultonUserClaims>;
+    tokenRepository: MongoRepository<FultonUserAccessToken>;
 
     constructor(private app: IFultonApp, private manager: MongoEntityManager) {
         this.options = app.options.identity;
         this.userRepository = manager.getMongoRepository(FultonUser) as any;
-        this.identityRepository = manager.getMongoRepository(FultonIdentity) as any;
-        this.tokenRepository = manager.getMongoRepository(FultonAccessToken) as any;
+        this.claimRepository = manager.getMongoRepository(FultonUserClaims) as any;
+        this.tokenRepository = manager.getMongoRepository(FultonUserAccessToken) as any;
 
         this.updateMetadata(this.userRepository.metadata);
-        this.updateMetadata(this.identityRepository.metadata);
+        this.updateMetadata(this.claimRepository.metadata);
         this.updateMetadata(this.tokenRepository.metadata);
     }
 
@@ -74,7 +74,7 @@ class MongoRunner implements IRunner {
     }
 
     updateMetadata(metadata: EntityMetadata) {
-        // make metadata is for mongo 
+        // make metadata for mongo 
         let idColumn = metadata.ownColumns.find((c) => c.propertyName == "id")
 
         idColumn.isObjectId = true;
@@ -97,27 +97,27 @@ class MongoRunner implements IRunner {
         return this.userRepository.updateOne({ "_id": userId }, { $set: fields });
     }
 
-    addAccessToken(accessToken: FultonAccessToken): Promise<any> {
+    addAccessToken(accessToken: FultonUserAccessToken): Promise<any> {
         return this.tokenRepository.insertOne(accessToken);
     }
 
-    addIdentity(identity: FultonIdentity): Promise<any> {
-        return this.identityRepository.insertOne(identity);
+    addClaim(identity: FultonUserClaims): Promise<any> {
+        return this.claimRepository.insertOne(identity);
     }
 
-    updateIdentity(id: any, update: Partial<FultonIdentity>): Promise<any> {
-        return this.identityRepository.updateOne({ "_id": id }, { $set: update });
+    updateClaim(id: any, update: Partial<FultonUserClaims>): Promise<any> {
+        return this.claimRepository.updateOne({ "_id": id }, { $set: update });
     }
 
     countUserName(name: string): Promise<number> {
-        return this.identityRepository.count({
+        return this.claimRepository.count({
             "type": "local",
             username: name,
         })
     }
 
     countUserEmail(email: string): Promise<number> {
-        return this.identityRepository.count({
+        return this.claimRepository.count({
             "type": "local",
             email: email,
         })
@@ -128,13 +128,13 @@ class MongoRunner implements IRunner {
     }
 
     async findUserByOauth(type: string, sourceUserId: string): Promise<FultonUser> {
-        var id = await this.identityRepository.findOne({
+        var claim = await this.claimRepository.findOne({
             "type": type,
             "sourceUserId": sourceUserId
         })
 
-        if (id) {
-            return this.userRepository.findOne(id.userId)
+        if (claim) {
+            return this.userRepository.findOne(claim.userId)
         } else {
             return null;
         }
@@ -159,28 +159,28 @@ class MongoRunner implements IRunner {
 
     }
 
-    findIdentities(user: IFultonUser): Promise<FultonIdentity[]> {
-        return this.identityRepository.find({
+    findClaims(user: IFultonUser): Promise<FultonUserClaims[]> {
+        return this.claimRepository.find({
             "userId": user.id
         });
     }
 
-    findIdentity(type: string, sourceUserId: string): Promise<FultonIdentity> {
+    findClaim(type: string, sourceUserId: string): Promise<FultonUserClaims> {
         if (type == "local") {
-            return this.identityRepository.findOne({
+            return this.claimRepository.findOne({
                 "type": type,
                 "userId": sourceUserId
             });
         } else {
-            return this.identityRepository.findOne({
+            return this.claimRepository.findOne({
                 "type": type,
                 "sourceUserId": sourceUserId
             });
         }
     }
 
-    findIdentityByLocal(nameOrEmail: string): Promise<FultonIdentity> {
-        return this.identityRepository.findOne({
+    findClaimByLocal(nameOrEmail: string): Promise<FultonUserClaims> {
+        return this.claimRepository.findOne({
             "type": "local",
             "$or": [
                 { username: nameOrEmail },
@@ -189,21 +189,21 @@ class MongoRunner implements IRunner {
         } as any);
     }
 
-    async findIdentityByLocalResetToken(token: string, code: string): Promise<FultonIdentity> {
-        let id = await this.identityRepository.findOne({
+    async findClaimByResetPasswordToken(token: string, code: string): Promise<FultonUserClaims> {
+        let claim = await this.claimRepository.findOne({
             "type": "local",
             "resetPasswordToken": token,
             "resetPasswordExpiredAt": { "$gt": new Date() }
         } as any);
 
-        if (id) {
+        if (claim) {
             // check code, if reach the try-limits, then revoke the token.
-            if (id.resetPasswordCode == code) {
-                return id;
-            } else if (id.resetPasswordCodeTryCount >= this.options.forgotPassword.tryLimits - 1) {
-                await this.identityRepository.updateMany({ "resetPasswordToken": token }, { $set: { resetPasswordToken: null } })
+            if (claim.resetPasswordCode == code) {
+                return claim;
+            } else if (claim.resetPasswordCodeTryCount >= this.options.forgotPassword.tryLimits - 1) {
+                await this.claimRepository.updateMany({ "resetPasswordToken": token }, { $set: { resetPasswordToken: null } })
             } else {
-                await this.identityRepository.updateMany({ "resetPasswordToken": token }, { $inc: { resetPasswordCodeTryCount: 1 } })
+                await this.claimRepository.updateMany({ "resetPasswordToken": token }, { $inc: { resetPasswordCodeTryCount: 1 } })
             }
         }
     }
@@ -302,7 +302,7 @@ export class FultonUserService implements IUserService<FultonUser> {
         // add local identity
         var hashedPassword = passwordHash.generate(password, registerOptions.passwordHashOptions);
 
-        await this.runner.addIdentity({
+        await this.runner.addClaim({
             type: "local",
             userId: user.id,
             email: lEmail,
@@ -336,41 +336,41 @@ export class FultonUserService implements IUserService<FultonUser> {
         }
 
         var user;
-        let identity = await this.runner.findIdentityByLocal(username.toLocaleLowerCase())
-        let idUpdate = new FultonIdentity()
-        if (identity) {
+        let claim = await this.runner.findClaimByLocal(username.toLocaleLowerCase())
+        let claimUpdate = new FultonUserClaims()
+        if (claim) {
             // for locking
-            if (identity.loginLockReleaseAt) {
-                let lock = identity.loginLockReleaseAt.valueOf() - Date.now();
+            if (claim.loginLockReleaseAt) {
+                let lock = claim.loginLockReleaseAt.valueOf() - Date.now();
                 if (lock > 0) {
                     throw error.set("login_failed", `account locked, try ${lock / 1000.0} seconds later`);
                 }
 
-                idUpdate.loginLockReleaseAt = null;
+                claimUpdate.loginLockReleaseAt = null;
             }
 
-            if (passwordHash.verify(password, identity.hashedPassword)) {
-                user = await this.runner.findUserById(identity.userId);
-                idUpdate.loginTryCount = 0
-                idUpdate.loginFailedAt = null
+            if (passwordHash.verify(password, claim.hashedPassword)) {
+                user = await this.runner.findUserById(claim.userId);
+                claimUpdate.loginTryCount = 0
+                claimUpdate.loginFailedAt = null
             } else {
                 // login failed 
-                if (identity.loginFailedAt && (Date.now() - identity.loginFailedAt.valueOf() < this.options.login.lockTime)) {
-                    idUpdate.loginTryCount = identity.loginTryCount + 1
+                if (claim.loginFailedAt && (Date.now() - claim.loginFailedAt.valueOf() < this.options.login.lockTime)) {
+                    claimUpdate.loginTryCount = claim.loginTryCount + 1
                 } else {
                     // reset
-                    idUpdate.loginTryCount = 1;
+                    claimUpdate.loginTryCount = 1;
                 }
 
-                idUpdate.loginFailedAt = new Date()
+                claimUpdate.loginFailedAt = new Date()
 
-                if (idUpdate.loginTryCount > this.options.login.tryLimits) {
-                    idUpdate.loginLockReleaseAt = new Date(Date.now() + this.options.login.lockTime)
+                if (claimUpdate.loginTryCount > this.options.login.tryLimits) {
+                    claimUpdate.loginLockReleaseAt = new Date(Date.now() + this.options.login.lockTime)
                 }
             }
 
             //update identity
-            await this.runner.updateIdentity(identity.id, idUpdate)
+            await this.runner.updateClaim(claim.id, claimUpdate)
         }
 
         if (user) {
@@ -393,24 +393,24 @@ export class FultonUserService implements IUserService<FultonUser> {
         let user;
 
         // verify existence
-        let identity = await this.runner.findIdentity(token.provider, profile.id);
+        let claim = await this.runner.findClaim(token.provider, profile.id);
 
-        if (identity) {
+        if (claim) {
             // existed
-            let idUpdate = new FultonIdentity()
+            let claimUpdate = new FultonUserClaims()
 
-            if (userId && userId != identity.userId.toString()) {
+            if (userId && userId != claim.userId.toString()) {
                 throw error.set("existed", "the account has been linked.")
             }
 
             // update token info
-            idUpdate.accessToken = token.access_token
-            idUpdate.refreshToken = token.refresh_token || identity.refreshToken
-            idUpdate.issuedAt = new Date()
+            claimUpdate.accessToken = token.access_token
+            claimUpdate.refreshToken = token.refresh_token || claim.refreshToken
+            claimUpdate.issuedAt = new Date()
 
-            await this.runner.updateIdentity(identity.id, idUpdate);
+            await this.runner.updateClaim(claim.id, claimUpdate);
 
-            userId = identity.userId
+            userId = claim.userId
         } else {
             // not existed
             if (userId) {
@@ -433,7 +433,7 @@ export class FultonUserService implements IUserService<FultonUser> {
                 userId = user.id;
             }
 
-            identity = await this.runner.addIdentity({
+            claim = await this.runner.addClaim({
                 type: token.provider,
                 userId: userId,
                 accessToken: token.access_token,
@@ -464,7 +464,7 @@ export class FultonUserService implements IUserService<FultonUser> {
     async issueAccessToken(user: IFultonUser): Promise<AccessToken> {
         let token = this.encodeJwtToken(user)
 
-        let userToken: FultonAccessToken = {
+        let userToken: FultonUserAccessToken = {
             token: token,
             issuedAt: new Date(),
             expiredAt: new Date(Date.now() + (this.options.accessToken.duration * 1000)),
@@ -488,16 +488,20 @@ export class FultonUserService implements IUserService<FultonUser> {
         return this.runner.updateUser(userId, input);
     }
 
-    async updateLocalStrategy(userId: any, input: UpdateLocalModel): Promise<void> {
+    async updateLocalClaim(userId: any, input: UpdateLocalModel): Promise<void> {
         if (input == null) throw new FultonError(ErrorCodes.Invalid);
         let error = new FultonError("update_failed");
 
-        let id = await this.runner.findIdentity("local", userId)
-        let update = new FultonIdentity()
+        let claim = await this.runner.findClaim("local", userId)
+        let claimUpdate = new FultonUserClaims()
 
         if (input.username) {
             input.username = input.username.toLocaleLowerCase()
-            if (input.username != id.username) {
+            if (input.username != claim.username) {
+                if (!this.verifyUserName(error, input.username)) {
+                    throw error
+                }
+
                 //check username
                 let count = await this.runner.countUserName(input.username);
 
@@ -505,13 +509,17 @@ export class FultonUserService implements IUserService<FultonUser> {
                     throw error.addDetail("username", "existed", "the username is existed")
                 }
 
-                update.username = input.username
+                claimUpdate.username = input.username
             }
         }
 
         if (input.email) {
             input.email = input.email.toLocaleLowerCase()
-            if (input.email != id.email) {
+            if (input.email != claim.email) {
+                if (!this.verifyEmail(error, input.email)) {
+                    throw error;
+                }
+
                 //check username
                 let count = await this.runner.countUserEmail(input.email);
 
@@ -519,47 +527,50 @@ export class FultonUserService implements IUserService<FultonUser> {
                     throw error.addDetail("email", "existed", "the email is existed")
                 }
 
-                update.email = input.email
+                claimUpdate.email = input.email
             }
         }
 
         if (input.password) {
-            update.hashedPassword = passwordHash.generate(input.password, this.options.register.passwordHashOptions);
+            if (!this.verifyPassword(error, input.password)) {
+                throw error
+            }
+
+            claimUpdate.hashedPassword = passwordHash.generate(input.password, this.options.register.passwordHashOptions);
         }
 
-
-        await this.runner.updateIdentity(id.id, update);
+        await this.runner.updateClaim(claim.id, claimUpdate);
 
         return
     }
 
     async forgotPassword(usernameOrEmail: string): Promise<ForgotPasswordModel> {
-        let identity = await this.runner.findIdentityByLocal(usernameOrEmail);
-        if (identity) {
-            let idUpdate = new FultonIdentity()
+        let claim = await this.runner.findClaimByLocal(usernameOrEmail);
+        if (claim) {
+            let claimUpdate = new FultonUserClaims()
 
-            idUpdate.resetPasswordToken = codeGenerate();
-            idUpdate.resetPasswordCode = numberCodeGenerate();
-            idUpdate.resetPasswordCodeTryCount = 0;
-            idUpdate.resetPasswordExpiredAt = new Date(Date.now() + this.options.forgotPassword.duration * 1000);
+            claimUpdate.resetPasswordToken = codeGenerate();
+            claimUpdate.resetPasswordCode = numberCodeGenerate();
+            claimUpdate.resetPasswordCodeTryCount = 0;
+            claimUpdate.resetPasswordExpiredAt = new Date(Date.now() + this.options.forgotPassword.duration * 1000);
 
-            await this.runner.updateIdentity(identity.id, idUpdate);
+            await this.runner.updateClaim(claim.id, claimUpdate);
 
-            let user = await this.runner.findUserById(identity.userId);
+            let user = await this.runner.findUserById(claim.userId);
 
-            this.app.events.emit(EventKeys.UserForgotPassword, identity);
+            this.app.events.emit(EventKeys.UserForgotPassword, claim);
 
             var url = Helper.urlJoin(this.app.baseUrl, this.options.forgotPassword.verifyPath);
             this.sendForgotPasswordNotification({
                 displayName: user.displayName,
-                email: identity.email,
-                url: `${url}?token=${idUpdate.resetPasswordToken}&code=${idUpdate.resetPasswordCode}`,
-                token: idUpdate.resetPasswordToken,
-                code: idUpdate.resetPasswordCode
+                email: claim.email,
+                url: `${url}?token=${claimUpdate.resetPasswordToken}&code=${claimUpdate.resetPasswordCode}`,
+                token: claimUpdate.resetPasswordToken,
+                code: claimUpdate.resetPasswordCode
             });
 
             return {
-                token: idUpdate.resetPasswordToken,
+                token: claimUpdate.resetPasswordToken,
                 expires_in: this.options.forgotPassword.duration
             }
         } else {
@@ -571,20 +582,20 @@ export class FultonUserService implements IUserService<FultonUser> {
         let error = new FultonError(ErrorCodes.Invalid)
 
         if (this.verifyPassword(error, password)) {
-            let identity = await this.runner.findIdentityByLocalResetToken(token, code)
+            let claim = await this.runner.findClaimByResetPasswordToken(token, code)
 
-            if (identity) {
-                let idUpdate = new FultonIdentity()
+            if (claim) {
+                let claimUpdate = new FultonUserClaims()
 
-                idUpdate.hashedPassword = passwordHash.generate(password, this.options.register.passwordHashOptions)
-                idUpdate.resetPasswordCode = null;
-                idUpdate.resetPasswordCodeTryCount = null;
-                idUpdate.resetPasswordToken = null;
-                idUpdate.resetPasswordExpiredAt = null;
+                claimUpdate.hashedPassword = passwordHash.generate(password, this.options.register.passwordHashOptions)
+                claimUpdate.resetPasswordCode = null;
+                claimUpdate.resetPasswordCodeTryCount = null;
+                claimUpdate.resetPasswordToken = null;
+                claimUpdate.resetPasswordExpiredAt = null;
 
-                this.runner.updateIdentity(identity.id, idUpdate);
+                this.runner.updateClaim(claim.id, claimUpdate);
 
-                this.app.events.emit(EventKeys.UserDidResetPassword, identity);
+                this.app.events.emit(EventKeys.UserDidResetPassword, claim);
             } else {
                 throw error.set(ErrorCodes.Invalid, "the reset token and code are invalid");
             }
@@ -595,7 +606,7 @@ export class FultonUserService implements IUserService<FultonUser> {
 
     verifyResetPassword(token: string, code: string): Promise<void> {
         return new Promise((resolve, reject) => {
-            this.runner.findIdentityByLocalResetToken(token, code).then((identity) => {
+            this.runner.findClaimByResetPasswordToken(token, code).then((identity) => {
                 if (identity == null) {
                     reject(new FultonError(ErrorCodes.Invalid, "the reset token and code are invalid"))
                 } else {
@@ -609,8 +620,8 @@ export class FultonUserService implements IUserService<FultonUser> {
         throw new Error("Method not implemented.");
     }
 
-    getUserIdentities(user: IFultonUser): Promise<IFultonIdentity[]> {
-        return this.runner.findIdentities(user);
+    getUserIdentities(user: IFultonUser): Promise<IFultonUserClaims[]> {
+        return this.runner.findClaims(user);
     }
 
     revokeAccessToken(userId: string, token: string): Promise<any> {
@@ -664,44 +675,54 @@ export class FultonUserService implements IUserService<FultonUser> {
     }
 
     private verifyUserName(error: FultonError, username: any) {
+        let result: boolean = false;
+
         if (error.verifyRequired(username, "username")) {
-            let unResult: boolean;
+            let result: boolean;
             if (this.options.register.usernameVerifier instanceof Function) {
-                unResult = this.options.register.usernameVerifier(username)
+                result = this.options.register.usernameVerifier(username)
             } else {
-                unResult = this.options.register.usernameVerifier.test(username)
+                result = this.options.register.usernameVerifier.test(username)
             }
 
-            if (!unResult) {
+            if (!result) {
                 error.addDetail("username", "invalid", "the username is invalid")
             }
         }
+
+        return result;
     }
 
     private verifyPassword(error: FultonError, password: any): boolean {
-        let pwResult: boolean = false;
+        let result: boolean = false;
 
         if (error.verifyRequired(password, "password")) {
             if (this.options.register.passwordVerifier instanceof Function) {
-                pwResult = this.options.register.passwordVerifier(password)
+                result = this.options.register.passwordVerifier(password)
             } else {
-                pwResult = this.options.register.passwordVerifier.test(password)
+                result = this.options.register.passwordVerifier.test(password)
             }
 
-            if (!pwResult) {
+            if (!result) {
                 error.addDetail("password", "invalid", "the password is invalid")
             }
         }
 
-        return pwResult;
+        return result;
     }
 
     private verifyEmail(error: FultonError, email: string) {
+        let result: boolean = false;
+
         if (error.verifyRequired(email, "email")) {
-            if (!validator.isEmail(email)) {
+            result = validator.isEmail(email)
+
+            if (!result) {
                 error.addDetail("email", "invalid", "the email is invalid")
             }
         }
+
+        return result
     }
 
     private encodeJwtToken(user: IFultonUser): string {

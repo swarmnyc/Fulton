@@ -258,7 +258,7 @@ export class FultonIdentityRouter implements IIdentityRouter {
 
     profile(req: Request, res: Response, next: NextFunction) {
         if (req.isAuthenticated()) {
-            return res.send(lodash.pick(req.user, this.options.profile.readableFields))
+            res.send(lodash.pick(req.user, this.options.profile.readableFields))
         } else {
             res.sendStatus(401)
         }

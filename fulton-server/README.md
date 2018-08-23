@@ -77,7 +77,11 @@ export class ExampleApp extends FultonApp {
 }
 ```
 
-See [Options](https://swarmnyc.gitbooks.io/fulton/content/options.html) for more information.
+Fulton Server has js-docs for almost all of public classes, functions and members on its typescript declaration files. Therefore, typescript supported IDEs such as Visual Studio Code can give you Auto-Complete with documents that can improve the coding experiences as this picture.
+
+![server-options-auto-complete](/screenshots/server-options-auto-complete.gif) 
+
+As you can see, the features of Fulton Server can be very easy to change. See [Options](https://github.com/swarmnyc/fulton/wiki/server-options) for more information.
     
 
 ## Requirements
@@ -88,5 +92,25 @@ See [Options](https://swarmnyc.gitbooks.io/fulton/content/options.html) for more
 
 There are some known issues, see the notes to avoid the issues.
 - Because typescript isn't really a programming language. The ts code will compiled to javascript. And javascript doesn't have interface and generic type and a lot features which only exists on typescript for helping coding experience. After compiling, they are all gone.
+	For example, 
+	```typescript
+	// typescript
+	interface MyInterface{
+		p1: string;
+		p2: string;
+	}
+
+	class MyClass <T extends MyInterface> {
+		p1: T;
+		p2: T;
+	}
+
+	```
+	```javascript
+	// the javascript that complied from typescript
+	class MyClass {
+	}
+	// all others staff are gone.
+	```
 
 - zone.js has a problem for es2017. use es2016 for now.

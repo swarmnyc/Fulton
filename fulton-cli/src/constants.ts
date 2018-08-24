@@ -16,7 +16,7 @@ export const TemplateRoot = path.posix.join(AppRoot, "templates");
 export const CWD = process.env["CWD"] || "."
 
 export const DatabasePackages = ["typeorm", "validator", "class-validator"]
-export const Packages = ["fulton-server"]
+export const Packages = ["fulton-server", "dotenv"]
 export const DevPackages = ["@types/node", "rimraf", "ts-node", "typescript"]
 
 export const FultonConfig: IFultonConfig = loadFultonConfig();

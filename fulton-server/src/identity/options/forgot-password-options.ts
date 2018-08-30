@@ -44,11 +44,11 @@ export class ForgotPasswordOptions extends BaseOptions<ForgotPasswordOptions> {
     resetPath?: string = "/auth/reset-password";
 
     /**
-     * the duration of reset password token in seconds
+     * the duration of reset password token in milliseconds
      * 
-     * default is 30 minutes = 1800
+     * default is 30 minutes = 1,800,000
      */
-    duration?: number = 1800;
+    duration?: number = 1_800_000;
 
     /**
      * the handler for revoke forgot password
@@ -60,7 +60,19 @@ export class ForgotPasswordOptions extends BaseOptions<ForgotPasswordOptions> {
      * the try limits for failure,
      * the default value is 3
      */
-    tryLimits?: number = 3;
+    tryLimit?: number = 3;
+
+    /**
+     * fails if the user require forgot password more this limit,
+     * the default value is 10
+     */
+    requireLimit?: number = 10;
+
+    /**
+     * if users require over the requireLimit, than lock for the given time in milliseconds.
+     * the default value is 30 mins, not long because it only punishes bots. 
+     */
+    requireLockTime?: number = 1_800_000
 
     /**
      * the options for notification

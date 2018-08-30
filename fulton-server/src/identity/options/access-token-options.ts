@@ -8,11 +8,11 @@ export class AccessTokenOptions extends BaseOptions<AccessTokenOptions> {
     type?: string = "bearer";
 
     /**
-     * the duration of access token in seconds
+     * the duration of access token in milliseconds
      * 
-     * default is a mouth = 2,592,000
+     * default is 30 days = 2,592,000,000
      */
-    duration?: number = 2592000;
+    duration?: number = 2_592_000_000;
 
     /**
      * the scopes of access token, for examples, username, rolus, email

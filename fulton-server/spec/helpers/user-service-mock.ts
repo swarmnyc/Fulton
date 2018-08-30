@@ -79,7 +79,7 @@ export class UserServiceMock implements IUserService<FultonUser> {
         return Promise.resolve({
             access_token: `${user.displayName}-accessToken`,
             token_type: this.app.options.identity.accessToken.type,
-            expires_in: this.app.options.identity.accessToken.duration
+            expires_in: this.app.options.identity.accessToken.duration / 1000
         });
     }
 

@@ -62,6 +62,13 @@ export class FultonUserClaims implements IFultonUserClaims {
     @Column()
     resetPasswordCodeTryCount?: number;
 
+    @Column()
+    resetPasswordLastRequiredAt?: Date;
+    @Column()
+    resetPasswordRequireLockReleaseAt?: Date;
+    @Column()
+    resetPasswordRequireCount?: number;
+
     // for type is oauth, only keep last tokens
     @Column()
     sourceUserId?: string;

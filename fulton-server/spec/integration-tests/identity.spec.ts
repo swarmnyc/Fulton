@@ -18,6 +18,9 @@ class MyApp extends FultonApp {
         });
 
         options.identity.login.lockTime = 1000
+        
+        options.identity.forgotPassword.requireLimit = 3
+        options.identity.forgotPassword.requireLockTime = 1000
 
         options.index.handler = (req: Request, res: Response) => {
             if (req.isAuthenticated()) {
@@ -159,8 +162,6 @@ describe('Identity Integration Test', () => {
                 reject(error)
             }
         })
-
-
 
     });
 
@@ -457,5 +458,49 @@ describe('Identity Integration Test', () => {
         result = await httpTester.post("/auth/profile/local", { username: "test2"});
 
         expect(result.response.statusCode).toEqual(400);
+    });
+
+    it('should lock forgot password and release the lock', () => {
+        return new Promise(async (resolve, reject) => {
+            try {
+                await prepareUser();
+
+                var claimRepository = getMongoRepository(FultonUserClaims)
+
+                await httpTester.post("/auth/forgot-password", { username: "test" });
+
+                await httpTester.post("/auth/forgot-password", { username: "test" });
+
+                var claim = await claimRepository.findOne({ "type": "local", username: "test" })
+                expect(claim.resetPasswordRequireCount).toEqual(2);
+                expect(claim.resetPasswordRequireLockReleaseAt).toBeFalsy();
+
+                await httpTester.post("/auth/forgot-password", { username: "test" });
+
+                claim = await claimRepository.findOne({ "type": "local", username: "test" })
+                expect(claim.resetPasswordRequireCount).toEqual(3);
+                expect(claim.resetPasswordRequireLockReleaseAt).toBeTruthy();
+
+                var result = await httpTester.post("/auth/forgot-password", { username: "test" });
+
+                expect(result.response.statusCode).toEqual(400);
+                expect(result.body.error.message).toContain("account locked");
+
+                setTimeout(async () => {
+                    try {
+                        let result = await httpTester.post("/auth/forgot-password", { username: "test" });
+                
+                        expect(result.response.statusCode).toEqual(200);
+
+                        resolve()
+
+                    } catch (error) {
+                        reject(error)
+                    }
+                }, 2000);
+            } catch (error) {
+                reject(error)
+            }
+        });
     });
 });

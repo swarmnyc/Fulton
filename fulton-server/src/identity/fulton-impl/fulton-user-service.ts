@@ -200,7 +200,7 @@ class MongoRunner implements IRunner {
             // check code, if reach the try-limits, then revoke the token.
             if (claim.resetPasswordCode == code) {
                 return claim;
-            } else if (claim.resetPasswordCodeTryCount >= this.options.forgotPassword.tryLimits - 1) {
+            } else if (claim.resetPasswordCodeTryCount >= this.options.forgotPassword.tryLimit - 1) {
                 await this.claimRepository.updateMany({ "resetPasswordToken": token }, { $set: { resetPasswordToken: null } })
             } else {
                 await this.claimRepository.updateMany({ "resetPasswordToken": token }, { $inc: { resetPasswordCodeTryCount: 1 } })
@@ -364,7 +364,7 @@ export class FultonUserService implements IUserService<FultonUser> {
 
                 claimUpdate.loginFailedAt = new Date()
 
-                if (claimUpdate.loginTryCount > this.options.login.tryLimits) {
+                if (claimUpdate.loginTryCount > this.options.login.tryLimit) {
                     claimUpdate.loginLockReleaseAt = new Date(Date.now() + this.options.login.lockTime)
                 }
             }
@@ -467,7 +467,7 @@ export class FultonUserService implements IUserService<FultonUser> {
         let userToken: FultonUserAccessToken = {
             token: token,
             issuedAt: new Date(),
-            expiredAt: new Date(Date.now() + (this.options.accessToken.duration * 1000)),
+            expiredAt: new Date(Date.now() + (this.options.accessToken.duration)),
             revoked: false,
             userId: user.id
         };
@@ -477,7 +477,7 @@ export class FultonUserService implements IUserService<FultonUser> {
         return {
             access_token: token,
             token_type: this.options.accessToken.type,
-            expires_in: this.options.accessToken.duration
+            expires_in: this.options.accessToken.duration / 1000 // local use second
         }
     }
 
@@ -549,10 +549,31 @@ export class FultonUserService implements IUserService<FultonUser> {
         if (claim) {
             let claimUpdate = new FultonUserClaims()
 
+            if (claim.resetPasswordRequireLockReleaseAt) {
+                let lock = claim.resetPasswordRequireLockReleaseAt.valueOf() - Date.now();
+                if (lock > 0) {
+                    throw new FultonError("require_failed", `account locked, try ${lock / 1000.0} seconds later`);
+                }
+
+                claimUpdate.resetPasswordRequireLockReleaseAt = null;
+            }
+
             claimUpdate.resetPasswordToken = codeGenerate();
             claimUpdate.resetPasswordCode = numberCodeGenerate();
             claimUpdate.resetPasswordCodeTryCount = 0;
-            claimUpdate.resetPasswordExpiredAt = new Date(Date.now() + this.options.forgotPassword.duration * 1000);
+            claimUpdate.resetPasswordExpiredAt = new Date(Date.now() + this.options.forgotPassword.duration);
+            claimUpdate.resetPasswordLastRequiredAt = new Date()
+
+            if (claim.resetPasswordLastRequiredAt && (Date.now() - claim.resetPasswordLastRequiredAt.valueOf() < this.options.forgotPassword.requireLockTime)) {
+                claimUpdate.resetPasswordRequireCount = claim.resetPasswordRequireCount + 1
+            } else {
+                // reset
+                claimUpdate.resetPasswordRequireCount = 1;
+            }
+
+            if (claimUpdate.resetPasswordRequireCount >= this.options.forgotPassword.requireLimit) {
+                claimUpdate.resetPasswordRequireLockReleaseAt = new Date(Date.now() + this.options.forgotPassword.requireLockTime)
+            }
 
             await this.runner.updateClaim(claim.id, claimUpdate);
 

@@ -41,10 +41,10 @@ export class LoginStrategyOptions extends StrategyOptions {
     passwordField?: string;
 
     /**
-     * the try limits for failure,
+     * the try limit for failure,
      * the default value is 3
      */
-    tryLimits?: number = 3;
+    tryLimit?: number = 3;
 
     /**
      * if users try login over the tryLimits, than lock for the given time.

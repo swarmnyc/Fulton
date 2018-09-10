@@ -1,6 +1,6 @@
 import * as passport from 'passport';
 import { IFultonApp } from '../fulton-app';
-import { Request } from "../interfaces";
+import { Request, Type } from "../interfaces";
 import { NextFunction, Response, Middleware } from '../re-export';
 import { IdentityOptions } from './identity-options';
 import { OauthStrategyOptions } from './options/oauth-strategy-options';
@@ -71,6 +71,11 @@ export interface IIdentityRouter {
 
 export interface IUserService<T extends IUser> {
     currentUser: IUser;
+
+    /**
+     * the types of entities for user 
+     */
+    entities: Type[];
     init(app: IFultonApp): void;
 
     login(username: string, password: string): Promise<T>;
@@ -89,7 +94,7 @@ export interface IUserService<T extends IUser> {
     forgotPassword(usernameOrEmail: string): Promise<ForgotPasswordModel>;
     resetPassword(token: string, code: string, password: string): Promise<void>;
     verifyResetPassword(token: string, code: string): Promise<void>;
-    getUserIdentities(user: T): Promise<IFultonUserClaims[]>;
+    getUserClaims(user: T): Promise<IFultonUserClaims[]>;
     revokeAccessToken(userId: string, token: string): Promise<void>;
     revokeAllAccessTokens(userId: string): Promise<void>;
     //refreshAccessToken(token: string): Promise<AccessToken>;

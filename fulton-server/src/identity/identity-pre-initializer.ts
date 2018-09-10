@@ -12,9 +12,13 @@ module.exports = async function (app: IFultonApp) {
     let idOptions = app.options.identity;
 
     if (idOptions.userService == null) {
-        idOptions.userService = FultonUserService
+        idOptions.userService = new FultonUserService()
+    } else if (idOptions.userService instanceof Function) {
+        idOptions.userService = new (idOptions.userService)();
+    }
 
-        app.options.entities.push(FultonUser, FultonUserAccessToken, FultonUserClaims)
+    if (idOptions.userService.entities){
+        app.options.entities.push(...idOptions.userService.entities);
     }
 
     if (idOptions.router == null) {

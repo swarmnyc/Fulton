@@ -17,6 +17,12 @@ const args = require("yargs")
         alias: 'v',
         choices: ['prerelease', 'patch', 'minor', 'major']
     })
+    .option('clean', {
+        alias: 'c',
+        type: "boolean",
+        desc: "does remove all files before build",
+        default: true
+    })
     .option('projects', {
         alias: 'p',
         array: true,
@@ -44,7 +50,11 @@ const semver = require('semver');
 let currentVersion; // cached version
 
 gulp.task('clean', function (callback) {
-    rimraf("./dist", callback);
+    if (args.clean){
+        rimraf("./dist", callback);
+    }else{
+        callback();
+    }
 });
 
 gulp.task('build-projects', function (callback) {

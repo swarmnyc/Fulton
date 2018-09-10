@@ -13,7 +13,7 @@ import { getManager, MongoEntityManager, MongoRepository } from 'typeorm';
 import { Helper } from '../../helpers/helper';
 import { IdentityOptions } from '../identity-options';
 import { IFultonApp } from '../../fulton-app';
-import { inject, injectable, NotificationMessage, Request } from '../../interfaces';
+import { inject, injectable, NotificationMessage, Request, Type } from '../../interfaces';
 import { ObjectId } from 'bson';
 
 interface JWTPayload {
@@ -31,7 +31,7 @@ interface JWTPayload {
 /**
  * the runner is for multiple database engines supports
  */
-interface IRunner {
+export interface IRunner {
     convertUserId(userId: any): any;
     updateMetadata(metadata: EntityMetadata): void;
     addUser(user: FultonUser): Promise<FultonUser>
@@ -52,7 +52,7 @@ interface IRunner {
     revokeAllAccessTokens(userId: string): Promise<any>;
 }
 
-class MongoRunner implements IRunner {
+export class MongoRunner implements IRunner {
     options: IdentityOptions;
     userRepository: MongoRepository<FultonUser>;
     claimRepository: MongoRepository<FultonUserClaims>;
@@ -101,8 +101,8 @@ class MongoRunner implements IRunner {
         return this.tokenRepository.insertOne(accessToken);
     }
 
-    addClaim(identity: FultonUserClaims): Promise<any> {
-        return this.claimRepository.insertOne(identity);
+    addClaim(claim: FultonUserClaims): Promise<any> {
+        return this.claimRepository.insertOne(claim);
     }
 
     updateClaim(id: any, update: Partial<FultonUserClaims>): Promise<any> {
@@ -219,8 +219,10 @@ class MongoRunner implements IRunner {
 
 @injectable()
 export class FultonUserService implements IUserService<FultonUser> {
-    private runner: IRunner;
-    private app: IFultonApp;
+    protected runner: IRunner;
+    protected app: IFultonApp;
+
+    entities: Type[] = [FultonUser, FultonUserAccessToken, FultonUserClaims];
 
     init(app: IFultonApp) {
         this.app = app;
@@ -234,7 +236,7 @@ export class FultonUserService implements IUserService<FultonUser> {
         }
     }
 
-    private get options(): IdentityOptions {
+    protected get options(): IdentityOptions {
         return this.app.options.identity;
     }
 
@@ -641,7 +643,7 @@ export class FultonUserService implements IUserService<FultonUser> {
         throw new Error("Method not implemented.");
     }
 
-    getUserIdentities(user: IFultonUser): Promise<IFultonUserClaims[]> {
+    getUserClaims(user: IFultonUser): Promise<IFultonUserClaims[]> {
         return this.runner.findClaims(user);
     }
 
@@ -653,11 +655,11 @@ export class FultonUserService implements IUserService<FultonUser> {
         return this.runner.revokeAllAccessTokens(userId);
     }
 
-    private get jwtSecret(): string | Buffer {
+    protected get jwtSecret(): string | Buffer {
         return this.options.accessToken.secret || this.app.appName;
     }
 
-    private sendWelcomeNotification(model: WelcomeNotificationModel) {
+    protected sendWelcomeNotification(model: WelcomeNotificationModel) {
         var opts = this.options.register.notification
         if (opts.extraVariables) {
             Object.assign(model, opts.extraVariables)
@@ -676,7 +678,7 @@ export class FultonUserService implements IUserService<FultonUser> {
         }
     }
 
-    private sendForgotPasswordNotification(model: ForgotPasswordNotificationModel) {
+    protected sendForgotPasswordNotification(model: ForgotPasswordNotificationModel) {
         var opts = this.options.forgotPassword.notification
         if (opts.extraVariables) {
             Object.assign(model, opts.extraVariables)
@@ -695,7 +697,7 @@ export class FultonUserService implements IUserService<FultonUser> {
         }
     }
 
-    private verifyUserName(error: FultonError, username: any) {
+    protected verifyUserName(error: FultonError, username: any) {
         let result: boolean = false;
 
         if (error.verifyRequired(username, "username")) {
@@ -714,7 +716,7 @@ export class FultonUserService implements IUserService<FultonUser> {
         return result;
     }
 
-    private verifyPassword(error: FultonError, password: any): boolean {
+    protected verifyPassword(error: FultonError, password: any): boolean {
         let result: boolean = false;
 
         if (error.verifyRequired(password, "password")) {
@@ -732,7 +734,7 @@ export class FultonUserService implements IUserService<FultonUser> {
         return result;
     }
 
-    private verifyEmail(error: FultonError, email: string) {
+    protected verifyEmail(error: FultonError, email: string) {
         let result: boolean = false;
 
         if (error.verifyRequired(email, "email")) {
@@ -746,7 +748,7 @@ export class FultonUserService implements IUserService<FultonUser> {
         return result
     }
 
-    private encodeJwtToken(user: IFultonUser): string {
+    protected encodeJwtToken(user: IFultonUser): string {
         let payload: JWTPayload = {
             id: user.id,
             ts: Date.now()

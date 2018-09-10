@@ -11,19 +11,11 @@ import { StrategyOptions } from './options/strategy-options';
 module.exports = async function identityInitializer(app: IFultonApp) {
     let opts = app.options.identity;
 
-    let userService: IUserService<IUser>;
-
-    if (opts.userService instanceof Function) {
-        userService = new (opts.userService)();
-    } else {
-        userService = opts.userService;
-    }
-
-    userService.init(app)
-
     // assign userService
-    app.userService = userService;
-    app.express.request.constructor.prototype.userService = userService;
+    app.userService = opts.userService as IUserService<IUser>
+    app.express.request.constructor.prototype.userService = app.userService;
+
+    app.userService.init(app)
 
     let router: IIdentityRouter;
     if (opts.router instanceof Function) {

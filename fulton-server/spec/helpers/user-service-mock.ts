@@ -1,14 +1,13 @@
 import * as lodash from 'lodash';
-
-import { AccessToken, IUserService, RegisterModel, IOauthProfile, IFultonUserClaims } from '../../src/identity/interfaces';
-import { inject, injectable } from "../../src/interfaces";
-
-import { FultonApp } from "../../src/fulton-app";
 import { FultonError } from '../../src/common/fulton-error';
+import { FultonApp } from "../../src/fulton-app";
 import { FultonUser } from '../../src/identity/fulton-impl/fulton-user';
+import { AccessToken, IFultonUserClaims, IOauthProfile, IUserService, RegisterModel } from '../../src/identity/interfaces';
+import { Type } from "../../src/interfaces";
 
 export class UserServiceMock implements IUserService<FultonUser> {
     currentUser: FultonUser;
+    entities: Type[] = []
 
     constructor(public app: FultonApp) {
     }
@@ -68,7 +67,7 @@ export class UserServiceMock implements IUserService<FultonUser> {
                 displayName: input.username,
                 email: input.email
             })
-            
+
             return Promise.resolve(user);
         } else {
             return Promise.reject(error);
@@ -103,7 +102,7 @@ export class UserServiceMock implements IUserService<FultonUser> {
         throw new Error("Method not implemented.");
     }
 
-    getUserIdentities(user: FultonUser): Promise<IFultonUserClaims[]> {
+    getUserClaims(user: FultonUser): Promise<IFultonUserClaims[]> {
         throw new Error("Method not implemented.");
     }
 

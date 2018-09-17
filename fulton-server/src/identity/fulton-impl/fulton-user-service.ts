@@ -683,6 +683,7 @@ export class FultonUserService implements IUserService<FultonUser> {
         if (opts.extraVariables) {
             Object.assign(model, opts.extraVariables)
         }
+        
         if (opts.email.enabled && model.email) {
             var message: NotificationMessage = {
                 email: {

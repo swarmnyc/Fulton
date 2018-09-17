@@ -96,6 +96,8 @@ export class EntityService<TEntity> extends Service implements IEntityService<TE
     }
 
     findById(id: any, queryParams?: QueryParams): Promise<OperationOneResult<TEntity>> {
+        if (id == null) throw new FultonError("invalid_parameter", "id cannot be null")
+
         if (queryParams == null) {
             queryParams = {
                 needAdjust: true

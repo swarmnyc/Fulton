@@ -242,9 +242,9 @@ export class FultonUserService implements IUserService<FultonUser> {
 
     get currentUser(): IFultonUser {
         if (this.app.options.miscellaneous.zoneEnabled) {
-            let res: Request = Zone.current.get("res");
-            if (res) {
-                return res.user;
+            let req: Request = Zone.current.get("req");
+            if (req) {
+                return req.user;
             } else {
                 return null;
             }

@@ -26,8 +26,8 @@ module.exports = function (app: IFultonApp) {
  * a factory for create EntityService
  */
 function entityServiceFactory<T>(ctx: interfaces.Context): EntityServiceFactory<T> {
-    return (entity: Type<T>) => {
-        let service = new (require("../entities/entity-service").EntityService)(entity);
+    return (entity: Type<T>, connectionName?:string) => {
+        let service = new (require("../entities/entity-service").EntityService)(entity, connectionName);
         service["app"] = ctx.container.get(DiKeys.FultonApp);
 
         return service;

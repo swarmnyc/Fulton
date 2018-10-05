@@ -17,15 +17,15 @@ export class EntityService<TEntity> extends Service implements IEntityService<TE
     protected mainRepository: Repository<TEntity>
     private _runner: EntityRunner;
 
-    constructor(entity: Type<TEntity>)
+    constructor(entity: Type<TEntity>, connectionName?:string)
     constructor(mainRepository: Repository<TEntity>)
-    constructor(input: Repository<TEntity> | Type<TEntity>) {
+    constructor(input: Repository<TEntity> | Type<TEntity>, connectionName:string = "default") {
         super()
 
         if (input instanceof Repository) {
             this.mainRepository = input
         } else {
-            this.mainRepository = this.getRepository(input);
+            this.mainRepository = this.getRepository(input, connectionName);
         }
     }
 

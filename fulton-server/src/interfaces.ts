@@ -20,7 +20,7 @@ export type PathIdentifier = (string | RegExp | (string | RegExp)[]);
 
 export type RepositoryFactory<TEntity = any> = ((entity: Type<TEntity>) => Repository<TEntity>);
 
-export type EntityServiceFactory<TEntity = any> = ((entity: Type<TEntity>) => IEntityService<TEntity>);
+export type EntityServiceFactory<TEntity = any> = ((entity: Type<TEntity>, connectionName?: string) => IEntityService<TEntity>);
 
 export interface Dict {
     [key: string]: any

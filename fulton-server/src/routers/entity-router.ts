@@ -20,14 +20,7 @@ export abstract class EntityRouter<TEntity> extends Router {
     init() {
         if (this.entityService == null) {
             // use default implementation
-            let factory = this.app.container.get<EntityServiceFactory>(DiKeys.EntityServiceFactory);
-            if (factory instanceof Function) {
-                // factory
-                this.entityService = factory(this.metadata.router.entity);
-            } else {
-                // instance
-                this.entityService = factory;
-            }
+            this.entityService = this.app.getEntityService(this.metadata.router.entity)
         }
 
         super.init();

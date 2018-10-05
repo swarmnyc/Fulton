@@ -1,24 +1,24 @@
+import { EventEmitter } from 'events';
 import * as express from 'express';
+import { Express } from 'express';
 import * as fs from 'fs';
 import * as http from 'http';
 import * as https from 'https';
 import * as lodash from 'lodash';
 import * as path from 'path';
-import * as winston from 'winston';
-import { AppMode, DiContainer, INotificationService, NotificationMessage, Response, Type, TypeIdentifier } from './interfaces';
-import { ClassProvider, FactoryProvider, FunctionProvider, Provider, TypeProvider, ValueProvider } from './helpers/type-helpers';
 import { Connection, Repository } from 'typeorm';
-import { defaultHttpLoggerHandler } from './middlewares/http-logger';
-import { DiKeys, EventKeys } from './keys';
 import { EntityMetadata } from 'typeorm/metadata/EntityMetadata';
-import { Env } from './helpers/env';
-import { EventEmitter } from 'events';
-import { Express } from 'express';
-import { FultonAppOptions } from './options/fulton-app-options';
-import { fultonDebug, fultonDebugMaster } from './helpers/debug';
+import * as winston from 'winston';
 import { FultonLog } from './fulton-log';
+import { fultonDebug, fultonDebugMaster } from './helpers/debug';
+import { Env } from './helpers/env';
 import { Helper } from './helpers/helper';
+import { ClassProvider, FactoryProvider, FunctionProvider, Provider, TypeProvider, ValueProvider } from './helpers/type-helpers';
 import { IUser, IUserService } from './identity/interfaces';
+import { AppMode, DiContainer, EntityServiceFactory, IEntityService, INotificationService, NotificationMessage, Response, Type, TypeIdentifier } from './interfaces';
+import { DiKeys, EventKeys } from './keys';
+import { defaultHttpLoggerHandler } from './middlewares/http-logger';
+import { FultonAppOptions } from './options/fulton-app-options';
 import { Router } from './routers/router';
 
 
@@ -126,6 +126,11 @@ export interface IFultonApp {
     getRepository<T>(entity: Type, connectionName?: string): Repository<T>
 
     /**
+     * A shortcut to get typeorm repository
+     */
+    getEntityService<T>(entity: Type, connectionName?: string): IEntityService<T>
+
+    /**
      * call NotificationService to send messages, message can be email, sms or push-notification
      * @param messages 
      */
@@ -178,24 +183,6 @@ export abstract class FultonApp implements IFultonApp {
         this.entityMetadatas = new Map();
         this.dbConnections = [];
         this.routers = [];
-    }
-
-    getLocalData(key: string): any {
-        if (this.options.miscellaneous.zoneEnabled) {
-            let res: Response = Zone.current.get("res");
-            if (res) {
-                return res.locals[key];
-            }
-        }
-    }
-
-    setLocalData(key: string, value: any) {
-        if (this.options.miscellaneous.zoneEnabled) {
-            let res: Response = Zone.current.get("res");
-            if (res) {
-                res.locals[key] = value;
-            }
-        }
     }
 
     async init(): Promise<void> {
@@ -355,8 +342,37 @@ export abstract class FultonApp implements IFultonApp {
         return Promise.all(tasks);
     }
 
+    getLocalData(key: string): any {
+        if (this.options.miscellaneous.zoneEnabled) {
+            let res: Response = Zone.current.get("res");
+            if (res) {
+                return res.locals[key];
+            }
+        }
+    }
+
+    setLocalData(key: string, value: any) {
+        if (this.options.miscellaneous.zoneEnabled) {
+            let res: Response = Zone.current.get("res");
+            if (res) {
+                res.locals[key] = value;
+            }
+        }
+    }
+
     getRepository<T>(entity: Type, connectionName?: string): Repository<T> {
         return require("typeorm").getRepository(entity, connectionName);
+    }
+
+    getEntityService<T>(entity: Type, connectionName?: string): IEntityService<T> {
+        let factory = this.container.get<EntityServiceFactory>(DiKeys.EntityServiceFactory);
+        if (factory instanceof Function) {
+            // factory
+            return factory(entity, connectionName);
+        } else {
+            // instance
+            return factory;
+        }
     }
 
     sendNotifications(...messages: NotificationMessage[]): Promise<void> {

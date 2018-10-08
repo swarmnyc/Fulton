@@ -1,5 +1,5 @@
 import { HttpMethod, Middleware } from '../../interfaces';
-import { OauthAuthenticateOptions, OauthStrategyVerifier } from '../interfaces';
+import { OauthAuthenticateOptions, OauthStrategyVerifier, IOauthProfile } from '../interfaces';
 import { StrategyOptions } from './strategy-options';
 
 export class OauthStrategyOptions extends StrategyOptions {
@@ -59,7 +59,7 @@ export class OauthStrategyOptions extends StrategyOptions {
     /**
      * transform the oauth profile to our user format
      */
-    profileTransformer?: (profile: any) => any;
+    profileTransformer?: (profile: any) => IOauthProfile;
 
     /**
      * the options to pass to passport when call passport.authenticate()

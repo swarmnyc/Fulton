@@ -1,9 +1,9 @@
-import { AccessToken, IUser, OauthStrategyVerifier, IFultonUser } from '../interfaces';
-import { fultonDebug } from '../../helpers/debug';
-import { GoogleStrategyOptions } from '../options/google-strategy-options';
 import { OAuth2Client } from 'google-auth-library';
-import { Request } from '../../interfaces';
 import { Strategy } from 'passport-strategy';
+import { fultonDebug } from '../../helpers/debug';
+import { Request } from '../../interfaces';
+import { AccessToken, IOauthProfile, IUser, OauthStrategyVerifier } from '../interfaces';
+import { GoogleStrategyOptions } from '../options/google-strategy-options';
 
 export class GoogleStrategy extends Strategy {
     // only require google-auth-library when options.google.enabled = true;
@@ -44,7 +44,7 @@ export class GoogleStrategy extends Strategy {
                     this.success(user, info);
                 }
 
-                let profile: IFultonUser;
+                let profile: IOauthProfile;
 
                 if (token.id_token) {
                     let jwt = this.jws.decode(token.id_token);
@@ -59,7 +59,7 @@ export class GoogleStrategy extends Strategy {
                     profile = {
                         id: payload.sub,
                         email: payload.email,
-                        displayName: payload.name,
+                        username: payload.name,
                         portraitUrl: payload.picture
                     }
                 } else {

@@ -15,8 +15,8 @@ export interface IUser {
 export interface IOauthProfile {
     id?: string;
     email: string;
-    username?: string;
-    portraitUrl?: string;
+    username: string;
+    portraitUrl: string;
     [key: string]: any;
 }
 

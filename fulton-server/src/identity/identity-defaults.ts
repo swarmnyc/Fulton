@@ -1,6 +1,6 @@
 import { FultonLog } from '../fulton-log';
 import { Request } from '../interfaces';
-import { AccessToken, IUser, OauthStrategyVerifier, StrategyVerifyDone } from './interfaces';
+import { AccessToken, IUser, OauthStrategyVerifier, StrategyVerifyDone, IOauthProfile } from './interfaces';
 import { OauthStrategyOptions } from './options/oauth-strategy-options';
 
 export function defaultLoginStrategyVerifier(req: Request, username: string, password: string, done: StrategyVerifyDone) {
@@ -38,7 +38,7 @@ export async function defaultBearerStrategyVerifier(req: Request, token: string,
  * the wrapper of auth verifier, the purpose of it is to call req.userService.loginByOauth with the formated parameters.
  */
 export function defaultOauthStrategyVerifierFn(options: OauthStrategyOptions): OauthStrategyVerifier {
-    return (req: Request, access_token: string, fresh_token: string, profile: any, done: StrategyVerifyDone) => {
+    return (req: Request, access_token: string, fresh_token: string, profile: IOauthProfile, done: StrategyVerifyDone) => {
         let token: AccessToken = {
             provider: options.name,
             access_token: access_token,

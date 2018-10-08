@@ -1,7 +1,6 @@
 import { Env } from '../../helpers';
-import { BaseOptions } from '../../options/options';
+import { IOauthProfile } from '../interfaces';
 import { OauthStrategyOptions } from './oauth-strategy-options';
-import { IFultonUser } from '../interfaces';
 
 /**
  * pre-defined github strategy
@@ -31,10 +30,10 @@ export class GithubStrategyOptions extends OauthStrategyOptions {
                 email = profile.email;
             }
 
-            let user: IFultonUser = {
+            let user: IOauthProfile = {
                 id: profile.id,
                 email: email,
-                displayName: profile.displayName,
+                username: profile.displayName,
                 portraitUrl: profile._json.avatar_url
             };
 

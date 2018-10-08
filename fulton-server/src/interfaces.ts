@@ -75,6 +75,8 @@ export interface IEntityService<TEntity> {
 
     update(id: any, entity: TEntity | Partial<TEntity>): Promise<OperationResult>;
 
+    // updateMany(query: any, entity: TEntity | Partial<TEntity>): Promise<OperationResult>;
+
     delete(id: any): Promise<OperationResult>;
 
     readonly entityType: Type<TEntity>;

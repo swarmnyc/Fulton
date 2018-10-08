@@ -43,6 +43,7 @@ export class UserServiceMock implements IUserService<FultonUser> {
     }
 
     loginByOauth(userId: string, token: AccessToken, profile: IOauthProfile): Promise<FultonUser> {
+        profile.displayName = profile.username
         return Promise.resolve(profile as any);
     }
 

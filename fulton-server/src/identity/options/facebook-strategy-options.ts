@@ -1,8 +1,7 @@
-import { Env } from '../../helpers';
-import { BaseOptions } from '../../options/options';
-import { OauthStrategyOptions } from './oauth-strategy-options';
-import { IFultonUser } from '../interfaces';
 import * as lodash from 'lodash';
+import { Env } from '../../helpers';
+import { IOauthProfile } from '../interfaces';
+import { OauthStrategyOptions } from './oauth-strategy-options';
 
 /**
  * pre-defined facebook strategy
@@ -45,10 +44,10 @@ export class FacebookStrategyOptions extends OauthStrategyOptions {
                 portraitUrl = profile.photos[0].value
             }
 
-            let user: IFultonUser = {
+            let user: IOauthProfile = {
                 id: profile.id,
                 email: email,
-                displayName: profile.displayName,
+                username: profile.displayName,
                 portraitUrl: portraitUrl
             };
 

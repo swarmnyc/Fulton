@@ -4,7 +4,7 @@ import { ${appName} } from './app';
 
 /*
 AppLaunch help you launch tasks. 
-If calling launch() with no paramaters, the default paramater is ["app"]. 
+If calling launch() with no parameters, the default paramater is ["app"]. 
 Task "app" is the pre-defined task which starts the app.
 
 Also, you can add other tasks, for example:
@@ -23,7 +23,7 @@ There are 3 ways to launch these tasks.
 1. hard code it, like
 AppLauncher.launch(["batch-task", "clean-task", "app"]) 
 
-2. as paramaters, like
+2. as parameters, like
 > node src/main.ts batch-task clean-task app
 or
 > npm run start -- batch-task clean-task app

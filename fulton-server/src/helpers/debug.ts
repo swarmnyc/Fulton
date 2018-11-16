@@ -62,7 +62,7 @@ function fultonDebugCore(tag: string, ...args: any[]): boolean {
         if (cluster.isWorker) {
             // if it is worker, add pid
             if (args.length > 0 && typeof args[0] == "string"){
-                args[0] = addProceeInfo(args[0]);
+                args[0] = addProcessInfo(args[0]);
             }
         }
 
@@ -74,8 +74,8 @@ function fultonDebugCore(tag: string, ...args: any[]): boolean {
     return false;
 };
 
-/** if it is worker add pid infront of message */
-export function addProceeInfo(msg: string): string {
+/** if it is worker add pid information of message */
+export function addProcessInfo(msg: string): string {
     if (cluster.isWorker) {
         return `[${process.pid}] ` + msg;
     }

@@ -20,6 +20,7 @@ import { DiKeys, EventKeys } from './keys';
 import { defaultHttpLoggerHandler } from './middlewares/http-logger';
 import { FultonAppOptions } from './options/fulton-app-options';
 import { Router } from './routers/router';
+import { BaseOptions } from './options/options';
 
 
 
@@ -32,6 +33,11 @@ export interface IFultonApp {
      * app name, use in output, parser. default is class name.
      */
     readonly appName: string;
+
+    /**
+     * app mode.
+     */
+    readonly mode: AppMode;
 
     /**
      * the instance of Express, created during init().
@@ -176,8 +182,8 @@ export abstract class FultonApp implements IFultonApp {
     /**
      * @param mode There are some different default values for api and web-view. 
      */
-    constructor(public readonly mode: AppMode = "api") {
-        this.appName = this.constructor.name;
+    constructor(appName?: string, public mode: AppMode = "api") {
+        this.appName = appName || this.constructor.name;
         this.options = new FultonAppOptions(this.appName, mode);
         this.events = new EventEmitter();
         this.entityMetadatas = new Map();
@@ -231,9 +237,9 @@ export abstract class FultonApp implements IFultonApp {
             this.isInitialized = true;
             this.events.emit(EventKeys.AppDidInit, this);
 
-            fultonDebugMaster("app", "Initializing with options: %O\t", this.options)
+            fultonDebugMaster("app", this.outputOptions("Initializing with options:\t%O\t"))
         } catch (error) {
-            fultonDebug("app", "App Init failed with: %O\t", this.options)
+            fultonDebug("app", this.outputOptions("App Init failed with:\t%O\t"))
             //FultonLog.error("App Init failed by", error)
             throw error;
         }
@@ -659,6 +665,22 @@ export abstract class FultonApp implements IFultonApp {
             });
         } else {
             this.express(req, res);
+        }
+    }
+
+    private outputOptions = (message: string) => {
+        return () => {
+            var opt = lodash.cloneDeepWith(this.options, (value, key, o, s) => {
+                if (key != null && typeof value == "object") {
+                    if (value instanceof BaseOptions) {
+                        return lodash.toPlainObject(value)
+                    } else if (!(value instanceof Date || value instanceof Array)) {
+                        return value.toString()
+                    }
+                }
+            })
+
+            return [message, opt]
         }
     }
 }

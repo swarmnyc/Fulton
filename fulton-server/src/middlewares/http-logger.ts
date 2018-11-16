@@ -5,7 +5,7 @@ import { Middleware, NextFunction, Request, Response } from "../interfaces";
 import { FultonLog } from "../fulton-log";
 import { LoggerOptions } from "winston";
 import chalk from "chalk";
-import { fultonDebug, addProceeInfo } from '../helpers/debug';
+import { fultonDebug, addProcessInfo } from '../helpers/debug';
 
 // inspired from https://github.com/bithavoc/express-winston/blob/master/index.js
 
@@ -57,7 +57,7 @@ export function defaultHttpLoggerHandler(options: LoggerOptions): Middleware {
                         msg = `${req.method} ${url} ${res.statusCode} ${responseTime}ms`
                     }
 
-                    logger.info(addProceeInfo(msg))
+                    logger.info(addProcessInfo(msg))
                 }
             }
         });

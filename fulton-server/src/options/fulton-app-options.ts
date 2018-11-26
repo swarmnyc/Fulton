@@ -1,24 +1,36 @@
 import * as lodash from 'lodash';
+import { Provider } from '../helpers';
+import { IdentityOptions } from '../identity/identity-options';
 import { AppMode, Middleware, Type } from '../interfaces';
+import { CompressionOptions } from './compression-options';
 import { CorsOptions } from './cors-options';
 import { DatabaseOptions } from './databases-options';
 import { DocOptions } from './doc-options';
-import { Env } from '../helpers/env';
 import { ErrorHandlerOptions } from './error-handler-options';
 import { FormatterOptions } from './formatter-options';
-import { IdentityOptions } from '../identity/identity-options';
 import { IndexOptions } from './index-options';
 import { LoaderOptions } from './loader-options';
 import { LoggingOptions } from './logging-options';
 import { MiscellaneousOptions } from './miscellaneous-options';
 import { NotificationOptions } from './notification-options';
-import { Provider } from '../helpers';
+import { Options } from './options';
+import { SecurityOptions } from './security-options';
 import { ServerOptions } from './server-options';
 import { StaticFilesOptions } from './static-file-options';
-import { Options } from './options';
-import { CompressionOptions } from './compression-options';
 
 export class FultonAppOptions {
+    /**
+     * the entities for typeorm, the value will concatenate all database CollectionOptions.entities
+     * you can directly define entities on each CollectionOptions
+     * typeorm will automatically road entities under ./entities
+     */
+    entities: Type[] = [];
+
+    /**
+     * app level custom middlewares, they will be placed before routers
+     */
+    middlewares: Middleware[] = [];
+
     /**
      * Define values or types injections
      * 
@@ -96,21 +108,14 @@ export class FultonAppOptions {
     services: Provider[] = [];
 
     /**
-     * the entities for typeorm, the value will concatenate all database CollectionOptions.entities
-     * you can directly define entities on each CollectionOptions
-     * typeorm will automatically road entities under ./entities
+     * app level cors middlewares
      */
-    entities: Type[] = [];
+    readonly cors = new CorsOptions(this.appName, this.appMode);
 
     /**
-     * app level custom middlewares, they will be placed before routers
+     * compress request and response
      */
-    middlewares: Middleware[] = [];
-
-    /**
-     * User manager and authentication based on passport
-     */
-    readonly identity = new IdentityOptions(this.appName, this.appMode);
+    readonly compression = new CompressionOptions(this.appName, this.appMode);
 
     /**
      * Databases connection options, you can define connection options on FultonApp.onInt(),  
@@ -125,42 +130,6 @@ export class FultonAppOptions {
      * `env["{appName}.options.databases.default.{optionName}"]`
      */
     readonly databases = new DatabaseOptions(this.appName, this.appMode);
-
-    /**
-     * behavior for "/" request, only one of three methods can be activated at the same time.
-     */
-    readonly index = new IndexOptions(this.appName, this.appMode);
-
-    /**
-     * error and 404 middlewares, they will be placed on the last.
-     */
-    readonly errorHandler = new ErrorHandlerOptions(this.appName, this.appMode);
-
-    /**
-     * request and response format
-     */
-    readonly formatter = new FormatterOptions(this.appName, this.appMode);
-
-    /**
-     * for loading modules automatically, default is disabled, 
-     * because we want to use Angular style, define types explicitly
-     */
-    readonly loader = new LoaderOptions(this.appName, this.appMode);
-
-    /**
-     * Logging options
-     */
-    readonly logging = new LoggingOptions(this.appName, this.appMode);
-
-    /**
-     * the options for serving static files
-     */
-    readonly staticFile = new StaticFilesOptions(this.appName, this.appMode);
-
-    /**
-     * app level cors middlewares
-     */
-    readonly cors = new CorsOptions(this.appName, this.appMode);
 
     /**
      * use swagger to serve docs, see https://swagger.io/specification/.
@@ -178,15 +147,60 @@ export class FultonAppOptions {
     readonly docs = new DocOptions(this.appName, this.appMode);
 
     /**
-     * the settings for http and https servers
+     * the options of error and 404 middlewares, they will be placed on the last.
+     */
+    readonly errorHandler = new ErrorHandlerOptions(this.appName, this.appMode);
+
+    /**
+     * the options of request and response format
+     */
+    readonly formatter = new FormatterOptions(this.appName, this.appMode);
+
+    /**
+     * the options of user manager and authentication based on passport
+     */
+    readonly identity = new IdentityOptions(this.appName, this.appMode);
+
+    /**
+     * the options of notification.
+     */
+    readonly notification = new NotificationOptions(this.appName, this.appMode);
+
+    /**
+     * the options of behavior for "/" request, only one of three methods can be activated at the same time.
+     */
+    readonly index = new IndexOptions(this.appName, this.appMode);
+
+    /**
+     * the options of loading modules automatically, default is disabled, 
+     * because we want to use Angular style, define types explicitly
+     */
+    readonly loader = new LoaderOptions(this.appName, this.appMode);
+
+    /**
+     * the options of Logging options
+     */
+    readonly logging = new LoggingOptions(this.appName, this.appMode);
+
+    /**
+     * the options of serving static files
+     */
+    readonly staticFile = new StaticFilesOptions(this.appName, this.appMode);
+
+    /**
+     * the options of require security.
+     */
+    readonly security = new SecurityOptions(this.appName, this.appMode);
+
+    /**
+     * the options of http and https servers
      */
     readonly server = new ServerOptions(this.appName, this.appMode);
 
-    readonly notification = new NotificationOptions(this.appName, this.appMode);
-
+    /**
+     * the options of miscellaneous
+     */
     readonly miscellaneous = new MiscellaneousOptions(this.appName, this.appMode);
-
-    readonly compression = new CompressionOptions(this.appName, this.appMode);
 
     constructor(private appName: string, private appMode: AppMode) { }
 

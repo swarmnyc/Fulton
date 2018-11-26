@@ -215,6 +215,8 @@ export abstract class FultonApp implements IFultonApp {
 
             await this.initCors();
 
+            await this.initSecurity();
+
             await this.initCompression();
 
             await this.initFormatter();
@@ -366,6 +368,18 @@ export abstract class FultonApp implements IFultonApp {
         }
     }
 
+    getProvider(type: (Type | object), diKey?: any): any {
+        if (diKey != null) {
+            return this.container.get(diKey);
+        }
+
+        if (type instanceof Function) {
+            return this.container.get(type);
+        } else {
+            return type;
+        }
+    }
+
     getRepository<T>(entity: Type, connectionName?: string): Repository<T> {
         return require("typeorm").getRepository(entity, connectionName);
     }
@@ -391,17 +405,106 @@ export abstract class FultonApp implements IFultonApp {
         return this.notificationService.send(...messages);
     }
 
-    protected initServer(): void | Promise<void> {
-        this.express = express();
-        this.express.request.constructor.prototype.fultonApp = this;
+    // initialization functions
+    protected initCors(): void | Promise<void> {
+        if (this.options.cors.enabled) {
+            // won't load cors module if it is not enabled;
+            return require('./initializers/cors-initializer')(this)
+        }
+    }
 
-        this.express.disable('x-powered-by');
+    protected initCompression(): void | Promise<void> {
+        if (this.options.compression.enabled) {
+            // won't load compression module if it is not enabled;
+            return require('./initializers/compression-initializer')(this)
+        }
+    }
 
-        this.events.emit(EventKeys.AppDidInitServer, this);
+    /**
+     * init databases, it will be ignored if repository is empty.
+     */
+    protected initDatabases(): Promise<void> {
+        return require('./initializers/database-initializer')(this);
     }
 
     protected initDiContainer(): void | Promise<void> {
         return require('./initializers/di-initializer')(this);
+    }
+
+    protected initDocs(): void | Promise<void> {
+        if (this.options.docs.enabled) {
+            require("./initializers/docs-initializer")(this);
+        }
+    }
+
+
+    protected initErrorHandler(): void | Promise<void> {
+        if (this.options.errorHandler) {
+            if (lodash.some(this.options.errorHandler.error404Middlewares)) {
+                this.express.use(...this.options.errorHandler.error404Middlewares);
+            }
+
+            if (lodash.some(this.options.errorHandler.errorMiddlewares)) {
+                this.express.use(...this.options.errorHandler.errorMiddlewares);
+            }
+
+            this.events.emit(EventKeys.AppDidInitErrorHandler, this);
+        }
+    }
+
+    protected initFormatter(): void | Promise<void> {
+        require("./initializers/formatter-initializer")(this);
+    }
+
+    protected initHttpLogging(): void | Promise<void> {
+        if (this.options.logging.httpLoggerEnabled) {
+            if (lodash.some(this.options.logging.httpLoggerMiddlewares)) {
+                this.express.use(...this.options.logging.httpLoggerMiddlewares);
+            } else if (this.options.logging.httpLoggerOptions) {
+                this.express.use(defaultHttpLoggerHandler(this.options.logging.httpLoggerOptions));
+            }
+
+            this.events.emit(EventKeys.AppDidInitHttpLogging, this);
+        }
+    }
+
+    protected initPreIdentity(): Promise<void> {
+        if (this.options.identity.enabled) {
+            return require("./identity/identity-pre-initializer")(this)
+        }
+    }
+
+    protected initIdentity(): void | Promise<void> {
+        if (this.options.identity.enabled) {
+            // won't load passport-* modules if it is not enabled;
+            return require("./identity/identity-initializer")(this)
+        }
+    }
+
+    protected initIndex(): void | Promise<void> {
+        if (!this.options.index.enabled) {
+            return
+        }
+
+        if (this.options.index.handler) {
+            this.express.all("/", this.options.index.handler);
+        } else if (this.options.index.filepath) {
+            this.express.all("/", (res, req) => {
+                req.sendFile(path.resolve(this.options.index.filepath));
+            });
+        } else if (this.options.index.message) {
+            this.express.all("/", (res, req) => {
+                req.send(this.options.index.message);
+            });
+        }
+
+        this.events.emit(EventKeys.AppDidInitIndex, this);
+    }
+
+    protected initProviders(): void | Promise<void> {
+        this.registerTypes(this.options.providers || []);
+
+        this.events.emit(EventKeys.AppDidInitProviders, this);
     }
 
     protected initLogging(): void | Promise<void> {
@@ -422,33 +525,11 @@ export abstract class FultonApp implements IFultonApp {
         this.events.emit(EventKeys.AppDidInitLogging, this);
     }
 
-    protected initProviders(): void | Promise<void> {
-        this.registerTypes(this.options.providers || []);
+    protected initMiddlewares(): void | Promise<void> {
+        if (lodash.some(this.options.middlewares)) {
+            this.express.use(...this.options.middlewares);
 
-        this.events.emit(EventKeys.AppDidInitProviders, this);
-    }
-
-    /**
-     * init databases, it will be ignored if repository is empty.
-     */
-    protected initDatabases(): Promise<void> {
-        return require('./initializers/database-initializer')(this);
-    }
-
-    protected initServices(): Promise<void> {
-        return require('./initializers/service-initializer')(this);
-    }
-
-    protected initPreIdentity(): Promise<void> {
-        if (this.options.identity.enabled) {
-            return require("./identity/identity-pre-initializer")(this)
-        }
-    }
-
-    protected initIdentity(): void | Promise<void> {
-        if (this.options.identity.enabled) {
-            // won't load passport-* modules if it is not enabled;
-            return require("./identity/identity-initializer")(this)
+            this.events.emit(EventKeys.AppDidInitMiddlewares, this);
         }
     }
 
@@ -473,16 +554,8 @@ export abstract class FultonApp implements IFultonApp {
         this.events.emit(EventKeys.AppDidInitRouters, this);
     }
 
-    protected initHttpLogging(): void | Promise<void> {
-        if (this.options.logging.httpLoggerEnabled) {
-            if (lodash.some(this.options.logging.httpLoggerMiddlewares)) {
-                this.express.use(...this.options.logging.httpLoggerMiddlewares);
-            } else if (this.options.logging.httpLoggerOptions) {
-                this.express.use(defaultHttpLoggerHandler(this.options.logging.httpLoggerOptions));
-            }
-
-            this.events.emit(EventKeys.AppDidInitHttpLogging, this);
-        }
+    protected initServices(): Promise<void> {
+        return require('./initializers/service-initializer')(this);
     }
 
     protected initStaticFile(): void | Promise<void> {
@@ -509,72 +582,25 @@ export abstract class FultonApp implements IFultonApp {
         }
     }
 
-    protected initCors(): void | Promise<void> {
-        if (this.options.cors.enabled) {
-            // won't load cors module if it is not enabled;
-            return require('./initializers/cors-initializer')(this)
+    protected initServer(): void | Promise<void> {
+        this.express = express();
+        this.express.request.constructor.prototype.fultonApp = this;
+
+        this.express.disable('x-powered-by');
+
+        this.events.emit(EventKeys.AppDidInitServer, this);
+    }
+
+    protected initSecurity(): void | Promise<void> {
+        if (this.options.security.enabled) {
+            // won't load security module if it is not enabled;
+            return require('./initializers/security-initializer')(this)
         }
     }
 
-    protected initCompression(): void | Promise<void> {
-        if (this.options.compression.enabled) {
-            // won't load compression module if it is not enabled;
-            return require('./initializers/compression-initializer')(this)
-        }
-    }
-
-    protected initMiddlewares(): void | Promise<void> {
-        if (lodash.some(this.options.middlewares)) {
-            this.express.use(...this.options.middlewares);
-
-            this.events.emit(EventKeys.AppDidInitMiddlewares, this);
-        }
-    }
-
-    protected initFormatter(): void | Promise<void> {
-        require("./initializers/formatter-initializer")(this);
-    }
-
-    protected initIndex(): void | Promise<void> {
-        if (!this.options.index.enabled) {
-            return
-        }
-
-        if (this.options.index.handler) {
-            this.express.all("/", this.options.index.handler);
-        } else if (this.options.index.filepath) {
-            this.express.all("/", (res, req) => {
-                req.sendFile(path.resolve(this.options.index.filepath));
-            });
-        } else if (this.options.index.message) {
-            this.express.all("/", (res, req) => {
-                req.send(this.options.index.message);
-            });
-        }
-
-        this.events.emit(EventKeys.AppDidInitIndex, this);
-    }
-
-    protected initErrorHandler(): void | Promise<void> {
-        if (this.options.errorHandler) {
-            if (lodash.some(this.options.errorHandler.error404Middlewares)) {
-                this.express.use(...this.options.errorHandler.error404Middlewares);
-            }
-
-            if (lodash.some(this.options.errorHandler.errorMiddlewares)) {
-                this.express.use(...this.options.errorHandler.errorMiddlewares);
-            }
-
-            this.events.emit(EventKeys.AppDidInitErrorHandler, this);
-        }
-    }
-
-    protected initDocs(): void | Promise<void> {
-        if (this.options.docs.enabled) {
-            require("./initializers/docs-initializer")(this);
-        }
-    }
-
+    /**
+     * the function for di to register types
+     */
     protected registerTypes(providers: Provider[], singleton?: boolean): TypeIdentifier[] {
         let ids: TypeIdentifier[] = [];
 
@@ -629,24 +655,13 @@ export abstract class FultonApp implements IFultonApp {
         return ids;
     }
 
-    getProvider(type: (Type | object), diKey: any): any {
-        if (type == null) {
-            return this.container.get(diKey);
-        }
-
-        if (type instanceof Function) {
-            return this.container.get(type);
-        } else {
-            return type;
-        }
-    }
-
     /**
      * to init the app. Env values for options will be loaded after onInit.
      * @param options the options for start app
      */
     protected abstract onInit(options: FultonAppOptions): void | Promise<void>;
 
+    // private functions
     private serve = (req: any, res: any) => {
         this.baseUrl = Helper.baseUrlRaw(req)
         if (this.options.miscellaneous.zoneEnabled) {

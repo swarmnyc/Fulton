@@ -29,6 +29,7 @@ export enum EventKeys {
     AppDidInitServer = "AppDidInitServer",
     AppDidInitServices = "AppDidInitServices",
     AppDidInitStaticFile = "AppDidInitStaticFile",
+    AppDidInitSecurity = "AppDidInitSecurity",
 
     UserDidRegister = "UserDidRegister",
     UserDidLogin = "UserDidLogin",

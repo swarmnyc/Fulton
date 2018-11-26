@@ -7,7 +7,6 @@ import { EntityRunner } from './entity-runner';
 import { FultonError } from '../../common';
 import { FultonStackError } from '../../common/fulton-error';
 import { ObjectId } from 'bson';
-import { Type } from "../../interfaces";
 
 interface IncludeOptions {
     [key: string]: IncludeOptions | false
@@ -15,6 +14,22 @@ interface IncludeOptions {
 
 @injectable()
 export class MongoEntityRunner extends EntityRunner {
+    updateIdMetadata<T>(repository: Repository<T>) {
+        let metadata = repository.metadata
+
+        // make metadata for mongo 
+        let idColumn = metadata.ownColumns.find((c) => c.propertyName == "id")
+
+        if (idColumn && idColumn.isObjectId == false) {
+            idColumn.isObjectId = true;
+            idColumn.givenDatabaseName =
+                idColumn.databaseNameWithoutPrefixes =
+                idColumn.databaseName = "_id";
+
+            metadata.generatedColumns = [idColumn]
+            metadata.objectIdColumn = idColumn
+        }
+    }
 
     /**
      * use provided repository to find entities

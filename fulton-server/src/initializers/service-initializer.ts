@@ -12,9 +12,9 @@ module.exports = async function (app: FultonApp) {
         providers = loadedProviders.concat(providers);
     }
 
-    var ids = app["registerTypes"](providers, true);
+    initModuleServices(app, providers);
 
-    initNotificationServices(app, ids);
+    var ids = app["registerTypes"](providers, true);
 
     // init services
     ids.forEach((id) => {
@@ -27,47 +27,69 @@ module.exports = async function (app: FultonApp) {
     app.events.emit(EventKeys.AppDidInitServices, this);
 }
 
-function initNotificationServices(app: FultonApp, ids: any[]) {
+function initModuleServices(app: FultonApp, providers: Provider[]) {
+    // add security service if security are enabled
+    if (app.options.security.enabled) {
+        app.options.entities.push(require("../entities/entity-service").SecurityService)
+        providers.push(require("../services/security-service").SecurityService)
+    }
+
     // add these services if notification are enabled
     if (app.options.notification.enabled) {
-        // add the default TemplateService
+        // add template service
         if (app.options.notification.templateService == null) {
-            app.container
-                .bind(DiKeys.TemplateService)
-                .to(require("../services/template-service").TemplateService)
-                .inSingletonScope();
-
-            ids.push(DiKeys.TemplateService)
+            providers.push({
+                provide: DiKeys.TemplateService,
+                useClass: require("../services/template-service").TemplateService
+            })
+        } else {
+            providers.push({
+                provide: DiKeys.TemplateService,
+                useClass: app.options.notification.templateService
+            })
         }
 
-        // add the default EMailService
-        if (app.options.notification.email.enabled && app.options.notification.email.service == null) {
-            app.container
-                .bind(DiKeys.EmailService)
-                .to(require("../services/email-service").EmailService)
-                .inSingletonScope();
-
-            ids.push(DiKeys.EmailService)
+        // add email service
+        if (app.options.notification.email.enabled) {
+            if (app.options.notification.email.service == null) {
+                providers.push({
+                    provide: DiKeys.EmailService,
+                    useClass: require("../services/email-service").EmailService
+                })
+            } else {
+                providers.push({
+                    provide: DiKeys.EmailService,
+                    useClass: app.options.notification.email.service
+                })
+            }
         }
 
-        // add the default EMailService
-        if (app.options.notification.pushNotification.enabled && app.options.notification.pushNotification.service == null) {
-            app.container
-                .bind(DiKeys.PushNotificationService)
-                .to(require("../services/fcm-push-notification-service").FcmPushNotificationService)
-                .inSingletonScope();
-
-            ids.push(DiKeys.PushNotificationService)
+        // add push notification service
+        if (app.options.notification.pushNotification.enabled) {
+            if (app.options.notification.pushNotification.service == null) {
+                providers.push({
+                    provide: DiKeys.PushNotificationService,
+                    useClass: require("../services/fcm-push-notification-service").FcmPushNotificationService
+                })
+            } else {
+                providers.push({
+                    provide: DiKeys.PushNotificationService,
+                    useClass: app.options.notification.pushNotification.service
+                })
+            }
         }
 
-        // add the default NotificationService if there is no NotificationService registered
+        // add notification service
         if (app.options.notification.service == null) {
-            app.container
-                .bind(DiKeys.NotificationService)
-                .to(require("../services/notification-service").NotificationService)
-                .inSingletonScope();
-
-            ids.push(DiKeys.NotificationService)
+            providers.push({
+                provide: DiKeys.NotificationService,
+                useClass: require("../services/notification-service").NotificationService
+            })
+        } else {
+            providers.push({
+                provide: DiKeys.NotificationService,
+                useClass: app.options.notification.service
+            })
         }
     }
 }

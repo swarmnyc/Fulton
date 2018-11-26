@@ -1,5 +1,6 @@
 import * as lodash from 'lodash';
 import { ConnectionOptions } from "typeorm";
+import { ClientSecurity } from '../entities/client-security';
 import { getRelatedToMetadata } from '../entities/entity-decorators-helpers';
 import { FultonApp } from '../fulton-app';
 import { Type } from '../interfaces';
@@ -10,6 +11,8 @@ module.exports = async function (app: FultonApp): Promise<any> {
         // if databases = 0, skip initDatabases
         return;
     }
+
+    initModuleEntities(app)
 
     let connOptions: ConnectionOptions[] = [];
 
@@ -42,4 +45,11 @@ module.exports = async function (app: FultonApp): Promise<any> {
     }
 
     app.events.emit(EventKeys.AppDidInitDatabases, app);
+}
+
+function initModuleEntities(app: FultonApp) {
+    // add security service if security are enabled
+    if (app.options.security.enabled) {
+        app.options.entities.push(ClientSecurity)
+    }
 }

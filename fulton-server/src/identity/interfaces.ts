@@ -16,7 +16,7 @@ export interface IOauthProfile {
     id?: string;
     email: string;
     username: string;
-    portraitUrl: string;
+    portraitUrl?: string;
     [key: string]: any;
 }
 

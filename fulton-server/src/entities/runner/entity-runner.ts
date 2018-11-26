@@ -14,6 +14,8 @@ let funcReg = /^((?:num)|(?:int)|(?:date)|(?:bool)|(?:ObjectId))\((.+)\)$/
 export abstract class EntityRunner {
     entityMetadatas: Map<Type, EntityMetadata>;
 
+    abstract updateIdMetadata<TEntity>(repository: Repository<TEntity>): void;
+
     find<TEntity>(repository: Repository<TEntity>, queryParams?: QueryParams): Promise<FindResult<TEntity>> {
         let error = this.adjustParams(repository.metadata, queryParams);
         if (error) {

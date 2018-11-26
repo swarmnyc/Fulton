@@ -33,7 +33,6 @@ export class EntityService<TEntity> extends Service implements IEntityService<TE
         if (this._runner == null) {
             if (this.mainRepository instanceof MongoRepository) {
                 this._runner = this.app.container.get(DiKeys.MongoEntityRunner);
-
             } else {
                 //TODO: Sql Entity Runner
             }
@@ -168,6 +167,10 @@ export class EntityService<TEntity> extends Service implements IEntityService<TE
                 }
             })
             .catch(this.errorHandler);
+    }
+
+    updateIdMetadata(){
+        this.runner.updateIdMetadata(this.mainRepository)
     }
 
     /** 

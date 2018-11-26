@@ -1,5 +1,5 @@
 import { Env } from '../helpers/env';
-import { Dict, INotificationService, Type } from '../interfaces';
+import { Dict, Type } from '../interfaces';
 import { EmailOptions } from './notification-email-options';
 import { PushNotificationOptions } from './notification-pn-options';
 import { BaseOptions } from './options';
@@ -13,16 +13,14 @@ export class NotificationOptions extends BaseOptions<NotificationOptions> {
     enabled?: boolean = false;
 
     /**
-     * the type or instance of service of notification. default is use Fulton Default Notification Service,
-     * if the value is a Type, the type has to be registered in app.options.providers
+     * the type or instance of service of notification. default is use Fulton Default Notification Service
      */
-    service?: Type | INotificationService;
+    service?: Type;
 
     /**
      * the type or instance of service of templating. default is use Fulton Default Template Service,
-     * if the value is a Type, the type has to be registered in app.options.providers
      */
-    templateService?: Type | INotificationService;
+    templateService?: Type;
 
     readonly email = new EmailOptions(this.appName, this.appMode);
 

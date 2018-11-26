@@ -183,6 +183,11 @@ export interface QueryParams {
         index?: number,
         size?: number,
     },
+
+    /**
+     * If true, use cache with default duration. If false or 0, no cache. if it is number and bigger than 0, get values and set the values with the number (mill-second) 
+     */
+    cache?: boolean | number,
     needAdjust?: boolean;
 }
 

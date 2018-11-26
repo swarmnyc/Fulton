@@ -1,4 +1,4 @@
-import { getConnection, getMongoManager } from 'typeorm';
+import { getMongoManager } from 'typeorm';
 
 export class MongoHelper {
     static async insertData(collections: any, reset?: boolean): Promise<any> {
@@ -14,5 +14,9 @@ export class MongoHelper {
         });
 
         await Promise.all(tasks);
+    };
+
+    static reset(): Promise<any> {
+        return getMongoManager().connection.dropDatabase();
     };
 }

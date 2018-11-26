@@ -14,7 +14,7 @@ export class EmailOptions extends BaseOptions<EmailOptions>{
      * the email service. default is use nodemailer Email Service,
      * if the value is a Type, the type has to be registered in app.options.providers
      */
-    service?: Type | IEmailService;
+    service?: Type;
 
     /**
      * the default sender. use nodemailer format, like

@@ -196,7 +196,7 @@ describe('Identity Integration Test', () => {
         let userService = app.userService as FultonUserService
         let accessToken: AccessToken = {
             provider: "TEST",
-            access_token: "TTEESSTT"
+            access_token: "TOKEN"
         }
         let profile: IOauthProfile = {
             id: "test",
@@ -228,7 +228,7 @@ describe('Identity Integration Test', () => {
 
         let accessToken: AccessToken = {
             provider: "TEST",
-            access_token: "TTEESSTT"
+            access_token: "TOKEN"
         }
         let profile: IOauthProfile = {
             id: "test",
@@ -254,7 +254,7 @@ describe('Identity Integration Test', () => {
 
         let accessToken: AccessToken = {
             provider: "TEST",
-            access_token: "TTEESSTT"
+            access_token: "TOKEN"
         }
 
         let profile: IOauthProfile = {

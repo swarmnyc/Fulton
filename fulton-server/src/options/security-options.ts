@@ -17,6 +17,11 @@ export class SecurityOptions extends BaseOptions<SecurityOptions> {
     fieldName?: string = "client-key"
 
     /**
+     * the white url array
+     */
+    excludes: RegExp[] = [];
+
+    /**
      * custom middlewares for security
      */
     middlewares?: Middleware[] = []

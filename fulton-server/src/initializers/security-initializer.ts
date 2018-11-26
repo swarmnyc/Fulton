@@ -1,9 +1,8 @@
-import * as cors from 'cors';
+import * as lodash from 'lodash';
+import { FultonError } from '../common';
 import { FultonApp } from '../fulton-app';
 import { EventKeys } from '../keys';
-import * as lodash from 'lodash';
 import { SecurityService } from '../services/security-service';
-import { FultonError } from '../common';
 
 module.exports = function (app: FultonApp) {
     if (lodash.some(app.options.security.middlewares)) {

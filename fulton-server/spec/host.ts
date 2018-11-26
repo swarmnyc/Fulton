@@ -11,19 +11,21 @@ dotenv.config({ path: "./spec/secret.env" })
 class MyApp extends FultonApp {
     protected onInit(options: FultonAppOptions): void {
         this["assetFolder"] = "../assets"
-        options.server.httpsEnabled = true;
+        // options.server.httpsEnabled = true;
 
         options.identity.enabled = true;
         // options.identity.google.enabled = true;
         // options.identity.github.enabled = true;
         // options.identity.facebook.enabled = true;
 
+        options.docs.enabled = true;      
+
+        options.security.enabled = true;
+
         options.databases.set("default", {
             type: "mongodb",
             url: "mongodb://localhost:27017/fulton-test"
         });
-
-        options.docs.enabled = true;      
 
         options.identity.register.notification.email.set({
             bodyTemplate: "<h1>Hello ${displayName}</h1><p> Thanks for your registration.</p>"

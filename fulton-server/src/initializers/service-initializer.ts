@@ -54,7 +54,7 @@ function initModuleServices(app: FultonApp, providers: Provider[]) {
             if (app.options.notification.email.service == null) {
                 providers.push({
                     provide: DiKeys.EmailService,
-                    useClass: require("../services/email-service").EmailService
+                    useClass: require("../services/notification/email-service").EmailService
                 })
             } else {
                 providers.push({
@@ -69,7 +69,7 @@ function initModuleServices(app: FultonApp, providers: Provider[]) {
             if (app.options.notification.pushNotification.service == null) {
                 providers.push({
                     provide: DiKeys.PushNotificationService,
-                    useClass: require("../services/fcm-push-notification-service").FcmPushNotificationService
+                    useClass: require("../services/notification/fcm-push-notification-service").FcmPushNotificationService
                 })
             } else {
                 providers.push({
@@ -83,7 +83,7 @@ function initModuleServices(app: FultonApp, providers: Provider[]) {
         if (app.options.notification.service == null) {
             providers.push({
                 provide: DiKeys.NotificationService,
-                useClass: require("../services/notification-service").NotificationService
+                useClass: require("../services/notification/notification-service").NotificationService
             })
         } else {
             providers.push({

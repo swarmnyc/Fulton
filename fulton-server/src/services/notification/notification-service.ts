@@ -1,8 +1,8 @@
-import { FultonApp } from '../fulton-app';
-import { IEmailService, INotificationService, IPushNotificationService, NotificationMessage } from '../interfaces';
-import { DiKeys } from '../keys';
-import { NotificationOptions } from '../options/notification-options';
-import { Service } from './service';
+import { FultonApp } from '../../fulton-app';
+import { IEmailService, INotificationService, IPushNotificationService, NotificationMessage } from '../../interfaces';
+import { DiKeys } from '../../keys';
+import { NotificationOptions } from '../../options/notification-options';
+import { Service } from '../service';
 
 export class NotificationService extends Service implements INotificationService {
     emailService: IEmailService

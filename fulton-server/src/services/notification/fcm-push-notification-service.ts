@@ -1,9 +1,9 @@
 import * as fs from 'fs';
-import { IPushNotificationService } from '../interfaces';
-import { Service } from './service';
+import { IPushNotificationService } from '../../interfaces';
+import { Service } from '../service';
 import { JWT } from 'google-auth-library';
 import { Credentials } from 'google-auth-library/build/src/auth/credentials';
-import { FultonLog } from '../fulton-log';
+import { FultonLog } from '../../fulton-log';
 import * as https from 'https'
 
 interface Config {

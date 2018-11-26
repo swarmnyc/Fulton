@@ -1,18 +1,15 @@
 import * as lodash from 'lodash';
-
-import { HttpResult, HttpTester } from "../../src/test/http-tester";
-import { OperationOneResult, OperationManyResult, OperationResult, QueryParams, Request, Response, injectable } from "../../src/interfaces";
-import { httpGet, router } from '../../src/routers/route-decorators';
-
-import { Category } from '../entities/category';
-import { EntityRouter } from '../../src/routers/entity-router';
+import { Repository } from "typeorm";
 import { EntityService } from '../../src/entities/entity-service';
 import { FultonApp } from '../../src/fulton-app';
+import { injectable, OperationManyResult, OperationOneResult, QueryParams, Request, Response } from "../../src/interfaces";
 import { FultonAppOptions } from '../../src/options/fulton-app-options';
-import { MongoHelper } from "../helpers/mongo-helper";
-import { Repository } from "typeorm";
+import { EntityRouter } from '../../src/routers/entity-router';
+import { httpGet, router } from '../../src/routers/route-decorators';
+import { HttpTester } from "../../src/test/http-tester";
+import { Category } from '../entities/category';
 import { Territory } from '../entities/territory';
-import { UserServiceMock } from "../helpers/user-service-mock";
+import { MongoHelper } from "../helpers/mongo-helper";
 import { sampleData } from "../support/sample-data";
 
 @injectable()

@@ -1,6 +1,6 @@
 import { FultonApp } from '../../src/fulton-app';
 import { FultonAppOptions } from '../../src/options/fulton-app-options';
-import { FcmPushNotificationService } from '../../src/services/fcm-push-notification-service';
+import { FcmPushNotificationService } from '../../src/services/notification/fcm-push-notification-service';
 import { DiKeys } from '../../src/keys';
 
 

@@ -38,8 +38,8 @@ describe('entity service', () => {
         service = new EntityService<Employee>(repo)
 
         service["app"] = app;
-        service["_runner"] = new MongoEntityRunner();
-        service["_runner"].entityMetadatas = app.entityMetadatas;
+        service["runner"] = new MongoEntityRunner();
+        service["runner"].entityMetadatas = app.entityMetadatas;
         employeeMetadata = app.entityMetadatas.get(Employee);
         categoryMetadata = app.entityMetadatas.get(Category);
         customerMetadata = app.entityMetadatas.get(Customer);

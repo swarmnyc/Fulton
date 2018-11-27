@@ -62,16 +62,21 @@ export class SecurityService extends Service implements ISecurityService {
             return false
         }
 
-        let result = await this.entityService.findOne({
+        // cache for 10 minutes if cache is enabled
+        let date = new Date()
+        date = new Date(date.getFullYear(), date.getMonth(), date.getDate(), date.getHours(),  Math.floor(date.getMinutes() / 10) * 10)
+
+        let data = await this.entityService.findOne({
             filter: {
                 key: key,
                 expiredAt: {
-                    "$gt": new Date()
+                    "$gt": date
                 }
-            }
+            },
+            cache: true
         })
 
-        return result.data != null
+        return data != null
     }
 
     private getKey(req: Request): string {

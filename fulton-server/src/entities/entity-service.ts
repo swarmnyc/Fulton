@@ -6,7 +6,7 @@ import { EntityMetadata } from 'typeorm/metadata/EntityMetadata';
 import { FultonError, FultonStackError } from '../common/fulton-error';
 import { FultonLog } from '../fulton-log';
 import { IUser } from '../identity';
-import { IEntityService, OperationManyResult, OperationOneResult, OperationResult, QueryParams, Type } from '../interfaces';
+import { IEntityService, OperationManyResult, OperationOneResult, OperationResult, QueryParams, Type, ICacheService } from '../interfaces';
 import { DiKeys } from '../keys';
 import { injectable } from '../re-export';
 import { Service } from '../services';
@@ -15,11 +15,12 @@ import { EntityRunner } from './runner/entity-runner';
 @injectable()
 export class EntityService<TEntity> extends Service implements IEntityService<TEntity> {
     protected mainRepository: Repository<TEntity>
-    private _runner: EntityRunner;
+    protected runner: EntityRunner;
+    protected cacheService: ICacheService;
 
-    constructor(entity: Type<TEntity>, connectionName?:string)
+    constructor(entity: Type<TEntity>, connectionName?: string)
     constructor(mainRepository: Repository<TEntity>)
-    constructor(input: Repository<TEntity> | Type<TEntity>, connectionName:string = "default") {
+    constructor(input: Repository<TEntity> | Type<TEntity>, connectionName: string = "default") {
         super()
 
         if (input instanceof Repository) {
@@ -29,18 +30,15 @@ export class EntityService<TEntity> extends Service implements IEntityService<TE
         }
     }
 
-    protected get runner(): EntityRunner {
-        if (this._runner == null) {
-            if (this.mainRepository instanceof MongoRepository) {
-                this._runner = this.app.container.get(DiKeys.MongoEntityRunner);
-            } else {
-                //TODO: Sql Entity Runner
-            }
-
-            this._runner.entityMetadatas = this.app.entityMetadatas;
+    onInit() {
+        if (this.mainRepository instanceof MongoRepository) {
+            this.runner = this.app.container.get(DiKeys.MongoEntityRunner);
+            this.runner.entityMetadatas = this.app.entityMetadatas;
+        } else {
+            //TODO: Sql Entity Runner
         }
 
-        return this._runner;
+        this.cacheService = this.app.getCacheService(this.mainRepository.target.toString())
     }
 
     get entityType(): Type {
@@ -76,25 +74,22 @@ export class EntityService<TEntity> extends Service implements IEntityService<TE
                     }
                 }
             })
-            .catch(this.errorHandler);
     }
 
-    findOne(queryParams?: QueryParams): Promise<OperationOneResult<TEntity>> {
+    findOne(queryParams?: QueryParams): Promise<TEntity> {
+        if (queryParams && queryParams.cache) {
+
+        }
+
         if (queryParams && queryParams.needAdjust == null) {
             queryParams.needAdjust = true
         }
 
         return this.runner
             .findOne(this.mainRepository, queryParams)
-            .then((data) => {
-                return {
-                    data: data
-                }
-            })
-            .catch(this.errorHandler);
     }
 
-    findById(id: any, queryParams?: QueryParams): Promise<OperationOneResult<TEntity>> {
+    findById(id: any, queryParams?: QueryParams): Promise<TEntity> {
         if (id == null) throw new FultonError("invalid_parameter", "id cannot be null")
 
         if (queryParams == null) {
@@ -111,65 +106,36 @@ export class EntityService<TEntity> extends Service implements IEntityService<TE
 
         return this.runner
             .findOne(this.mainRepository, queryParams)
-            .then((data) => {
-                return {
-                    data: data
-                }
-            })
-            .catch(this.errorHandler);
     }
 
-    count(queryParams?: QueryParams): Promise<OperationOneResult<number>> {
+    count(queryParams?: QueryParams): Promise<number> {
         return this.runner
             .count(this.mainRepository, queryParams)
-            .then((num) => {
-                return {
-                    data: num
-                }
-            })
-            .catch(this.errorHandler);
     }
 
-    create(input: TEntity | Partial<TEntity>): Promise<OperationOneResult<TEntity>> {
+    create(input: TEntity | Partial<TEntity>): Promise<TEntity> {
         return this.convertAndVerifyEntity(this.mainRepository.metadata, input)
             .then((entity) => {
                 return this.runner
                     .create(this.mainRepository, entity)
-                    .then((newEntity) => {
-                        return {
-                            status: 201,
-                            data: newEntity
-                        }
-                    })
             })
-            .catch(this.errorHandler);
     }
 
-    update(id: any, input: TEntity | Partial<TEntity>): Promise<OperationResult> {
+    update(id: any, input: TEntity | Partial<TEntity>): Promise<void> {
         return this
             .convertAndVerifyEntity(this.mainRepository.metadata, input)
             .then((entity) => {
                 return this.runner
                     .update(this.mainRepository, id, entity)
-                    .then((newEntity) => {
-                        return { status: 202 }
-                    })
             })
-            .catch(this.errorHandler);
     }
 
-    delete(id: any): Promise<OperationResult> {
+    delete(id: any): Promise<void> {
         return this.runner
             .delete(this.mainRepository, id)
-            .then((newEntity) => {
-                return {
-                    status: 202
-                }
-            })
-            .catch(this.errorHandler);
     }
 
-    updateIdMetadata(){
+    updateIdMetadata() {
         this.runner.updateIdMetadata(this.mainRepository)
     }
 
@@ -213,24 +179,6 @@ export class EntityService<TEntity> extends Service implements IEntityService<TE
     /** Convert Value base on the type or ColumnMetadata */
     protected convertValue(metadata: string | ColumnMetadata, value: any): any {
         return this.runner.convertValue(metadata, value, null);
-    }
-
-    /**
-     * handler operation fails
-     * @param error 
-     */
-    protected errorHandler(error: any): OperationManyResult & OperationOneResult {
-        FultonLog.warn("EntityService operation failed with error:\n", error);
-
-        if (error instanceof FultonError) {
-            return error
-        } else {
-            return {
-                error: {
-                    code: error.message
-                }
-            }
-        }
     }
 
     private convertEntity(metadata: EntityMetadata, input: any, errorTracker: FultonStackError): any {

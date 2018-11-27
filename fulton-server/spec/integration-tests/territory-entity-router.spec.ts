@@ -31,12 +31,11 @@ class TerritoryService extends EntityService<Territory>{
                     }
                 }
             })
-            .catch(this.errorHandler);
     }
 
     async getCategoriesByTerritoryId(territoryId: string): Promise<Category[]> {
         let result = await this.findById(territoryId);
-        let tagIds = result.data.categories.map((c) => c.categoryId);
+        let tagIds = result.categories.map((c) => c.categoryId);
 
         return this.categoryRepository.find({ "_id": { "$in": tagIds } } as any);
     }
@@ -52,7 +51,10 @@ class TerritoryRouter extends EntityRouter<Territory>{
     categories(req: Request, res: Response) {
         this.entityService
             .getCategories(req.queryParams)
-            .then(this.sendResult(res));
+            .then((result)=>{
+                res.send(result)
+            })
+            .catch(this.errorHandler(res));
     }
 
     @httpGet("/:id/categories")
@@ -64,13 +66,7 @@ class TerritoryRouter extends EntityRouter<Territory>{
                     data: tags
                 });
             })
-            .catch((err) => {
-                res.status(400).send({
-                    error: {
-                        message: err.message
-                    }
-                });
-            });
+            .catch(this.errorHandler(res));
     }
 }
 

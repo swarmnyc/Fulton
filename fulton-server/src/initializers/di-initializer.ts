@@ -29,7 +29,7 @@ function entityServiceFactory<T>(ctx: interfaces.Context): EntityServiceFactory<
     return (entity: Type<T>, connectionName?:string) => {
         let service = new (require("../entities/entity-service").EntityService)(entity, connectionName);
         service["app"] = ctx.container.get(DiKeys.FultonApp);
-
+        service.onInit()
         return service;
     }
 }

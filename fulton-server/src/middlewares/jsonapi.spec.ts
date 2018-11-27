@@ -1,16 +1,13 @@
-import { EntityRouter, entityRouter } from '../routers';
-import { IEntityService, OperationOneResult, OperationManyResult, OperationResult, QueryParams, Request, Response, Type } from "../interfaces";
-
-import { Category } from '../../spec/entities/category';
 import { Connection } from "typeorm/connection/Connection";
+import { Category } from '../../spec/entities/category';
 import { Employee } from '../../spec/entities/employee';
-import { FultonApp } from '../fulton-app';
-import { FultonAppOptions } from '../options/fulton-app-options';
-import { HttpTester } from "../test/http-tester";
 import { Territory } from '../../spec/entities/territory';
 import { getRelatedToMetadata } from "../entities/entity-decorators-helpers";
-import { queryParamsParser } from "./query-params-parser";
-import { sampleData } from "../../spec/support/sample-data";
+import { FultonApp } from '../fulton-app';
+import { IEntityService, OperationManyResult, QueryParams, Request, Response, Type } from "../interfaces";
+import { FultonAppOptions } from '../options/fulton-app-options';
+import { EntityRouter, entityRouter } from '../routers';
+import { HttpTester } from "../test/http-tester";
 
 class EmployeeEntityService implements IEntityService<Employee> {
     entityType: Type<Employee> = Employee
@@ -88,7 +85,7 @@ class EmployeeEntityService implements IEntityService<Employee> {
         });
     }
 
-    findById(id: any, QueryParams?: QueryParams): Promise<OperationOneResult<Employee>> {
+    findById(id: any, QueryParams?: QueryParams): Promise<Employee> {
         let data: Employee = Object.assign(new Employee(), {
             "employeeId": 1,
             "lastName": "Davolio",
@@ -116,26 +113,24 @@ class EmployeeEntityService implements IEntityService<Employee> {
             ]
         });
 
-        return Promise.resolve({
-            data: data
-        });
+        return Promise.resolve(data);
     }
 
-    findOne(queryParams: QueryParams): Promise<OperationOneResult<Employee>> {
+    findOne(queryParams: QueryParams): Promise<Employee> {
         throw new Error("Method not implemented.");
     }
 
-    count(queryParams?: QueryParams): Promise<OperationOneResult<number>> {
+    count(queryParams?: QueryParams): Promise<number> {
         throw new Error("Method not implemented.");
     }
 
-    create(entity: Employee): Promise<OperationOneResult<Employee>> {
+    create(entity: Employee): Promise<Employee> {
         throw new Error("Method not implemented.");
     }
-    update(id: string, entity: Employee): Promise<OperationResult> {
+    update(id: string, entity: Employee): Promise<void> {
         throw new Error("Method not implemented.");
     }
-    delete(id: string): Promise<OperationResult> {
+    delete(id: string): Promise<void> {
         throw new Error("Method not implemented.");
     }
 }

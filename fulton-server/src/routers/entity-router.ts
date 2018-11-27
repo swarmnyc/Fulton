@@ -1,8 +1,7 @@
-import { DiKeys } from '../keys';
-import { EntityService } from '../entities/entity-service';
-import { EntityServiceFactory, IEntityService, injectable, NextFunction, OperationManyResult, OperationOneResult, OperationResult, Request, Response } from '../interfaces';
-import { FullEntityRouterMetadata, getFullEntityRouterActionMetadata } from './route-decorators-helpers';
+import { FultonError } from '../common/fulton-error';
+import { IEntityService, injectable, Request, Response } from '../interfaces';
 import { httpDelete, httpGet, httpPatch, httpPost, httpPut } from './route-decorators';
+import { FullEntityRouterMetadata, getFullEntityRouterActionMetadata } from './route-decorators-helpers';
 import { Router } from './router';
 
 @injectable()
@@ -27,7 +26,7 @@ export abstract class EntityRouter<TEntity> extends Router {
     }
 
     @httpGet("/")
-    list(req: Request, res: Response, next: NextFunction) {
+    list(req: Request, res: Response) {
         // by default don't return all entities
         if (req.queryParams.pagination) {
             if (req.queryParams.pagination.index == null)
@@ -44,14 +43,22 @@ export abstract class EntityRouter<TEntity> extends Router {
 
         this.entityService
             .find(req.queryParams)
-            .then(this.sendResult(res));
+            .then((result) => {
+                res.send(result)
+            })
+            .catch(this.errorHandler(res));
     }
 
     @httpGet("/:id")
     detail(req: Request, res: Response) {
         this.entityService
             .findById(req.params.id, req.queryParams)
-            .then(this.sendResult(res));
+            .then((entity) => {
+                res.send({
+                    data: entity
+                });
+            })
+            .catch(this.errorHandler(res));
     }
 
     @httpPost("/")
@@ -59,11 +66,14 @@ export abstract class EntityRouter<TEntity> extends Router {
         if (req.body.data) {
             this.entityService
                 .create(req.body.data)
-                .then(this.sendResult(res));
+                .then((entity) => {
+                    res.status(201).send({
+                        data: entity
+                    });
+                })
+                .catch(this.errorHandler(res));
         } else {
-            res.status(400).send({
-                error: { "message": "no data" }
-            });
+            this.errorHandler(res)(new FultonError("no-data", "no data"))
         }
     }
 
@@ -71,14 +81,14 @@ export abstract class EntityRouter<TEntity> extends Router {
     @httpPatch("/:id")
     update(req: Request, res: Response) {
         // TODO: determine who can update
-        if (req.params.id && req.body.data) {
+        if (req.body.data) {
             this.entityService
                 .update(req.params.id, req.body.data)
-                .then(this.sendResult(res));
+                .then(() => {
+                    res.sendStatus(202);
+                })
         } else {
-            res.status(400).send({
-                error: { "message": "no data or id" }
-            });
+            this.errorHandler(res)(new FultonError("no-data", "no data"))
         }
     }
 
@@ -88,38 +98,27 @@ export abstract class EntityRouter<TEntity> extends Router {
         if (req.params.id) {
             this.entityService
                 .delete(req.params.id)
-                .then(this.sendResult(res));
-        } else {
-            res.status(400).send({
-                error: { "message": "no id" }
-            });
+                .then(() => {
+                    res.sendStatus(202);
+                })
+                .catch(this.errorHandler(res));
         }
     }
 
-    protected sendResult(res: Response): ((result: OperationManyResult | OperationOneResult | OperationResult) => void) {
-        return (result) => {
-            if (result.error) {
-                res.status(400).send(result);
+    /**
+     * handler operation fails
+     * @param error 
+     */
+    protected errorHandler(res: Response): (error: any) => void {
+        return (error) => {
+            let fe: FultonError
+            if ((error instanceof FultonError)) {
+                fe = error
             } else {
-                let status = (<OperationResult>result).status;
-                if (status) {
-                    res.status(status);
-                }
-                
-                if ((<OperationManyResult>result).data) {
-                    res.send(result);
-                } else {
-                    if (status){
-                        res.end()
-                    }else{
-                        res.status(400).send({
-                            error: {
-                                "message": "no data"
-                            }
-                        });
-                    }
-                }
+                fe = new FultonError(error.message)
             }
+
+            res.status(fe.status || 400).send(fe);
         }
     }
 }

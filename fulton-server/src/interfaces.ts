@@ -64,19 +64,19 @@ export interface FindResult<TEntity> {
 export interface IEntityService<TEntity> {
     find(queryParams?: QueryParams): Promise<OperationManyResult<TEntity>>;
 
-    findOne(queryParams?: QueryParams): Promise<OperationOneResult<TEntity>>;
+    findOne(queryParams?: QueryParams): Promise<TEntity>;
 
-    findById(id: any, QueryParams?: QueryParams): Promise<OperationOneResult<TEntity>>;
+    findById(id: any, QueryParams?: QueryParams): Promise<TEntity>;
 
-    count(queryParams?: QueryParams): Promise<OperationOneResult<number>>;
+    count(queryParams?: QueryParams): Promise<number>;
 
-    create(entity: TEntity | Partial<TEntity>): Promise<OperationOneResult<TEntity>>;
+    create(entity: TEntity | Partial<TEntity>): Promise<TEntity>;
 
-    update(id: any, entity: TEntity | Partial<TEntity>): Promise<OperationResult>;
+    update(id: any, entity: TEntity | Partial<TEntity>): Promise<void>;
 
     // updateMany(query: any, entity: TEntity | Partial<TEntity>): Promise<OperationResult>;
 
-    delete(id: any): Promise<OperationResult>;
+    delete(id: any): Promise<void>;
 
     readonly entityType: Type<TEntity>;
 }

@@ -20,10 +20,21 @@ class Food {
 }
 
 class FoodRepository extends Repository<Food>{
+    metadata: any
+    constructor() {
+        super();
+
+        this.metadata = {
+            target : Food
+        }
+    }
 }
 
 @injectable()
 class FoodEntityService extends EntityService<Food> {
+    constructor() {
+        super(Food);
+    }
 }
 
 @entityRouter("/A", Food)
@@ -55,7 +66,9 @@ class MyApp extends FultonApp {
 describe('Fulton Entity Router', () => {
     let spy: jasmine.Spy;
     beforeAll(() => {
-        spy = spyOn(typeorm, "getRepository").and.returnValue(new FoodRepository());
+        spy = spyOn(typeorm, "getRepository").and.callFake(()=>{
+            return new FoodRepository()
+        });
     });
 
     afterAll(() => {

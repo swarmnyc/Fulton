@@ -14,11 +14,11 @@ export class NotificationService extends Service implements INotificationService
         this.options = this.app.options.notification;
 
         if (this.options.email.enabled) {
-            this.emailService = (<FultonApp>this.app).getProvider(this.options.email.service, DiKeys.EmailService)
+            this.emailService = this.app.getInstance(DiKeys.EmailService)
         }
 
         if (this.options.pushNotification.enabled) {
-            this.pushNotificationService = (<FultonApp>this.app).getProvider(this.options.pushNotification.service, DiKeys.PushNotificationService)
+            this.pushNotificationService = this.app.getInstance(DiKeys.PushNotificationService)
         }
     }
 

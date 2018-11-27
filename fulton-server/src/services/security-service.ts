@@ -1,9 +1,9 @@
-import { Request, IEntityService } from '../interfaces';
-import { Service } from './service';
 import { ClientSecurity } from '../entities/client-security';
 import { EntityService } from '../entities/entity-service';
+import { ISecurityService, Request } from '../interfaces';
+import { Service } from './service';
 
-export class SecurityService extends Service {
+export class SecurityService extends Service implements ISecurityService {
     entityService: EntityService<ClientSecurity>
     fieldName: string
     excludes: RegExp[]
@@ -15,7 +15,7 @@ export class SecurityService extends Service {
         this.entityService.updateIdMetadata()
 
         if (this.app.options.docs.enabled) {
-            // add doc to excludes
+            // add docs to excludes
             let docPath = this.app.options.docs.path
             let reg: RegExp
 
@@ -74,7 +74,7 @@ export class SecurityService extends Service {
         return result.data != null
     }
 
-    getKey(req: Request): string {
+    private getKey(req: Request): string {
         let key = req.query[this.fieldName]
         if (key == null) {
             key = req.header(`x-${this.fieldName}`)

@@ -75,20 +75,20 @@ export let Helper = {
     baseUrlRaw(req: http.IncomingMessage) {
         // x-forwarded-proto is from proxy like AWS load balancer
         let protocol = req.headers["x-forwarded-proto"];
-        if (!protocol){
+        if (!protocol) {
             protocol = (req.connection instanceof tls.TLSSocket) ? "https" : "http"
         }
 
         return `${protocol}://${req.headers["host"]}`;
     },
 
-    urlResolve(req: Request, ...pathes: string[]) {
+    urlResolve(req: Request, ...paths: string[]) {
         let baseUrl = req.fultonApp.baseUrl;
 
-        if (pathes == null || pathes.length == 0) {
+        if (paths == null || paths.length == 0) {
             return baseUrl;
         } else {
-            return urlJoin(baseUrl, ...pathes)
+            return urlJoin(baseUrl, ...paths)
         }
     },
 

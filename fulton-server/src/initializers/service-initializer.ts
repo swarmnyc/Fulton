@@ -3,6 +3,7 @@ import { FultonApp } from '../fulton-app';
 import { Provider } from '../helpers';
 import { DiKeys, EventKeys } from '../keys';
 import { Service } from '../services/service';
+import { MockCacheProviderService } from '../services/cache/mock-cache-service';
 
 module.exports = async function (app: FultonApp) {
     let providers = app.options.services || [];
@@ -30,8 +31,45 @@ module.exports = async function (app: FultonApp) {
 function initModuleServices(app: FultonApp, providers: Provider[]) {
     // add security service if security are enabled
     if (app.options.security.enabled) {
-        app.options.entities.push(require("../entities/entity-service").SecurityService)
-        providers.push(require("../services/security-service").SecurityService)
+        if (app.options.security.service == null) {
+            providers.push({
+                provide: DiKeys.SecurityService,
+                useClass: require("../services/security-service").SecurityService
+            })
+        } else {
+            providers.push({
+                provide: DiKeys.SecurityService,
+                useClass: app.options.security.service
+            })
+        }
+    }
+
+    // add cache service
+    if (app.options.cache.enabled) {
+        if (app.options.cache.providerService) {
+            app.options.cache.type = "other"
+        }
+
+        let provider;
+        switch (app.options.cache.type) {
+            case "memory":
+                break;
+            case "redis":
+                break;
+            case "other":
+                provider = app.options.cache.providerService
+                break;
+        }
+
+        providers.push({
+            provide: DiKeys.CacheProviderService,
+            useClass: provider
+        })
+    } else {
+        providers.push({
+            provide: DiKeys.CacheProviderService,
+            useClass: MockCacheProviderService
+        })
     }
 
     // add these services if notification are enabled

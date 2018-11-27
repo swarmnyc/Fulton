@@ -1,10 +1,12 @@
 export enum DiKeys {
+    CacheProviderService = "CacheProviderService",
     EmailService = "EmailService",
     EntityServiceFactory = "EntityServiceFactory",
     FultonApp = "FultonApp",
     MongoEntityRunner = "MongoEntityRunner",
     NotificationService = "NotificationService",
     PushNotificationService = "PushNotificationService",
+    SecurityService = "SecurityService",
     TemplateService = "TemplateService",
 }
 

@@ -2,6 +2,7 @@ import * as lodash from 'lodash';
 import { Provider } from '../helpers';
 import { IdentityOptions } from '../identity/identity-options';
 import { AppMode, Middleware, Type } from '../interfaces';
+import { CacheOptions } from './cache-options';
 import { CompressionOptions } from './compression-options';
 import { CorsOptions } from './cors-options';
 import { DatabaseOptions } from './databases-options';
@@ -106,6 +107,11 @@ export class FultonAppOptions {
      * ```
      */
     services: Provider[] = [];
+
+    /**
+     * app level cors middlewares
+     */
+    readonly cache = new CacheOptions(this.appName, this.appMode);
 
     /**
      * app level cors middlewares

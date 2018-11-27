@@ -41,6 +41,30 @@ export let Env = {
 
         return Helper.getFloat(Env.get(name, null), defaultValue);
     },
+    /**
+     * parse all env, if it matches the pattern, put the value into options
+     */
+    parse(pattern: RegExp, options: any): void {
+         
+        for (const key in process.env) {
+            let propName, value;
+            let match = pattern.exec(key)
+            if (match) {
+                propName = match[1];
+                value = process.env[key];
+            } else {
+                continue;
+            }
+
+            if (Helper.isBooleanString(value)) {
+                options[propName] = Helper.getBoolean(value);
+            } else if (Helper.isNumberString(value)) {
+                options[propName] = Helper.getFloat(value);
+            } else {
+                options[propName] = value;
+            }
+        }
+    },
     stage: process.env["NODE_ENV"] || "dev",
     isProduction: /(prod)|(production)/i.test(process.env["NODE_ENV"])
 }

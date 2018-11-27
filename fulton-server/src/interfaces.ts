@@ -1,11 +1,10 @@
+import { OpenApiSpec, PathItemObject } from "@loopback/openapi-spec";
 import "reflect-metadata";
-import "./extensions"
-
 import { Repository } from "typeorm";
-import { FultonStackError } from './common/fulton-error';
-import { PathItemObject, OpenApiSpec } from "@loopback/openapi-spec";
+import "./extensions";
+import { Request } from "./re-export";
 
-export * from "./re-export"
+export * from "./re-export";
 
 export interface AbstractType<T=any> extends Function {
 }
@@ -195,6 +194,10 @@ export interface ITemplateService {
     generate(contentOrFilePath: string, variables: any): string;
 }
 
+export interface ISecurityService {
+    verify(req: Request): Promise<boolean>;
+}
+
 export interface INotificationService {
     send(...messages: NotificationMessage[]): Promise<void>
 }
@@ -215,6 +218,18 @@ export interface IEmailService {
 
 export interface IPushNotificationService {
     send(payload: any): Promise<void>
+}
+
+export interface ICacheProvideService {
+    getCacheService(category: string): ICacheService
+    resetAll(): void
+}
+
+export interface ICacheService {
+    get<T=any>(key: string, defaultValue?: T): Promise<T>
+    set<T=any>(key: string, value: T, maxArg: number): Promise<void>
+    remove(key: string): Promise<void>
+    removeAll(): Promise<void>
 }
 
 export interface EmailMessage {

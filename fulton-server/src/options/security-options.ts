@@ -1,5 +1,5 @@
 import { Env } from '../helpers';
-import { Middleware } from '../interfaces';
+import { Middleware, Type } from '../interfaces';
 import { BaseOptions } from './options';
 
 export class SecurityOptions extends BaseOptions<SecurityOptions> {
@@ -25,6 +25,11 @@ export class SecurityOptions extends BaseOptions<SecurityOptions> {
      * custom middlewares for security
      */
     middlewares?: Middleware[] = []
+
+    /**
+     * the type or instance of service of notification. default is use Fulton Default Notification Service
+     */
+    service?: Type;
 
     init?(): void {
         this.enabled = Env.getBoolean(`${this.appName}.options.security.enabled`, this.enabled);

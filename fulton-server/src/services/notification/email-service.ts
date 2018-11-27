@@ -12,7 +12,7 @@ export class EmailService extends Service implements IEmailService {
     private transporter: Transporter;
 
     onInit() {
-        this.templateService = (<FultonApp>this.app).getProvider(this.app.options.notification.templateService, DiKeys.TemplateService)
+        this.templateService = this.app.getInstance(DiKeys.TemplateService)
 
         if (this.app.options.notification.email.otherOptions) {
             this.transporter = mailer.createTransport(this.app.options.notification.email.otherOptions);

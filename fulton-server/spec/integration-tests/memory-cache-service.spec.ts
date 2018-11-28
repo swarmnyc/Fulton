@@ -34,6 +34,10 @@ describe('Memory Cache Service', () => {
         app.getInstance<ICacheProvideService>(DiKeys.CacheProviderService).resetAll();
     });
 
+    afterAll(async () => {
+        await app.stop()
+    })
+
     it('should cache data on find', async () => {
         let entityService = app.getEntityService(Category) as EntityService<Category>
         let cacheService = entityService["cache"]["service"]
@@ -142,7 +146,7 @@ describe('Memory Cache Service', () => {
         expect(result.constructor).toEqual(Category)
     });
 
-    it('should reset cache on create', async () => {
+    it('should re get cache after create', async () => {
         let entityService = app.getEntityService(Category) as EntityService<Category>
         let cacheService = entityService["cache"]["service"]
         let spyGet = spyOn(cacheService, "get").and.callThrough()
@@ -162,12 +166,12 @@ describe('Memory Cache Service', () => {
 
         await entityService.findById("000000000000000000000001", { cache: true })
 
-        expect(spyGet.calls.count()).toEqual(2)
+        expect(spyGet.calls.count()).toEqual(1) // data is dirty, skip get
         expect(spySet.calls.count()).toEqual(2)
-        expect(spyReset.calls.count()).toEqual(1)
+        expect(spyReset.calls.count()).toEqual(0)
     });
 
-    it('should reset cache on update', async () => {
+    it('should re get cache after update', async () => {
         let entityService = app.getEntityService(Category) as EntityService<Category>
         let cacheService = entityService["cache"]["service"]
         let spyGet = spyOn(cacheService, "get").and.callThrough()
@@ -186,12 +190,12 @@ describe('Memory Cache Service', () => {
 
         await entityService.findById("000000000000000000000001", { cache: true })
 
-        expect(spyGet.calls.count()).toEqual(2)
+        expect(spyGet.calls.count()).toEqual(1)
         expect(spySet.calls.count()).toEqual(2)
-        expect(spyReset.calls.count()).toEqual(1)
+        expect(spyReset.calls.count()).toEqual(0)
     });
 
-    it('should reset cache on delete', async () => {
+    it('should re get cache after delete', async () => {
         let entityService = app.getEntityService(Category) as EntityService<Category>
         let cacheService = entityService["cache"]["service"]
         let spyGet = spyOn(cacheService, "get").and.callThrough()
@@ -207,8 +211,8 @@ describe('Memory Cache Service', () => {
 
         await entityService.findById("000000000000000000000001", { cache: true })
 
-        expect(spyGet.calls.count()).toEqual(2)
+        expect(spyGet.calls.count()).toEqual(1)
         expect(spySet.calls.count()).toEqual(2)
-        expect(spyReset.calls.count()).toEqual(1)
+        expect(spyReset.calls.count()).toEqual(0)
     });
 });

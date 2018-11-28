@@ -29,7 +29,6 @@ describe('Memory cache service', () => {
 
         // expired
         expect(await service.get("test1")).toBeUndefined()
-        expect(await service.get("test1", "EFG")).toEqual("EFG")
     });
 
     it('should remove data', async () => {

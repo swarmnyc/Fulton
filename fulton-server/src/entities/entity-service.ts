@@ -12,47 +12,38 @@ import { injectable } from '../re-export';
 import { Service } from '../services';
 import { EntityRunner } from './runner/entity-runner';
 
+// the strategy of cache is caching all query result by query params and create and update and delete will mark dirty. 
+// if dirty is true, the query will not use cached data.
 export type QueryExecutor = () => Promise<any>
 
 export class CacheServiceWrapper {
+    isDirty: boolean = false
     constructor(public service: ICacheService, private entityType: Type) { }
 
     fetch(queryParams: QueryParams, type: string, executor?: QueryExecutor): Promise<any> {
         if (this.service && queryParams.cache) {
             let cacheKey = this.getCacheKey(type, queryParams)
-            return this.service.get(cacheKey).then((cacheResult) => {
-                fultonDebug("entity-cache", () => `fetch cache - ${this.service.namespace}:${cacheKey}:${cacheResult ? "found" : "not found"}`)
-                
-                if (cacheResult) {
-                    return this.convertObject(cacheResult)
-                }
 
-                let promise = executor()
+            if (this.isDirty) {
+                this.isDirty = false
+                return this.addCache(executor(), cacheKey, queryParams.cache)
+            } else {
+                return this.service.get(cacheKey).then((cacheResult) => {
+                    fultonDebug("entity-cache", () => `fetch cache - ${this.service.namespace}:${cacheKey}:${cacheResult ? "found" : "not found"}`)
 
-                promise.then((result) => {
-                    let maxAge: number = (typeof queryParams.cache == "boolean") ? null : queryParams.cache
+                    if (cacheResult) {
+                        return this.convertObject(cacheResult)
+                    }
 
-                    fultonDebug("entity-cache", () => `add cache - ${this.service.namespace}:${cacheKey} for ${maxAge || "default"}`)
-
-                    this.service.set(cacheKey, result, maxAge)
+                    return this.addCache(executor(), cacheKey, queryParams.cache)
                 })
-
-                return promise
-            })
+            }
         } else {
             return executor()
         }
     }
 
-    removeAll = () => {
-        if (this.service) {
-            fultonDebug("entity-cache", `reset cache - ${this.service.namespace}`)
-
-            this.service.reset()
-        }
-    }
-
-    private getCacheKey(type: string, queryParams: QueryParams): string {
+    getCacheKey(type: string, queryParams: QueryParams): string {
         return type + ":" + JSON.stringify({
             filter: queryParams.filter,
             sort: queryParams.sort,
@@ -64,12 +55,22 @@ export class CacheServiceWrapper {
         })
     }
 
+    addCache(promise: Promise<any>, key: string, maxAge: number | boolean): Promise<any> {
+        promise.then((result) => {
+            maxAge = (typeof maxAge == "boolean") ? null : maxAge
+
+            fultonDebug("entity-cache", () => `add cache - ${this.service.namespace}:${key} for ${maxAge || "default"}`)
+
+            this.service.set(key, result, maxAge)
+        })
+
+        return promise
+    }
+
     private convertObject(object: any): any {
         return object
     }
 }
-
-
 
 @injectable()
 export class EntityService<TEntity> extends Service implements IEntityService<TEntity> {
@@ -177,9 +178,8 @@ export class EntityService<TEntity> extends Service implements IEntityService<TE
         return this
             .convertAndVerifyEntity(this.mainRepository.metadata, input)
             .then((entity) => {
-                let promise = this.runner.create(this.mainRepository, entity)
-                promise.then(this.cache.removeAll)
-                return promise
+                this.cache.isDirty = true
+                return this.runner.create(this.mainRepository, entity)
             })
     }
 
@@ -187,16 +187,14 @@ export class EntityService<TEntity> extends Service implements IEntityService<TE
         return this
             .convertAndVerifyEntity(this.mainRepository.metadata, input)
             .then((entity) => {
-                let promise = this.runner.update(this.mainRepository, id, entity)
-                promise.then(this.cache.removeAll)
-                return promise
+                this.cache.isDirty = true
+                return this.runner.update(this.mainRepository, id, entity)
             })
     }
 
     delete(id: any): Promise<void> {
-        let promise = this.runner.delete(this.mainRepository, id)
-        promise.then(this.cache.removeAll)
-        return promise
+        this.cache.isDirty = true
+        return this.runner.delete(this.mainRepository, id)
     }
 
     updateIdMetadata() {

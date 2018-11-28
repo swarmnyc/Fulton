@@ -227,7 +227,7 @@ export interface ICacheProvideService {
 
 export interface ICacheService {
     readonly namespace: string;
-    get(key: string, defaultValue?: any, convertFunc?: (obj: any) => any): Promise<any>
+    get(key: string, convertFunc?: (obj: any) => any): Promise<any>
     set(key: string, value: any, maxArg?: number): Promise<void>
     delete(key: string): Promise<void>
     reset(): Promise<void>

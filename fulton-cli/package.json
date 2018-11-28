@@ -39,7 +39,7 @@
   "homepage": "https://github.com/swarmnyc/fulton",
   "license": "MIT",
   "dependencies": {
-    "caporal": "^0.10.0",
+    "caporal": "^1.1.0",
     "chalk": "^2.4.1",
     "cli-spinner": "^0.2.8",
     "inquirer": "^5.2.0",
@@ -55,7 +55,7 @@
     "@types/lodash": "^4.14.108",
     "@types/node": "^10.0.6",
     "@types/pluralize": "0.0.28",
-    "@types/winston": "^2.3.9",    
+    "@types/winston": "^2.3.9",
     "jasmine": "^3.1.0",
     "rimraf": "^2.6.2",
     "ts-node": "^6.0.3",

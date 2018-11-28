@@ -36,7 +36,7 @@ describe('Memory Cache Service', () => {
 
     it('should cache data on find', async () => {
         let entityService = app.getEntityService(Category) as EntityService<Category>
-        let cacheService = entityService["cacheService"]["service"]
+        let cacheService = entityService["cache"]["service"]
         let spyGet = spyOn(cacheService, "get").and.callThrough()
         let spySet = spyOn(cacheService, "set").and.callThrough()
 
@@ -84,7 +84,7 @@ describe('Memory Cache Service', () => {
 
     it('should cache data on findOne', async () => {
         let entityService = app.getEntityService(Category) as EntityService<Category>
-        let cacheService = entityService["cacheService"]["service"]
+        let cacheService = entityService["cache"]["service"]
         let spyGet = spyOn(cacheService, "get").and.callThrough()
         let spySet = spyOn(cacheService, "set").and.callThrough()
 
@@ -114,7 +114,7 @@ describe('Memory Cache Service', () => {
 
     it('should cache data on findById', async () => {
         let entityService = app.getEntityService(Category) as EntityService<Category>
-        let cacheService = entityService["cacheService"]["service"]
+        let cacheService = entityService["cache"]["service"]
         let spyGet = spyOn(cacheService, "get").and.callThrough()
         let spySet = spyOn(cacheService, "set").and.callThrough()
 
@@ -144,7 +144,7 @@ describe('Memory Cache Service', () => {
 
     it('should reset cache on create', async () => {
         let entityService = app.getEntityService(Category) as EntityService<Category>
-        let cacheService = entityService["cacheService"]["service"]
+        let cacheService = entityService["cache"]["service"]
         let spyGet = spyOn(cacheService, "get").and.callThrough()
         let spySet = spyOn(cacheService, "set").and.callThrough()
         let spyReset = spyOn(cacheService, "reset").and.callThrough()
@@ -169,7 +169,7 @@ describe('Memory Cache Service', () => {
 
     it('should reset cache on update', async () => {
         let entityService = app.getEntityService(Category) as EntityService<Category>
-        let cacheService = entityService["cacheService"]["service"]
+        let cacheService = entityService["cache"]["service"]
         let spyGet = spyOn(cacheService, "get").and.callThrough()
         let spySet = spyOn(cacheService, "set").and.callThrough()
         let spyReset = spyOn(cacheService, "reset").and.callThrough()
@@ -193,7 +193,7 @@ describe('Memory Cache Service', () => {
 
     it('should reset cache on delete', async () => {
         let entityService = app.getEntityService(Category) as EntityService<Category>
-        let cacheService = entityService["cacheService"]["service"]
+        let cacheService = entityService["cache"]["service"]
         let spyGet = spyOn(cacheService, "get").and.callThrough()
         let spySet = spyOn(cacheService, "set").and.callThrough()
         let spyReset = spyOn(cacheService, "reset").and.callThrough()

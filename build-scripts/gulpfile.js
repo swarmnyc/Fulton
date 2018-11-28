@@ -40,9 +40,7 @@ const path = require('path');
 const exec = require('child_process').exec;
 
 const gulp = require('gulp');
-const gutil = require('gulp-util');
 const rimraf = require('rimraf');
-const sequence = require('gulp-sequence');
 const replace = require('gulp-replace');
 const inquirer = require('inquirer');
 const semver = require('semver');
@@ -84,7 +82,7 @@ gulp.task('publish-projects', function (callback) {
 gulp.task("update-package.json", function (callback) {
     getCurrentVersion()
         .then((version) => {
-            gutil.log("The version is", version);
+            console.log("The version is", version);
 
             gulp.src("./dist/*/package*.json")
                 .pipe(replace("0.0.0-PLACEHOLDER", version))
@@ -136,9 +134,9 @@ gulp.task("increase-version", function (callback) {
                 return semver.inc(version, result.type, 'beta')
             }
         })
-        .then((newVesion) => {
-            if (newVesion) {
-                return updateVersion(newVesion)
+        .then((newVersion) => {
+            if (newVersion) {
+                return updateVersion(newVersion)
             }
         })
         .then(callback)
@@ -149,7 +147,7 @@ gulp.task("install-cli-in-local", function (callback) {
     let install = function () {
         exec(`cd ./dist/fulton-cli/ && npm pack && npm install -g fulton-cli-0.0.0-PLACEHOLDER.tgz`, function (err, stdout, stderr) {
             if (err) {
-                gutil.log("install-cli-in-local error:", err);
+                console.log("install-cli-in-local error:", err);
                 callback("install-cli-in-local failed");
                 return;
             }
@@ -165,11 +163,11 @@ gulp.task("install-cli-in-local", function (callback) {
     rimraf("./dist", build);
 });
 
-gulp.task('build', sequence("increase-version", "clean", "build-projects", "update-package.json"));
+gulp.task('build', gulp.series("increase-version", "clean", "build-projects", "update-package.json"));
 
-gulp.task('publish', sequence("check-login", "publish-projects"));
+gulp.task('publish', gulp.series("check-login", "publish-projects"));
 
-gulp.task('buildPublish', sequence("build", "publish"));
+gulp.task('buildPublish', gulp.series("build", "publish"));
 
 function getCurrentVersion() {
     return new Promise((resolve, reject) => {
@@ -180,7 +178,7 @@ function getCurrentVersion() {
         // use version from git tags
         exec("git describe --tags --abbrev=0", function (err, stdout, stderr) {
             if (err) {
-                gutil.log("get git tags error:", err);
+                console.log("get git tags error:", err);
                 reject("get git tags failed");
                 return;
             }
@@ -196,12 +194,12 @@ function updateVersion(version) {
         // use version from git tags
         exec(`git tag version/${version}`, function (err, stdout, stderr) {
             if (err) {
-                gutil.log("set git tags error:", err);
+                console.log("set git tags error:", err);
                 reject("set git tags failed");
                 return;
             }
 
-            gutil.log(`update version to ${version}`)
+            console.log(`update version to ${version}`)
             currentVersion = version;
 
             resolve()
@@ -214,10 +212,10 @@ function buildPackage(package) {
     const extraFolders = package.extraFolders;
 
     return new Promise((resolve, reject) => {
-        gutil.log(`--> Start build fulton-${name}`)
+        console.log(`--> Start build fulton-${name}`)
         exec(`cd ../fulton-${name}/ && npm run build`, function (err, stdout, stderr) {
             if (err) {
-                gutil.log(`build-fulton-${name} error:`, err);
+                console.log(`build-fulton-${name} error:`, err);
                 reject(`build-fulton-${name} failed`);
                 return;
             }
@@ -249,7 +247,7 @@ function buildPackage(package) {
 
             Promise.all(tasks)
                 .then(() => {
-                    gutil.log(`<-- Finish build fulton-${name}`)
+                    console.log(`<-- Finish build fulton-${name}`)
                     resolve();
                 })
                 .catch(reject);
@@ -261,16 +259,16 @@ function publishPackage(package) {
     const name = package.name;
 
     return new Promise((resolve, reject) => {
-        gutil.log(`--> Start publish fulton-${name}`)
+        console.log(`--> Start publish fulton-${name}`)
 
         exec(`cd ./dist/fulton-${name}/ && npm publish`, function (err, stdout, stderr) {
             if (err) {
-                gutil.log(`publish-fulton-${name} error:`, err);
+                console.log(`publish-fulton-${name} error:`, err);
                 reject(`publish-fulton-${name} failed`);
                 return;
             }
 
-            gutil.log(`<-- Finish publish fulton-${name}`)
+            console.log(`<-- Finish publish fulton-${name}`)
             resolve();
         });
     })

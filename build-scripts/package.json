@@ -11,9 +11,8 @@
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "dependencies": {
-    "gulp": "^3.9.1",
+    "gulp": "^4.0.0",
     "gulp-replace": "^1.0.0",
-    "gulp-sequence": "^1.0.0",
     "inquirer": "^6.2.0",
     "rimraf": "^2.6.2",
     "semver": "^5.5.0",

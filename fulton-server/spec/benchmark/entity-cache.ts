@@ -5,12 +5,13 @@ import { Category } from '../entities/category';
 import chalk from "chalk"
 
 class MyApp extends FultonApp {
-    constructor(private useCache: boolean) {
+    constructor(private useCache: boolean, private cacheType?: "redis" | "memory") {
         super()
     }
     protected onInit(options: FultonAppOptions): void {
         options.entities = [Category];
         options.cache.enabled = this.useCache;
+        options.cache.type = this.cacheType
 
         options.databases.set("default", {
             type: "mongodb",
@@ -19,8 +20,8 @@ class MyApp extends FultonApp {
     }
 }
 
-async function testAction1(useCache: boolean): Promise<void> {
-    let app = new MyApp(useCache)
+async function testAction(useCache: boolean, cacheType?: "redis" | "memory"): Promise<void> {
+    let app = new MyApp(useCache, cacheType)
     await app.init()
 
     let entityService = app.getEntityService(Category) as EntityService<Category>
@@ -52,11 +53,12 @@ async function testAction1(useCache: boolean): Promise<void> {
 
 export async function exec() {
     console.log("Start test no cache")
-    await testAction1(false)
+    await testAction(false)
 
-    console.log("")
+    console.log("\nStart test with memory cache")
+    await testAction(true, "memory")
 
-    console.log("Start test with cache")
-    await testAction1(true)
+    console.log("\nStart test with redis cache")
+    await testAction(true, "redis")
 }
 

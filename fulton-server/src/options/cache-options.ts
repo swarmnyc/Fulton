@@ -1,16 +1,17 @@
 import { Env, Helper } from '../helpers';
-import { Middleware, Type, ICacheProvideService } from '../interfaces';
+import { Middleware, Type, ICacheServiceProvider } from '../interfaces';
 import { BaseOptions } from './options';
 
 
-export interface RedisConnectionOptions {
+export interface CacheConnectionOptions {
     host?: string
     port?: number
     path?: string
     url?: string
     password?: string
     db?: string
-    connect_timeout?: string
+    connect_timeout?: number
+    [key: string]: any
 }
 
 export class CacheOptions extends BaseOptions<CacheOptions> {
@@ -29,7 +30,7 @@ export class CacheOptions extends BaseOptions<CacheOptions> {
     /**
      * if the value is null, the app will look at type. If type is memory, use MemoryCacheProvider. If type is redis, use RedisCacheProvider
      */
-    providerService?: Type<ICacheProvideService>
+    serviceProvider?: Type<ICacheServiceProvider>
 
     /**
      * the default is 10 minutes
@@ -55,12 +56,12 @@ export class CacheOptions extends BaseOptions<CacheOptions> {
     /**
      * connection options for redis or other
      */
-    connectionOptions: RedisConnectionOptions | any = {};
+    connectionOptions: CacheConnectionOptions = {};
 
     init?(): void {
         this.enabled = Env.getBoolean(`${this.appName}.options.cache.enabled`, this.enabled);
         this.resetHandlerEnabled = Env.getBoolean(`${this.appName}.options.cache.resetHandlerEnabled`, this.resetHandlerEnabled);
-        
+
         this.type = Env.get(`${this.appName}.options.cache.type`, this.type) as any;
 
         Env.parse(new RegExp(`^${this.appName}\\.options\\.cache\\.connectionOptions\\.(\\w+?)$`, "i"), this.connectionOptions)

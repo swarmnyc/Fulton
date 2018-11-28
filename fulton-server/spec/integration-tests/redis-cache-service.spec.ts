@@ -18,10 +18,17 @@ class MyApp extends FultonApp {
             type: "mongodb",
             url: "mongodb://localhost:27017/fulton-test"
         });
+
+        options.cache.set({
+            type: "redis",
+            connectionOptions: {
+                host: "localhost"
+            }
+        })
     }
 }
 
-describe('Memory Cache Service', () => {
+describe('Redis Cache Service', () => {
     let app: MyApp;
 
     beforeAll(async () => {

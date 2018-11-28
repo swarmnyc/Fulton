@@ -1,6 +1,6 @@
 import { sleep } from "../../../spec/helpers/test-helper";
 import { FultonApp } from "../../fulton-app";
-import { ICacheProvideService } from "../../interfaces";
+import { ICacheServiceProvider } from "../../interfaces";
 import { DiKeys } from "../../keys";
 import { FultonAppOptions } from "../../options/fulton-app-options";
 
@@ -79,7 +79,7 @@ describe('Memory cache service', () => {
         service1.set("test", "ABCD")
         service2.set("test", "ABCD")
 
-        let provider = app.getInstance<ICacheProvideService>(DiKeys.CacheProviderService)
+        let provider = app.getInstance<ICacheServiceProvider>(DiKeys.CacheServiceProvider)
         provider.resetAll()
 
         expect(await service1.get("test")).toBeUndefined()

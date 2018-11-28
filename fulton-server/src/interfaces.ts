@@ -220,14 +220,15 @@ export interface IPushNotificationService {
     send(payload: any): Promise<void>
 }
 
-export interface ICacheProvideService {
+export interface ICacheServiceProvider {
     getCacheService(namespace: string): ICacheService
     resetAll(): void
 }
 
 export interface ICacheService {
+    isTypeLost: boolean
     readonly namespace: string;
-    get(key: string, convertFunc?: (obj: any) => any): Promise<any>
+    get(key: string): Promise<any>
     set(key: string, value: any, maxArg?: number): Promise<void>
     delete(key: string): Promise<void>
     reset(): Promise<void>

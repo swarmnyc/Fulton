@@ -45,7 +45,7 @@ function initModuleServices(app: FultonApp, providers: Provider[]) {
 
     // add cache service
     if (app.options.cache.enabled) {
-        if (app.options.cache.providerService) {
+        if (app.options.cache.serviceProvider) {
             app.options.cache.type = "other"
         }
 
@@ -55,16 +55,17 @@ function initModuleServices(app: FultonApp, providers: Provider[]) {
                 target = require("../services/cache/memory-cache-service").default
                 break;
             case "redis":
+                target = require("../services/cache/redis-cache-service").default
                 break;
             case "other":
-                target = app.options.cache.providerService
+                target = app.options.cache.serviceProvider
                 break;
             default:
                 throw new Error("Unknown cache type " + app.options.cache.type)
         }
 
         providers.push({
-            provide: DiKeys.CacheProviderService,
+            provide: DiKeys.CacheServiceProvider,
             useClass: target
         })
     }

@@ -7,7 +7,7 @@ export abstract class BaseOptions<T extends Options> implements Options {
 
     init?(): void {}
 
-    set?(options: T): void {
+    set?(options: Partial<T>): void {
         Object.assign(this, options);
     }
 }

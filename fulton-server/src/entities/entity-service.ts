@@ -20,19 +20,19 @@ export class CacheServiceWrapper {
     isDirty: boolean = false
     constructor(public service: ICacheService, private entityType: Type) { }
 
-    fetch(queryParams: QueryParams, type: string, executor?: QueryExecutor): Promise<any> {
+    fetch(queryParams: QueryParams, operation: string, executor?: QueryExecutor): Promise<any> {
         if (this.service && queryParams.cache) {
-            let cacheKey = this.getCacheKey(type, queryParams)
+            let cacheKey = this.getCacheKey(operation, queryParams)
 
             if (this.isDirty) {
                 this.isDirty = false
                 return this.addCache(executor(), cacheKey, queryParams.cache)
             } else {
-                return this.service.get(cacheKey).then((cacheResult) => {
-                    fultonDebug("entity-cache", () => `fetch cache - ${this.service.namespace}:${cacheKey}:${cacheResult ? "found" : "not found"}`)
+                return this.service.get(cacheKey).then((object) => {
+                    fultonDebug("entity-cache", () => `fetch cache - ${this.service.namespace}:${cacheKey}:${object ? "found" : "not found"}`)
 
-                    if (cacheResult) {
-                        return this.convertObject(cacheResult)
+                    if (object) {
+                        return this.convertObject(operation, object)
                     }
 
                     return this.addCache(executor(), cacheKey, queryParams.cache)
@@ -67,7 +67,20 @@ export class CacheServiceWrapper {
         return promise
     }
 
-    private convertObject(object: any): any {
+    private convertObject(operation: string, object: any): any {
+        if (this.service.isTypeLost) {
+            // memory cache doesn't lose type
+            if (operation == "find") {
+                if (object && object.data instanceof Array) {
+                    object.data.forEach((item: any) => {
+                        item.constructor = this.entityType
+                    });
+                }
+            } else {
+                object.constructor = this.entityType
+            }
+        }
+
         return object
     }
 }

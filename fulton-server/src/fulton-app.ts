@@ -15,7 +15,7 @@ import { Env } from './helpers/env';
 import { Helper } from './helpers/helper';
 import { ClassProvider, FactoryProvider, FunctionProvider, Provider, TypeProvider, ValueProvider } from './helpers/type-helpers';
 import { IUser, IUserService } from './identity/interfaces';
-import { AppMode, DiContainer, EntityServiceFactory, ICacheProvideService, ICacheService, IEntityService, INotificationService, NotificationMessage, Response, Type, TypeIdentifier } from './interfaces';
+import { AppMode, DiContainer, EntityServiceFactory, ICacheServiceProvider, ICacheService, IEntityService, INotificationService, NotificationMessage, Response, Type, TypeIdentifier } from './interfaces';
 import { DiKeys, EventKeys } from './keys';
 import { defaultHttpLoggerHandler } from './middlewares/http-logger';
 import { FultonAppOptions } from './options/fulton-app-options';
@@ -402,7 +402,7 @@ export abstract class FultonApp implements IFultonApp {
 
     getCacheService(category?: string): ICacheService {
         if (this.options.cache.enabled) {
-            return this.container.get<ICacheProvideService>(DiKeys.CacheProviderService).getCacheService(category)
+            return this.container.get<ICacheServiceProvider>(DiKeys.CacheServiceProvider).getCacheService(category)
         }
 
         return null

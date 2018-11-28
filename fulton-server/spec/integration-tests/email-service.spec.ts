@@ -30,7 +30,7 @@ class MyApp extends FultonApp {
     }
 }
 
-describe('Email Service', () => {
+xdescribe('Email Service', () => {
     var app = new MyApp()
 
     beforeAll(async () => {

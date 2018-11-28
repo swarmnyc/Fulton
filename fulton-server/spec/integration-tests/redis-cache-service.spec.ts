@@ -1,17 +1,20 @@
-import { ObjectID } from 'bson';
 import * as lodash from 'lodash';
 import { EntityService } from '../../src/entities/entity-service';
 import { FultonApp } from '../../src/fulton-app';
+import { FultonUser } from '../../src/identity/fulton-impl/fulton-user';
+import { FultonUserService } from '../../src/identity/fulton-impl/fulton-user-service';
 import { ICacheServiceProvider } from '../../src/interfaces';
 import { DiKeys } from '../../src/keys';
 import { FultonAppOptions } from '../../src/options/fulton-app-options';
 import { Category } from '../entities/category';
 import { MongoHelper } from "../helpers/mongo-helper";
+import { sleep } from '../helpers/test-helper';
 import { sampleData } from "../support/sample-data";
 
 class MyApp extends FultonApp {
     protected onInit(options: FultonAppOptions): void {
         options.entities = [Category];
+        options.identity.enabled = true;
         options.cache.enabled = true;
 
         options.databases.set("default", {
@@ -156,73 +159,52 @@ describe('Redis Cache Service', () => {
         expect(result.constructor).toEqual(Category)
     });
 
-    it('should re get cache after create', async () => {
-        let entityService = app.getEntityService(Category) as EntityService<Category>
-        let cacheService = entityService["cache"]["service"]
+    it('should cache user by token', async () => {
+        let userService = app.userService as FultonUserService
+
+        let cacheService = userService["cacheService"]
         let spyGet = spyOn(cacheService, "get").and.callThrough()
         let spySet = spyOn(cacheService, "set").and.callThrough()
-        let spyReset = spyOn(cacheService, "reset").and.callThrough()
 
-        await entityService.findById("000000000000000000000001", { cache: true })
-
-        expect(spyGet.calls.count()).toEqual(1)
-        expect(spySet.calls.count()).toEqual(1)
-
-        await entityService.create({
-            "categoryId": new ObjectID(),
-            "categoryName": "Test",
-            "description": "Test"
+        let user = await userService.register({
+            email: "test@test.com",
+            username: "test",
+            password: "test123"
         })
 
-        await entityService.findById("000000000000000000000001", { cache: true })
+        let token = await userService.issueAccessToken(user)
 
-        expect(spyGet.calls.count()).toEqual(1) // data is dirty, skip get
+        let fetchedUser = await userService.loginByAccessToken(token.access_token)
+        await sleep(100)
+        expect(spyGet.calls.count()).toEqual(2)
         expect(spySet.calls.count()).toEqual(2)
-        expect(spyReset.calls.count()).toEqual(0)
+
+        fetchedUser = await userService.loginByAccessToken(token.access_token)
+        expect(fetchedUser.constructor).toEqual(FultonUser);
+
+        expect(spyGet.calls.count()).toEqual(3)
+        expect(spySet.calls.count()).toEqual(2)
     });
 
-    it('should re get cache after update', async () => {
-        let entityService = app.getEntityService(Category) as EntityService<Category>
-        let cacheService = entityService["cache"]["service"]
+    it('should cache fit by wrong token', async () => {
+        let userService = app.userService as FultonUserService
+
+        let cacheService = userService["cacheService"]
         let spyGet = spyOn(cacheService, "get").and.callThrough()
         let spySet = spyOn(cacheService, "set").and.callThrough()
-        let spyReset = spyOn(cacheService, "reset").and.callThrough()
 
-        await entityService.findById("000000000000000000000001", { cache: true })
+        let token = "eyJhbGciOiJIUzI1NiJ9.eyJpZCI6IjViZmYyNTIzYTZkNDEzYjMwY2ZiMTE0YiIsInRzIjoxNTQzNDQ3ODQzMzM5fQ.HYjlzIzvezTnWrZA50VKgZ_OksuqCkckVqqQnOqoriE"
+
+        let fetchedUser = await userService.loginByAccessToken(token)
+        expect(fetchedUser).toBeNull()
 
         expect(spyGet.calls.count()).toEqual(1)
         expect(spySet.calls.count()).toEqual(1)
 
-        await entityService.update("000000000000000000000003", {
-            "categoryName": "Test",
-            "description": "Test"
-        })
+        fetchedUser = await userService.loginByAccessToken(token)
+        expect(fetchedUser).toBeNull()
 
-        await entityService.findById("000000000000000000000001", { cache: true })
-
-        expect(spyGet.calls.count()).toEqual(1)
-        expect(spySet.calls.count()).toEqual(2)
-        expect(spyReset.calls.count()).toEqual(0)
-    });
-
-    it('should re get cache after delete', async () => {
-        let entityService = app.getEntityService(Category) as EntityService<Category>
-        let cacheService = entityService["cache"]["service"]
-        let spyGet = spyOn(cacheService, "get").and.callThrough()
-        let spySet = spyOn(cacheService, "set").and.callThrough()
-        let spyReset = spyOn(cacheService, "reset").and.callThrough()
-
-        await entityService.findById("000000000000000000000001", { cache: true })
-
-        expect(spyGet.calls.count()).toEqual(1)
+        expect(spyGet.calls.count()).toEqual(2)
         expect(spySet.calls.count()).toEqual(1)
-
-        await entityService.delete("000000000000000000000003")
-
-        await entityService.findById("000000000000000000000001", { cache: true })
-
-        expect(spyGet.calls.count()).toEqual(1)
-        expect(spySet.calls.count()).toEqual(2)
-        expect(spyReset.calls.count()).toEqual(0)
     });
 });

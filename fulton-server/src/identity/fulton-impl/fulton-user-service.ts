@@ -1,20 +1,20 @@
+import { ObjectId } from 'bson';
 import * as jws from 'jws';
 import * as lodash from 'lodash';
 import * as passwordHash from 'password-hash';
-import * as validator from 'validator';
-import { AccessToken, ForgotPasswordModel, ForgotPasswordNotificationModel, IFultonUser, IOauthProfile, IUserService, RegisterModel, WelcomeNotificationModel, IFultonUserClaims, UpdateLocalModel } from '../interfaces';
-import { codeGenerate, numberCodeGenerate, timingSafeEqual } from '../../helpers/crypto-helper';
-import { DiKeys, EventKeys } from '../../keys';
-import { EntityMetadata } from 'typeorm/metadata/EntityMetadata';
-import { ErrorCodes } from '../../common/fulton-error';
-import { FultonUserAccessToken, FultonUserClaims, FultonUser } from './fulton-user';
-import { FultonError } from '../../common';
 import { getManager, MongoEntityManager, MongoRepository } from 'typeorm';
-import { Helper } from '../../helpers/helper';
-import { IdentityOptions } from '../identity-options';
+import { EntityMetadata } from 'typeorm/metadata/EntityMetadata';
+import * as validator from 'validator';
+import { FultonError } from '../../common';
+import { ErrorCodes } from '../../common/fulton-error';
 import { IFultonApp } from '../../fulton-app';
-import { inject, injectable, NotificationMessage, Request, Type } from '../../interfaces';
-import { ObjectId } from 'bson';
+import { codeGenerate, numberCodeGenerate, timingSafeEqual } from '../../helpers/crypto-helper';
+import { Helper } from '../../helpers/helper';
+import { ICacheService, injectable, NotificationMessage, Request, Type } from '../../interfaces';
+import { EventKeys } from '../../keys';
+import { IdentityOptions } from '../identity-options';
+import { AccessToken, ForgotPasswordModel, ForgotPasswordNotificationModel, IFultonUser, IFultonUserClaims, IOauthProfile, IUserService, RegisterModel, UpdateLocalModel, WelcomeNotificationModel } from '../interfaces';
+import { FultonUser, FultonUserAccessToken, FultonUserClaims } from './fulton-user';
 
 interface JWTPayload {
     id: string;
@@ -34,14 +34,14 @@ interface JWTPayload {
 export interface IRunner {
     convertUserId(userId: any): any;
     updateMetadata(metadata: EntityMetadata): void;
-    addUser(user: FultonUser): Promise<FultonUser>
+    addUser(user: IFultonUser): Promise<IFultonUser>
     addAccessToken(accessToken: FultonUserAccessToken): Promise<any>
     addClaim(claim: FultonUserClaims): Promise<any>
     updateUser(userId: any, fields: any): Promise<any>;
     updateClaim(claimId: any, update: Partial<FultonUserClaims>): Promise<any>
-    findUserById(userId: any): Promise<FultonUser>;
-    findUserByOauth(type: string, sourceUserId: string): Promise<FultonUser>;
-    findUserByToken(token: string): Promise<FultonUser>;
+    findUserById(userId: any): Promise<IFultonUser>;
+    findUserByOauth(type: string, sourceUserId: string): Promise<IFultonUser>;
+    findUserByToken(token: string): Promise<IFultonUser>;
     findClaims(user: IFultonUser): Promise<FultonUserClaims[]>
     findClaim(type: string, sourceUserId: string): Promise<FultonUserClaims>;
     findClaimByLocal(usernameOrEmail: string): Promise<FultonUserClaims>;
@@ -54,12 +54,13 @@ export interface IRunner {
 
 export class MongoRunner implements IRunner {
     options: IdentityOptions;
-    userRepository: MongoRepository<FultonUser>;
+    userRepository: MongoRepository<IFultonUser>;
     claimRepository: MongoRepository<FultonUserClaims>;
     tokenRepository: MongoRepository<FultonUserAccessToken>;
 
     constructor(private app: IFultonApp, private manager: MongoEntityManager) {
         this.options = app.options.identity;
+
         this.userRepository = manager.getMongoRepository(FultonUser) as any;
         this.claimRepository = manager.getMongoRepository(FultonUserClaims) as any;
         this.tokenRepository = manager.getMongoRepository(FultonUserAccessToken) as any;
@@ -86,9 +87,9 @@ export class MongoRunner implements IRunner {
         metadata.objectIdColumn = idColumn
     }
 
-    addUser(user: FultonUser): Promise<FultonUser> {
+    addUser(user: IFultonUser): Promise<IFultonUser> {
         return this.userRepository.insertOne(user).then((result) => {
-            user["id"] = result.insertedId;
+            user["id"] = result.insertedId as any;
             return user;
         });
     }
@@ -123,11 +124,11 @@ export class MongoRunner implements IRunner {
         })
     }
 
-    async findUserById(userId: any): Promise<FultonUser> {
+    async findUserById(userId: any): Promise<IFultonUser> {
         return this.userRepository.findOne(userId);
     }
 
-    async findUserByOauth(type: string, sourceUserId: string): Promise<FultonUser> {
+    async findUserByOauth(type: string, sourceUserId: string): Promise<IFultonUser> {
         var claim = await this.claimRepository.findOne({
             "type": type,
             "sourceUserId": sourceUserId
@@ -140,7 +141,7 @@ export class MongoRunner implements IRunner {
         }
     }
 
-    async findUserByToken(token: string): Promise<FultonUser> {
+    async findUserByToken(token: string): Promise<IFultonUser> {
         let payload = JSON.parse(jws.decode(token).payload)
         let userTokens = await this.tokenRepository.find({
             "userId": new ObjectId(payload.id),
@@ -218,10 +219,16 @@ export class MongoRunner implements IRunner {
 }
 
 @injectable()
-export class FultonUserService implements IUserService<FultonUser> {
+export class FultonUserService implements IUserService<IFultonUser> {
+    private CacheMaxAge = 30_000 // only cache for 3 minute
+
     protected runner: IRunner;
     protected app: IFultonApp;
 
+    // only cache token to user, if cache is enabled
+    protected cacheService: ICacheService;
+
+    // TODO: make types replace able
     entities: Type[] = [FultonUser, FultonUserAccessToken, FultonUserClaims];
 
     init(app: IFultonApp) {
@@ -234,6 +241,8 @@ export class FultonUserService implements IUserService<FultonUser> {
         } else {
             //this.runner = new SqlRunner(manager)
         }
+
+        this.cacheService = this.app.getCacheService("FultonUserService")
     }
 
     protected get options(): IdentityOptions {
@@ -251,7 +260,7 @@ export class FultonUserService implements IUserService<FultonUser> {
         }
     }
 
-    async register(input: RegisterModel): Promise<FultonUser> {
+    async register(input: RegisterModel): Promise<IFultonUser> {
         let error = new FultonError("register_failed");
         let registerOptions = this.options.register;
 
@@ -293,7 +302,7 @@ export class FultonUserService implements IUserService<FultonUser> {
             email: input.email,
             portraitUrl: input.portraitUrl,
             registeredAt: new Date()
-        } as FultonUser;
+        } as IFultonUser;
 
         if (registerOptions.otherFields.length > 0) {
             Object.assign(userInput, lodash.pick(input, registerOptions.otherFields))
@@ -322,7 +331,7 @@ export class FultonUserService implements IUserService<FultonUser> {
         return user;
     }
 
-    async login(username: string, password: string): Promise<FultonUser> {
+    async login(username: string, password: string): Promise<IFultonUser> {
         let error = new FultonError("login_failed");
 
         if (!lodash.some(username)) {
@@ -384,7 +393,7 @@ export class FultonUserService implements IUserService<FultonUser> {
         }
     }
 
-    async loginByOauth(userId: string, token: AccessToken, profile: IOauthProfile): Promise<FultonUser> {
+    async loginByOauth(userId: string, token: AccessToken, profile: IOauthProfile): Promise<IFultonUser> {
         let error = new FultonError();
 
         // the id is necessary
@@ -423,7 +432,7 @@ export class FultonUserService implements IUserService<FultonUser> {
                 let userInput = {
                     displayName: profile.username,
                     portraitUrl: profile.portraitUrl
-                } as FultonUser
+                } as IFultonUser
 
                 if (profile.email) {
                     userInput.email = profile.email
@@ -455,9 +464,14 @@ export class FultonUserService implements IUserService<FultonUser> {
         }
     }
 
-    loginByAccessToken(token: string): Promise<FultonUser> {
+    loginByAccessToken(token: string): Promise<IFultonUser> {
         if (jws.verify(token, "HS256", this.jwtSecret)) {
-            return this.runner.findUserByToken(token);
+            if (this.cacheService) {
+                return this.cacheUserViaToken(token)
+            } else {
+                // no cache
+                return this.runner.findUserByToken(token);
+            }
         } else {
             return Promise.reject("Invalid Token");
         }
@@ -487,7 +501,13 @@ export class FultonUserService implements IUserService<FultonUser> {
         if (input == null) throw new FultonError(ErrorCodes.Invalid);
         input = lodash.pick(input, this.options.profile.updatableFields)
 
-        return this.runner.updateUser(userId, input);
+        let promise = this.runner.updateUser(userId, input);
+
+        if (this.cacheService) {
+            this.cleanUserCache(userId)
+        }
+
+        return promise
     }
 
     async updateLocalClaim(userId: any, input: UpdateLocalModel): Promise<void> {
@@ -683,7 +703,7 @@ export class FultonUserService implements IUserService<FultonUser> {
         if (opts.extraVariables) {
             Object.assign(model, opts.extraVariables)
         }
-        
+
         if (opts.email.enabled && model.email) {
             var message: NotificationMessage = {
                 email: {
@@ -768,5 +788,52 @@ export class FultonUserService implements IUserService<FultonUser> {
         });
 
         return token
+    }
+
+    protected cacheUserViaToken(token: string): Promise<IFultonUser> {
+        let cacheKey = `token:${token}`
+        return this.cacheService.get(cacheKey).then((cachedUser) => {
+            if (cachedUser) {
+                // hit cache
+                if (cachedUser == "null") return null
+
+                if (this.cacheService.isTypeLost) {
+                    cachedUser.constructor = FultonUser
+                }
+
+                return cachedUser
+            }
+
+            let promise = this.runner.findUserByToken(token)
+
+            promise.then((user) => {
+                // also track cached keys
+                this.cacheService.set(cacheKey, user || "null", this.CacheMaxAge)
+
+                if (user) {
+                    let trackCacheKey = `user:${user.id}`
+                    this.cacheService.get(trackCacheKey).then((keys: string[]) => {
+                        keys = keys || []
+                        keys.push(cacheKey)
+
+                        this.cacheService.set(trackCacheKey, keys)
+                    })
+                }
+            });
+
+            return promise
+        })
+    }
+
+    protected cleanUserCache(userId: string) {
+        // clear user cache
+        let trackCacheKey = `user:${userId}`
+        this.cacheService.get(trackCacheKey).then((keys: string[]) => {
+            keys.forEach((key) => {
+                this.cacheService.delete(key)
+            })
+
+            this.cacheService.delete(trackCacheKey)
+        })
     }
 }

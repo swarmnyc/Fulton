@@ -56,6 +56,16 @@ export class NewProjectAction extends BaseAction {
             appName += "App"
         }
 
+        let isCacheMemory = lodash.includes(this.createOptions.features, "cache-memory")
+        let isCacheRedis = lodash.includes(this.createOptions.features, "cache-redis")
+        let cacheType: string
+
+        if (isCacheRedis) {
+            cacheType = "redis"
+        } else {
+            cacheType = "memory"
+        }
+
         let opts: AppOptions = {
             projectName: this.createOptions.name,
             projectNameSafe: lodash.snakeCase(this.createOptions.name),
@@ -71,6 +81,8 @@ export class NewProjectAction extends BaseAction {
             isFacebookAuthEnabled: lodash.includes(this.createOptions.features, "oauth-facebook"),
             isGitHubAuthEnabled: lodash.includes(this.createOptions.features, "oauth-github"),
             isApiDocsEnabled: lodash.includes(this.createOptions.features, "api-docs"),
+            isCacheEnabled: isCacheMemory || isCacheRedis,
+            cacheType: cacheType,
             isEmailNotificationEnabled: lodash.includes(this.createOptions.features, "email"),
             isDockerEnabled: lodash.includes(this.createOptions.features, "docker")
         }
@@ -167,7 +179,7 @@ export class NewProjectAction extends BaseAction {
             var commandStr = `cd ${this.root} && npm install -D ${devPackageString} && npm install ${packageString}`
 
             this.logger.debug(`\nexec ${commandStr}`);
-        
+
             if (this.createOptions.dry) {
                 // skip install package if in dry mode
                 resolve()

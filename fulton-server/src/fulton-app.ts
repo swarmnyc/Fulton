@@ -228,6 +228,8 @@ export abstract class FultonApp implements IFultonApp {
 
             await this.initSecurity();
 
+            await this.initCache();
+
             await this.initCompression();
 
             await this.initFormatter();
@@ -399,9 +401,11 @@ export abstract class FultonApp implements IFultonApp {
     }
 
     getCacheService(category?: string): ICacheService {
-        let provider = this.container.get<ICacheProvideService>(DiKeys.CacheProviderService)
+        if (this.options.cache.enabled) {
+            return this.container.get<ICacheProvideService>(DiKeys.CacheProviderService).getCacheService(category)
+        }
 
-        return provider.getCacheService(category)
+        return null
     }
 
     sendNotifications(...messages: NotificationMessage[]): Promise<void> {
@@ -418,7 +422,7 @@ export abstract class FultonApp implements IFultonApp {
     protected initCache(): void | Promise<void> {
         if (this.options.cache.enabled) {
             return require('./initializers/cache-initializer')(this)
-        } 
+        }
     }
 
     protected initCors(): void | Promise<void> {
@@ -699,11 +703,27 @@ export abstract class FultonApp implements IFultonApp {
 
     private outputOptions = (message: string) => {
         return () => {
+            var setProviderToString = (item: Provider) => {
+                if (typeof item == "object") {
+                    item.toString = function () {
+                        return JSON.stringify({
+                            provide: this.provide,
+                            useClass: (<ClassProvider>this).useClass ? "class " + (<ClassProvider>this).useClass.name : null,
+                            useValue: (<ValueProvider>this).useValue ? "value " + (<ValueProvider>this).useValue : null
+                        })
+                    }
+                }
+            }
+
+            this.options.services.forEach(setProviderToString)
+
             var opt = lodash.cloneDeepWith(this.options, (value, key, o, s) => {
                 if (key != null && typeof value == "object") {
                     if (value instanceof BaseOptions) {
+                        // sub options 
                         return lodash.toPlainObject(value)
                     } else if (!(value instanceof Date || value instanceof Array)) {
+                        // other object
                         return value.toString()
                     }
                 }

@@ -5,8 +5,11 @@
 ${appName}.options.compression.enabled=${isCompressionEnabled}
 ${appName}.options.cors.enabled=${isCorsEnabled}
 ${appName}.options.docs.enabled=${isApiDocsEnabled}
-${appName}.options.formatter.jsonApi=${isJsonApiEnabled}
 
+${appName}.options.cache.enabled=${isCacheEnabled}
+${appName}.options.cache.type=${cacheType}
+
+${appName}.options.formatter.jsonApi=${isJsonApiEnabled}
 
 <% if(isDatabaseEnabled) { %>## Databases<% } %><% databases.forEach(function(db){ %>
 ${db.options} 

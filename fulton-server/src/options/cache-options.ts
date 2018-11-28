@@ -32,9 +32,9 @@ export class CacheOptions extends BaseOptions<CacheOptions> {
     providerService?: Type<ICacheProvideService>
 
     /**
-     * the default is 1 hour
+     * the default is 10 minutes
      */
-    defaultMaxAge: number = 3600000;
+    defaultMaxAge: number = 600_000;
 
     /**
      * if true, the app will register a path to handle reset request

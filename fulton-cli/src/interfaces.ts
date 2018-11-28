@@ -52,6 +52,9 @@ export interface AppOptions {
     isGitHubAuthEnabled: boolean;
     isFacebookAuthEnabled: boolean;
 
+    isCacheEnabled: boolean;
+    cacheType: string;
+
     isEmailNotificationEnabled: boolean;
 
     isDockerEnabled: boolean;
@@ -111,7 +114,7 @@ export interface SchematicOptions {
 
 export interface UpdateFeatureOptions {
     features: string[]
-    dry: boolean;    
+    dry: boolean;
     addPackages: Set<string>
     addDevPackages: Set<string>
     removePackages: Set<string>

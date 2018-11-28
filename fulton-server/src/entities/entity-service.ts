@@ -4,19 +4,75 @@ import { getMongoRepository, getRepository, MongoRepository, Repository } from '
 import { ColumnMetadata } from 'typeorm/metadata/ColumnMetadata';
 import { EntityMetadata } from 'typeorm/metadata/EntityMetadata';
 import { FultonError, FultonStackError } from '../common/fulton-error';
-import { FultonLog } from '../fulton-log';
+import { fultonDebug } from '../helpers/debug';
 import { IUser } from '../identity';
-import { IEntityService, OperationManyResult, OperationOneResult, OperationResult, QueryParams, Type, ICacheService } from '../interfaces';
+import { ICacheService, IEntityService, OperationManyResult, QueryParams, Type } from '../interfaces';
 import { DiKeys } from '../keys';
 import { injectable } from '../re-export';
 import { Service } from '../services';
 import { EntityRunner } from './runner/entity-runner';
 
+type QueryFunc = () => Promise<any>
+
+class CacheServiceWrapper {
+    constructor(private service: ICacheService, private type: Type) { }
+
+    fetch(queryParams: QueryParams, type: string, queryFunc?: QueryFunc): Promise<any> {
+        if (this.service && queryParams.cache) {
+            let cacheKey = this.getCacheKey(type, queryParams)
+            return this.service.get(cacheKey).then((cacheResult) => {
+                fultonDebug("cache", `fetch cache - ${this.service.namespace}:${cacheKey}:${cacheResult ? "found" : "not found"}`)
+                if (cacheResult) {
+                    return this.convertObject(cacheResult)
+                }
+
+                let promise = queryFunc()
+
+                promise.then((result) => {
+                    fultonDebug("cache", `add cache - ${this.service.namespace}:${cacheKey}`)
+                    let maxAge: number = (typeof queryParams.cache == "boolean") ? null : queryParams.cache
+                    this.service.set(cacheKey, result, maxAge)
+                })
+
+                return promise
+            })
+        } else {
+            return queryFunc()
+        }
+    }
+
+    removeAll = () => {
+        if (this.service) {
+            fultonDebug("cache", `reset cache - ${this.service.namespace}`)
+
+            this.service.reset()
+        }
+    }
+
+    private getCacheKey(type: string, queryParams: QueryParams): string {
+        return type + ":" + JSON.stringify({
+            filter: queryParams.filter,
+            sort: queryParams.sort,
+            select: queryParams.select,
+            include: queryParams.include,
+            includes: queryParams.includes,
+            projection: queryParams.projection,
+            pagination: queryParams.pagination
+        })
+    }
+
+    private convertObject(object: any): any {
+        return object
+    }
+}
+
+
+
 @injectable()
 export class EntityService<TEntity> extends Service implements IEntityService<TEntity> {
     protected mainRepository: Repository<TEntity>
     protected runner: EntityRunner;
-    protected cacheService: ICacheService;
+    protected cacheService: CacheServiceWrapper;
 
     constructor(entity: Type<TEntity>, connectionName?: string)
     constructor(mainRepository: Repository<TEntity>)
@@ -38,7 +94,7 @@ export class EntityService<TEntity> extends Service implements IEntityService<TE
             //TODO: Sql Entity Runner
         }
 
-        this.cacheService = this.app.getCacheService(this.mainRepository.target.toString())
+        this.cacheService = new CacheServiceWrapper(this.app.getCacheService(`EntityService:${this.entityType.name}`), this.entityType)
     }
 
     get entityType(): Type {
@@ -62,31 +118,30 @@ export class EntityService<TEntity> extends Service implements IEntityService<TE
             queryParams.needAdjust = true
         }
 
-        return this.runner
-            .find(this.mainRepository, queryParams)
-            .then((result) => {
-                return {
-                    data: result.data,
-                    pagination: {
-                        total: result.total,
-                        index: lodash.get(queryParams, "pagination.index") || 0,
-                        size: lodash.get(queryParams, "pagination.size") || result.total
+        return this.cacheService.fetch(queryParams, "find", () => {
+            return this.runner
+                .find(this.mainRepository, queryParams)
+                .then((result) => {
+                    return {
+                        data: result.data,
+                        pagination: {
+                            total: result.total,
+                            index: lodash.get(queryParams, "pagination.index") || 0,
+                            size: lodash.get(queryParams, "pagination.size") || result.total
+                        }
                     }
-                }
-            })
+                })
+        })
     }
 
     findOne(queryParams?: QueryParams): Promise<TEntity> {
-        if (queryParams && queryParams.cache) {
-
-        }
-
         if (queryParams && queryParams.needAdjust == null) {
             queryParams.needAdjust = true
         }
 
-        return this.runner
-            .findOne(this.mainRepository, queryParams)
+        return this.cacheService.fetch(queryParams, "findOne", () => {
+            return this.runner.findOne(this.mainRepository, queryParams)
+        })
     }
 
     findById(id: any, queryParams?: QueryParams): Promise<TEntity> {
@@ -104,20 +159,24 @@ export class EntityService<TEntity> extends Service implements IEntityService<TE
             id: id
         }
 
-        return this.runner
-            .findOne(this.mainRepository, queryParams)
+        return this.cacheService.fetch(queryParams, "findOne", () => {
+            return this.runner.findOne(this.mainRepository, queryParams)
+        })
     }
 
     count(queryParams?: QueryParams): Promise<number> {
-        return this.runner
-            .count(this.mainRepository, queryParams)
+        return this.cacheService.fetch(queryParams, "count", () => {
+            return this.runner.count(this.mainRepository, queryParams)
+        })
     }
 
     create(input: TEntity | Partial<TEntity>): Promise<TEntity> {
-        return this.convertAndVerifyEntity(this.mainRepository.metadata, input)
+        return this
+            .convertAndVerifyEntity(this.mainRepository.metadata, input)
             .then((entity) => {
-                return this.runner
-                    .create(this.mainRepository, entity)
+                let promise = this.runner.create(this.mainRepository, entity)
+                promise.then(this.cacheService.removeAll)
+                return promise
             })
     }
 
@@ -125,14 +184,16 @@ export class EntityService<TEntity> extends Service implements IEntityService<TE
         return this
             .convertAndVerifyEntity(this.mainRepository.metadata, input)
             .then((entity) => {
-                return this.runner
-                    .update(this.mainRepository, id, entity)
+                let promise = this.runner.update(this.mainRepository, id, entity)
+                promise.then(this.cacheService.removeAll)
+                return promise
             })
     }
 
     delete(id: any): Promise<void> {
-        return this.runner
-            .delete(this.mainRepository, id)
+        let promise = this.runner.delete(this.mainRepository, id)
+        promise.then(this.cacheService.removeAll)
+        return promise
     }
 
     updateIdMetadata() {

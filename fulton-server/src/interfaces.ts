@@ -221,15 +221,16 @@ export interface IPushNotificationService {
 }
 
 export interface ICacheProvideService {
-    getCacheService(category: string): ICacheService
+    getCacheService(namespace: string): ICacheService
     resetAll(): void
 }
 
 export interface ICacheService {
-    get<T=any>(key: string, defaultValue?: T): Promise<T>
-    set<T=any>(key: string, value: T, maxArg: number): Promise<void>
-    remove(key: string): Promise<void>
-    removeAll(): Promise<void>
+    readonly namespace: string;
+    get(key: string, defaultValue?: any, convertFunc?: (obj: any) => any): Promise<any>
+    set(key: string, value: any, maxArg?: number): Promise<void>
+    delete(key: string): Promise<void>
+    reset(): Promise<void>
 }
 
 export interface EmailMessage {

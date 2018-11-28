@@ -3,7 +3,6 @@ import { FultonApp } from '../fulton-app';
 import { Provider } from '../helpers';
 import { DiKeys, EventKeys } from '../keys';
 import { Service } from '../services/service';
-import { MockCacheProviderService } from '../services/cache/mock-cache-service';
 
 module.exports = async function (app: FultonApp) {
     let providers = app.options.services || [];
@@ -50,25 +49,23 @@ function initModuleServices(app: FultonApp, providers: Provider[]) {
             app.options.cache.type = "other"
         }
 
-        let provider;
+        let target;
         switch (app.options.cache.type) {
             case "memory":
+                target = require("../services/cache/memory-cache-service").default
                 break;
             case "redis":
                 break;
             case "other":
-                provider = app.options.cache.providerService
+                target = app.options.cache.providerService
                 break;
+            default:
+                throw new Error("Unknown cache type " + app.options.cache.type)
         }
 
         providers.push({
             provide: DiKeys.CacheProviderService,
-            useClass: provider
-        })
-    } else {
-        providers.push({
-            provide: DiKeys.CacheProviderService,
-            useClass: MockCacheProviderService
+            useClass: target
         })
     }
 

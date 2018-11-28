@@ -55,6 +55,8 @@ export const FeatureList: Feature[] = [
     { name: "Http CORS", short: "CORS", value: "cors", packages: ["cors"] },
     { name: "Send email", value: "email", packages: ["nodemailer"] },
     { name: "Push notification", value: "push notification", packages: ["google-auth-library"] },
+    { name: "Cache via Memory", short: "Cache Memory", value: "cache-memory", packages: ["lru-cache"] },
+    { name: "Cache via Redis", short: "Cache redis", value: "cache-redis", packages: ["redis"] },
     { name: "json-api -support input and output as json-api format", short: "json-api", value: "json-api", packages: [] },
     { name: "docker - add dockerfile and docker compose", short: "Docker", value: "docker", packages: [] }
 ]

@@ -1,17 +1,16 @@
-import { HttpResult, HttpTester } from "../../src/test/http-tester";
-import { OperationOneResult, OperationManyResult, OperationResult, QueryParams, Request, Response } from "../../src/interfaces";
-
+import { FultonApp } from '../../src/fulton-app';
+import { OperationManyResult, OperationOneResult, QueryParams, Request, Response } from "../../src/interfaces";
+import { FultonAppOptions } from '../../src/options/fulton-app-options';
+import { EntityRouter } from '../../src/routers/entity-router';
+import { entityRouter, httpGet } from '../../src/routers/route-decorators';
+import { HttpTester } from "../../src/test/http-tester";
 import { Category } from "../entities/category";
 import { Customer } from '../entities/customer';
 import { Employee } from '../entities/employee';
-import { EntityRouter } from '../../src/routers/entity-router';
-import { FultonApp } from '../../src/fulton-app';
-import { FultonAppOptions } from '../../src/options/fulton-app-options';
-import { MongoHelper } from "../helpers/mongo-helper";
 import { Territory } from "../entities/territory";
-import { UserServiceMock } from "../helpers/user-service-mock";
-import { entityRouter, httpGet } from '../../src/routers/route-decorators';
+import { MongoHelper } from "../helpers/mongo-helper";
 import { sampleData } from "../support/sample-data";
+
 
 @entityRouter("/employees", Employee)
 class EmployeeEntityRouter extends EntityRouter<Employee>{

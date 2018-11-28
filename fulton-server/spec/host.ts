@@ -18,13 +18,13 @@ class MyApp extends FultonApp {
         // options.identity.github.enabled = true;
         // options.identity.facebook.enabled = true;
 
-        options.docs.enabled = true;      
-
+        options.docs.enabled = true;
+        options.cache.enabled = true;
         options.security.enabled = true;
 
         options.databases.set("default", {
             type: "mongodb",
-            url: "mongodb://localhost:27017/fulton-test"
+            url: "mongodb://localhost:27017/fulton"
         });
 
         options.identity.register.notification.email.set({

@@ -1,11 +1,11 @@
-import { FultonApp } from "../../src/fulton-app";
-import { FultonAppOptions } from "../../src/options/fulton-app-options";
-import { Request, Response } from "../../src/interfaces";
-import { HttpTester } from "../../src/test/http-tester";
+import { FultonApp } from "../../../src/fulton-app";
+import { FultonAppOptions } from "../../../src/options/fulton-app-options";
+import { Request, Response } from "../../../src/interfaces";
+import { HttpTester } from "../../../src/test/http-tester";
 import { setTimeout } from "timers";
-import { Service } from '../../src/services/service';
-import { router, httpGet } from '../../src/routers/route-decorators';
-import { Router } from '../../src/routers/router';
+import { Service } from '../../../src/services/service';
+import { router, httpGet } from '../../../src/routers/route-decorators';
+import { Router } from '../../../src/routers/router';
 
 class TestService extends Service {
     getId() {
@@ -53,27 +53,31 @@ class TestRouter extends Router {
 }
 
 class MyApp extends FultonApp {
+    constructor(private userZone:boolean){
+        super()
+    }
+
     protected onInit(options: FultonAppOptions): void | Promise<void> {
         options.services.push(TestService);
         options.routers.push(TestRouter);
+
+        options.miscellaneous.zoneEnabled = this.userZone;
+
+        this.express.use("/test", (req, res) => {
+            if ((<any>global)["Zone"]) {
+                res.sendStatus(400);
+            } else {
+                res.sendStatus(200);
+            }
+        })
     }
 }
 
 xdescribe('Zone', () => {
-    let app: MyApp;
-    let httpTester: HttpTester;
-
-    beforeAll(async () => {
-        app = new MyApp();
-        httpTester = new HttpTester(app);
-        return httpTester.start();
-    });
-
-    afterAll(async () => {
-        return httpTester.stop();
-    });
-
     it('should works', async () => {
+        let app = new MyApp(true);
+        let httpTester = new HttpTester(app);
+        await httpTester.start();
         let task1 = httpTester.get("/test?id=1");
         let task2 = httpTester.get("/test?id=2");
         let task3 = httpTester.get("/test?id=3");
@@ -85,5 +89,20 @@ xdescribe('Zone', () => {
         expect(result1.body).toEqual("1")
         expect(result2.body).toEqual("2")
         expect(result3.body).toEqual("3")
+
+        await httpTester.stop();
+    });
+
+    it('should not load zone.js', async () => {
+        // this test have to run only itself, otherwise other tests will road zone.js before it.
+        let app = new MyApp(false);
+        let httpTester = new HttpTester(app);
+        await httpTester.start();
+
+        let result = await httpTester.get("/test");
+        
+        expect(result.response.statusCode).toEqual(200);
+
+        await httpTester.stop();
     });
 });

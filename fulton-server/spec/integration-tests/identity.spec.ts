@@ -1,12 +1,13 @@
 import { getMongoRepository } from "typeorm";
 import { FultonApp } from '../../src/fulton-app';
 import * as cryptoHelper from '../../src/helpers/crypto-helper';
-import { FultonUserAccessToken, FultonUserClaims, FultonUser } from "../../src/identity/fulton-impl/fulton-user";
+import { FultonUser, FultonUserAccessToken, FultonUserClaims } from "../../src/identity/fulton-impl/fulton-user";
 import { FultonUserService } from '../../src/identity/fulton-impl/fulton-user-service';
 import { AccessToken, IOauthProfile } from '../../src/identity/interfaces';
 import { Request, Response } from "../../src/interfaces";
 import { FultonAppOptions } from '../../src/options/fulton-app-options';
 import { HttpResult, HttpTester } from "../../src/test/http-tester";
+import { sleep } from "../helpers/test-helper";
 
 class MyApp extends FultonApp {
     protected onInit(options: FultonAppOptions): void {
@@ -17,10 +18,10 @@ class MyApp extends FultonApp {
             url: "mongodb://localhost:27017/fulton-test"
         });
 
-        options.identity.login.lockTime = 1000
+        options.identity.login.lockTime = 500
         
         options.identity.forgotPassword.requireLimit = 3
-        options.identity.forgotPassword.requireLockTime = 1000
+        options.identity.forgotPassword.requireLockTime = 500
 
         options.index.handler = (req: Request, res: Response) => {
             if (req.isAuthenticated()) {
@@ -142,22 +143,22 @@ describe('Identity Integration Test', () => {
                 expect(result.response.statusCode).toEqual(400);
                 expect(result.body.error.message).toContain("account locked");
 
-                setTimeout(async () => {
-                    try {
-                        let result = await httpTester.post("/auth/login", {
-                            username: "Test",
-                            password: "test123"
-                        });
-                
-                        expect(result.response.statusCode).toEqual(200);
-                        expect(result.body.access_token).toBeTruthy();    
+                await sleep(1000)
 
-                        resolve()
+                try {
+                    let result = await httpTester.post("/auth/login", {
+                        username: "Test",
+                        password: "test123"
+                    });
+            
+                    expect(result.response.statusCode).toEqual(200);
+                    expect(result.body.access_token).toBeTruthy();    
 
-                    } catch (error) {
-                        reject(error)
-                    }
-                }, 2000);
+                    resolve()
+
+                } catch (error) {
+                    reject(error)
+                }
             } catch (error) {
                 reject(error)
             }
@@ -486,21 +487,21 @@ describe('Identity Integration Test', () => {
                 expect(result.response.statusCode).toEqual(400);
                 expect(result.body.error.message).toContain("account locked");
 
-                setTimeout(async () => {
-                    try {
-                        let result = await httpTester.post("/auth/forgot-password", { username: "test" });
-                
-                        expect(result.response.statusCode).toEqual(200);
+                await sleep(1000)
 
-                        resolve()
+                try {
+                    let result = await httpTester.post("/auth/forgot-password", { username: "test" });
+            
+                    expect(result.response.statusCode).toEqual(200);
 
-                    } catch (error) {
-                        reject(error)
-                    }
-                }, 2000);
+                    resolve()
+
+                } catch (error) {
+                    reject(error)
+                }
             } catch (error) {
                 reject(error)
             }
         });
-    });
+    }, 5_000);
 });

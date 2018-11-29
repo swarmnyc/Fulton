@@ -3,7 +3,7 @@ import { EntityService } from '../../src/entities/entity-service';
 import { FultonApp } from '../../src/fulton-app';
 import { FultonUser } from '../../src/identity/fulton-impl/fulton-user';
 import { FultonUserService } from '../../src/identity/fulton-impl/fulton-user-service';
-import { ICacheServiceProvider } from '../../src/interfaces';
+import { ICacheServiceFactory } from '../../src/interfaces';
 import { DiKeys } from '../../src/keys';
 import { FultonAppOptions } from '../../src/options/fulton-app-options';
 import { Category } from '../entities/category';
@@ -23,8 +23,8 @@ class MyApp extends FultonApp {
         });
 
         options.cache.set({
-            type: "redis",
-            connectionOptions: {
+            provider: "redis",
+            configs: {
                 host: "localhost"
             }
         })
@@ -41,7 +41,7 @@ describe('Redis Cache Service', () => {
     });
 
     beforeEach(() => {
-        app.getInstance<ICacheServiceProvider>(DiKeys.CacheServiceProvider).resetAll();
+        app.getInstance<ICacheServiceFactory>(DiKeys.CacheServiceFactory).resetAll();
     });
 
     afterAll(async () => {

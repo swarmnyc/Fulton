@@ -216,11 +216,21 @@ export interface IEmailService {
     send(message: EmailMessage): Promise<void>
 }
 
+export type PushNotificationProvider = "firebase" | "aws" | "other"
+
 export interface IPushNotificationService {
     send(payload: any): Promise<void>
 }
 
-export interface ICacheServiceProvider {
+export type SmsNotificationProvider = "aws" | "other"
+
+export interface ISmsNotificationService {
+    send(payload: any): Promise<void>
+}
+
+export type CacheProvider = "memory" | "redis" | "other" 
+
+export interface ICacheServiceFactory {
     getCacheService(namespace: string): ICacheService
     resetAll(): void
 }

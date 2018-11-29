@@ -1,7 +1,7 @@
-import { DiKeys } from '../../src/keys';
-import { FultonApp } from '../../src/fulton-app';
-import { FultonAppOptions } from '../../src/options/fulton-app-options';
-import { IEmailService } from '../../src/interfaces';
+import { DiKeys } from '../../../src/keys';
+import { FultonApp } from '../../../src/fulton-app';
+import { FultonAppOptions } from '../../../src/options/fulton-app-options';
+import { IEmailService } from '../../../src/interfaces';
 
 class MyApp extends FultonApp {
     protected onInit(options: FultonAppOptions): void {

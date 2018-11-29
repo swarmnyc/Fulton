@@ -1,12 +1,12 @@
 import * as redis from "redis";
 import { FultonLog } from "../../fulton-log";
-import { ICacheService, ICacheServiceProvider } from "../../interfaces";
+import { ICacheService, ICacheServiceFactory } from "../../interfaces";
 import { Service } from "../service";
 
-export default class RedisCacheServiceProvider extends Service implements ICacheServiceProvider {
+export default class RedisCacheServiceFactory extends Service implements ICacheServiceFactory {
     client: redis.RedisClient
     onInit() {
-        this.client = redis.createClient(this.app.options.cache.connectionOptions)
+        this.client = redis.createClient(this.app.options.cache.configs)
     }
 
     getCacheService(namespace: string): ICacheService {

@@ -2,6 +2,7 @@ import { Env } from '../helpers/env';
 import { Dict, Type } from '../interfaces';
 import { EmailOptions } from './notification-email-options';
 import { PushNotificationOptions } from './notification-pn-options';
+import { SmsNotificationOptions } from './notification-sms-options';
 import { BaseOptions } from './options';
 
 export class NotificationOptions extends BaseOptions<NotificationOptions> {
@@ -10,24 +11,23 @@ export class NotificationOptions extends BaseOptions<NotificationOptions> {
      * the default value is false
      * It can be overridden by env["{appName}.options.notification.enabled"]
      */
-    enabled?: boolean = false;
+    enabled: boolean = false;
 
     /**
-     * the type or instance of service of notification. default is use Fulton Default Notification Service
+     * the type of service of notification. 
+     * default is use Fulton Default Notification Service
      */
-    service?: Type;
+    service: Type;
 
     /**
      * the type or instance of service of templating. default is use Fulton Default Template Service,
      */
-    templateService?: Type;
+    templateService: Type;
 
     readonly email = new EmailOptions(this.appName, this.appMode);
 
-    //TODO: sms notification
-    readonly sms?: any
+    readonly sms = new SmsNotificationOptions(this.appName, this.appMode);
 
-    // TODO: pushNotification
     readonly pushNotification = new PushNotificationOptions(this.appName, this.appMode);
 
     /**

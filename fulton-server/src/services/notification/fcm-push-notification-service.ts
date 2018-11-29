@@ -1,57 +1,36 @@
 import * as fs from 'fs';
-import { IPushNotificationService } from '../../interfaces';
-import { Service } from '../service';
 import { JWT } from 'google-auth-library';
 import { Credentials } from 'google-auth-library/build/src/auth/credentials';
+import * as https from 'https';
 import { FultonLog } from '../../fulton-log';
-import * as https from 'https'
-
-interface Config {
-    filePath: string
-    fcmConfig: FcmConfig
-}
-
-interface FcmConfig {
-    type: string
-    project_id: string
-    private_key_id: string
-    private_key: string
-    client_email: string
-    client_id: string
-    auth_uri: string
-    token_uri: string
-    auth_provider_x509_cert_url: string
-    client_x509_cert_url: string
-}
+import { IPushNotificationService } from '../../interfaces';
+import { PushNotificationProviderConfigs } from '../../options/notification-pn-options';
+import { Service } from '../service';
 
 var MESSAGING_SCOPE = 'https://www.googleapis.com/auth/firebase.messaging';
 var SCOPES = [MESSAGING_SCOPE];
 
 export class FcmPushNotificationService extends Service implements IPushNotificationService {
-    private config: Config
-    private fcmConfig: FcmConfig;
+    private configs: PushNotificationProviderConfigs
     private credentials: Credentials;
     private requestOptions: https.RequestOptions;
 
     onInit() {
-        this.config = this.app.options.notification.pushNotification.config
-        if (this.config) {
-            if (this.config.filePath) {
-                this.fcmConfig = JSON.parse(fs.readFileSync(this.config.filePath).toString())
-            }
-
-            if (this.config.fcmConfig) {
-                this.fcmConfig = this.config.fcmConfig
+        if (this.app.options.notification.pushNotification.configs) {
+            if (this.app.options.notification.pushNotification.configs.filePath) {
+                this.configs = JSON.parse(fs.readFileSync(this.app.options.notification.pushNotification.configs.filePath).toString())
+            } else {
+                this.configs = this.app.options.notification.pushNotification.configs
             }
         }
 
-        if (this.fcmConfig == null) {
-            throw new Error("For FcmPushNotificationService, notification.pushNotification.config.filePath or notification.pushNotification.config.fcmConfig cannot be undefined!")
+        if (this.configs == null) {
+            throw new Error("For FcmPushNotificationService, notification.pushNotification.config cannot be undefined!")
         } else {
             this.requestOptions = {
                 hostname: 'fcm.googleapis.com',
                 port: 443,
-                path: `/v1/projects/${this.fcmConfig.project_id}/messages:send`,
+                path: `/v1/projects/${this.configs.project_id}/messages:send`,
                 method: 'POST',
                 headers: {
                     "Content-Type": "application/json",
@@ -98,9 +77,9 @@ export class FcmPushNotificationService extends Service implements IPushNotifica
 
         return new Promise((resolve, reject) => {
             var jwtClient = new JWT(
-                this.fcmConfig.client_email,
+                this.configs.client_email,
                 null,
-                this.fcmConfig.private_key,
+                this.configs.private_key,
                 SCOPES,
                 null
             );

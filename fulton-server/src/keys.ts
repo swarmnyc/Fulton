@@ -1,5 +1,5 @@
 export enum DiKeys {
-    CacheServiceProvider = "CacheServiceProvider",
+    CacheServiceFactory = "CacheServiceFactory",
     EmailService = "EmailService",
     EntityServiceFactory = "EntityServiceFactory",
     FultonApp = "FultonApp",

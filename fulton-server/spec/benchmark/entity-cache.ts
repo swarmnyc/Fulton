@@ -3,15 +3,16 @@ import { FultonApp } from '../../src/fulton-app';
 import { FultonAppOptions } from '../../src/options/fulton-app-options';
 import { Category } from '../entities/category';
 import chalk from "chalk"
+import { CacheProvider } from '../../src/main';
 
 class MyApp extends FultonApp {
-    constructor(private useCache: boolean, private cacheType?: "redis" | "memory") {
+    constructor(private useCache: boolean, private cacheProvider?: CacheProvider) {
         super()
     }
     protected onInit(options: FultonAppOptions): void {
         options.entities = [Category];
         options.cache.enabled = this.useCache;
-        options.cache.type = this.cacheType
+        options.cache.provider = this.cacheProvider
 
         options.databases.set("default", {
             type: "mongodb",
@@ -20,7 +21,7 @@ class MyApp extends FultonApp {
     }
 }
 
-async function testAction(useCache: boolean, cacheType?: "redis" | "memory"): Promise<void> {
+async function testAction(useCache: boolean, cacheType?: CacheProvider): Promise<void> {
     let app = new MyApp(useCache, cacheType)
     await app.init()
 

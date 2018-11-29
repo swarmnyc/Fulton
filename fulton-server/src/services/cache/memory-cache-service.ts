@@ -1,8 +1,8 @@
-import { ICacheServiceProvider, ICacheService } from "../../interfaces";
+import { ICacheServiceFactory, ICacheService } from "../../interfaces";
 import { Service } from "../service";
 import * as Cache from "lru-cache"
 
-export default class MemoryCacheServiceProvider extends Service implements ICacheServiceProvider {
+export default class MemoryCacheServiceFactory extends Service implements ICacheServiceFactory {
     map = new Map<string, ICacheService>()
     getCacheService(namespace: string): ICacheService {
         if (this.map.has(namespace)) return this.map.get(namespace)

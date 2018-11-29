@@ -1,8 +1,7 @@
-import { FultonApp } from '../../src/fulton-app';
-import { FultonAppOptions } from '../../src/options/fulton-app-options';
-import { FcmPushNotificationService } from '../../src/services/notification/fcm-push-notification-service';
-import { DiKeys } from '../../src/keys';
-
+import { FultonApp } from '../../../src/fulton-app';
+import { FultonAppOptions } from '../../../src/options/fulton-app-options';
+import { FcmPushNotificationService } from '../../../src/services/notification/fcm-push-notification-service';
+import { DiKeys } from '../../../src/keys';
 
 class MyApp extends FultonApp {
     protected onInit(options: FultonAppOptions): void {
@@ -10,12 +9,12 @@ class MyApp extends FultonApp {
         options.notification.enabled = true
         options.notification.pushNotification.enabled = true
 
-        options.notification.pushNotification.config = {
+        options.notification.pushNotification.provider = "firebase"
+        options.notification.pushNotification.configs = {
             filePath: "./spec/google-firebase.json"
         }
     }
 }
-
 
 xdescribe('Firebase cloud messaging', () => {
     var app = new MyApp()
@@ -41,7 +40,7 @@ xdescribe('Firebase cloud messaging', () => {
         await app.sendNotifications({
             pushNotification: {
                 message: {
-                    topic: "game_start",
+                    topic: "dev_game_start",
                     data: {
                         type: "game_start",
                         gameId: "5b3beb5082313e000fc731e4",

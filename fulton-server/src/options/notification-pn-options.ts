@@ -1,6 +1,26 @@
 import { Env } from '../helpers';
 import { BaseOptions } from './options';
-import { Type } from '../interfaces';
+import { Type, PushNotificationProvider } from '../interfaces';
+
+export interface FcmPushNotificationConfig {
+    type?: string
+    project_id?: string
+    private_key_id?: string
+    private_key?: string
+    client_email?: string
+    client_id?: string
+    auth_uri?: string
+    token_uri?: string
+    auth_provider_x509_cert_url?: string
+    client_x509_cert_url?: string
+}
+
+export interface PushNotificationProviderConfigs extends FcmPushNotificationConfig {
+    /** the file path of the configs for firebase*/
+    filePath?: string;
+    
+    [key: string]: any;
+}
 
 export class PushNotificationOptions extends BaseOptions<PushNotificationOptions>{
     /**
@@ -11,30 +31,32 @@ export class PushNotificationOptions extends BaseOptions<PushNotificationOptions
     enabled?: boolean = false;
 
     /**
-     * the type or instance of service of push notification. 
-     * default is use Fulton Default push Notification Service which is use Firebase Cloud messaging,
-     * if the value is a Type, the type has to be registered in app.options.providers
+     * the provider of push notification
+     * the default value is null. However, if the service field is not null, the value will become "other"
+     * It can be overridden by env["{appName}.options.notification.push_notification.provider"]
      */
-    service?: Type;
+    provider: PushNotificationProvider;
 
     /**
-     * the config
+     * the type of service of notification. 
+     * if the provider is other, this value is required,
+     * by default, 
+     * if the provider is firebase, use Fulton Default FcmPushNotificationService.
+     */
+    service: Type;
+
+    /**
+     * the configs for provider
      * 
      * the value can be overridden by
-     * `env["{appName}.options.notification.push_notification.config.{name}"]`
+     * `env["{appName}.options.notification.push_notification.configs.{name}"]`
      */
-    config?: any = {};
+    configs?: PushNotificationProviderConfigs = {};
 
     init?(): void {
         this.enabled = Env.getBoolean(`${this.appName}.options.notification.push_notification.enabled`, this.enabled);
+        this.provider = Env.get(`${this.appName}.options.notification.push_notification.provider`, this.provider) as any;
 
-        let namedReg = new RegExp(`^${this.appName}\\.options\\.notification\\.push_notification\\.config\\.(\\w+?)$`);
-
-        for (const key in process.env) {
-            let match = namedReg.exec(key)
-            if (match) {
-                this.config[match[1]] = process.env[key]
-            } 
-        }
+        Env.parse(new RegExp(`^${this.appName}\\.options\\.notification\\.push_notification\\.configs\\.(\\w+?)$`), this.configs);
     }
 }

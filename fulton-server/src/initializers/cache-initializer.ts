@@ -1,6 +1,6 @@
 import * as lodash from 'lodash';
 import { FultonApp } from '../fulton-app';
-import { ICacheServiceProvider } from '../interfaces';
+import { ICacheServiceFactory } from '../interfaces';
 import { DiKeys } from '../keys';
 
 module.exports = function (app: FultonApp) {
@@ -9,7 +9,7 @@ module.exports = function (app: FultonApp) {
             app.express.get(app.options.cache.resetPath, ...app.options.cache.middlewares);
         } else {
             app.express.get(app.options.cache.resetPath, (_, res) => {
-                app.getInstance<ICacheServiceProvider>(DiKeys.CacheServiceProvider).resetAll()
+                app.getInstance<ICacheServiceFactory>(DiKeys.CacheServiceFactory).resetAll()
                 res.send("ok")
             });
         }

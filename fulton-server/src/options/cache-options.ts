@@ -1,9 +1,9 @@
 import { Env, Helper } from '../helpers';
-import { Middleware, Type, ICacheServiceProvider } from '../interfaces';
+import { Middleware, Type, ICacheServiceFactory, CacheProvider } from '../interfaces';
 import { BaseOptions } from './options';
 
 
-export interface CacheConnectionOptions {
+export interface CacheProviderConfigs {
     host?: string
     port?: number
     path?: string
@@ -23,14 +23,19 @@ export class CacheOptions extends BaseOptions<CacheOptions> {
     enabled?: boolean = false;
 
     /**
+     * the provider of cache.
      * the default value is memory. However, if the service field is not null, the value will become "other"
      */
-    type: "memory" | "redis" | "other" = "memory"
+    provider: CacheProvider = "memory"
 
     /**
-     * if the value is null, the app will look at type. If type is memory, use MemoryCacheProvider. If type is redis, use RedisCacheProvider
+     * the type of service factory of notification. 
+     * if the provider is other, this value is required,
+     * by default, 
+     * if the provider is memory, use Fulton Default MemoryCacheProvider.
+     * if the provider is redis, use Fulton Default RedisCacheProvider.
      */
-    serviceProvider?: Type<ICacheServiceProvider>
+    serviceFactory?: Type<ICacheServiceFactory>
 
     /**
      * the default is 10 minutes
@@ -54,16 +59,19 @@ export class CacheOptions extends BaseOptions<CacheOptions> {
     middlewares?: Middleware[] = []
 
     /**
-     * connection options for redis or other
+     * the configs to provider
+     * 
+     * the value can be overridden by
+     * `env["{appName}.options.cache.configs.{name}"]`
      */
-    connectionOptions: CacheConnectionOptions = {};
+    configs: CacheProviderConfigs = {};
 
     init?(): void {
         this.enabled = Env.getBoolean(`${this.appName}.options.cache.enabled`, this.enabled);
         this.resetHandlerEnabled = Env.getBoolean(`${this.appName}.options.cache.resetHandlerEnabled`, this.resetHandlerEnabled);
 
-        this.type = Env.get(`${this.appName}.options.cache.type`, this.type) as any;
+        this.provider = Env.get(`${this.appName}.options.cache.provider`, this.provider) as any;
 
-        Env.parse(new RegExp(`^${this.appName}\\.options\\.cache\\.connectionOptions\\.(\\w+?)$`, "i"), this.connectionOptions)
+        Env.parse(new RegExp(`^${this.appName}\\.options\\.cache\\.configs\\.(\\w+?)$`, "i"), this.configs)
     }
 }

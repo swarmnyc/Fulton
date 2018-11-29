@@ -1,7 +1,7 @@
 import { FultonApp } from '../../../src/fulton-app';
-import { FultonAppOptions } from '../../../src/options/fulton-app-options';
-import { FcmPushNotificationService } from '../../../src/services/notification/fcm-push-notification-service';
 import { DiKeys } from '../../../src/keys';
+import { FultonAppOptions } from '../../../src/options/fulton-app-options';
+import FcmPushNotificationService from '../../../src/services/notification/fcm-push-notification-service';
 
 class MyApp extends FultonApp {
     protected onInit(options: FultonAppOptions): void {

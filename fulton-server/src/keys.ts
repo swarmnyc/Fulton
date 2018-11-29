@@ -7,6 +7,7 @@ export enum DiKeys {
     NotificationService = "NotificationService",
     PushNotificationService = "PushNotificationService",
     SecurityService = "SecurityService",
+    SmsNotificationService = "SmsNotificationService",
     TemplateService = "TemplateService",
 }
 

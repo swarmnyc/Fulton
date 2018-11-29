@@ -4,7 +4,7 @@ import { Service } from './service';
 import * as fs from 'fs';
 import { TemplateExecutor } from 'lodash';
 
-export class TemplateService extends Service implements ITemplateService {
+export default class TemplateService extends Service implements ITemplateService {
     templates = new Map<string, TemplateExecutor>()
 
     generate(textOrFilePath: string, variables: any = {}): string {

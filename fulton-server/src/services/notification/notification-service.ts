@@ -1,11 +1,11 @@
-import { FultonApp } from '../../fulton-app';
-import { IEmailService, INotificationService, IPushNotificationService, NotificationMessage } from '../../interfaces';
+import { IEmailService, INotificationService, IPushNotificationService, ISmsNotificationService, NotificationMessage } from '../../interfaces';
 import { DiKeys } from '../../keys';
 import { NotificationOptions } from '../../options/notification-options';
 import { Service } from '../service';
 
-export class NotificationService extends Service implements INotificationService {
+export default class NotificationService extends Service implements INotificationService {
     emailService: IEmailService
+    smsService: ISmsNotificationService
     pushNotificationService: IPushNotificationService
 
     options: NotificationOptions
@@ -15,6 +15,10 @@ export class NotificationService extends Service implements INotificationService
 
         if (this.options.email.enabled) {
             this.emailService = this.app.getInstance(DiKeys.EmailService)
+        }
+
+        if (this.options.sms.enabled) {
+            this.smsService = this.app.getInstance(DiKeys.SmsNotificationService)
         }
 
         if (this.options.pushNotification.enabled) {
@@ -35,10 +39,13 @@ export class NotificationService extends Service implements INotificationService
                     tasks.push(this.emailService.send(msg.email))
                 }
 
-                // if (msg.sms) {
-                // }
+                if (this.smsService && msg.sms) {
+                    // send sms
+                    tasks.push(this.smsService.send(msg.sms))
+                }
 
                 if (this.pushNotificationService && msg.pushNotification) {
+                    // send pn
                     tasks.push(this.pushNotificationService.send(msg.pushNotification))
                 }
             });

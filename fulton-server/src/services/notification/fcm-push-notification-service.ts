@@ -10,7 +10,7 @@ import { Service } from '../service';
 var MESSAGING_SCOPE = 'https://www.googleapis.com/auth/firebase.messaging';
 var SCOPES = [MESSAGING_SCOPE];
 
-export class FcmPushNotificationService extends Service implements IPushNotificationService {
+export default class FcmPushNotificationService extends Service implements IPushNotificationService {
     private configs: PushNotificationProviderConfigs
     private credentials: Credentials;
     private requestOptions: https.RequestOptions;

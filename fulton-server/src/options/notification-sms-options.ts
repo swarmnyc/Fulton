@@ -1,6 +1,14 @@
 import { Env } from '../helpers';
+import { SmsNotificationProvider, Type } from '../interfaces';
 import { BaseOptions } from './options';
-import { Type, PushNotificationProvider } from '../interfaces';
+
+export interface SmsNotificationProviderConfigs {
+    aws_access_key_id?: string
+    aws_secret_access_key?: string
+    aws_region?: string
+
+    [key: string]: any
+}
 
 export class SmsNotificationOptions extends BaseOptions<SmsNotificationOptions>{
     /**
@@ -14,7 +22,7 @@ export class SmsNotificationOptions extends BaseOptions<SmsNotificationOptions>{
      * the provider of push notification
      * It can be overridden by env["{appName}.options.notification.sms.provider"]
      */
-    provider: PushNotificationProvider = "firebase";
+    provider: SmsNotificationProvider;
 
     /**
      * the type of service of notification. 
@@ -30,7 +38,7 @@ export class SmsNotificationOptions extends BaseOptions<SmsNotificationOptions>{
      * the value can be overridden by
      * `env["{appName}.options.notification.sms.configs.{name}"]`
      */
-    configs?: any = {};
+    configs?: SmsNotificationProviderConfigs = {};
 
     init?(): void {
         this.enabled = Env.getBoolean(`${this.appName}.options.notification.sms.enabled`, this.enabled);

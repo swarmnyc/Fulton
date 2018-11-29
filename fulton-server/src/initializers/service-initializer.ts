@@ -76,7 +76,7 @@ function initModuleServices(app: FultonApp, providers: Provider[]) {
         if (app.options.notification.templateService == null) {
             providers.push({
                 provide: DiKeys.TemplateService,
-                useClass: require("../services/template-service").TemplateService
+                useClass: require("../services/template-service").default
             })
         } else {
             providers.push({
@@ -88,9 +88,10 @@ function initModuleServices(app: FultonApp, providers: Provider[]) {
         // add email service
         if (app.options.notification.email.enabled) {
             if (app.options.notification.email.service == null) {
+                // default email service
                 providers.push({
                     provide: DiKeys.EmailService,
-                    useClass: require("../services/notification/email-service").EmailService
+                    useClass: require("../services/notification/email-service").default
                 })
             } else {
                 providers.push({
@@ -102,24 +103,43 @@ function initModuleServices(app: FultonApp, providers: Provider[]) {
 
         // add push notification service
         if (app.options.notification.pushNotification.enabled) {
-            if (app.options.notification.pushNotification.service == null) {
-                providers.push({
-                    provide: DiKeys.PushNotificationService,
-                    useClass: require("../services/notification/fcm-push-notification-service").FcmPushNotificationService
-                })
-            } else {
-                providers.push({
-                    provide: DiKeys.PushNotificationService,
-                    useClass: app.options.notification.pushNotification.service
-                })
+            let target;
+            switch (app.options.notification.pushNotification.provider) {
+                case "firebase":
+                    target = require("../services/notification/fcm-push-notification-service").default
+                    break;
+                default:
+                    throw new Error("Unknown push notification provider " + app.options.notification.pushNotification.provider)
             }
+
+            providers.push({
+                provide: DiKeys.PushNotificationService,
+                useClass: target
+            })
+        }
+
+        // add sms notification service
+        if (app.options.notification.sms.enabled) {
+            let target;
+            switch (app.options.notification.sms.provider) {
+                case "aws":
+                    target = require("../services/notification/aws-sms-notification-service").default
+                    break;
+                default:
+                    throw new Error("Unknown sms notification provider " + app.options.notification.sms.provider)
+            }
+
+            providers.push({
+                provide: DiKeys.SmsNotificationService,
+                useClass: target
+            })
         }
 
         // add notification service
         if (app.options.notification.service == null) {
             providers.push({
                 provide: DiKeys.NotificationService,
-                useClass: require("../services/notification/notification-service").NotificationService
+                useClass: require("../services/notification/notification-service").default
             })
         } else {
             providers.push({

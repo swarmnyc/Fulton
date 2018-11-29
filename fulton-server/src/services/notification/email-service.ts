@@ -1,13 +1,12 @@
 import * as mailer from 'nodemailer';
 import { Transporter } from 'nodemailer';
 import { Options as MailOptions } from 'nodemailer/lib/mailer';
-import { FultonApp } from '../../fulton-app';
 import { FultonLog } from '../../fulton-log';
 import { EmailMessage, IEmailService, ITemplateService } from '../../interfaces';
 import { DiKeys } from '../../keys';
 import { Service } from '../service';
 
-export class EmailService extends Service implements IEmailService {
+export default class EmailService extends Service implements IEmailService {
     private templateService: ITemplateService;
     private transporter: Transporter;
 

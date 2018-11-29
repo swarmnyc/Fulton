@@ -1,8 +1,8 @@
+import * as crypto from 'crypto';
 import * as escapeStringRegexp from 'escape-string-regexp';
 import * as http from 'http';
 import * as tls from 'tls';
 import { Request } from '../interfaces';
-
 
 let urlJoin: ((...args: string[]) => string) = require('url-join');
 
@@ -90,6 +90,30 @@ export let Helper = {
         } else {
             return urlJoin(baseUrl, ...paths)
         }
+    },
+
+    hash(data: string | Buffer): Buffer {
+        let stream = crypto.createHash("sha256");
+        stream.write(data);
+        stream.end();
+
+        return stream.read() as Buffer;
+    },
+
+    hmac(data: string | Buffer, salt: string | Buffer): Buffer {
+        let stream = crypto.createHmac("sha256", salt);
+        stream.write(data);
+        stream.end();
+
+        return stream.read() as Buffer;
+    },
+
+    toBase64(data: string | Buffer) {
+        if (data instanceof Buffer) {
+            return data.toString("base64")
+        }
+
+        return Buffer.from(data).toString("base64");
     },
 
     urlJoin: urlJoin

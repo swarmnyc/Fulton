@@ -203,13 +203,11 @@ export interface INotificationService {
 }
 
 export interface NotificationMessage {
-    email?: EmailMessage,
+    email?: EmailMessage;
 
-    // TODO: sms message
-    sms?: any;
+    sms?: SmsMessage;
 
-    // TODO: pushNotification
-    pushNotification?: any;
+    pushNotification?: PushNotificationMessage;
 }
 
 export interface IEmailService {
@@ -228,7 +226,7 @@ export interface ISmsNotificationService {
     send(payload: any): Promise<void>
 }
 
-export type CacheProvider = "memory" | "redis" | "other" 
+export type CacheProvider = "memory" | "redis" | "other"
 
 export interface ICacheServiceFactory {
     getCacheService(namespace: string): ICacheService
@@ -291,6 +289,16 @@ export interface EmailMessage {
     variables?: any;
 
     attachments?: any[];
+}
+
+export interface SmsMessage {
+    message: string
+    phoneNumber: string
+}
+
+export interface PushNotificationMessage {
+    // TODO: add generic properties
+    [key: string]: any
 }
 
 export type HttpMethod = "all" | "get" | "post" | "patch" | "delete" | "head" | "put";

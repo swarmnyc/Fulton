@@ -13,9 +13,14 @@ export interface AwsConfigs {
 
 export interface AwsRequestOptions extends https.RequestOptions {
     service: string;
+    /**
+     * path without querystring
+     */
+    rawPath?: string;
     query?: Dict;
     region?: string;
-    payload?: any;
+    payload?: string | Buffer;
+    payloadHash?: string;
 }
 
 export interface AwsCanonical {
@@ -42,20 +47,29 @@ export class AwsClient {
         if (!this.configs.region) throw Error("AWS region id is undefined")
     }
 
-    protected prepareRequest(options: AwsRequestOptions): void {
+    prepareRequest(options: AwsRequestOptions): void {
         let datetime = this.generateDateTimeTimestamp();
         let date = datetime.substr(0, 8)
 
+        // check options
         options.region = options.region || this.configs.region
         options.path = options.path || "/"
+        if (!options.path.startsWith("/")) options.path = "/" + options.path
+
+        if (options.host == null) {
+            options.host = `${options.service}.${options.region}.amazonaws.com`
+        }
 
         options.headers = options.headers || {}
 
         options.headers["Host"] = options.host
         options.headers["X-Amz-Date"] = datetime
 
+        // generate signature
         let canonical = this.generateCanonical(options)
         let hashedCanonical = Helper.hash(canonical.canonical).toString("hex");
+
+        //console.log(`Canonical=\n${canonical.canonical}\n`)
 
         let scope = `${date}/${options.region}/${options.service}/aws4_request`;
 
@@ -63,41 +77,61 @@ export class AwsClient {
 
         let signatureSalt = this.generateSignatureSalt(date, options.region, options.service);
 
+        //console.log(`StringToSign=\n${stringToString}\n`)
+
         let signature = Helper.hmac(stringToString, signatureSalt).toString("hex");
 
-        options.headers["Authorization"] = `${Algorithm} Credential=${this.configs.accessKey}/${scope}, SignedHeaders=${canonical.signedHeaders}, Signature=${signature}`
+        let authorization = `${Algorithm} Credential=${this.configs.accessKey}/${scope}, SignedHeaders=${canonical.signedHeaders}, Signature=${signature}`
+
+        options.headers["Authorization"] = authorization
+
+        //console.log(`Authorization=${authorization}`)
 
         if (options.query) {
+            options.rawPath = options.path
             options.path += "?" + qs.stringify(options.query)
         }
     }
 
     protected generateCanonical(options: AwsRequestOptions): AwsCanonical {
-        let qs: string[] = []
-        let queryKeys = Object.getOwnPropertyNames(options.query).sort()
+        // query
+        let queryArr: string[] = []
+        if (options.query) {
+            let queryKeys = Object.getOwnPropertyNames(options.query).sort()
 
-        for (var key of queryKeys) {
-            let value = encodeURIComponent((options.query[key] || "").toString())
-            qs.push(`${key}=${value}`)
+            for (var key of queryKeys) {
+                let value = encodeURIComponent((options.query[key] || "").toString())
+                queryArr.push(`${key}=${value}`)
+            }
         }
 
-        let queryString = qs.join("&")
+        let queryString = queryArr.join("&")
 
+        // headers
         let canonicalHeaders = ""
-        let hs: string[] = []
-        let headerKeys = Object.getOwnPropertyNames(options.headers).sort()
+        let headerArr: string[] = []
 
-        for (var key of headerKeys) {
-            let header = key.toLocaleLowerCase();
-            let value = (options.headers[key] || "").toString().trim()
+        if (options.headers) {
+            let headerKeys = Object.getOwnPropertyNames(options.headers).sort()
 
-            canonicalHeaders += `${header}:${value}\n`
-            hs.push(header)
+            for (var key of headerKeys) {
+                let header = key.toLocaleLowerCase();
+                let value = (options.headers[key] || "").toString().trim()
+
+                canonicalHeaders += `${header}:${value}\n`
+                headerArr.push(header)
+            }
         }
 
-        let signedHeaders = hs.join(";")
+        let signedHeaders = headerArr.join(";")
 
-        let hashedPayload = Helper.hash(options.payload || "").toString("hex")
+        // payload
+        let hashedPayload
+        if (options.payloadHash) {
+            hashedPayload = options.payloadHash
+        } else {
+            hashedPayload = Helper.hash(options.payload || "").toString("hex")
+        }
 
         let canonical = `${options.method}\n${options.path}\n${queryString}\n${canonicalHeaders}\n${signedHeaders}\n${hashedPayload}`
         return { canonical, signedHeaders }

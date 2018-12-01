@@ -8,6 +8,7 @@ import { Middleware, NextFunction, Request, Response } from "../../interfaces";
 import { IdentityOptions } from "../identity-options";
 import { IIdentityRouter, IUser, OauthAuthenticateOptions } from "../interfaces";
 import { OauthStrategyOptions } from '../options/oauth-strategy-options';
+import { StrategyOptions } from '../options/strategy-options';
 
 type Strategy = passport.Strategy;
 
@@ -77,7 +78,7 @@ export class FultonIdentityRouter implements IIdentityRouter {
 
             // register to express
             if (options.path) {
-                let middlewares: any[] = [];
+                let middlewares: Middleware[]
 
                 options.authenticateOptions = options.authenticateOptions || {}
                 lodash.defaults(options.authenticateOptions, {
@@ -86,12 +87,11 @@ export class FultonIdentityRouter implements IIdentityRouter {
                 });
 
                 if (options instanceof OauthStrategyOptions) {
-                    // oauth use oauthFn to generate the action
-                    middlewares.push(this.oauthFn(options))
+                    // for oauth strategy
+                    middlewares = [this.oauthFn(options)]
                 } else {
                     // for regular strategy
-                    middlewares.push(passport.authenticate(options.name, options.authenticateOptions))
-                    middlewares.push(this.issueAccessToken.bind(this))
+                    middlewares = [this.authFn(options)]
                 }
 
                 let httpMethod = this.app.express[options.httpMethod || "get"];
@@ -100,8 +100,7 @@ export class FultonIdentityRouter implements IIdentityRouter {
 
             if (options instanceof OauthStrategyOptions) {
                 if (options.callbackPath || options.callbackUrl) {
-                    // for oauth strategy 
-                    let middlewares: any[] = [];
+                    // for oauth strategy callback
 
                     lodash.defaultsDeep(options, {
                         callbackAuthenticateOptions: {
@@ -110,7 +109,7 @@ export class FultonIdentityRouter implements IIdentityRouter {
                         }
                     });
 
-                    middlewares.push(this.oauthCallbackFn(options))
+                    let middlewares = [this.oauthCallbackFn(options)]
 
                     let httpMethod = this.app.express[options.callbackHttpMethod || "get"];
                     httpMethod.apply(this.app.express, [options.callbackPath, middlewares]);
@@ -290,6 +289,18 @@ export class FultonIdentityRouter implements IIdentityRouter {
     }
 
     /**
+     * the wrapper for passport.authenticate to handle error message
+     * @param options 
+     */
+    authFn(options: StrategyOptions): Middleware {
+        return (req: Request, res: Response, next: NextFunction) => {
+            let handler = this.passportAuthenticateCallback(options, req, res, next)
+
+            passport.authenticate(options.name, options.authenticateOptions, handler)(req, res, next);
+        }
+    }
+
+    /**
      * the wrapper for passport.authenticate, the purpose of it is that generate callbackUrl dynamically
      * @param options 
      */
@@ -312,28 +323,7 @@ export class FultonIdentityRouter implements IIdentityRouter {
      */
     oauthCallbackFn(options: OauthStrategyOptions): Middleware {
         return (req: Request, res: Response, next: NextFunction) => {
-            let finished = (error: any, user: any, info: any) => {
-                if (error) {
-                    next(error);
-                    return;
-                }
-
-                if (user) {
-                    let opts = options.callbackAuthenticateOptions;
-                    req.logIn(user, opts, (err) => {
-                        if (opts && opts.successRedirect) {
-                            res.redirect(opts.successRedirect);
-                        } else {
-                            this.issueAccessToken(req, res);
-                        }
-                    });
-
-                    return;
-                }
-
-                // TODO: web-view mode
-                res.sendStatus(401);
-            }
+            let handler = this.passportAuthenticateCallback(options, req, res, next)
 
             if (req.query.access_token) {
                 // mobile flow, like facebook login on Android, android app get access_token already, so here just get profile
@@ -346,7 +336,7 @@ export class FultonIdentityRouter implements IIdentityRouter {
                             return;
                         }
 
-                        strategy._verify(req, req.query.access_token, req.query.refresh_token, profile, finished)
+                        strategy._verify(req, req.query.access_token, req.query.refresh_token, profile, handler)
                     })
                 } else {
                     next(new FultonError(ErrorCodes.Unknown));
@@ -355,7 +345,7 @@ export class FultonIdentityRouter implements IIdentityRouter {
                 this.setCallbackUrl(req, options, options.callbackAuthenticateOptions)
 
                 // normal flow, providers return a code, use the code to get access_token and profile
-                passport.authenticate(options.name, options.callbackAuthenticateOptions, finished)(req, res, next);
+                passport.authenticate(options.name, options.callbackAuthenticateOptions, handler)(req, res, next);
             }
         }
     }
@@ -363,6 +353,44 @@ export class FultonIdentityRouter implements IIdentityRouter {
     async issueAccessToken(req: Request, res: Response) {
         let accessToken = await req.userService.issueAccessToken(req.user);
         res.send(accessToken);
+    }
+
+    private passportAuthenticateCallback(options: StrategyOptions, req: Request, res: Response, next: Function) {
+        return (error: any, user: any, info: any) => {
+            if (user == false && info) {
+                // strategy.fail()
+                if (info instanceof FultonError) {
+                    error = info
+                } else {
+                    error = new FultonError(null, info.message || info)
+                }
+            }
+
+            if (error) {
+                // strategy.error()
+                next(error);
+                return;
+            }
+
+            if (user) {
+                if (user instanceof Function) {
+                    // just a hack way to let strategy handler success itself
+                    // strategy.success(function)
+                    user(req, res, next)
+                } else {
+                    // strategy.success(user)
+                    let opts = options.authenticateOptions;
+
+                    req.logIn(user, opts, () => {
+                        if (opts && opts.successRedirect) {
+                            res.redirect(opts.successRedirect);
+                        } else {
+                            this.issueAccessToken(req, res);
+                        }
+                    });
+                }
+            }
+        }
     }
 
     private setCallbackUrl(req: Request, options: OauthStrategyOptions, target: OauthAuthenticateOptions) {

@@ -1,6 +1,14 @@
 import { Middleware, NextFunction, Request, Response } from "../interfaces";
 import { AuthenticateOptions } from "./interfaces";
 
+let passport:any 
+function requirePassport(){
+    // load passport module if identity is enabled
+    if (!passport) passport = require("passport")
+
+    return passport
+}
+
 /**
  * custom authenticate for router action
  * for example
@@ -16,7 +24,7 @@ import { AuthenticateOptions } from "./interfaces";
  * @param name name of the strategy 
  */
 export function authenticate(name:string, options?: AuthenticateOptions, callback?: (...args: any[]) => any) : Middleware {
-    return require("passport").authenticate(name, options, callback)
+    return requirePassport().authenticate(name, options, callback)
 }
 
 /**
@@ -24,7 +32,7 @@ export function authenticate(name:string, options?: AuthenticateOptions, callbac
  */
 export function defaultAuthenticate(req: Request, res: Response, next: NextFunction) {
     // authenticate every request to get user info.
-    let fn = require("passport").authenticate(req.fultonApp.options.identity.defaultAuthSupportStrategies, function (error:any, user:any, _:any) {
+    requirePassport().authenticate(req.fultonApp.options.identity.defaultAuthSupportStrategies, function (error:any, user:any) {
         if (error) {
             next(error);
         } else if (user) {
@@ -33,14 +41,11 @@ export function defaultAuthenticate(req: Request, res: Response, next: NextFunct
             });
         } else {
             if (req.fultonApp.options.identity.defaultAuthenticateErrorIfFailure) {
-                // TODO: web-view
                 res.sendStatus(401);
             } else {
                 next();
             }
         }
 
-    });
-
-    fn(req, res, next);
+    })(req, res, next);
 }

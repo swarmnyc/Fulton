@@ -17,7 +17,8 @@ export enum ErrorCodes {
  * ```
  * 
  */
-export class FultonError {
+export class FultonError implements Error {
+    name: "FultonError"
     error: FultonErrorObject;
     status: number;
 
@@ -25,7 +26,6 @@ export class FultonError {
     constructor(code: string, message?: string, status?: number)
     constructor(input?: FultonErrorObject, status?: number)
     constructor(...args: any[]) {
-
         if (args.length == 0) {
             this.error = {};
         } else {
@@ -125,6 +125,10 @@ export class FultonError {
 
     hasError(): boolean {
         return this.error.detail != null;
+    }
+
+    get message():string{
+        return JSON.stringify(this)
     }
 
     public toJSON() {

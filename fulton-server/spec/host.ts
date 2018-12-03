@@ -1,7 +1,8 @@
-import { FultonApp } from "../src/fulton-app";
-import { FultonAppOptions } from "../src/options/fulton-app-options";
 import { AppLauncher } from '../src/app-launcher';
+import { ClientSecurity } from "../src/entities/client-security";
+import { FultonApp } from "../src/fulton-app";
 import { EventKeys } from '../src/keys';
+import { FultonAppOptions } from "../src/options/fulton-app-options";
 
 var dotenv = require('dotenv');
 
@@ -36,8 +37,20 @@ class MyApp extends FultonApp {
         })
 
         // remove database
-        this.events.once(EventKeys.AppDidInitDatabases, () => {
+        this.events.once(EventKeys.AppDidInit, () => {
             //this.connections[0].dropDatabase();
+            let securityES = this.getEntityService(ClientSecurity)
+
+            securityES.count().then((count) => {
+                if (count == 0) {
+                    securityES.create({
+                        name: "test",
+                        key: "abcd",
+                        createdAt: new Date(),
+                        expiredAt: new Date(3000)
+                    })
+                }
+            })
         })
     }
 }

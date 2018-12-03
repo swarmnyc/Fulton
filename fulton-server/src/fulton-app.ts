@@ -135,12 +135,12 @@ export interface IFultonApp {
     /**
      * A shortcut to get typeorm repository
      */
-    getRepository<T>(entity: Type, connectionName?: string): Repository<T>
+    getRepository<T>(entity: Type<T>, connectionName?: string): Repository<T>
 
     /**
      * A shortcut to get typeorm repository
      */
-    getEntityService<T>(entity: Type, connectionName?: string): IEntityService<T>
+    getEntityService<T>(entity: Type<T>, connectionName?: string): IEntityService<T>
 
     /**
      * A shortcut to get typeorm repository
@@ -385,11 +385,11 @@ export abstract class FultonApp implements IFultonApp {
         return this.container.get<T>(key);
     }
 
-    getRepository<T>(entity: Type, connectionName?: string): Repository<T> {
+    getRepository<T>(entity: Type<T>, connectionName?: string): Repository<T> {
         return require("typeorm").getRepository(entity, connectionName);
     }
 
-    getEntityService<T>(entity: Type, connectionName?: string): IEntityService<T> {
+    getEntityService<T>(entity: Type<T>, connectionName?: string): IEntityService<T> {
         let factory = this.container.get<EntityServiceFactory>(DiKeys.EntityServiceFactory);
         if (factory instanceof Function) {
             // factory

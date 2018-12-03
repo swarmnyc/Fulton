@@ -95,6 +95,9 @@ module.exports = async function identityInitializer(app: IFultonApp) {
             strategy = settings.strategy = new strategy(options.strategyOptions, options.verifier);
         }
 
+        // set app, for custom strategy
+        (<any>strategy).app = app
+
         options.name = options.name || strategy.name;
 
         if (options.addToDefaultAuthenticateList) {

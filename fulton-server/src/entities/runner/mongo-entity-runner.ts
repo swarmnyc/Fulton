@@ -14,7 +14,7 @@ interface IncludeOptions {
 
 @injectable()
 export class MongoEntityRunner extends EntityRunner {
-    updateIdMetadata<T>(repository: Repository<T>) {
+    updateIdMetadata<T>(repository: MongoRepository<T>) {
         let metadata = repository.metadata
 
         // make metadata for mongo 
@@ -36,9 +36,7 @@ export class MongoEntityRunner extends EntityRunner {
      * @param repository 
      * @param queryParams 
      */
-    protected async findCore<T>(repository: Repository<T>, queryParams: QueryParams = {}): Promise<FindResult<T>> {
-        let repo = (<any>repository as MongoRepository<T>);
-
+    protected async findCore<T>(repository: MongoRepository<T>, queryParams: QueryParams = {}): Promise<FindResult<T>> {
         let skip;
         let size;
         if (queryParams.pagination) {
@@ -48,7 +46,7 @@ export class MongoEntityRunner extends EntityRunner {
             }
         }
 
-        let cursor = repo.createEntityCursor(queryParams.filter)
+        let cursor = repository.createEntityCursor(queryParams.filter)
         if (skip) cursor.skip(skip)
         if (size) cursor.limit(size)
         if (queryParams.sort) cursor.sort(queryParams.sort)
@@ -56,11 +54,11 @@ export class MongoEntityRunner extends EntityRunner {
 
         const [data, count] = await Promise.all<any>([
             cursor.toArray(),
-            repo.count(queryParams.filter),
+            repository.count(queryParams.filter),
         ]);
 
         if (data.length > 0 && queryParams.includes) {
-            await this.processIncludes(repo, data, queryParams.includes);
+            await this.processIncludes(repository, data, queryParams.includes);
         }
 
         return { data: data, total: count };
@@ -71,7 +69,7 @@ export class MongoEntityRunner extends EntityRunner {
      * @param repository 
      * @param queryParams 
      */
-    protected async findOneCore<T>(repository: Repository<T>, queryParams: QueryParams = {}): Promise<T> {
+    protected async findOneCore<T>(repository: MongoRepository<T>, queryParams: QueryParams = {}): Promise<T> {
         let repo = (<any>repository as MongoRepository<T>);
 
         let cursor = repo.createEntityCursor(queryParams.filter)
@@ -88,36 +86,66 @@ export class MongoEntityRunner extends EntityRunner {
         return data
     }
 
-    protected createCore<T extends any>(repository: Repository<T>, entity: T): Promise<T> {
+    protected createCore<T extends any>(repository: MongoRepository<T>, entity: T): Promise<T> {
         if (entity[repository.metadata.objectIdColumn.propertyName]) {
             // TODO: should move this code to typeorm
             entity._id = entity[repository.metadata.objectIdColumn.propertyName];
             delete entity[repository.metadata.objectIdColumn.propertyName];
         }
 
-        return (<any>repository as MongoRepository<T>)
-            .insertOne(entity)
-            .then((result) => {
+        return repository.insertOne(entity).then((result) => {
+            // TODO: should move this code to typeorm
+            entity[repository.metadata.objectIdColumn.propertyName] = entity._id;
+            delete entity._id;
+
+            return entity
+        });
+    }
+
+    protected createManyCore<T extends any>(repository: MongoRepository<T>, entities: T[]): Promise<T[]> {
+        entities.forEach((entity) => {
+            if (entity[repository.metadata.objectIdColumn.propertyName]) {
                 // TODO: should move this code to typeorm
+                entity._id = entity[repository.metadata.objectIdColumn.propertyName];
+                delete entity[repository.metadata.objectIdColumn.propertyName];
+            }
+        })
+
+
+        return repository.insertMany(entities).then(() => {
+            // TODO: should move this code to typeorm
+            entities.forEach((entity, i) => {
                 entity[repository.metadata.objectIdColumn.propertyName] = entity._id;
                 delete entity._id;
-
-                return entity
-            });
-    }
-
-    protected updateCore<T extends any>(repository: Repository<T>, id: any, entity: T, replace?: boolean): Promise<any> {
-        delete entity["id"];
-        return (<any>repository as MongoRepository<T>)
-            .updateOne({ _id: id }, replace ? entity : { $set: entity }).then(() => {
-                entity["id"] = id
-                return entity;
             })
+
+            return entities
+        });
     }
 
-    protected deleteCore<T>(repository: Repository<T>, id: any): Promise<any> {
-        return (<any>repository as MongoRepository<T>)
-            .deleteOne({ _id: id })
+    protected updateCore<T extends any>(repository: MongoRepository<T>, id: any, update: T): Promise<any> {
+        delete update[repository.metadata.objectIdColumn.propertyName];
+
+        return repository.updateOne({ _id: id }, this.convertUpdate(update)).then(() => {
+            update[repository.metadata.objectIdColumn.propertyName] = id
+            return update;
+        })
+    }
+
+    protected updateManyCore<T extends any>(repository: MongoRepository<T>, filter: any, update: T): Promise<number> {
+        return repository.updateMany(filter, this.convertUpdate(update)).then((result) => {
+            return result.modifiedCount
+        })
+    }
+
+    protected deleteCore<T>(repository: MongoRepository<T>, id: any): Promise<any> {
+        return repository.deleteOne({ _id: id })
+    }
+
+    protected deleteManyCore<T extends any>(repository: MongoRepository<T>, query: any): Promise<number> {
+        return repository.deleteMany(query).then((result) => {
+            return result.deletedCount
+        })
     }
 
     protected extendedConvertValue(metadata: string | ColumnMetadata, value: any, errorTracker: FultonStackError): any {
@@ -345,5 +373,14 @@ export class MongoEntityRunner extends EntityRunner {
         });
 
         return Promise.all(tasks);
+    }
+
+    private convertUpdate(input: any): any {
+        // mongo root element should be $set, $unset or $rename
+        if (input["$set"] || input["$unset"] || input["$rename"]) {
+            return input
+        } else {
+            return { $set: input }
+        }
     }
 }

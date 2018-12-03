@@ -47,21 +47,34 @@ export abstract class EntityRunner {
 
         fultonDebug("entity", "count on %s QueryParams:\n %O\t", repository.metadata.name, queryParams)
 
-        return repository.count(queryParams.filter)
+        return repository.count(queryParams ? queryParams.filter : null)
     }
 
     create<TEntity>(repository: Repository<TEntity>, entity: TEntity): Promise<TEntity> {
         return this.createCore(repository, entity)
     }
 
-    update<TEntity>(repository: Repository<TEntity>, id: any, entity: TEntity): Promise<void> {
+    createMany<TEntity>(repository: Repository<TEntity>, entities: TEntity[]): Promise<TEntity[]> {
+        return this.createManyCore(repository, entities)
+    }
+
+    update<TEntity>(repository: Repository<TEntity>, id: any, update: TEntity): Promise<void> {
         id = this.convertId(repository.metadata, id);
 
         if (!id) {
             return Promise.reject(new FultonError("invalid id"));
         }
 
-        return this.updateCore(repository, id, entity);
+        return this.updateCore(repository, id, update);
+    }
+
+    updateMany<TEntity>(repository: Repository<TEntity>, filter: any, update: any): Promise<number> {
+        let error = this.adjustParams(repository.metadata, { filter: filter }, true);
+        if (error) {
+            return Promise.reject(error);
+        }
+
+        return this.updateManyCore(repository, filter, update);
     }
 
     delete<TEntity>(repository: Repository<TEntity>, id: any): Promise<void> {
@@ -72,6 +85,15 @@ export abstract class EntityRunner {
         }
 
         return this.deleteCore(repository, id)
+    }
+
+    deleteMany<TEntity>(repository: Repository<TEntity>, filter: any): Promise<number> {
+        let error = this.adjustParams(repository.metadata, { filter: filter }, true);
+        if (error) {
+            return Promise.reject(error);
+        }
+
+        return this.deleteManyCore(repository, filter);
     }
 
     /** 
@@ -303,9 +325,15 @@ export abstract class EntityRunner {
 
     protected abstract createCore<TEntity>(repository: Repository<TEntity>, entity: TEntity): Promise<TEntity>;
 
-    protected abstract updateCore<TEntity>(repository: Repository<TEntity>, id: any, entity: TEntity): Promise<void>;
+    protected abstract createManyCore<TEntity>(repository: Repository<TEntity>, entities: TEntity[]): Promise<TEntity[]>;
+
+    protected abstract updateCore<TEntity>(repository: Repository<TEntity>, id: any, update: any): Promise<void>;
+
+    protected abstract updateManyCore<TEntity>(repository: Repository<TEntity>, query: any, update: any): Promise<number>;
 
     protected abstract deleteCore<TEntity>(repository: Repository<TEntity>, id: any): Promise<void>;
+
+    protected abstract deleteManyCore<TEntity>(repository: Repository<TEntity>, query: any): Promise<number>;
 
     protected getColumnMetadata(metadata: EntityMetadata, name: string): ColumnMetadata {
         if (metadata && name) {

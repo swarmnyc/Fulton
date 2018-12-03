@@ -84,7 +84,7 @@ class MyApp extends FultonApp {
     }
 }
 
-describe('EntityRouter Integration Test with Territory', () => {
+describe('TerritoryEntityRouter', () => {
     let app: MyApp;
     let httpTester: HttpTester;
 

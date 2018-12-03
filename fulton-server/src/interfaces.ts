@@ -70,13 +70,17 @@ export interface IEntityService<TEntity> {
 
     count(queryParams?: QueryParams): Promise<number>;
 
-    create(entity: TEntity | Partial<TEntity>): Promise<TEntity>;
+    create(entity: Partial<TEntity>): Promise<TEntity>;
 
-    update(id: any, entity: TEntity | Partial<TEntity>): Promise<void>;
+    createMany(entity: Partial<TEntity>[]): Promise<TEntity[]>;
 
-    // updateMany(query: any, entity: TEntity | Partial<TEntity>): Promise<OperationResult>;
+    update(id: any, update: Partial<TEntity> | Dict): Promise<void>;
+
+    updateMany(filter: any, update: Partial<TEntity> | Dict): Promise<number>;
 
     delete(id: any): Promise<void>;
+
+    deleteMany(filter: any): Promise<number>;
 
     readonly entityType: Type<TEntity>;
 }

@@ -33,7 +33,7 @@ class MyApp extends FultonApp {
     }
 }
 
-describe('EntityRouter Integration Test', () => {
+describe('EmployeeEntityRouter', () => {
     let app: MyApp;
     let httpTester: HttpTester;
 

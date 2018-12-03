@@ -23,16 +23,18 @@ export class ServerOptions extends BaseOptions<ServerOptions> {
     /**
      * the port for http
      * the default value is 3000
-     * It can be overridden by process.env["{appName}.options.server.httpPort"]
+     * It can be overridden by 
+     * process.env.PORT or
+     * process.env["{appName}.options.server.httpPort"]
      */
-    httpPort?: number = 3000;
+    httpPort?: number | string = 3000;
 
     /**
      * the port for https 
      * the default value is 443
      * It can be overridden by process.env["{appName}.options.server.httpsPort"]
      */
-    httpsPort?: number = 443;
+    httpsPort?: number | string = 443;
 
     /**
      * ssl options, must to provide if httpsEnabled is true.
@@ -56,12 +58,11 @@ export class ServerOptions extends BaseOptions<ServerOptions> {
     init?(): void {
         this.httpEnabled = Env.getBoolean(`${this.appName}.options.server.httpEnabled`, this.httpEnabled);
         this.httpsEnabled = Env.getBoolean(`${this.appName}.options.server.httpsEnabled`, this.httpsEnabled);
-        
-        this.httpPort = Env.getInt(`${this.appName}.options.server.httpPort`, this.httpPort);
-        this.httpsPort = Env.getInt(`${this.appName}.options.server.httpsPort`, this.httpsPort);
+
+        this.httpPort = Env.get(`${this.appName}.options.server.httpPort`, process.env.PORT || this.httpPort as any);
+        this.httpsPort = Env.get(`${this.appName}.options.server.httpsPort`, this.httpsPort as any);
 
         this.clusterEnabled = Env.getBoolean(`${this.appName}.options.server.clusterEnabled`, this.clusterEnabled);
         this.clusterWorkerNumber = Env.getInt(`${this.appName}.options.server.clusterWorkerNumber`, this.clusterWorkerNumber);
-        
     }
 }

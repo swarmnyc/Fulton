@@ -4,7 +4,7 @@ import { Employee } from '../../spec/entities/employee';
 import { Territory } from '../../spec/entities/territory';
 import { getRelatedToMetadata } from "../entities/entity-decorators-helpers";
 import { FultonApp } from '../fulton-app';
-import { IEntityService, OperationManyResult, QueryParams, Request, Response, Type } from "../interfaces";
+import { IEntityService, OperationManyResult, QueryParams, Request, Response, Type, Dict } from "../interfaces";
 import { FultonAppOptions } from '../options/fulton-app-options';
 import { EntityRouter, entityRouter } from '../routers';
 import { HttpTester } from "../test/http-tester";
@@ -131,6 +131,15 @@ class EmployeeEntityService implements IEntityService<Employee> {
         throw new Error("Method not implemented.");
     }
     delete(id: string): Promise<void> {
+        throw new Error("Method not implemented.");
+    }
+    createMany(entity: (Employee | Partial<Employee>)[]): Promise<Employee[]> {
+        throw new Error("Method not implemented.");
+    }
+    updateMany(filter: any, update: Employee | Partial<Employee> | Dict): Promise<number> {
+        throw new Error("Method not implemented.");
+    }
+    deleteMany(filter: any): Promise<number> {
         throw new Error("Method not implemented.");
     }
 }

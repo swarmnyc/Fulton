@@ -12,7 +12,6 @@ export let Env = {
      * get value and parse to boolean the condition is /(true)|1/i;
      * @param name 
      * @param defaultValue is null
-     * @param caseless 
      */
     getBoolean(name: string, defaultValue?: boolean): boolean {
         return Helper.getBoolean(Env.get(name, null), defaultValue);

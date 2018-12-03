@@ -38,7 +38,15 @@ class FakeEntityService implements IEntityService<any>{
     delete(id: string): Promise<void> {
         throw new Error("Method not implemented.");
     }
-
+    createMany(entity: any[]): Promise<any[]> {
+        throw new Error("Method not implemented.");
+    }
+    updateMany(filter: any, update: any): Promise<number> {
+        throw new Error("Method not implemented.");
+    }
+    deleteMany(filter: any): Promise<number> {
+        throw new Error("Method not implemented.");
+    }
 }
 
 @entityRouter("/employees", Employee)

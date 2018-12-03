@@ -20,6 +20,8 @@ describe('Fulton App Options', () => {
     it('should init options', async () => {
         let app = new MyFultonApp();
 
+        process.env[`PORT`] = "7777"
+
         process.env[`${app.appName}.options.index.enabled`] = "1"
 
         process.env[`${app.appName}.options.logging.defaultLoggerLevel`] = "info"
@@ -41,21 +43,24 @@ describe('Fulton App Options', () => {
 
         expect(app.options.server.httpEnabled).toEqual(false);
         expect(app.options.server.httpsEnabled).toEqual(true);
-        expect(app.options.server.httpPort).toEqual(777);
-        expect(app.options.server.httpsPort).toEqual(999);
+        expect(app.options.server.httpPort).toEqual("777");
+        expect(app.options.server.httpsPort).toEqual("999");
         expect(app.options.server.clusterWorkerNumber).toBeUndefined();
+
+        delete process.env[`${app.appName}.options.server.httpPort`]
+
+        await app.init();
+
+        expect(app.options.server.httpPort).toEqual("7777");
     });
 
     it('should override', async () => {
-        process.env[`MyFultonApp.options.server.httpPort`] = "777"
-
         let app = new MyFultonApp();
         app.options.index.set({
             message: "test",
         })
 
         await app.init();
-        expect(app.options.server.httpPort).toEqual(777);
         expect(app.options.index.message).toEqual("test");
     });
 

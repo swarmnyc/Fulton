@@ -21,7 +21,7 @@ export class CacheServiceWrapper {
     constructor(public service: ICacheService, private entityType: Type) { }
 
     fetch(queryParams: QueryParams, operation: string, executor?: QueryExecutor): Promise<any> {
-        if (this.service && queryParams.cache) {
+        if (this.service && queryParams && queryParams.cache) {
             let cacheKey = this.getCacheKey(operation, queryParams)
 
             if (this.isDirty) {
@@ -196,7 +196,17 @@ export class EntityService<TEntity> extends Service implements IEntityService<TE
             })
     }
 
-    update(id: any, input: TEntity | Partial<TEntity>): Promise<void> {
+    createMany(input: Partial<TEntity>[]): Promise<TEntity[]> {
+        let verify = input.map((item) => this.convertAndVerifyEntity(this.mainRepository.metadata, item))
+
+        return Promise.all(verify).then((entities) => {
+            this.cache.isDirty = true
+            return this.runner.createMany(this.mainRepository, entities)
+        })
+    }
+
+
+    update(id: any, input: Partial<TEntity>): Promise<void> {
         return this
             .convertAndVerifyEntity(this.mainRepository.metadata, input)
             .then((entity) => {
@@ -205,9 +215,19 @@ export class EntityService<TEntity> extends Service implements IEntityService<TE
             })
     }
 
+    updateMany(filter: any, update: Partial<TEntity>): Promise<number> {
+        this.cache.isDirty = true
+        return this.runner.updateMany(this.mainRepository, filter, update)
+    }
+
     delete(id: any): Promise<void> {
         this.cache.isDirty = true
         return this.runner.delete(this.mainRepository, id)
+    }
+
+    deleteMany(filter: any): Promise<number> {
+        this.cache.isDirty = true
+        return this.runner.deleteMany(this.mainRepository, filter)
     }
 
     updateIdMetadata() {

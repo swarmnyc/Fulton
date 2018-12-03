@@ -37,6 +37,7 @@ export class NotificationOptions extends BaseOptions<NotificationOptions> {
 
     init?(): void {
         this.email.init();
+        this.sms.init();
         this.pushNotification.init();
 
         this.enabled = Env.getBoolean(`${this.appName}.options.notification.enabled`, this.enabled);

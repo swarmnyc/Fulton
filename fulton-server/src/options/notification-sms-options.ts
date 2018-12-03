@@ -13,10 +13,10 @@ export interface SmsNotificationProviderConfigs {
 export class SmsNotificationOptions extends BaseOptions<SmsNotificationOptions>{
     /**
      * if true, app will enable send email notification.
-     * the default value is false
+     * the default value is true
      * It can be overridden by env["{appName}.options.notification.sms.enabled"]
      */
-    enabled?: boolean = false;
+    enabled?: boolean = true;
 
     /**
      * the provider of push notification

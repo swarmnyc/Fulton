@@ -25,15 +25,15 @@ export interface PushNotificationProviderConfigs extends FcmPushNotificationConf
 export class PushNotificationOptions extends BaseOptions<PushNotificationOptions>{
     /**
      * if true, app will enable send email notification.
-     * the default value is false
-     * It can be overridden by env["{appName}.options.notification.push_notification.enabled"]
+     * the default value is true
+     * It can be overridden by env["{appName}.options.notification.push-notification.enabled"]
      */
-    enabled?: boolean = false;
+    enabled?: boolean = true;
 
     /**
      * the provider of push notification
      * the default value is null. However, if the service field is not null, the value will become "other"
-     * It can be overridden by env["{appName}.options.notification.push_notification.provider"]
+     * It can be overridden by env["{appName}.options.notification.push-notification.provider"]
      */
     provider: PushNotificationProvider;
 
@@ -49,14 +49,14 @@ export class PushNotificationOptions extends BaseOptions<PushNotificationOptions
      * the configs for provider
      * 
      * the value can be overridden by
-     * `env["{appName}.options.notification.push_notification.configs.{name}"]`
+     * `env["{appName}.options.notification.push-notification.configs.{name}"]`
      */
     configs?: PushNotificationProviderConfigs = {};
 
     init?(): void {
-        this.enabled = Env.getBoolean(`${this.appName}.options.notification.push_notification.enabled`, this.enabled);
-        this.provider = Env.get(`${this.appName}.options.notification.push_notification.provider`, this.provider) as any;
+        this.enabled = Env.getBoolean(`${this.appName}.options.notification.push-notification.enabled`, this.enabled);
+        this.provider = Env.get(`${this.appName}.options.notification.push-notification.provider`, this.provider) as any;
 
-        Env.parse(new RegExp(`^${this.appName}\\.options\\.notification\\.push_notification\\.configs\\.(\\w+?)$`), this.configs);
+        Env.parse(new RegExp(`^${this.appName}\\.options\\.notification\\.push-notification\\.configs\\.(\\w+?)$`), this.configs);
     }
 }

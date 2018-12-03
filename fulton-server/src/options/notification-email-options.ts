@@ -5,10 +5,10 @@ import { Type, IEmailService } from '../interfaces';
 export class EmailOptions extends BaseOptions<EmailOptions>{
     /**
      * if true, app will enable send email notification.
-     * the default value is false
+     * the default value is true
      * It can be overridden by env["{appName}.options.notification.email.enabled"]
      */
-    enabled?: boolean = false;
+    enabled?: boolean = true;
 
      /**
      * the email service. default is use nodemailer Email Service,

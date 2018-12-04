@@ -56,8 +56,8 @@ export class ServerOptions extends BaseOptions<ServerOptions> {
         this.httpEnabled = Env.getBoolean(`${this.appName}.options.server.httpEnabled`, this.httpEnabled);
         this.httpsEnabled = Env.getBoolean(`${this.appName}.options.server.httpsEnabled`, this.httpsEnabled);
 
-        this.httpPort = Env.get(`${this.appName}.options.server.httpPort`, process.env.PORT || this.httpPort as any);
-        this.httpsPort = Env.get(`${this.appName}.options.server.httpsPort`, this.httpsPort as any);
+        this.httpPort = Env.get(`${this.appName}.options.server.httpPort`, process.env.PORT || this.httpPort as string);
+        this.httpsPort = Env.get(`${this.appName}.options.server.httpsPort`, this.httpsPort as string);
 
         this.clusterEnabled = Env.getBoolean(`${this.appName}.options.server.clusterEnabled`, this.clusterEnabled);
         this.clusterWorkerNumber = Env.getInt(`${this.appName}.options.server.clusterWorkerNumber`, this.clusterWorkerNumber);

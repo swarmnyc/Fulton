@@ -407,7 +407,7 @@ describe('entity service', () => {
         output = { ...output };
         output.territories = output.territories.map((t) => { return { ...t } });
 
-        expect(output as any).toEqual({
+        expect(output).toEqual({
             "customerId": "ALFKI",
             "companyName": "Alfreds Futterkiste",
             "contactName": "Maria Anders",
@@ -431,7 +431,7 @@ describe('entity service', () => {
                     "regionId": 1
                 }
             ]
-        });
+        } as Customer);
     });
 
     it('should deep convert input', () => {
@@ -475,7 +475,7 @@ describe('entity service', () => {
         output = { ...output };
         output.territories = output.territories.map((t) => { return { ...t } });
 
-        expect(output as any).toEqual({
+        expect(output).toEqual({
             "customerId": "ALFKI",
             "territories": [
                 {
@@ -500,7 +500,7 @@ describe('entity service', () => {
                     ]
                 }
             ]
-        });
+        } as Customer);
     });
 
     it('should validate input success', () => {

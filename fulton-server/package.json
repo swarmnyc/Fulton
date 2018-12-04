@@ -15,7 +15,7 @@
     "test:all": "npm run test && npm run test:it",
     "test:debug": "node --inspect-brk=9229 -r ts-node/register ./spec/test.ts",
     "test:debug:it": "node --inspect-brk=9229 -r ts-node/register ./spec/test.ts --it",
-    "test:debug:host": "set debug=fulton && node --inspect-brk=9229 -r ts-node/register ./spec/host.ts",
+    "test:debug:host": "node --inspect-brk=9229 -r ts-node/register ./spec/host.ts",
     "bm": "ts-node ./spec/test-benchmark.ts",
     "coverage": "nyc npm test"
   },

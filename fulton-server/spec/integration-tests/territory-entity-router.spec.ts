@@ -3,7 +3,7 @@ import { Repository } from "typeorm";
 import { injectable, Request, Response } from "../../src/alias";
 import { EntityService } from '../../src/entities/entity-service';
 import { FultonApp } from '../../src/fulton-app';
-import { OperationManyResult, OperationOneResult, QueryParams } from "../../src/interfaces";
+import { OperationManyResult, OperationOneResult, QueryParams, Dict } from "../../src/interfaces";
 import { FultonAppOptions } from '../../src/options/fulton-app-options';
 import { EntityRouter } from '../../src/routers/entity-router';
 import { httpGet, router } from '../../src/routers/route-decorators';
@@ -38,7 +38,7 @@ class TerritoryService extends EntityService<Territory>{
         let result = await this.findById(territoryId);
         let tagIds = result.categories.map((c) => c.categoryId);
 
-        return this.categoryRepository.find({ "_id": { "$in": tagIds } } as any);
+        return this.categoryRepository.find({ "_id": { "$in": tagIds } } as Dict);
     }
 }
 
@@ -273,7 +273,7 @@ describe('TerritoryEntityRouter', () => {
                 "categoryName": "Confections",
                 "description": "Desserts candies and sweet breads"
             }
-        ] as any);
+        ]);
     });
 
     it('should return the categories by tag id', async () => {

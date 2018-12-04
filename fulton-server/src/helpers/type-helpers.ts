@@ -60,11 +60,11 @@ export function getIdentifiers(providers: Provider[]): TypeIdentifier[] {
     if (providers == null)
         return ids;
 
-    for (const provider of providers as any[]) {
+    for (const provider of providers) {
         if (isFunction(provider)) {
-            ids.push(provider);
-        } else if (provider.provide) {
-            ids.push(provider.provide);
+            ids.push(provider as Type);
+        } else if ((provider as ClassProvider).provide) {
+            ids.push((provider as ClassProvider).provide);
         }
     }
 

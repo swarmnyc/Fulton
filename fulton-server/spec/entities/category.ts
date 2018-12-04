@@ -3,7 +3,7 @@ import { column, entity, ObjectId, objectIdColumn } from "../../src/entities";
 @entity("categories")
 export class Category {
     @objectIdColumn() 
-    categoryId: ObjectId;
+    categoryId: ObjectId | string;
 
     @column()
     categoryName:string;

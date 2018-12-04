@@ -70,7 +70,7 @@ export class CacheOptions extends BaseOptions<CacheOptions> {
         this.enabled = Env.getBoolean(`${this.appName}.options.cache.enabled`, this.enabled);
         this.resetHandlerEnabled = Env.getBoolean(`${this.appName}.options.cache.resetHandlerEnabled`, this.resetHandlerEnabled);
 
-        this.provider = Env.get(`${this.appName}.options.cache.provider`, this.provider) as any;
+        this.provider = Env.get(`${this.appName}.options.cache.provider`, this.provider) as CacheProvider;
 
         Env.parse(new RegExp(`^${this.appName}\\.options\\.cache\\.configs\\.(\\w+?)$`, "i"), this.configs)
     }

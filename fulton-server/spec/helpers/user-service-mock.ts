@@ -2,10 +2,10 @@ import * as lodash from 'lodash';
 import { FultonError } from '../../src/common/fulton-error';
 import { FultonApp } from "../../src/fulton-app";
 import { FultonUser } from '../../src/identity/fulton-impl/fulton-user';
-import { AccessToken, IFultonUserClaims, IOauthProfile, IUserService, RegisterModel } from '../../src/identity/interfaces';
+import { AccessToken, IFultonUserClaims, IOauthProfile, IUserService, RegisterModel, IUser } from '../../src/identity/interfaces';
 import { Type } from "../../src/interfaces";
 
-export class UserServiceMock implements IUserService<FultonUser> {
+export class UserServiceMock implements IUserService<IUser> {
     currentUser: FultonUser;
     entities: Type[] = []
 
@@ -16,7 +16,7 @@ export class UserServiceMock implements IUserService<FultonUser> {
 
     }
 
-    login(username: string, password: string): Promise<FultonUser> {
+    login(username: string, password: string): Promise<IUser> {
         let error = new FultonError();
 
         if (!lodash.some(username)) {
@@ -42,12 +42,12 @@ export class UserServiceMock implements IUserService<FultonUser> {
         }
     }
 
-    loginByOauth(userId: string, token: AccessToken, profile: IOauthProfile): Promise<FultonUser> {
+    loginByOauth(userId: string, token: AccessToken, profile: IOauthProfile): Promise<IUser> {
         profile.displayName = profile.username
-        return Promise.resolve(profile as any);
+        return Promise.resolve(profile);
     }
 
-    loginByAccessToken(token: string): Promise<FultonUser> {
+    loginByAccessToken(token: string): Promise<IUser> {
         let info = token.split("-");
         if (info[1] == "accessToken") {
             let user = new FultonUser();
@@ -60,7 +60,7 @@ export class UserServiceMock implements IUserService<FultonUser> {
         }
     }
 
-    register(input: RegisterModel): Promise<FultonUser> {
+    register(input: RegisterModel): Promise<IUser> {
         let error = new FultonError();
 
         if (error.verifyRequiredList(input, ["username", "password", "email"])) {
@@ -75,7 +75,7 @@ export class UserServiceMock implements IUserService<FultonUser> {
         }
     }
 
-    issueAccessToken(user: FultonUser): Promise<AccessToken> {
+    issueAccessToken(user: IUser): Promise<AccessToken> {
         return Promise.resolve({
             access_token: `${user.displayName}-accessToken`,
             token_type: this.app.options.identity.accessToken.type,

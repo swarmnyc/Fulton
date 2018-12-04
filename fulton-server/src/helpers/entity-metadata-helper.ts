@@ -17,7 +17,7 @@ export class EntityMetadataHelper {
     constructor(conns: Connection[]) {
         for (const conn of conns) {
             for (const metadata of conn.entityMetadatas) {
-                if (!this.entities.has(metadata.target as any)) {
+                if (!this.entities.has(metadata.target)) {
                     let epm = {
                         raw: metadata
                     }

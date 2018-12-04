@@ -35,7 +35,7 @@ export interface UpdateLocalModel {
 }
 
 export interface IFultonUser extends IUser {
-    id?: string;
+    id?: any;
     displayName?: string;
     portraitUrl?: string;
     email?: string;

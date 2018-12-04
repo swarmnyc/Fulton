@@ -55,7 +55,7 @@ export class PushNotificationOptions extends BaseOptions<PushNotificationOptions
 
     init?(): void {
         this.enabled = Env.getBoolean(`${this.appName}.options.notification.push-notification.enabled`, this.enabled);
-        this.provider = Env.get(`${this.appName}.options.notification.push-notification.provider`, this.provider) as any;
+        this.provider = Env.get(`${this.appName}.options.notification.push-notification.provider`, this.provider) as PushNotificationProvider;
 
         Env.parse(new RegExp(`^${this.appName}\\.options\\.notification\\.push-notification\\.configs\\.(\\w+?)$`), this.configs);
     }

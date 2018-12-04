@@ -3,6 +3,7 @@ import { Middleware, Request, Response } from "../alias";
 import { authenticate } from '../identity/authenticate-middlewares';
 import { errorHandler, httpDelete, httpGet, httpPost, httpPut, router } from './route-decorators';
 import { Router } from "./router";
+import { IFultonApp } from "../fulton-app";
 
 let middleware: Middleware = function () {
 }
@@ -135,7 +136,7 @@ describe('Fulton Router', () => {
         let app = express();
 
         let spy = spyOn(app, "use");
-        router["app"] = { express: app } as any;
+        router["app"] = { express: app } as IFultonApp;
 
         router.init();
 

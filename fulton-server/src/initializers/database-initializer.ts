@@ -22,8 +22,7 @@ module.exports = async function (app: FultonApp): Promise<any> {
         // extends entities
         if (lodash.some(app.options.entities)) {
             if (conn.entities) {
-                let arr = conn.entities as any[];
-                arr.push(app.options.entities);
+                conn.entities.push(...app.options.entities);
             } else {
                 lodash.set(conn, "entities", app.options.entities);
             }

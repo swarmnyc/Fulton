@@ -1,11 +1,10 @@
-import * as debug from "debug"
-import * as cluster from 'cluster';
 import clack, { Chalk } from "chalk";
-
-import { Env } from './env';
+import * as cluster from 'cluster';
+import * as debug from "debug";
 import { IDebugger } from "debug";
 import { isArray } from "util";
-import { moduleExists } from "./module-helpers";
+import { Env } from './env';
+
 
 let loggers = new Map<string, IDebugger>();
 
@@ -66,7 +65,7 @@ function fultonDebugCore(tag: string, ...args: any[]): boolean {
             }
         }
 
-        logger.apply(fultonDebug, args as any);
+        logger.apply(fultonDebug, args as SuppressChecking);
 
         return true;
     }

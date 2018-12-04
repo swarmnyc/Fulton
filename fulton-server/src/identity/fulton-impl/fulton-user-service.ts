@@ -10,7 +10,7 @@ import { ErrorCodes } from '../../common/fulton-error';
 import { IFultonApp } from '../../fulton-app';
 import { codeGenerate, numberCodeGenerate, timingSafeEqual } from '../../helpers/crypto-helper';
 import { Helper } from '../../helpers/helper';
-import { ICacheService, NotificationMessage, Type } from '../../interfaces';
+import { ICacheService, NotificationMessage, Type, Dict } from '../../interfaces';
 import { injectable, Request } from '../../alias';
 import { EventKeys } from '../../keys';
 import { IdentityOptions } from '../identity-options';
@@ -62,9 +62,9 @@ export class MongoRunner implements IRunner {
     constructor(private app: IFultonApp, private manager: MongoEntityManager) {
         this.options = app.options.identity;
 
-        this.userRepository = manager.getMongoRepository(FultonUser) as any;
-        this.claimRepository = manager.getMongoRepository(FultonUserClaims) as any;
-        this.tokenRepository = manager.getMongoRepository(FultonUserAccessToken) as any;
+        this.userRepository = manager.getMongoRepository(FultonUser) as SuppressChecking;
+        this.claimRepository = manager.getMongoRepository(FultonUserClaims) as SuppressChecking;
+        this.tokenRepository = manager.getMongoRepository(FultonUserAccessToken) as SuppressChecking;
 
         this.updateMetadata(this.userRepository.metadata);
         this.updateMetadata(this.claimRepository.metadata);
@@ -94,7 +94,7 @@ export class MongoRunner implements IRunner {
 
     addUser(user: IFultonUser): Promise<IFultonUser> {
         return this.userRepository.insertOne(user).then((result) => {
-            user["id"] = result.insertedId as any;
+            user["id"] = result.insertedId;
             return user;
         });
     }
@@ -152,7 +152,7 @@ export class MongoRunner implements IRunner {
             "userId": this.convertId(payload.id),
             "revoked": false,
             "expiredAt": { "$gt": new Date() }
-        } as any)
+        } as Dict)
 
         let userToken = userTokens.find(userToken => {
             return timingSafeEqual(token, userToken.token)
@@ -193,7 +193,7 @@ export class MongoRunner implements IRunner {
                 { username: nameOrEmail },
                 { email: nameOrEmail }
             ]
-        } as any);
+        } as Dict);
     }
 
     async findClaimByResetPasswordToken(token: string, code: string): Promise<FultonUserClaims> {
@@ -201,7 +201,7 @@ export class MongoRunner implements IRunner {
             "type": "local",
             "resetPasswordToken": token,
             "resetPasswordExpiredAt": { "$gt": new Date() }
-        } as any);
+        } as Dict);
 
         if (claim) {
             // check code, if reach the try-limits, then revoke the token.

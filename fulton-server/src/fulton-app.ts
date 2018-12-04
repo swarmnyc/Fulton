@@ -537,7 +537,7 @@ export abstract class FultonApp implements IFultonApp {
 
         if (this.options.logging.defaultLoggerColorized) {
             if (winston.default.transports.console) {
-                (winston.default.transports.console as any).colorize = true;
+                winston.default.transports.console.colorize = true;
             }
         }
 

@@ -81,7 +81,7 @@ module.exports = function (app: FultonApp) {
 
                     send.apply(thisArg, args);
                 },
-            }) as any
+            }) as SuppressChecking
         }
 
         next();

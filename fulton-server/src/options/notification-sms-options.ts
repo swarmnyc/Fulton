@@ -42,7 +42,7 @@ export class SmsNotificationOptions extends BaseOptions<SmsNotificationOptions>{
 
     init?(): void {
         this.enabled = Env.getBoolean(`${this.appName}.options.notification.sms.enabled`, this.enabled);
-        this.provider = Env.get(`${this.appName}.options.notification.sms.provider`, this.provider) as any;
+        this.provider = Env.get(`${this.appName}.options.notification.sms.provider`, this.provider) as SmsNotificationProvider;
 
         Env.parse(new RegExp(`^${this.appName}\\.options\\.notification\\.sms\\.configs\\.(\\w+?)$`), this.configs);
     }

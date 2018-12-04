@@ -24,6 +24,8 @@ declare global {
          */
         same(str: any): boolean
     }
+
+    type SuppressChecking = any
 }
 
 declare module "passport" {
@@ -33,7 +35,13 @@ declare module "passport" {
 
     interface OAuthStrategy {
         _verify: OauthStrategyVerifier
-        userProfile(accessToken:string, done: (error: any, profile?: any) => void):void
+        userProfile(accessToken: string, done: (error: any, profile?: any) => void): void
+    }
+}
+
+declare module "winston" {
+    interface TransportInstance {
+        colorize?: boolean | 'all' | 'level' | 'message';
     }
 }
 

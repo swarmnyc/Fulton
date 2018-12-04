@@ -1,8 +1,8 @@
-import * as winston from "winston"
-
-import { FultonApp } from "./fulton-app";
+import * as winston from "winston";
 import { NPMLoggingLevel } from "winston";
 import { addProcessInfo } from './helpers/debug';
+import { Dict } from "./interfaces";
+
 
 /**
  * equals to winston.LoggerInstance
@@ -51,7 +51,7 @@ export let FultonLog = {
     },
 
     set level(level: FultonLoggerLevel) {
-        (winston as any).level = level;
+        (winston as Dict).level = level;
     },
 
     /**

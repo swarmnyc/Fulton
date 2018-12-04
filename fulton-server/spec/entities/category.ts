@@ -1,4 +1,4 @@
-import { entity, objectIdColumn, column, ObjectId } from "../../src/re-export";
+import { column, entity, ObjectId, objectIdColumn } from "../../src/entities";
 
 @entity("categories")
 export class Category {

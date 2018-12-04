@@ -1,8 +1,9 @@
 import * as lodash from 'lodash';
 import { Repository } from "typeorm";
+import { injectable, Request, Response } from "../../src/alias";
 import { EntityService } from '../../src/entities/entity-service';
 import { FultonApp } from '../../src/fulton-app';
-import { injectable, OperationManyResult, OperationOneResult, QueryParams, Request, Response } from "../../src/interfaces";
+import { OperationManyResult, OperationOneResult, QueryParams } from "../../src/interfaces";
 import { FultonAppOptions } from '../../src/options/fulton-app-options';
 import { EntityRouter } from '../../src/routers/entity-router';
 import { httpGet, router } from '../../src/routers/route-decorators';
@@ -51,7 +52,7 @@ class TerritoryRouter extends EntityRouter<Territory>{
     categories(req: Request, res: Response) {
         this.entityService
             .getCategories(req.queryParams)
-            .then((result)=>{
+            .then((result) => {
                 res.send(result)
             })
             .catch(this.errorHandler(res));

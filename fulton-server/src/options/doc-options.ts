@@ -1,7 +1,7 @@
-import { BaseOptions } from './options';
-import { Env } from '../helpers';
-import { Middleware, PathIdentifier } from '../interfaces';
 import { InfoObject } from '@loopback/openapi-spec';
+import { Env } from '../helpers';
+import { PathIdentifier } from '../interfaces';
+import { BaseOptions } from './options';
 
 export class DocOptions extends BaseOptions<DocOptions> {
     /**

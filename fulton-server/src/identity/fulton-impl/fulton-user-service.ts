@@ -10,7 +10,8 @@ import { ErrorCodes } from '../../common/fulton-error';
 import { IFultonApp } from '../../fulton-app';
 import { codeGenerate, numberCodeGenerate, timingSafeEqual } from '../../helpers/crypto-helper';
 import { Helper } from '../../helpers/helper';
-import { ICacheService, injectable, NotificationMessage, Request, Type } from '../../interfaces';
+import { ICacheService, NotificationMessage, Type } from '../../interfaces';
+import { injectable, Request } from '../../alias';
 import { EventKeys } from '../../keys';
 import { IdentityOptions } from '../identity-options';
 import { AccessToken, ForgotPasswordModel, ForgotPasswordNotificationModel, IFultonUser, IFultonUserClaims, IOauthProfile, IUserService, RegisterModel, UpdateLocalModel, WelcomeNotificationModel } from '../interfaces';
@@ -32,7 +33,7 @@ interface JWTPayload {
  * the runner is for multiple database engines supports
  */
 export interface IRunner {
-    convertUserId(userId: any): any;
+    convertId(userId: any): any;
     updateMetadata(metadata: EntityMetadata): void;
     addUser(user: IFultonUser): Promise<IFultonUser>
     addAccessToken(accessToken: FultonUserAccessToken): Promise<any>
@@ -70,8 +71,12 @@ export class MongoRunner implements IRunner {
         this.updateMetadata(this.tokenRepository.metadata);
     }
 
-    convertUserId(userId: any): ObjectId {
-        return new ObjectId(userId)
+    convertId(id: any): any {
+        if (id instanceof ObjectId) {
+            return id
+        }
+
+        return new ObjectId(id)
     }
 
     updateMetadata(metadata: EntityMetadata) {
@@ -95,7 +100,7 @@ export class MongoRunner implements IRunner {
     }
 
     updateUser(userId: any, fields: any): Promise<any> {
-        return this.userRepository.updateOne({ "_id": userId }, { $set: fields });
+        return this.userRepository.updateOne({ "_id": this.convertId(userId) }, { $set: fields });
     }
 
     addAccessToken(accessToken: FultonUserAccessToken): Promise<any> {
@@ -107,7 +112,7 @@ export class MongoRunner implements IRunner {
     }
 
     updateClaim(id: any, update: Partial<FultonUserClaims>): Promise<any> {
-        return this.claimRepository.updateOne({ "_id": id }, { $set: update });
+        return this.claimRepository.updateOne({ "_id": this.convertId(id) }, { $set: update });
     }
 
     countUserName(name: string): Promise<number> {
@@ -144,7 +149,7 @@ export class MongoRunner implements IRunner {
     async findUserByToken(token: string): Promise<IFultonUser> {
         let payload = JSON.parse(jws.decode(token).payload)
         let userTokens = await this.tokenRepository.find({
-            "userId": new ObjectId(payload.id),
+            "userId": this.convertId(payload.id),
             "revoked": false,
             "expiredAt": { "$gt": new Date() }
         } as any)
@@ -152,6 +157,7 @@ export class MongoRunner implements IRunner {
         let userToken = userTokens.find(userToken => {
             return timingSafeEqual(token, userToken.token)
         })
+
         if (userToken != null) {
             return this.userRepository.findOne(userToken.userId);
         } else {
@@ -426,7 +432,7 @@ export class FultonUserService implements IUserService<IFultonUser> {
             // not existed
             if (userId) {
                 // link to current user   
-                userId = this.runner.convertUserId(userId)
+                userId = this.runner.convertId(userId)
             } else {
                 // create user
                 let userInput = {

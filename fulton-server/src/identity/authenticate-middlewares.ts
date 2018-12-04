@@ -1,4 +1,4 @@
-import { Middleware, NextFunction, Request, Response } from "../interfaces";
+import { Middleware, NextFunction, Request, Response } from "../alias";
 import { AuthenticateOptions } from "./interfaces";
 
 let passport:any 

@@ -1,7 +1,6 @@
-import { column, entity, objectIdColumn } from "../../src/re-export";
-
+import { column, entity } from "../../src/entities";
+import { idColumn, relatedTo } from '../../src/entities/entity-decorators';
 import { Territory } from './territory';
-import { relatedTo, idColumn } from '../../src/entities/entity-decorators';
 
 @entity("employees")
 export class Employee {

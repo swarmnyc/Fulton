@@ -4,10 +4,13 @@ import { Employee } from '../../spec/entities/employee';
 import { Territory } from '../../spec/entities/territory';
 import { getRelatedToMetadata } from "../entities/entity-decorators-helpers";
 import { FultonApp } from '../fulton-app';
-import { IEntityService, OperationManyResult, QueryParams, Request, Response, Type, Dict } from "../interfaces";
+import { IEntityService, OperationManyResult, QueryParams, Type, Dict } from "../interfaces";
+import { Request, Response } from "../alias";
 import { FultonAppOptions } from '../options/fulton-app-options';
 import { EntityRouter, entityRouter } from '../routers';
 import { HttpTester } from "../test/http-tester";
+
+import "../extensions"
 
 class EmployeeEntityService implements IEntityService<Employee> {
     entityType: Type<Employee> = Employee
@@ -326,11 +329,11 @@ describe('jsonapi middleware', () => {
                 },
                 "relationships": {
                     "territories":
-                        {
-                            "data": [
-                                { "id": 6897, "type": "Territory" },
-                                { "id": 19713, "type": "Territory" }]
-                        }
+                    {
+                        "data": [
+                            { "id": 6897, "type": "Territory" },
+                            { "id": 19713, "type": "Territory" }]
+                    }
                 },
                 "links": { "self": "http://localhost:5000/employees/1" }
             }

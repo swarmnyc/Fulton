@@ -1,6 +1,7 @@
 import { ClientSecurity } from '../entities/client-security';
 import { EntityService } from '../entities/entity-service';
-import { ISecurityService, Request } from '../interfaces';
+import { ISecurityService } from '../interfaces';
+import { Request } from '../alias';
 import { Service } from './service';
 
 export class SecurityService extends Service implements ISecurityService {

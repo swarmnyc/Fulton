@@ -29,6 +29,12 @@ module.exports = async function (app: FultonApp): Promise<any> {
             }
         }
 
+        switch (conn.type) {
+            case "mongodb":
+                lodash.set(conn, "useNewUrlParser", true);
+                break;
+        }
+
         connOptions.push(conn);
     });
 

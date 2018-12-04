@@ -1,7 +1,6 @@
-import { Middleware, ErrorMiddleware } from "../interfaces";
-import { BaseOptions } from './options';
-import { Env } from "../helpers";
+import { ErrorMiddleware, Middleware } from "../alias";
 import { default404ErrorHandler, defaultErrorHandler } from '../middlewares/error-handlers';
+import { BaseOptions } from './options';
 
 export class ErrorHandlerOptions extends BaseOptions<ErrorHandlerOptions> {
     /**

@@ -1,5 +1,4 @@
-import { Request, Response, Middleware, NextFunction } from "../interfaces";
-import { RequestHandler } from "express"
+import { Middleware, NextFunction, Request, Response } from "../alias";
 
 /**
  * async and await wrap, if return true, will call next

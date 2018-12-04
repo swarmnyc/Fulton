@@ -1,14 +1,12 @@
-import { IStrategyOptionsWithRequest, Strategy as LocalStrategy } from 'passport-local';
-import { Request, Response } from "../interfaces";
-
-import { AccessToken } from './interfaces';
+import { Strategy as LocalStrategy } from 'passport-local';
+import { UserServiceMock } from "../../spec/helpers/user-service-mock";
 import { FultonApp } from "../fulton-app";
 import { FultonAppOptions } from "../options/fulton-app-options";
-import { GoogleStrategy } from "./strategies/google-strategy";
 import { HttpTester } from "../test/http-tester";
-import { UserServiceMock } from "../../spec/helpers/user-service-mock";
 import { defaultLoginStrategyVerifier, defaultOauthStrategyVerifierFn } from './identity-defaults';
+import { AccessToken } from './interfaces';
 import { OauthStrategyOptions } from './options/oauth-strategy-options';
+import { GoogleStrategy } from "./strategies/google-strategy";
 
 class MyApp extends FultonApp {
     protected onInit(options: FultonAppOptions): void | Promise<void> {
@@ -120,6 +118,6 @@ describe('Identity Custom Strategies', () => {
         });
 
         let result2 = await httpTester.get("/test/github/callback?code=test", null, false);
-        expect(result2.response.headers.location).toEqual("/");
+        expect(result2.body.access_token).toBeTruthy();
     });
 });

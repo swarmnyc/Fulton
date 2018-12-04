@@ -1,13 +1,12 @@
 import * as typeorm from 'typeorm';
-
-import { column, entity, injectable, objectIdColumn } from '../interfaces';
-import { entityRouter, httpGet, router } from "./route-decorators";
-
-import { EntityRouter } from "./entity-router";
+import { Repository } from "typeorm/repository/Repository";
+import { column, entity, objectIdColumn } from '../entities';
 import { EntityService } from "../entities/entity-service";
 import { FultonApp } from "../fulton-app";
+import { injectable } from '../alias';
 import { FultonAppOptions } from "../options/fulton-app-options";
-import { Repository } from "typeorm/repository/Repository";
+import { EntityRouter } from "./entity-router";
+import { entityRouter } from "./route-decorators";
 
 @entity("foods")
 class Food {
@@ -25,7 +24,7 @@ class FoodRepository extends Repository<Food>{
         super();
 
         this.metadata = {
-            target : Food
+            target: Food
         }
     }
 }
@@ -39,7 +38,7 @@ class FoodEntityService extends EntityService<Food> {
 
 @entityRouter("/A", Food)
 class EntityRouterA extends EntityRouter<Food> {
-    onInit(){
+    onInit() {
         this.metadata.actions.get("detail").middlewares = [() => { return "A" }]
     }
 }
@@ -50,7 +49,7 @@ class EntityRouterB extends EntityRouter<Food> {
         super(entityService);
     }
 
-    onInit(){
+    onInit() {
         this.metadata.actions.get("list").middlewares = [() => { return "B" }]
     }
 }
@@ -66,7 +65,7 @@ class MyApp extends FultonApp {
 describe('Fulton Entity Router', () => {
     let spy: jasmine.Spy;
     beforeAll(() => {
-        spy = spyOn(typeorm, "getRepository").and.callFake(()=>{
+        spy = spyOn(typeorm, "getRepository").and.callFake(() => {
             return new FoodRepository()
         });
     });

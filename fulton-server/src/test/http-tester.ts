@@ -1,14 +1,14 @@
 import * as request from 'request';
 import * as url from 'url';
 
-import { Headers, OptionsWithUrl, RequiredUriUrl } from 'request';
+import { Headers, OptionsWithUrl } from 'request';
 
-import { ClientResponse } from 'http';
+import { IncomingMessage } from 'http';
 import { FultonApp } from '../fulton-app';
 import { FultonLog } from '../fulton-log';
 
 export interface HttpResult {
-    response?: ClientResponse;
+    response?: IncomingMessage;
     body?: any;
 }
 

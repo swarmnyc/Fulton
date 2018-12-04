@@ -1,6 +1,7 @@
 import * as lodash from 'lodash';
+import { Middleware } from "../alias";
 import { Env } from '../helpers/env';
-import { AppMode, Middleware, Type } from '../interfaces';
+import { AppMode, Type } from '../interfaces';
 import { Options } from '../options/options';
 import { IIdentityRouter, IUser, IUserService, Strategy } from './interfaces';
 import { AccessTokenOptions } from './options/access-token-options';
@@ -16,8 +17,6 @@ import { ProfileOptions } from './options/profile-options';
 import { RegisterOptions } from './options/register-options';
 import { StrategyOptions } from './options/strategy-options';
 import { StrategySettings } from './options/strategy-settings';
-
-
 
 export class IdentityOptions {
     /**

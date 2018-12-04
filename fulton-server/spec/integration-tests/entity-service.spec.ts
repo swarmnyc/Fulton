@@ -1,9 +1,5 @@
 import { FultonApp } from '../../src/fulton-app';
-import { OperationManyResult, OperationOneResult, QueryParams, Request, Response } from "../../src/interfaces";
 import { FultonAppOptions } from '../../src/options/fulton-app-options';
-import { EntityRouter } from '../../src/routers/entity-router';
-import { entityRouter, httpGet } from '../../src/routers/route-decorators';
-import { HttpTester } from "../../src/test/http-tester";
 import { Category } from "../entities/category";
 import { Customer } from '../entities/customer';
 import { Employee } from '../entities/employee';

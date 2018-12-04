@@ -1,7 +1,7 @@
-import { entity, objectIdColumn, column } from "../../src/re-export";
-import { Territory } from './territory';
-import { IsInt, Min, Max, IsEmail, IsNotEmpty, ValidateNested, IsDefined } from "class-validator";
+import { IsDefined, IsEmail, IsInt, Max, Min, ValidateNested } from "class-validator";
 import { idColumn } from '../../src/entities/entity-decorators';
+import { column, entity } from "../../src/entities";
+import { Territory } from './territory';
 
 @entity("customers")
 export class Customer {

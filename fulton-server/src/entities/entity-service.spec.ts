@@ -1,17 +1,16 @@
-import { Connection, Repository } from 'typeorm';
-
-import { Category } from '../../spec/entities/category';
-import { Employee } from '../../spec/entities/employee';
+import { ObjectId } from 'bson';
+import { Repository } from 'typeorm';
 import { EntityMetadata } from 'typeorm/metadata/EntityMetadata';
-import { EntityService } from './entity-service';
-import { FultonApp } from '../fulton-app';
-import { FultonAppOptions } from '../options/fulton-app-options';
-import { QueryParams } from '../interfaces';
+import { Category } from '../../spec/entities/category';
+import { Customer } from '../../spec/entities/customer';
+import { Employee } from '../../spec/entities/employee';
 import { Territory } from '../../spec/entities/territory';
 import { createFakeConnection } from '../../spec/helpers/entity-helper';
-import { ObjectId } from 'bson';
-import { Customer } from '../../spec/entities/customer';
 import { FultonError, FultonStackError } from '../common/fulton-error';
+import { FultonApp } from '../fulton-app';
+import { QueryParams } from '../interfaces';
+import { FultonAppOptions } from '../options/fulton-app-options';
+import { EntityService } from './entity-service';
 import { MongoEntityRunner } from './runner/mongo-entity-runner';
 
 class MyApp extends FultonApp {
@@ -536,7 +535,7 @@ describe('entity service', () => {
                     code: "invalid_input",
                     detail: {
                         companyName: [{ code: "isDefined", message: 'companyName should not be null or undefined' }],
-                        rating: [{ code: "max", message: 'rating must be less than 10' }],
+                        rating: [{ code: "max", message: 'rating must not be greater than 10' }],
                         email: [{ code: "isEmail", message: 'email must be an email' }]
                     }
                 });

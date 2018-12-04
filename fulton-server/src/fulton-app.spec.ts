@@ -2,7 +2,7 @@ import { FultonError } from './common/fulton-error';
 import { FultonApp } from './fulton-app';
 import { FultonLog } from './fulton-log';
 import { Env, Factory } from './helpers';
-import { DiContainer, inject, injectable } from './interfaces';
+import { DiContainer, inject, injectable } from './alias';
 import { DiKeys } from './keys';
 import { FultonAppOptions } from './options/fulton-app-options';
 import { httpGet, Router, router } from './routers';

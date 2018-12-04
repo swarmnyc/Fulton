@@ -1,11 +1,8 @@
 import * as express from 'express';
-
-import { Request, Response, Middleware } from "../interfaces";
-import { getFullRouterActionMetadata, getRouterActionMetadataList } from "./route-decorators-helpers";
-
-import { Router } from "./router";
-import { router, httpPost, httpDelete, httpGet, httpPut, errorHandler } from './route-decorators';
+import { Middleware, Request, Response } from "../alias";
 import { authenticate } from '../identity/authenticate-middlewares';
+import { errorHandler, httpDelete, httpGet, httpPost, httpPut, router } from './route-decorators';
+import { Router } from "./router";
 
 let middleware: Middleware = function () {
 }

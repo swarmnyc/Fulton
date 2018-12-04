@@ -1,4 +1,6 @@
-import { FindResult, QueryParams, Type, injectable } from '../../interfaces';
+import { FindResult, QueryParams, Type } from '../../interfaces';
+import { injectable } from '../../alias';
+
 import { FultonError, FultonStackError } from "../../common";
 
 import { ColumnMetadata } from "typeorm/metadata/ColumnMetadata";

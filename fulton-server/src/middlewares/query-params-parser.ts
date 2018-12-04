@@ -1,8 +1,9 @@
-import { Request, Response, NextFunction, QueryParams, QueryColumnOptions } from "../interfaces";
+import { QueryParams, QueryColumnOptions } from "../interfaces";
+import { Request, Response, NextFunction } from "../alias";
 import { Helper } from "../helpers/helper";
 
 let optReg = /^([+-]?)(.+?)([+-]?)$/;
-function parseOptionsString(arrStr: string, positive:number, negative:number): QueryColumnOptions {
+function parseOptionsString(arrStr: string, positive: number, negative: number): QueryColumnOptions {
     let options: QueryColumnOptions;
 
     let arr = arrStr.split(",");

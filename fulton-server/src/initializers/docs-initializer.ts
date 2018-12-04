@@ -1,14 +1,13 @@
-import * as fs from 'fs';
-import * as lodash from 'lodash';
-import { column, entity, manyToMany } from '../re-export';
 import { DefinitionsObject, OpenApiSpec, OperationObject, ParameterObject, ParametersDefinitionsObject, PathItemObject, PathsObject, ResponseObject, SchemaObject } from '@loopback/openapi-spec';
-import { EntityRouter } from '../routers/entity-router';
-import { EventKeys } from '../keys';
+import * as fs from 'fs';
+import { Middleware, NextFunction, Request, Response } from '../alias';
+import { MimeTypes } from '../constants';
 import { FultonApp } from '../fulton-app';
 import { Helper } from '../helpers/helper';
-import { Middleware, NextFunction, PathIdentifier, Request, Response, Type } from '../interfaces';
-import { MimeTypes } from '../constants';
 import { OauthStrategyOptions } from '../identity/options/oauth-strategy-options';
+import { PathIdentifier, Type } from '../interfaces';
+import { EventKeys } from '../keys';
+import { EntityRouter } from '../routers/entity-router';
 
 module.exports = function (app: FultonApp) {
     let options = app.options.docs;

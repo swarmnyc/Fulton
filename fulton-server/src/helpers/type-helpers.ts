@@ -1,4 +1,5 @@
-import { DiContainer, Type, TypeIdentifier } from '../interfaces';
+import { Type, TypeIdentifier } from '../interfaces';
+import { DiContainer } from '../alias';
 import { isFunction } from "util";
 
 export interface TypeProvider extends Type {

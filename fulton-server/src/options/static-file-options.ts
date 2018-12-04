@@ -1,8 +1,8 @@
-import { BaseOptions } from './options';
-import { Env } from '../helpers';
-import { FultonLoggerLevel, FultonLoggerOptions } from '../fulton-log';
-import { Middleware, PathIdentifier } from '../interfaces';
 import { ServeStaticOptions } from 'serve-static';
+import { Middleware } from "../alias";
+import { Env } from '../helpers';
+import { PathIdentifier } from '../interfaces';
+import { BaseOptions } from './options';
 
 export class StaticFilesOptions extends BaseOptions<StaticFilesOptions> {
     /**

@@ -1,13 +1,11 @@
-import * as assert from "assert";
-import * as lodash from "lodash";
-
-import { Router as ExpressRouter, IRouterMatcher } from "express";
-import { FullRouterMetadata, getFullRouterActionMetadata } from "./route-decorators-helpers";
-import { Middleware, inject, injectable } from "../interfaces";
-
-import { DiKeys } from "../keys";
-import { IFultonApp } from '../fulton-app';
 import { OpenApiSpec } from "@loopback/openapi-spec";
+import * as assert from "assert";
+import { IRouterMatcher, Router as ExpressRouter } from "express";
+import * as lodash from "lodash";
+import { inject, injectable, Middleware } from "../alias";
+import { IFultonApp } from '../fulton-app';
+import { DiKeys } from "../keys";
+import { FullRouterMetadata, getFullRouterActionMetadata } from "./route-decorators-helpers";
 
 /**
  * Express Router Wrap

@@ -1,6 +1,6 @@
 import { EntityRouterMetadata, RouterMetadata, RouterActionMetadata } from "./route-decorators-helpers";
-import { HttpMethod, Middleware, PathIdentifier, RouterActionDocOptions, RouterDocOptions, injectable, Type } from "../interfaces";
-
+import { HttpMethod, PathIdentifier, RouterActionDocOptions, RouterDocOptions, Type } from "../interfaces";
+import { injectable, Middleware } from "../alias";
 import { Keys } from "../constants";
 import { isFunction } from "util";
 
@@ -152,7 +152,7 @@ export function httpAction(method: HttpMethod, path: PathIdentifier = "/", ...ar
                 doc = args[0];
                 middlewares = args.slice(1);
             }
-        }else{
+        } else {
             middlewares = []
         }
 

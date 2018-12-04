@@ -1,9 +1,7 @@
-import { AuthenticateOptions, LocalStrategyVerifier } from '../interfaces';
-import { BaseOptions } from '../../options/options';
-import { Env } from '../../helpers';
-import { HttpMethod, Middleware, PathIdentifier } from '../../interfaces';
-import { StrategyOptions } from './strategy-options';
 import * as lodash from 'lodash';
+import { Env } from '../../helpers';
+import { LocalStrategyVerifier } from '../interfaces';
+import { StrategyOptions } from './strategy-options';
 
 /**
  * the local strategy for login, fulton doesn't have html for login, 

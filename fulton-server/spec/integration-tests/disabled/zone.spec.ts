@@ -1,6 +1,6 @@
 import { FultonApp } from "../../../src/fulton-app";
 import { FultonAppOptions } from "../../../src/options/fulton-app-options";
-import { Request, Response } from "../../../src/interfaces";
+import { Request, Response } from "../../../src/alias";
 import { HttpTester } from "../../../src/test/http-tester";
 import { setTimeout } from "timers";
 import { Service } from '../../../src/services/service';

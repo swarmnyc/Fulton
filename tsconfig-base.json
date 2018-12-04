@@ -6,8 +6,6 @@
     "lib": ["es2017"],  
     "module": "commonjs",
     "moduleResolution": "node",
-    "noFallthroughCasesInSwitch": true,
-    "noImplicitAny": true,
     "skipLibCheck": true,
     "sourceMap": true,
     "strict": true,

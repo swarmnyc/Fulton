@@ -1,4 +1,6 @@
-import { OperationManyResult, QueryParams, IEntityService, injectable, Type } from "../../src/interfaces";
+import { OperationManyResult, QueryParams, IEntityService, Type } from "../../src/interfaces";
+import { injectable } from "../../src/alias";
+
 @injectable()
 export class FakeEntityService implements IEntityService<any> {
     entityType: Type<any>;

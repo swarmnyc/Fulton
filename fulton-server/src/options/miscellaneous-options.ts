@@ -1,7 +1,5 @@
-import { BaseOptions } from './options';
-import { CorsOptions as CorsOpts } from 'cors';
 import { Env } from '../helpers';
-import { Middleware } from '../interfaces';
+import { BaseOptions } from './options';
 
 export class MiscellaneousOptions extends BaseOptions<MiscellaneousOptions> {
     /**

@@ -1,5 +1,5 @@
 import { FultonLog } from '../fulton-log';
-import { Request } from '../interfaces';
+import { Request } from '../alias';
 import { AccessToken, IUser, OauthStrategyVerifier, StrategyVerifyDone, IOauthProfile } from './interfaces';
 import { OauthStrategyOptions } from './options/oauth-strategy-options';
 

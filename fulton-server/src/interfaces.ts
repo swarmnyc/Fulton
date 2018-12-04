@@ -1,10 +1,7 @@
 import { OpenApiSpec, PathItemObject } from "@loopback/openapi-spec";
-import "reflect-metadata";
-import { Repository } from "typeorm";
-import "./extensions";
-import { Request } from "./re-export";
 
-export * from "./re-export";
+import { Repository } from "typeorm";
+import { Request } from "./alias";
 
 export interface AbstractType<T=any> extends Function {
 }

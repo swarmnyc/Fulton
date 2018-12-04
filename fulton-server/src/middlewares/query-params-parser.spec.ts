@@ -3,7 +3,7 @@ import { FultonApp } from '../fulton-app';
 import { FultonAppOptions } from '../options/fulton-app-options';
 import { HttpTester } from '../test/http-tester';
 import { queryById } from './query-params-parser';
-import { Request, Response } from '../interfaces';
+import { Request, Response } from '../alias';
 
 class MyApp extends FultonApp {
     protected onInit(options: FultonAppOptions): void | Promise<void> {

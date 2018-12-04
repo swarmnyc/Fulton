@@ -1,10 +1,10 @@
 import * as lodash from 'lodash';
 import * as passport from 'passport';
+import { Middleware, NextFunction, Request, Response } from "../../alias";
 import { ErrorCodes, FultonError } from "../../common";
 import { IFultonApp } from "../../fulton-app";
 import { FultonLog } from "../../fulton-log";
 import { Helper } from '../../helpers';
-import { Middleware, NextFunction, Request, Response } from "../../interfaces";
 import { IdentityOptions } from "../identity-options";
 import { IIdentityRouter, IUser, OauthAuthenticateOptions } from "../interfaces";
 import { OauthStrategyOptions } from '../options/oauth-strategy-options';

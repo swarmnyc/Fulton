@@ -1,7 +1,7 @@
-import { Middleware } from "../interfaces";
-import { BaseOptions } from './options';
+import { Middleware } from "../alias";
 import { FultonLoggerLevel, FultonLoggerOptions } from '../fulton-log';
 import { Env } from "../helpers";
+import { BaseOptions } from './options';
 
 export class LoggingOptions extends BaseOptions<LoggingOptions> {
     /**

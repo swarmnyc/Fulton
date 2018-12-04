@@ -1,3 +1,5 @@
+import "../src/load-modules";
+
 import { AppLauncher } from '../src/app-launcher';
 import { ClientSecurity } from "../src/entities/client-security";
 import { FultonApp } from "../src/fulton-app";
@@ -22,6 +24,8 @@ class MyApp extends FultonApp {
         options.docs.enabled = true;
         options.cache.enabled = true;
         options.security.enabled = true;
+
+        options.notification.enabled = false;
 
         options.databases.set("default", {
             type: "mongodb",
@@ -61,16 +65,16 @@ AppLauncher.create(MyApp).launch()
 /*
 test cases:
 
-1. 
+1.
 - visit http://localhost:3000/auth/google
 - ok, if it return tokens
 
-2. 
+2.
 - post http://localhost:3000/auth/register to create user
 - visit http://localhost:3000/auth/google and put the user token on headers
 - ok, if the google identity link to the user
 
-3. 
+3.
 - visit http://localhost:3000/auth/github
 - visit http://localhost:3000/auth/facebook
 - ok, if it return tokens

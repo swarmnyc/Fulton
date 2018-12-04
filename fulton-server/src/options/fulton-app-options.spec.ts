@@ -17,6 +17,10 @@ class MyFultonApp extends FultonApp {
 }
 
 describe('Fulton App Options', () => {
+    afterAll(() => {
+        delete process.env[`PORT`]
+    })
+
     it('should init options', async () => {
         let app = new MyFultonApp();
 

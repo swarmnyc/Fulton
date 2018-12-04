@@ -1,11 +1,8 @@
-import * as lodash from 'lodash';
-
-import { Middleware, NextFunction, Request, Response } from "../interfaces";
-
-import { FultonLog } from "../fulton-log";
-import { LoggerOptions } from "winston";
 import chalk from "chalk";
-import { fultonDebug, addProcessInfo } from '../helpers/debug';
+import { LoggerOptions } from "winston";
+import { Middleware, NextFunction, Request, Response } from "../alias";
+import { FultonLog } from "../fulton-log";
+import { addProcessInfo, fultonDebug } from '../helpers/debug';
 
 // inspired from https://github.com/bithavoc/express-winston/blob/master/index.js
 
@@ -23,7 +20,7 @@ export function defaultHttpLoggerHandler(options: LoggerOptions): Middleware {
 
                 let responseTime = (new Date().getTime()) - res.locals.__startTime as number;
 
-                end.apply(thisArg, args);
+                end.apply(thisArg, args as any);
 
                 var logged = fultonDebug("http", (chalk) => {
                     let body;

@@ -1,9 +1,8 @@
-import { DiContainer, QueryParams } from "./interfaces";
-import { IUser, IUserService, OauthStrategyVerifier } from "./identity";
-
-import { IFultonApp } from "./fulton-app";
+import { DiContainer } from "./alias";
 import { RelatedToMetadata } from './entities/entity-decorators-helpers';
-import { Strategy } from "passport"
+import { IFultonApp } from "./fulton-app";
+import { IUser, IUserService, OauthStrategyVerifier } from "./identity";
+import { QueryParams } from "./interfaces";
 
 // custom types for helping development;
 declare global {
@@ -21,7 +20,7 @@ declare global {
 
     interface String {
         /**
-         * compare two strings are the same or not with case insesitive 
+         * compare two strings are the same or not with case insensitive 
          */
         same(str: any): boolean
     }
@@ -45,7 +44,7 @@ declare module "typeorm/metadata/EntityMetadata" {
 }
 
 /**
- * compare two strings are the same or not with case insesitive 
+ * compare two strings are the same or not with case insensitive 
  */
 String.prototype.same = function (str: any) {
     if (str == null) return false;

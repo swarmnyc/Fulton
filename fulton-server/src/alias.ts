@@ -1,5 +1,4 @@
 import * as express from "express";
-
 import { inject as inversifyInject, injectable as inversifyInjectable, optional as inversifyOptional, interfaces } from "inversify";
 
 /**
@@ -46,26 +45,3 @@ export interface Middleware extends express.RequestHandler { }
  * alias for express.ErrorRequestHandler
  */
 export interface ErrorMiddleware extends express.ErrorRequestHandler { }
-
-
-// rename typeorm functions
-try {
-    let { Entity, ObjectIdColumn, Column, ManyToMany, PrimaryColumn, PrimaryGeneratedColumn, ManyToOne, OneToMany, OneToOne } = require("typeorm")
-
-    module.exports.entity = Entity
-    module.exports.objectIdColumn = ObjectIdColumn
-    module.exports.column = Column
-    module.exports.manyToMany = ManyToMany
-    module.exports.primaryColumn = PrimaryColumn
-    module.exports.primaryGeneratedColumn = PrimaryGeneratedColumn
-    module.exports.manyToOne = ManyToOne
-    module.exports.oneToMany = OneToMany
-    module.exports.oneToOne = OneToOne
-} catch (error) { }
-
-// alias bson.ObjectId
-try {
-    let { ObjectId } = require("bson")
-
-    module.exports.ObjectId = ObjectId
-} catch (error) { }

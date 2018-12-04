@@ -1,7 +1,7 @@
-import { entity, objectIdColumn, column } from "../../src/re-export";
-import { Category } from './category';
-import { relatedTo, idColumn } from '../../src/entities/entity-decorators';
 import { IsNumber } from "class-validator";
+import { column, entity } from "../../src/entities";
+import { idColumn, relatedTo } from '../../src/entities/entity-decorators';
+import { Category } from './category';
 
 @entity("territories")
 export class Territory {

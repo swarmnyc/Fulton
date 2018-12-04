@@ -1,21 +1,19 @@
 import * as cluster from 'cluster';
 import * as os from 'os';
-
-import { FultonApp, IFultonApp } from './fulton-app';
-
-import { Env } from './helpers';
+import { IFultonApp } from './fulton-app';
 import { FultonLog } from './fulton-log';
-import { Type } from './interfaces';
+import { Env } from './helpers';
 import { fultonDebug } from './helpers/debug';
+import { Type } from './interfaces';
 
-export type LaunchTask<TApp> = (app: TApp) => Promise<any>
+export type LaunchTask = (app: IFultonApp) => Promise<any>
 
 /**
  * FultonApp launcher
  * 
  * you can start FultonApp http server, or just run a single task for a scheduled job
  * default tasks is "app"
- * the value can be overrided by process.env["{appName}.launch"]
+ * the value can be overrode by process.env["{appName}.launch"]
  * for example process.env["MyApp.launch"] = "taskA, app"
  */
 export class AppLauncher<TApp extends IFultonApp> {
@@ -24,8 +22,8 @@ export class AppLauncher<TApp extends IFultonApp> {
     }
 
     private app: IFultonApp;
-    private tasks: Map<string, LaunchTask<TApp>> = new Map();
-    private lognTasks: Map<string, boolean> = new Map();
+    private tasks: Map<string, LaunchTask> = new Map();
+    private longTasks: Map<string, boolean> = new Map();
 
     constructor(App: Type<IFultonApp>) {
         this.app = new App()
@@ -33,9 +31,9 @@ export class AppLauncher<TApp extends IFultonApp> {
         this.task("app", this.appTask, true);
     }
 
-    task(name: string, task: LaunchTask<TApp>, isLongTask: boolean = false): AppLauncher<TApp> {
+    task(name: string, task: LaunchTask, isLongTask: boolean = false): AppLauncher<TApp> {
         this.tasks.set(name, task);
-        this.lognTasks.set(name, isLongTask);
+        this.longTasks.set(name, isLongTask);
         return this
     }
 
@@ -76,7 +74,7 @@ export class AppLauncher<TApp extends IFultonApp> {
                     return;
                 }
 
-                longTask = longTask || this.lognTasks.get(taskName);
+                longTask = longTask || this.longTasks.get(taskName);
 
                 fultonDebug("launcher", `Starting Task : ${taskName}`)
 
@@ -102,12 +100,12 @@ export class AppLauncher<TApp extends IFultonApp> {
     private appTask(app: IFultonApp): Promise<any> {
         if (app.options.server.clusterEnabled) {
             if (cluster.isMaster) {
-                let wokerNum = app.options.server.clusterWorkerNumber || os.cpus().length;
+                let workerNum = app.options.server.clusterWorkerNumber || os.cpus().length;
 
-                fultonDebug("launcher", `Master ${process.pid} is running with ${wokerNum} worker(s)`);
+                fultonDebug("launcher", `Master ${process.pid} is running with ${workerNum} worker(s)`);
 
                 // Fork workers.
-                for (let i = 0; i < wokerNum; i++) {
+                for (let i = 0; i < workerNum; i++) {
                     cluster.fork();
                 }
 

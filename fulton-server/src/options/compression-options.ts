@@ -1,7 +1,7 @@
-import { BaseOptions } from './options';
 import { CompressionOptions as CompressionOpts } from 'compression';
+import { Middleware } from '../alias';
 import { Env } from '../helpers';
-import { Middleware } from '../interfaces';
+import { BaseOptions } from './options';
 
 export class CompressionOptions extends BaseOptions<CompressionOptions> {
     /**

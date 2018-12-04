@@ -1,7 +1,7 @@
 import { OAuth2Client } from 'google-auth-library';
 import { Strategy } from 'passport-strategy';
+import { Request } from '../../alias';
 import { fultonDebug } from '../../helpers/debug';
-import { Request } from '../../interfaces';
 import { AccessToken, IOauthProfile, IUser, OauthStrategyVerifier } from '../interfaces';
 import { GoogleStrategyOptions } from '../options/google-strategy-options';
 

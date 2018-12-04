@@ -1,6 +1,7 @@
 import * as lodash from 'lodash';
 
-import { OperationOneResult, OperationManyResult, OperationResult, QueryParams, Request, Response, injectable } from "../../src/interfaces";
+import { OperationOneResult, OperationManyResult, OperationResult, QueryParams } from "../../src/interfaces";
+import { Request, Response, injectable } from "../../src/alias";
 import { HttpResult, HttpTester } from "../../src/test/http-tester";
 
 import { Category } from '../entities/category';

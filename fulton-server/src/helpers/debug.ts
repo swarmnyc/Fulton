@@ -61,12 +61,12 @@ function fultonDebugCore(tag: string, ...args: any[]): boolean {
 
         if (cluster.isWorker) {
             // if it is worker, add pid
-            if (args.length > 0 && typeof args[0] == "string"){
+            if (args.length > 0 && typeof args[0] == "string") {
                 args[0] = addProcessInfo(args[0]);
             }
         }
 
-        logger.apply(fultonDebug, args);
+        logger.apply(fultonDebug, args as any);
 
         return true;
     }

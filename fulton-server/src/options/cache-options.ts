@@ -1,7 +1,7 @@
-import { Env, Helper } from '../helpers';
-import { Middleware, Type, ICacheServiceFactory, CacheProvider } from '../interfaces';
+import { Middleware } from "../alias";
+import { Env } from '../helpers';
+import { CacheProvider, ICacheServiceFactory, Type } from '../interfaces';
 import { BaseOptions } from './options';
-
 
 export interface CacheProviderConfigs {
     host?: string

@@ -4,7 +4,7 @@ import * as cryptoHelper from '../../src/helpers/crypto-helper';
 import { FultonUser, FultonUserAccessToken, FultonUserClaims } from "../../src/identity/fulton-impl/fulton-user";
 import { FultonUserService } from '../../src/identity/fulton-impl/fulton-user-service';
 import { AccessToken, IOauthProfile } from '../../src/identity/interfaces';
-import { Request, Response } from "../../src/interfaces";
+import { Request, Response } from "../../src/alias";
 import { FultonAppOptions } from '../../src/options/fulton-app-options';
 import { HttpResult, HttpTester } from "../../src/test/http-tester";
 import { sleep } from "../helpers/test-helper";

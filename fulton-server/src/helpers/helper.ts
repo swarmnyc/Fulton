@@ -2,7 +2,7 @@ import * as crypto from 'crypto';
 import * as escapeStringRegexp from 'escape-string-regexp';
 import * as http from 'http';
 import * as tls from 'tls';
-import { Request } from '../interfaces';
+import { Request } from '../alias';
 
 let urlJoin: ((...args: string[]) => string) = require('url-join');
 

@@ -1,4 +1,5 @@
-import { Type, column, objectIdColumn } from "../interfaces";
+import { column, objectIdColumn } from "./index";
+import { Type } from "../interfaces";
 import { RelatedToMetadata } from "./entity-decorators-helpers";
 import { Keys } from "../constants";
 import { ColumnOptions } from "typeorm";
@@ -46,7 +47,7 @@ export function idColumn(options: ColumnOptions = {}): any {
         if (!options.type) {
             options.type = type;
         }
-        
+
         // just a wrapper
         objectIdColumn(options)(target, property, descriptor);
     };

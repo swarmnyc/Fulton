@@ -1,5 +1,5 @@
-import { HttpMethod, Middleware } from '../../interfaces';
-import { OauthAuthenticateOptions, OauthStrategyVerifier, IOauthProfile } from '../interfaces';
+import { HttpMethod } from '../../interfaces';
+import { IOauthProfile, OauthAuthenticateOptions, OauthStrategyVerifier } from '../interfaces';
 import { StrategyOptions } from './strategy-options';
 
 export class OauthStrategyOptions extends StrategyOptions {

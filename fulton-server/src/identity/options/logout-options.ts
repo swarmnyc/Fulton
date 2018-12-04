@@ -1,8 +1,8 @@
-import { AuthenticateOptions } from '../interfaces';
-import { BaseOptions } from '../../options/options';
+import { Middleware } from "../../alias";
 import { Env } from '../../helpers';
-import { HttpMethod, Middleware, PathIdentifier } from '../../interfaces';
-import { IdentityNotificationOptions } from './notification-options';
+import { PathIdentifier } from '../../interfaces';
+import { BaseOptions } from '../../options/options';
+import { AuthenticateOptions } from '../interfaces';
 
 /**
  * the setting for logout to revoke access token

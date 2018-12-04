@@ -1,7 +1,7 @@
 import * as passport from 'passport';
+import { Middleware, NextFunction, Request, Response } from '../alias';
 import { IFultonApp } from '../fulton-app';
-import { Request, Type } from "../interfaces";
-import { NextFunction, Response, Middleware } from '../re-export';
+import { Type } from "../interfaces";
 import { IdentityOptions } from './identity-options';
 import { OauthStrategyOptions } from './options/oauth-strategy-options';
 

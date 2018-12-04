@@ -8,7 +8,7 @@ import { fultonDebug } from '../helpers/debug';
 import { IUser } from '../identity';
 import { ICacheService, IEntityService, OperationManyResult, QueryParams, Type } from '../interfaces';
 import { DiKeys } from '../keys';
-import { injectable } from '../re-export';
+import { injectable } from '../alias';
 import { Service } from '../services';
 import { EntityRunner } from './runner/entity-runner';
 

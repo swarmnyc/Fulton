@@ -14,8 +14,7 @@
   },
   "include": [
     "./src",
-    "./spec",
-    "./types"
+    "./spec"
   ],
   "exclude": [
     "build"

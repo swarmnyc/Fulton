@@ -6,7 +6,6 @@
   "helpers": [
     "helpers/**/*.ts"
   ],
-  "failFast": true,
-  "stopSpecOnExpectationFailure": true,
+  "oneFailurePerSpec": true,
   "random": false
 }

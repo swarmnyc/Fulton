@@ -1,14 +1,11 @@
-import * as passport from 'passport';
-
-import { Request, Response } from "../interfaces";
-import { Router, httpGet, router } from '../routers';
-import { authorized, authorizedByRole, authorizedByRoles } from './authorizes-middlewares';
-
-import { AccessToken, IFultonUser } from './interfaces';
+import { UserServiceMock } from "../../spec/helpers/user-service-mock";
+import { Request, Response } from "../alias";
 import { FultonApp } from "../fulton-app";
 import { FultonAppOptions } from "../options/fulton-app-options";
+import { httpGet, Router, router } from '../routers';
 import { HttpTester } from "../test/http-tester";
-import { UserServiceMock } from "../../spec/helpers/user-service-mock";
+import { authorizedByRole, authorizedByRoles } from './authorizes-middlewares';
+import { AccessToken, IFultonUser } from './interfaces';
 
 @router("/test")
 export class TestRouter extends Router {

@@ -1,6 +1,7 @@
 import { Env } from '../helpers';
-import { Middleware, Type } from '../interfaces';
+import { Type } from '../interfaces';
 import { BaseOptions } from './options';
+import { Middleware } from "../alias";
 
 export class SecurityOptions extends BaseOptions<SecurityOptions> {
     /**

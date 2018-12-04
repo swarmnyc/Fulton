@@ -1,5 +1,6 @@
+import { injectable, Request, Response } from '../alias';
 import { FultonError } from '../common/fulton-error';
-import { IEntityService, injectable, Request, Response } from '../interfaces';
+import { IEntityService } from '../interfaces';
 import { httpDelete, httpGet, httpPatch, httpPost, httpPut } from './route-decorators';
 import { FullEntityRouterMetadata, getFullEntityRouterActionMetadata } from './route-decorators-helpers';
 import { Router } from './router';

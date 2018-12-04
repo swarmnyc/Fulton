@@ -1,4 +1,4 @@
-import { Middleware } from "../interfaces";
+import { Middleware } from "../alias";
 import { BaseOptions } from './options';
 import { Env } from "../helpers";
 

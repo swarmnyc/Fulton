@@ -1,7 +1,8 @@
 import * as lodash from 'lodash';
+import { Middleware } from "../alias";
 import { Provider } from '../helpers';
 import { IdentityOptions } from '../identity/identity-options';
-import { AppMode, Middleware, Type } from '../interfaces';
+import { AppMode, Type } from '../interfaces';
 import { CacheOptions } from './cache-options';
 import { CompressionOptions } from './compression-options';
 import { CorsOptions } from './cors-options';

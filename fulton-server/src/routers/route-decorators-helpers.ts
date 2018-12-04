@@ -1,6 +1,6 @@
-import { Middleware, PathIdentifier, RouterActionDocOptions, RouterDocOptions, Type, AbstractType } from '../interfaces';
-
+import { Middleware } from "../alias";
 import { Keys } from "../constants";
+import { AbstractType, PathIdentifier, RouterActionDocOptions, RouterDocOptions, Type } from '../interfaces';
 
 export interface RouterMetadata {
     path: PathIdentifier,
@@ -83,7 +83,7 @@ function getAllRouterActionMetadata(target: any, type: AbstractType): AllRouterA
                     doc: metadata.doc,
                     middlewares: metadata.middlewares,
                     method: metadata.method,
-                    path : metadata.path,
+                    path: metadata.path,
                     property: metadata.property
                 });
             }

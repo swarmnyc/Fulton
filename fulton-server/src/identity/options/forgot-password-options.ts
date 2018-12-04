@@ -1,7 +1,7 @@
 import { BaseOptions } from '../../options/options';
 import { Env } from '../../helpers';
 import { IdentityNotificationOptions } from './notification-options';
-import { Middleware } from '../../interfaces';
+import { Middleware } from '../../alias';
 
 /**
  * options for forgot password

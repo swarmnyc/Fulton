@@ -33,6 +33,10 @@ declare module "passport" {
         _strategy(name: string): OAuthStrategy
     }
 
+    interface Strategy {
+        app?: IFultonApp
+    }
+
     interface OAuthStrategy {
         _verify: OauthStrategyVerifier
         userProfile(accessToken: string, done: (error: any, profile?: any) => void): void

@@ -59,7 +59,7 @@ export class GoogleStrategy extends Strategy {
                     profile = {
                         id: payload.sub,
                         email: payload.email,
-                        username: payload.name,
+                        displayName: payload.name,
                         portraitUrl: payload.picture
                     }
                 } else {
@@ -71,7 +71,6 @@ export class GoogleStrategy extends Strategy {
                 } catch (error) {
                     this.error(error);
                 }
-
             });
         } else {
             // redirect

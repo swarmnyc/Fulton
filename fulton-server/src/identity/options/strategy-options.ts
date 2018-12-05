@@ -1,6 +1,6 @@
 import { HttpMethod, PathIdentifier } from '../../interfaces';
 import { BaseOptions } from '../../options/options';
-import { AuthenticateOptions, LocalStrategyVerifier, StrategyVerifier } from '../interfaces';
+import { AuthenticateOptions, StrategyVerifier } from '../interfaces';
 
 export class StrategyOptions extends BaseOptions<StrategyOptions> {
     /**
@@ -33,7 +33,12 @@ export class StrategyOptions extends BaseOptions<StrategyOptions> {
     /**
      * the verifier is for passport strategy.
      */
-    verifier?: StrategyVerifier | LocalStrategyVerifier | any;
+    verifier?: StrategyVerifier;
+
+    /**
+     * if provided, call this function to get the verifier
+     */
+    verifierFn?: (options: StrategyOptions) => StrategyVerifier;
 
     /**
      * the options to pass to passport when call passport.authenticate()

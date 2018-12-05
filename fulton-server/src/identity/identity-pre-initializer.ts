@@ -1,27 +1,72 @@
 import { IFultonApp } from '../fulton-app';
 import { FultonIdentityRouter } from './fulton-impl/fulton-identity-router';
-import { FultonUserAccessToken, FultonUserClaims, FultonUser } from './fulton-impl/fulton-user';
 import { FultonUserService } from './fulton-impl/fulton-user-service';
-import * as passport from 'passport';
+import { defaultBearerStrategyVerifier, defaultLoginStrategyVerifier, defaultOauthStrategyVerifierFn } from "./identity-defaults";
 
 /**
  * Pre Initialize Identity
  * because entities have to be initialized first, so there are two Identity, one before database, one after middleware
  */
 module.exports = async function (app: IFultonApp) {
-    let idOptions = app.options.identity;
+    let opts = app.options.identity;
 
-    if (idOptions.userService == null) {
-        idOptions.userService = new FultonUserService()
-    } else if (idOptions.userService instanceof Function) {
-        idOptions.userService = new (idOptions.userService)();
+    if (opts.userService == null) {
+        opts.userService = new FultonUserService()
+    } else if (opts.userService instanceof Function) {
+        opts.userService = new (opts.userService)();
     }
 
-    if (idOptions.userService.entities){
-        app.options.entities.push(...idOptions.userService.entities);
+    if (opts.userService.entities){
+        app.options.entities.push(...opts.userService.entities);
     }
 
-    if (idOptions.router == null) {
-        idOptions.router = FultonIdentityRouter
+    if (opts.router == null) {
+        opts.router = FultonIdentityRouter
+    }
+
+     // init passport Strategies
+    // add pre-defined login strategy
+    if (opts.login.enabled) {
+        if (opts.login.verifier == null && opts.login.verifierFn == null) {
+            opts.login.verifier = defaultLoginStrategyVerifier
+        }
+
+        opts.addStrategy(opts.login, require("passport-local").Strategy);
+    }
+
+    // add pre-defined bearer strategy
+    if (opts.bearer.enabled) {
+        if (opts.bearer.verifier == null && opts.bearer.verifierFn == null) {
+            opts.bearer.verifier = defaultBearerStrategyVerifier
+        }
+
+        opts.addStrategy(opts.bearer, require("passport-http-bearer").Strategy);
+    }
+
+    // add pre-defined google strategy
+    if (opts.google.enabled) {
+        if (opts.google.verifier == null && opts.google.verifierFn == null) {
+            opts.google.verifierFn = defaultOauthStrategyVerifierFn
+        }
+        
+        opts.addStrategy(opts.google, require('./strategies/google-strategy').GoogleStrategy)
+    }
+
+    // add pre-defined github strategy
+    if (opts.github.enabled) {
+        if (opts.github.verifier == null && opts.github.verifierFn == null) {
+            opts.github.verifierFn = defaultOauthStrategyVerifierFn
+        }
+
+        opts.addStrategy(opts.github, require("passport-github").Strategy)
+    }
+
+    // add pre-defined github strategy
+    if (opts.facebook.enabled) {
+        if (opts.facebook.verifier == null && opts.facebook.verifierFn == null) {
+            opts.facebook.verifierFn = defaultOauthStrategyVerifierFn
+        }
+
+        opts.addStrategy(opts.facebook, require("passport-facebook").Strategy)
     }
 }

@@ -1,5 +1,5 @@
 import { HttpMethod } from '../../interfaces';
-import { IOauthProfile, OauthAuthenticateOptions, OauthStrategyVerifier } from '../interfaces';
+import { IOauthProfile, OauthAuthenticateOptions } from '../interfaces';
 import { StrategyOptions } from './strategy-options';
 
 export class OauthStrategyOptions extends StrategyOptions {
@@ -45,16 +45,6 @@ export class OauthStrategyOptions extends StrategyOptions {
      * the data to carry
      */
     state?: string;
-
-    /**
-     * verify the oauth request.
-     */
-    verifier?: OauthStrategyVerifier;
-
-    /**
-     * if provided, call this function to get the verifier
-     */
-    verifierFn?: (options: OauthStrategyOptions) => OauthStrategyVerifier;
 
     /**
      * transform the oauth profile to our user format

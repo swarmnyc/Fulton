@@ -33,7 +33,7 @@ export class GithubStrategyOptions extends OauthStrategyOptions {
             let user: IOauthProfile = {
                 id: profile.id,
                 email: email,
-                username: profile.displayName,
+                displayName: profile.displayName,
                 portraitUrl: profile._json.avatar_url
             };
 

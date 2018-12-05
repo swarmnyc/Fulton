@@ -17,7 +17,7 @@ class MyApp extends FultonApp {
         // options.server.httpsEnabled = true;
 
         options.identity.enabled = true;
-        // options.identity.google.enabled = true;
+        options.identity.google.enabled = true;
         // options.identity.github.enabled = true;
         // options.identity.facebook.enabled = true;
 

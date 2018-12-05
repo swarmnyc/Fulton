@@ -3,7 +3,6 @@ import * as passport from 'passport';
 import { IFultonApp } from '../fulton-app';
 import { EventKeys } from '../keys';
 import { defaultAuthenticate } from './authenticate-middlewares';
-import { defaultBearerStrategyVerifier, defaultLoginStrategyVerifier, defaultOauthStrategyVerifierFn } from './identity-defaults';
 import { IIdentityRouter, IUser, IUserService } from './interfaces';
 import { OauthStrategyOptions } from './options/oauth-strategy-options';
 import { StrategyOptions } from './options/strategy-options';
@@ -26,40 +25,6 @@ module.exports = async function identityInitializer(app: IFultonApp) {
 
     app.express.use(passport.initialize());
 
-    // init passport Strategies
-    // add pre-defined login strategy
-    if (opts.login.enabled) {
-        if (opts.login.verifier == null) {
-            opts.login.verifier = defaultLoginStrategyVerifier
-        }
-
-        opts.addStrategy(opts.login, require("passport-local").Strategy);
-    }
-
-    // add pre-defined bearer strategy
-    if (opts.bearer.enabled) {
-        if (opts.bearer.verifier == null) {
-            opts.bearer.verifier = defaultBearerStrategyVerifier
-        }
-
-        opts.addStrategy(opts.bearer, require("passport-http-bearer").Strategy);
-    }
-
-    // add pre-defined google strategy
-    if (opts.google.enabled) {
-        opts.addStrategy(opts.google, require('./strategies/google-strategy').GoogleStrategy)
-    }
-
-    // add pre-defined github strategy
-    if (opts.github.enabled) {
-        opts.addStrategy(opts.github, require("passport-github").Strategy)
-    }
-
-    // add pre-defined github strategy
-    if (opts.facebook.enabled) {
-        opts.addStrategy(opts.facebook, require("passport-facebook").Strategy)
-    }
-
     // first just prepare variables
     for (const settings of opts.strategies) {
         if (!settings.options.enabled) continue;
@@ -69,9 +34,9 @@ module.exports = async function identityInitializer(app: IFultonApp) {
 
         if (strategy instanceof Function) {
             options.strategyOptions = options.strategyOptions || {}
-
+            let overwrite
             if (options instanceof OauthStrategyOptions) {
-                lodash.defaults(options.strategyOptions, {
+                overwrite = {
                     clientId: options.clientId,
                     clientID: options.clientId,
                     clientSecret: options.clientSecret,
@@ -79,24 +44,24 @@ module.exports = async function identityInitializer(app: IFultonApp) {
                     callbackURL: options.callbackUrl,
                     scope: options.scope,
                     passReqToCallback: true
-                });
-
-                if (options.verifier == null) {
-                    let fn = options.verifierFn || defaultOauthStrategyVerifierFn
-
-                    options.verifier = fn(options);
-                }
+                };
             } else {
-                lodash.defaults(options.strategyOptions, {
+                overwrite = {
                     passReqToCallback: true
-                });
+                };
+            }
+
+            lodash.defaults(options.strategyOptions, overwrite);
+
+            if (options.verifierFn) {
+                options.verifier = options.verifierFn(options);
             }
 
             strategy = settings.strategy = new strategy(options.strategyOptions, options.verifier);
         }
 
         // set app, for custom strategy
-        (<any>strategy).app = app
+        strategy.app = app
 
         options.name = options.name || strategy.name;
 

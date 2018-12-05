@@ -81,8 +81,8 @@ module.exports = class GenerateCommand extends BaseCommand {
             .option("-f, --force", "override the file if it exists")
             .option("--not-open", "not open the file after it is generated")
             .option("--not-import", "not import the reference into app.ts after it is generated")
-            .option("--db-conn", "[entity] the database connection name", caporal.STRING)
-            .option("--db-engine", "[entity] the engine database", caporal.STRING);
+            .option("--db-conn <name>", "the database connection name", caporal.STRING)
+            .option("--db-engine <type>", "the engine database", caporal.STRING);
 
         return command;
     }

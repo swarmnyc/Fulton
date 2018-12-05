@@ -3,12 +3,13 @@ import { EntityService } from '../entities/entity-service';
 import { ISecurityService } from '../interfaces';
 import { Request } from '../alias';
 import { Service } from './service';
+import { OauthStrategyOptions } from "../identity/options/oauth-strategy-options";
 
 export class SecurityService extends Service implements ISecurityService {
     entityService: EntityService<ClientSecurity>
     fieldName: string
     excludes: RegExp[]
-    
+
     onInit() {
         this.entityService = this.app.getEntityService(ClientSecurity) as EntityService<ClientSecurity>
 
@@ -43,6 +44,16 @@ export class SecurityService extends Service implements ISecurityService {
             }
         }
 
+        if (this.app.options.identity.enabled) {
+            this.app.options.identity.strategies.forEach((strategy) => {
+                if (strategy.options instanceof OauthStrategyOptions) {
+                    if (strategy.options.enabled && strategy.options.callbackPath) {
+                        this.app.options.security.excludes.push(new RegExp(strategy.options.callbackPath, "i"))
+                    }
+                }
+            })
+        }
+
         this.fieldName = this.app.options.security.fieldName
         this.excludes = this.app.options.security.excludes
     }
@@ -65,7 +76,7 @@ export class SecurityService extends Service implements ISecurityService {
 
         // cache for 10 minutes if cache is enabled
         let date = new Date()
-        date = new Date(date.getFullYear(), date.getMonth(), date.getDate(), date.getHours(),  Math.floor(date.getMinutes() / 10) * 10)
+        date = new Date(date.getFullYear(), date.getMonth(), date.getDate(), date.getHours(), Math.floor(date.getMinutes() / 10) * 10)
 
         let data = await this.entityService.findOne({
             filter: {

@@ -37,14 +37,14 @@ export class ProfileOptions extends BaseOptions<ProfileOptions> {
     updateLocalIdentityPath?: string = "/auth/profile/local"
 
     /**
-     * the fields of output, the default value is ["id", "displayName", "email"]
+     * the fields that can be read, the default value is ["id", "displayName", "email"]
      */
-    readableFields?: string[] = ["id", "displayName", "email"];
+    readableFields?: string[] = ["id", "displayName", "email", "portraitUrl"];
 
     /**
-     * the fields of input, the default value is ["displayName", "email"]
+     * the fields that can be update, the default value is ["displayName", "email", "password", "portraitUrl"]
      */
-    updatableFields?: string[] = ["displayName", "email", "password"];
+    updatableFields?: string[] = ["displayName", "email", "password", "portraitUrl"];
 
     constructor(protected appName?: string, protected appMode?: string, protected type?: string) {
         super(appName, appMode);

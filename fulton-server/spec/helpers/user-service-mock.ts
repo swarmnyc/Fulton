@@ -43,7 +43,7 @@ export class UserServiceMock implements IUserService<IUser> {
     }
 
     loginByOauth(userId: string, token: AccessToken, profile: IOauthProfile): Promise<IUser> {
-        profile.displayName = profile.username
+        profile.displayName = profile.displayName
         return Promise.resolve(profile);
     }
 

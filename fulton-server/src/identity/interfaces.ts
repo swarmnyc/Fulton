@@ -15,7 +15,7 @@ export interface IUser {
 export interface IOauthProfile {
     id?: string;
     email: string;
-    username: string;
+    displayName: string;
     portraitUrl?: string;
     [key: string]: any;
 }
@@ -129,7 +129,7 @@ export interface StrategyVerifyDone {
     (error: any, user?: any, info?: any): void
 }
 
-export interface StrategyVerifier {
+export interface DefaultStrategyVerifier {
     (req: Request, ...args: any[]): void;
     (req: Request, done: StrategyVerifyDone): void;
 }
@@ -145,6 +145,8 @@ export interface TokenStrategyVerifier {
 export interface OauthStrategyVerifier {
     (req: Request, access_token: string, refresh_token: string, profile: any, done: StrategyVerifyDone): void;
 }
+
+export type StrategyVerifier = DefaultStrategyVerifier | LocalStrategyVerifier | TokenStrategyVerifier | OauthStrategyVerifier
 
 export interface ForgotPasswordModel {
     token: string,

@@ -41,10 +41,10 @@ export interface IRunner {
     updateUser(userId: any, fields: any): Promise<any>;
     updateClaim(claimId: any, update: Partial<FultonUserClaims>): Promise<any>
     findUserById(userId: any): Promise<IFultonUser>;
-    findUserByOauth(type: string, sourceUserId: string): Promise<IFultonUser>;
+    findUserByOauth(type: string, sourceId: string): Promise<IFultonUser>;
     findUserByToken(token: string): Promise<IFultonUser>;
     findClaims(user: IFultonUser): Promise<FultonUserClaims[]>
-    findClaim(type: string, sourceUserId: string): Promise<FultonUserClaims>;
+    findClaim(type: string, sourceId: string): Promise<FultonUserClaims>;
     findClaimByLocal(usernameOrEmail: string): Promise<FultonUserClaims>;
     findClaimByResetPasswordToken(token: string, code: string): Promise<FultonUserClaims>;
     countUserName(name: string): Promise<number>;
@@ -133,10 +133,10 @@ export class MongoRunner implements IRunner {
         return this.userRepository.findOne(userId);
     }
 
-    async findUserByOauth(type: string, sourceUserId: string): Promise<IFultonUser> {
+    async findUserByOauth(type: string, sourceId: string): Promise<IFultonUser> {
         var claim = await this.claimRepository.findOne({
             "type": type,
-            "sourceUserId": sourceUserId
+            "sourceId": sourceId
         })
 
         if (claim) {
@@ -172,16 +172,16 @@ export class MongoRunner implements IRunner {
         });
     }
 
-    findClaim(type: string, sourceUserId: string): Promise<FultonUserClaims> {
+    findClaim(type: string, sourceId: string): Promise<FultonUserClaims> {
         if (type == "local") {
             return this.claimRepository.findOne({
                 "type": type,
-                "userId": sourceUserId
+                "userId": sourceId
             });
         } else {
             return this.claimRepository.findOne({
                 "type": type,
-                "sourceUserId": sourceUserId
+                "sourceId": sourceId
             });
         }
     }
@@ -435,18 +435,11 @@ export class FultonUserService implements IUserService<IFultonUser> {
                 userId = this.runner.convertId(userId)
             } else {
                 // create user
-                let userInput = {
-                    displayName: profile.username,
-                    portraitUrl: profile.portraitUrl
-                } as IFultonUser
+                let input: IFultonUser = lodash.pick(profile, this.options.profile.updatableFields)
 
-                if (profile.email) {
-                    userInput.email = profile.email
-                }
+                input.registeredAt = new Date()
 
-                userInput.registeredAt = new Date()
-
-                user = await this.runner.addUser(userInput);
+                user = await this.runner.addUser(input);
                 userId = user.id;
             }
 
@@ -455,9 +448,9 @@ export class FultonUserService implements IUserService<IFultonUser> {
                 userId: userId,
                 accessToken: token.access_token,
                 refreshToken: token.refresh_token,
-                username: profile.username,
+                displayName: profile.displayName,
                 email: profile.email,
-                sourceUserId: profile.id
+                sourceId: profile.id
             })
         }
 

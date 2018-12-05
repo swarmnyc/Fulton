@@ -47,7 +47,7 @@ export class FacebookStrategyOptions extends OauthStrategyOptions {
             let user: IOauthProfile = {
                 id: profile.id,
                 email: email,
-                username: profile.displayName,
+                displayName: profile.displayName,
                 portraitUrl: portraitUrl
             };
 

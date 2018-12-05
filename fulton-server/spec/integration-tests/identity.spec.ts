@@ -201,7 +201,7 @@ describe('Identity Integration Test', () => {
         }
         let profile: IOauthProfile = {
             id: "test",
-            username: "test",
+            displayName: "test",
             email: "test@test.com"
         }
 
@@ -233,7 +233,7 @@ describe('Identity Integration Test', () => {
         }
         let profile: IOauthProfile = {
             id: "test",
-            username: "test",
+            displayName: "test",
             email: "test@test.com"
         }
 
@@ -260,7 +260,7 @@ describe('Identity Integration Test', () => {
 
         let profile: IOauthProfile = {
             id: "test",
-            username: "test",
+            displayName: "test",
             email: "test@test.com"
         }
 

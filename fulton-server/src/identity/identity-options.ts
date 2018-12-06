@@ -31,16 +31,22 @@ export class IdentityOptions {
     databaseConnectionName: string;
 
     /**
-     * the instance or type of UserService
+     * the type of User Entity
+     * the default value is FultonUser
+     * 
+     * if the fields of your user schema is more than FultonUser, you have to custom User Entity;
+     */
+    userEntity: Type<IUser>;
+
+    /**
+     * the type of UserService
      * the default value is FultonUserService
      * it can be used like
      * `req.userService`
      * 
-     * if your user schema is like FultonUser and auth strategies is
-     * username-password and bearer token, then you don't need to change this value,
-     * otherwise you have to custom your user service;
+     * you can custom user service to change the behaviors;
      */
-    userService: Type<IUserService<IUser>> | IUserService<IUser>;
+    userService: Type<IUserService<IUser>>;
 
     /**
      * the instance or type of IdentityRouter

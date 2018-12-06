@@ -2,6 +2,7 @@ import { IFultonApp } from '../fulton-app';
 import { FultonIdentityRouter } from './fulton-impl/fulton-identity-router';
 import { FultonUserService } from './fulton-impl/fulton-user-service';
 import { defaultBearerStrategyVerifier, defaultLoginStrategyVerifier, defaultOauthStrategyVerifierFn } from "./identity-defaults";
+import { FultonUserClaims, FultonUserAccessToken, FultonUser } from "./fulton-impl/fulton-user";
 
 /**
  * Pre Initialize Identity
@@ -11,20 +12,21 @@ module.exports = async function (app: IFultonApp) {
     let opts = app.options.identity;
 
     if (opts.userService == null) {
-        opts.userService = new FultonUserService()
-    } else if (opts.userService instanceof Function) {
-        opts.userService = new (opts.userService)();
-    }
+        opts.userService = FultonUserService
 
-    if (opts.userService.entities){
-        app.options.entities.push(...opts.userService.entities);
+        // add default entities, typeorm needs them to works
+        if (opts.userEntity == null) {
+            opts.userEntity = FultonUser
+        }
+
+        app.options.entities.push(opts.userEntity, FultonUserClaims, FultonUserAccessToken);
     }
 
     if (opts.router == null) {
         opts.router = FultonIdentityRouter
     }
 
-     // init passport Strategies
+    // init passport Strategies
     // add pre-defined login strategy
     if (opts.login.enabled) {
         if (opts.login.verifier == null && opts.login.verifierFn == null) {
@@ -48,7 +50,7 @@ module.exports = async function (app: IFultonApp) {
         if (opts.google.verifier == null && opts.google.verifierFn == null) {
             opts.google.verifierFn = defaultOauthStrategyVerifierFn
         }
-        
+
         opts.addStrategy(opts.google, require('./strategies/google-strategy').GoogleStrategy)
     }
 

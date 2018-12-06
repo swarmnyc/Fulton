@@ -19,7 +19,7 @@ class MyApp extends FultonApp {
         });
 
         options.identity.login.lockTime = 500
-        
+
         options.identity.forgotPassword.requireLimit = 3
         options.identity.forgotPassword.requireLockTime = 500
 
@@ -150,9 +150,9 @@ describe('Identity Integration Test', () => {
                         username: "Test",
                         password: "test123"
                     });
-            
+
                     expect(result.response.statusCode).toEqual(200);
-                    expect(result.body.access_token).toBeTruthy();    
+                    expect(result.body.access_token).toBeTruthy();
 
                     resolve()
 
@@ -456,7 +456,7 @@ describe('Identity Integration Test', () => {
 
         expect(result.response.statusCode).toEqual(200);
 
-        result = await httpTester.post("/auth/profile/local", { username: "test2"});
+        result = await httpTester.post("/auth/profile/local", { username: "test2" });
 
         expect(result.response.statusCode).toEqual(400);
     });
@@ -491,7 +491,7 @@ describe('Identity Integration Test', () => {
 
                 try {
                     let result = await httpTester.post("/auth/forgot-password", { username: "test" });
-            
+
                     expect(result.response.statusCode).toEqual(200);
 
                     resolve()

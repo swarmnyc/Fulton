@@ -31,7 +31,7 @@ export class TestRouter2 extends Router {
 class MyApp extends FultonApp {
     protected onInit(options: FultonAppOptions): void | Promise<void> {
         this.options.identity.enabled = true;
-        this.options.identity.userService = new UserServiceMock(this);
+        this.options.identity.userService = UserServiceMock;
 
         this.options.identity.google.enabled = true;
         this.options.identity.google.clientId = "test";

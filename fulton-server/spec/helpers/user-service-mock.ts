@@ -6,14 +6,13 @@ import { AccessToken, IFultonUserClaims, IOauthProfile, IUserService, RegisterMo
 import { Type } from "../../src/interfaces";
 
 export class UserServiceMock implements IUserService<IUser> {
-    currentUser: FultonUser;
-    entities: Type[] = []
-
-    constructor(public app: FultonApp) {
-    }
+    app: FultonApp
 
     init() {
+    }
 
+    getCurrentUser(): IUser {
+        throw new Error("Method not implemented.");
     }
 
     login(username: string, password: string): Promise<IUser> {
@@ -103,10 +102,6 @@ export class UserServiceMock implements IUserService<IUser> {
         throw new Error("Method not implemented.");
     }
 
-    getUserClaims(user: FultonUser): Promise<IFultonUserClaims[]> {
-        throw new Error("Method not implemented.");
-    }
-
     revokeAccessToken(userId: string, token: string): Promise<void> {
         throw new Error("Method not implemented.");
     }
@@ -119,6 +114,14 @@ export class UserServiceMock implements IUserService<IUser> {
         throw new Error("Method not implemented.");
     }
     updateLocalClaim(userId: any, input: any): Promise<void> {
+        throw new Error("Method not implemented.");
+    }
+
+    getUser(userId: any): Promise<FultonUser> {
+        throw new Error("Method not implemented.");
+    }
+
+    getUserClaims(userId: any): Promise<IFultonUserClaims[]> {
         throw new Error("Method not implemented.");
     }
 }

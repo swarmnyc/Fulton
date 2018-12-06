@@ -43,7 +43,7 @@ export interface IRunner {
     findUserById(userId: any): Promise<IFultonUser>;
     findUserByOauth(type: string, sourceId: string): Promise<IFultonUser>;
     findUserByToken(token: string): Promise<IFultonUser>;
-    findClaims(user: IFultonUser): Promise<FultonUserClaims[]>
+    findClaims(userId: any): Promise<FultonUserClaims[]>
     findClaim(type: string, sourceId: string): Promise<FultonUserClaims>;
     findClaimByLocal(usernameOrEmail: string): Promise<FultonUserClaims>;
     findClaimByResetPasswordToken(token: string, code: string): Promise<FultonUserClaims>;
@@ -62,7 +62,7 @@ export class MongoRunner implements IRunner {
     constructor(private app: IFultonApp, private manager: MongoEntityManager) {
         this.options = app.options.identity;
 
-        this.userRepository = manager.getMongoRepository(FultonUser) as SuppressChecking;
+        this.userRepository = manager.getMongoRepository(this.options.userEntity) as SuppressChecking;
         this.claimRepository = manager.getMongoRepository(FultonUserClaims) as SuppressChecking;
         this.tokenRepository = manager.getMongoRepository(FultonUserAccessToken) as SuppressChecking;
 
@@ -166,9 +166,9 @@ export class MongoRunner implements IRunner {
 
     }
 
-    findClaims(user: IFultonUser): Promise<FultonUserClaims[]> {
+    findClaims(userId: any): Promise<FultonUserClaims[]> {
         return this.claimRepository.find({
-            "userId": user.id
+            "userId": this.convertId(userId)
         });
     }
 
@@ -229,21 +229,17 @@ export class FultonUserService implements IUserService<IFultonUser> {
     private CacheMaxAge = 30_000 // only cache for 3 minute
 
     protected runner: IRunner;
-    protected app: IFultonApp;
 
     // only cache token to user, if cache is enabled
     protected cacheService: ICacheService;
 
-    // TODO: make types replace able
-    entities: Type[] = [FultonUser, FultonUserAccessToken, FultonUserClaims];
-
-    init(app: IFultonApp) {
-        this.app = app;
-
-        let manager = getManager(app.options.identity.databaseConnectionName);
+    app: IFultonApp;
+    
+    init() {
+        let manager = getManager(this.app.options.identity.databaseConnectionName);
 
         if (manager instanceof MongoEntityManager) {
-            this.runner = new MongoRunner(app, manager);
+            this.runner = new MongoRunner(this.app, manager);
         } else {
             //this.runner = new SqlRunner(manager)
         }
@@ -255,7 +251,7 @@ export class FultonUserService implements IUserService<IFultonUser> {
         return this.app.options.identity;
     }
 
-    get currentUser(): IFultonUser {
+    getCurrentUser(): IFultonUser {
         if (this.app.options.miscellaneous.zoneEnabled) {
             let req: Request = Zone.current.get("req");
             if (req) {
@@ -435,11 +431,9 @@ export class FultonUserService implements IUserService<IFultonUser> {
                 userId = this.runner.convertId(userId)
             } else {
                 // create user
-                let input: IFultonUser = lodash.pick(profile, this.options.profile.updatableFields)
+                profile.registeredAt = new Date()
 
-                input.registeredAt = new Date()
-
-                user = await this.runner.addUser(input);
+                user = await this.runner.addUser(profile);
                 userId = user.id;
             }
 
@@ -662,8 +656,12 @@ export class FultonUserService implements IUserService<IFultonUser> {
         throw new Error("Method not implemented.");
     }
 
-    getUserClaims(user: IFultonUser): Promise<IFultonUserClaims[]> {
-        return this.runner.findClaims(user);
+    getUser(userId: any): Promise<IFultonUser> {
+        return this.runner.findUserById(userId);
+    }
+
+    getUserClaims(userId: any): Promise<IFultonUserClaims[]> {
+        return this.runner.findClaims(userId);
     }
 
     revokeAccessToken(userId: string, token: string): Promise<any> {

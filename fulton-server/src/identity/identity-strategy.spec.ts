@@ -11,7 +11,7 @@ import { GoogleStrategy } from "./strategies/google-strategy";
 class MyApp extends FultonApp {
     protected onInit(options: FultonAppOptions): void | Promise<void> {
         this.options.identity.enabled = true;
-        this.options.identity.userService = new UserServiceMock(this);
+        this.options.identity.userService = UserServiceMock;
         this.options.identity.login.enabled = false;
         this.options.identity.register.enabled = false;
         this.options.identity.bearer.enabled = false;

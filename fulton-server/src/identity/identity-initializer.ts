@@ -11,10 +11,10 @@ module.exports = async function identityInitializer(app: IFultonApp) {
     let opts = app.options.identity;
 
     // assign userService
-    app.userService = opts.userService as IUserService<IUser>
+    app.userService = new opts.userService()
     app.express.request.constructor.prototype.userService = app.userService;
-
-    app.userService.init(app)
+    app.userService.app = app
+    app.userService.init()
 
     let router: IIdentityRouter;
     if (opts.router instanceof Function) {

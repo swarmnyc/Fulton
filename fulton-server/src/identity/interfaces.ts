@@ -14,8 +14,8 @@ export interface IUser {
 
 export interface IOauthProfile {
     id?: string;
-    email: string;
-    displayName: string;
+    email?: string;
+    displayName?: string;
     portraitUrl?: string;
     [key: string]: any;
 }
@@ -70,13 +70,9 @@ export interface IIdentityRouter {
 }
 
 export interface IUserService<T extends IUser> {
-    currentUser: IUser;
+    app: IFultonApp;
 
-    /**
-     * the types of entities for user 
-     */
-    entities: Type[];
-    init(app: IFultonApp): void;
+    init(): void;
 
     login(username: string, password: string): Promise<T>;
     /**
@@ -94,7 +90,9 @@ export interface IUserService<T extends IUser> {
     forgotPassword(usernameOrEmail: string): Promise<ForgotPasswordModel>;
     resetPassword(token: string, code: string, password: string): Promise<void>;
     verifyResetPassword(token: string, code: string): Promise<void>;
-    getUserClaims(user: T): Promise<IFultonUserClaims[]>;
+    getUser(userId: any): Promise<T>;
+    getUserClaims(userId: any): Promise<IFultonUserClaims[]>;
+    getCurrentUser(): T;
     revokeAccessToken(userId: string, token: string): Promise<void>;
     revokeAllAccessTokens(userId: string): Promise<void>;
     //refreshAccessToken(token: string): Promise<AccessToken>;

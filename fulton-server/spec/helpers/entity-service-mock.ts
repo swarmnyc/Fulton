@@ -2,7 +2,7 @@ import { OperationManyResult, QueryParams, IEntityService, Type } from "../../sr
 import { injectable } from "../../src/alias";
 
 @injectable()
-export class FakeEntityService implements IEntityService<any> {
+export class EntityServiceMock implements IEntityService<any> {
     entityType: Type<any>;
     find(queryParams: QueryParams): Promise<OperationManyResult<any>> {
         throw new Error("Method not implemented.");

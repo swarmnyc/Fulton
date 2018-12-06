@@ -14,9 +14,9 @@ export abstract class Service {
     onInit(): void {
     }
 
-    get currentUser(): IUser {
+    getCurrentUser(): IUser {
         if (this.app && this.app.userService) {
-            return this.app.userService.currentUser
+            return this.app.userService.getCurrentUser()
         }
     }
 }

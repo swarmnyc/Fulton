@@ -15,9 +15,9 @@ export interface HttpResult {
 export class HttpTester {
     private headers: Headers;
 
-    constructor(private app: FultonApp) {
+    constructor(private app: FultonApp, zoneEnabled = false) {
         FultonLog.level = "error";
-        this.app.options.miscellaneous.zoneEnabled = false;
+        this.app.options.miscellaneous.zoneEnabled = zoneEnabled;
         this.app.options.server.httpPort = 5000;
         this.app.options.logging.httpLoggerEnabled = false;
         this.headers = {};

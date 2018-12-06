@@ -6,6 +6,8 @@ import { setTimeout } from "timers";
 import { Service } from '../../../src/services/service';
 import { router, httpGet } from '../../../src/routers/route-decorators';
 import { Router } from '../../../src/routers/router';
+import { FultonError } from "../../../src/main";
+import { sleep } from "../../helpers/test-helper";
 
 class TestService extends Service {
     getId() {
@@ -26,7 +28,7 @@ class TestRouter extends Router {
     @httpGet()
     async get(req: Request, res: Response) {
         this.service.setId(req.query.id)
-        
+
         await this.delay(req.query.id).then(() => {
             console.log(`id:${req.query.id}, then, zone:${Zone.current.name}`);
         });
@@ -50,33 +52,51 @@ class TestRouter extends Router {
         });
 
     }
+
+    @httpGet("/sync-error")
+    syncError(req: Request, res: Response) {
+        throw new FultonError("sync-error")
+    }
+
+    @httpGet("/promise-error")
+    promiseError(req: Request, res: Response) {
+        new Promise(() => {
+            throw new FultonError("promise-error")
+        })
+    }
+
+    @httpGet("/async-error")
+    async asyncError(req: Request, res: Response) {
+        await sleep(1)
+
+        throw new FultonError("async-error")
+    }
+
+    @httpGet("/zone")
+    async zone(req: Request, res: Response) {
+        if ((<any>global)["Zone"]) {
+            res.sendStatus(400);
+        } else {
+            res.sendStatus(200);
+        }
+    }
 }
 
 class MyApp extends FultonApp {
-    constructor(private userZone:boolean){
+    constructor() {
         super()
     }
 
     protected onInit(options: FultonAppOptions): void | Promise<void> {
         options.services.push(TestService);
         options.routers.push(TestRouter);
-
-        options.miscellaneous.zoneEnabled = this.userZone;
-
-        this.express.use("/test", (req, res) => {
-            if ((<any>global)["Zone"]) {
-                res.sendStatus(400);
-            } else {
-                res.sendStatus(200);
-            }
-        })
     }
 }
 
 xdescribe('Zone', () => {
     it('should works', async () => {
-        let app = new MyApp(true);
-        let httpTester = new HttpTester(app);
+        let app = new MyApp();
+        let httpTester = new HttpTester(app, true);
         await httpTester.start();
         let task1 = httpTester.get("/test?id=1");
         let task2 = httpTester.get("/test?id=2");
@@ -93,14 +113,49 @@ xdescribe('Zone', () => {
         await httpTester.stop();
     });
 
+    it('should catch errors', async () => {
+        let app = new MyApp();
+        let httpTester = new HttpTester(app, true);
+        await httpTester.start();
+        let syncError = await httpTester.get("/test/sync-error");
+        let promiseError = await httpTester.get("/test/promise-error");
+        let asyncError = await httpTester.get("/test/async-error");
+
+
+        expect(syncError.body.error.code).toEqual("sync-error")
+        expect(promiseError.body.error.code).toEqual("promise-error")
+        expect(asyncError.body.error.code).toEqual("async-error")
+
+        await httpTester.stop();
+    });
+});
+
+xdescribe('No Zone', () => {
+    it('should catch errors', async () => {
+        // TODO: because Promise and async error is caught by zone.
+        // Have to fine a way to handle it
+        let app = new MyApp();
+        let httpTester = new HttpTester(app, false);
+        await httpTester.start();
+        let syncError = await httpTester.get("/test/sync-error");
+        let promiseError = await httpTester.get("/test/promise-error");
+        let asyncError = await httpTester.get("/test/async-error");
+
+        expect(syncError.body.error.code).toEqual("sync-error")
+        expect(promiseError.body.error.code).toEqual("promise-error")
+        expect(asyncError.body.error.code).toEqual("async-error")
+
+        await httpTester.stop();
+    });
+
     it('should not load zone.js', async () => {
         // this test have to run only itself, otherwise other tests will road zone.js before it.
-        let app = new MyApp(false);
-        let httpTester = new HttpTester(app);
+        let app = new MyApp();
+        let httpTester = new HttpTester(app, false);
         await httpTester.start();
 
-        let result = await httpTester.get("/test");
-        
+        let result = await httpTester.get("/test/zone");
+
         expect(result.response.statusCode).toEqual(200);
 
         await httpTester.stop();

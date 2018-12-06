@@ -118,10 +118,6 @@ export class EntityService<TEntity> extends Service implements IEntityService<TE
         return this.mainRepository.target as Type;
     }
 
-    get currentUser(): IUser {
-        return this.app.userService.currentUser;
-    }
-
     protected getRepository<T>(entity: Type<T>, connectionName?: string): Repository<T> {
         return getRepository(entity, connectionName)
     }

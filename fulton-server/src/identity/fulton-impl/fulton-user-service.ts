@@ -431,9 +431,11 @@ export class FultonUserService implements IUserService<IFultonUser> {
                 userId = this.runner.convertId(userId)
             } else {
                 // create user
-                profile.registeredAt = new Date()
+                let input = lodash.clone<IOauthProfile>(profile)
+                delete input.id 
+                input.registeredAt = new Date()
 
-                user = await this.runner.addUser(profile);
+                user = await this.runner.addUser(input);
                 userId = user.id;
             }
 

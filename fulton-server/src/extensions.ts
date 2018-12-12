@@ -6,18 +6,6 @@ import { QueryParams } from "./interfaces";
 
 // custom types for helping development;
 declare global {
-    namespace Express {
-        interface Request {
-            fultonApp?: IFultonApp;
-            userService?: IUserService<IUser>;
-            container?: DiContainer;
-            queryParams?: QueryParams;
-        }
-
-        interface Response {
-        }
-    }
-
     interface String {
         /**
          * compare two strings are the same or not with case insensitive 

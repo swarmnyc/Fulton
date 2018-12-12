@@ -1,5 +1,8 @@
 import * as express from "express";
 import { inject as inversifyInject, injectable as inversifyInjectable, optional as inversifyOptional, interfaces } from "inversify";
+import { IUser, IUserService } from "./identity/interfaces";
+import { IFultonApp } from "./fulton-app";
+import { QueryParams } from "./interfaces";
 
 /**
  * alias for inversify.injectable
@@ -29,7 +32,13 @@ export interface NextFunction extends express.NextFunction { }
 /**
  * extends express.Request
  */
-export interface Request extends express.Request { }
+export interface Request extends express.Request {
+    user?: IUser
+    fultonApp?: IFultonApp;
+    userService?: IUserService<IUser>;
+    container?: DiContainer;
+    queryParams?: QueryParams;
+}
 
 /**
  * extends express.Response

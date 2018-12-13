@@ -127,7 +127,11 @@ export class FultonError implements Error {
         return this.error.detail != null;
     }
 
-    get message():string{
+    get code(): string {
+        return this.error.code
+    }
+
+    get message(): string {
         return JSON.stringify(this)
     }
 

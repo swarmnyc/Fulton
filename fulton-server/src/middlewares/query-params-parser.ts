@@ -27,7 +27,7 @@ function parseOptionsString(arrStr: string, positive: number, negative: number):
 
 function parseOptionsObject(input: any): QueryColumnOptions {
     let options: QueryColumnOptions = {};
-    for (const name of Object.getOwnPropertyNames(input)) {
+    Object.getOwnPropertyNames(input).forEach((name) => {
         let value = input[name];
 
         if (typeof value == "string") {
@@ -37,7 +37,7 @@ function parseOptionsObject(input: any): QueryColumnOptions {
             }
 
         }
-    }
+    })
 
     return options;
 }
@@ -95,7 +95,8 @@ export function queryParamsParser(req: Request, res: Response, next: NextFunctio
         params = {
             needAdjust: true
         };
-        for (const name of Object.getOwnPropertyNames(req.query)) {
+
+        Object.getOwnPropertyNames(req.query).forEach((name) => {
             let value = req.query[name];
 
             // query params does not parae other values
@@ -105,28 +106,28 @@ export function queryParamsParser(req: Request, res: Response, next: NextFunctio
                     if (typeof value == "object") {
                         params.filter = params.filter ? Object.assign(params.filter, value) : value;
                     }
-                    continue;
+                    break;
                 case "sort":
                     if (typeof value == "string") {
                         params.sort = parseOptionsString(value, 1, -1);
                     } else if (typeof value == "object") {
                         params.sort = parseOptionsObject(value);
                     }
-                    continue;
+                    break;
                 case "projection":
                     if (typeof value == "string") {
                         params.projection = parseOptionsString(value, 1, 0);
                     } else if (typeof value == "object") {
                         params.projection = parseOptionsObject(value);
                     }
-                    continue;
+                    break;
                 case "select":
                     if (typeof value == "string") {
                         params.select = parseString(value);
                     } else if (value instanceof Array) {
                         params.select = parseArray(value);
                     }
-                    continue;
+                    break;
                 case "include":
                 case "includes":
                     if (typeof value == "string") {
@@ -134,7 +135,7 @@ export function queryParamsParser(req: Request, res: Response, next: NextFunctio
                     } else if (value instanceof Array) {
                         params.includes = parseArray(value);
                     }
-                    continue;
+                    break;
                 case "pagination":
                     if (typeof value == "object") {
                         params.pagination = {
@@ -142,9 +143,9 @@ export function queryParamsParser(req: Request, res: Response, next: NextFunctio
                             size: Helper.getInt(value.size)
                         }
                     }
-                    continue;
+                    break;
             }
-        }
+        })
     } else if (req.body && typeof req.body.query == "object") {
         params = {
             filter: req.body.query.filter,

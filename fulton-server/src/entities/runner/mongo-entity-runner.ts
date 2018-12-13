@@ -124,11 +124,13 @@ export class MongoEntityRunner extends EntityRunner {
     }
 
     protected updateCore<T extends any>(repository: MongoRepository<T>, id: any, update: T): Promise<any> {
+        // no id inside of update
         delete update[repository.metadata.objectIdColumn.propertyName];
 
-        return repository.updateOne({ _id: id }, this.convertUpdate(update)).then(() => {
-            update[repository.metadata.objectIdColumn.propertyName] = id
-            return update;
+        return repository.updateOne({ _id: id }, this.convertUpdate(update)).then((result) => {
+            if (result.modifiedCount == 0) {
+                return Promise.reject(new FultonError("unmatched_id"))
+            }
         })
     }
 
@@ -376,11 +378,17 @@ export class MongoEntityRunner extends EntityRunner {
     }
 
     private convertUpdate(input: any): any {
-        // mongo root element should be $set, $unset or $rename
-        if (input["$set"] || input["$unset"] || input["$rename"]) {
-            return input
-        } else {
-            return { $set: input }
-        }
+        Object.getOwnPropertyNames(input).forEach((name)=>{
+            if (!name.startsWith("$")) {
+                if (input["$set"] == null) {
+                    input["$set"] = {}
+                }
+
+                input["$set"][name] = input[name]
+                delete input[name]
+            }
+        })
+
+        return input
     }
 }

@@ -128,13 +128,13 @@ function initConverter(app: FultonApp): JsonApiConverter {
         }
 
         //TODO: relationships for SQL
-        for (const propertyName of Object.getOwnPropertyNames(relatedToMetadata)) {
+        Object.getOwnPropertyNames(relatedToMetadata).forEach((propertyName)=>{
             let refType = relatedToMetadata[propertyName];
 
             options.relationships[propertyName] = {
                 type: refType.name
             }
-        }
+        })
 
         // for router path
         let entityRouter = app.routers.find((router: Router) => {

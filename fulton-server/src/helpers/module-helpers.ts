@@ -50,13 +50,13 @@ export function defaultClassLoader<T>(type: AbstractType<T>): FultonClassLoader<
             let modules = await loadModules(dir, recursive);
 
             for (let routerModule of modules) {
-                for (let name of Object.getOwnPropertyNames(routerModule)) {
+                Object.getOwnPropertyNames(routerModule).forEach((name) => {
                     let routerClass = routerModule[name];
 
                     if (routerClass.prototype instanceof type) {
                         routers.push(routerClass);
                     }
-                }
+                })
             }
         }
 

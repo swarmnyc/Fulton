@@ -215,12 +215,12 @@ export class FultonAppOptions {
      * init options and load values from environment
      */
     init() {
-        for (const name of Object.getOwnPropertyNames(this)) {
+        Object.getOwnPropertyNames(this).forEach((name) => {
             var prop: Options = lodash.get(this, name);
 
             if (prop && prop.init) {
                 prop.init();
             }
-        }
+        })
     }
 }

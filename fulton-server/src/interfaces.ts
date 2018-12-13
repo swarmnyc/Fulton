@@ -55,6 +55,26 @@ export interface FindResult<TEntity> {
     total: number
 }
 
+/** https://docs.mongodb.com/manual/reference/operator/update */
+export type UpdateQuery<T> = {
+    $inc?: { [P in keyof T]?: number } | { [key: string]: number };
+    $min?: { [P in keyof T]?: number } | { [key: string]: number };
+    $max?: { [P in keyof T]?: number } | { [key: string]: number };
+    $mul?: { [P in keyof T]?: number } | { [key: string]: number };
+    $set?: Partial<T> | { [key: string]: any };
+    $setOnInsert?: Partial<T> | { [key: string]: any };
+    $unset?: { [P in keyof T]?: 1 | -1 } | { [key: string]: 1 | -1 };
+    $rename?: { [key: string]: keyof T } | { [key: string]: string };
+    $currentDate?: { [P in keyof T]?: (true | { $type: 'date' | 'timestamp' }) } | { [key: string]: (true | { $type: 'date' | 'timestamp' }) };
+    $addToSet?: Partial<T> | { [key: string]: any };
+    $pop?: { [P in keyof T]?: -1 | 1 } | { [key: string]: -1 | 1 };
+    $pull?: Partial<T> | { [key: string]: any };
+    $push?: Partial<T> | { [key: string]: any };
+    $pushAll?: Partial<T> | { [key: string]: Array<any> };
+    $each?: Partial<T> | { [key: string]: Array<any> };
+    $bit?: { [P in keyof T]?: any } | { [key: string]: any };
+};
+
 /**
  * Entity Service provides basic CRUD
  */
@@ -71,9 +91,9 @@ export interface IEntityService<TEntity> {
 
     createMany(entity: Partial<TEntity>[]): Promise<TEntity[]>;
 
-    update(id: any, update: Partial<TEntity> | Dict): Promise<void>;
+    update(id: any, update: Partial<TEntity> | UpdateQuery<TEntity>): Promise<void>;
 
-    updateMany(filter: any, update: Partial<TEntity> | Dict): Promise<number>;
+    updateMany(filter: any, update: Partial<TEntity> | UpdateQuery<TEntity>): Promise<number>;
 
     delete(id: any): Promise<void>;
 

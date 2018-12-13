@@ -3,12 +3,11 @@ import * as lodash from 'lodash';
 import { getMongoRepository, getRepository, MongoRepository, Repository } from 'typeorm';
 import { ColumnMetadata } from 'typeorm/metadata/ColumnMetadata';
 import { EntityMetadata } from 'typeorm/metadata/EntityMetadata';
+import { injectable } from '../alias';
 import { FultonError, FultonStackError } from '../common/fulton-error';
 import { fultonDebug } from '../helpers/debug';
-import { IUser } from '../identity';
-import { ICacheService, IEntityService, OperationManyResult, QueryParams, Type } from '../interfaces';
+import { ICacheService, IEntityService, OperationManyResult, QueryParams, Type, UpdateQuery } from '../interfaces';
 import { DiKeys } from '../keys';
-import { injectable } from '../alias';
 import { Service } from '../services';
 import { EntityRunner } from './runner/entity-runner';
 
@@ -114,6 +113,21 @@ export class EntityService<TEntity> extends Service implements IEntityService<TE
         this.cache = new CacheServiceWrapper(this.app.getCacheService(`EntityService:${this.entityType.name}`), this.entityType)
     }
 
+    /**
+     * validate the entity
+     * @param entity 
+     * @param type [optional] if the entity is plain object, then type is required
+     */
+    static validateEntity<T>(entity: T, type?: Type<T>): Promise<void> {
+        if (type) entity.constructor = type
+
+        return EntityService.validateCore(entity, new FultonStackError("invalid_input"))
+    }
+
+    validateEntity<T>(entity: T, type?: Type<T>): Promise<void> {
+        return EntityService.validateEntity(entity, type)
+    }
+
     get entityType(): Type {
         return this.mainRepository.target as Type;
     }
@@ -201,8 +215,7 @@ export class EntityService<TEntity> extends Service implements IEntityService<TE
         })
     }
 
-
-    update(id: any, input: Partial<TEntity>): Promise<void> {
+    update(id: any, input: Partial<TEntity> | UpdateQuery<TEntity>): Promise<void> {
         return this
             .convertAndVerifyEntity(this.mainRepository.metadata, input)
             .then((entity) => {
@@ -211,9 +224,13 @@ export class EntityService<TEntity> extends Service implements IEntityService<TE
             })
     }
 
-    updateMany(filter: any, update: Partial<TEntity>): Promise<number> {
-        this.cache.isDirty = true
-        return this.runner.updateMany(this.mainRepository, filter, update)
+    updateMany(filter: any, input: Partial<TEntity> | UpdateQuery<TEntity>): Promise<number> {
+        return this
+            .convertAndVerifyEntity(this.mainRepository.metadata, input)
+            .then((entity) => {
+                this.cache.isDirty = true
+                return this.runner.updateMany(this.mainRepository, filter, entity)
+            })
     }
 
     delete(id: any): Promise<void> {
@@ -249,10 +266,10 @@ export class EntityService<TEntity> extends Service implements IEntityService<TE
             return Promise.reject(errorTracker);
         }
 
-        return this.verifyEntity(entity, errorTracker);
+        return EntityService.validateCore(entity, errorTracker);
     }
 
-    private verifyEntity(entity: any, errorTracker: FultonStackError): Promise<any> {
+    private static validateCore(entity: any, errorTracker: FultonStackError): Promise<any> {
         return validate(entity, { skipMissingProperties: true })
             .then((errors) => {
                 if (errors.length == 0) {
@@ -262,7 +279,7 @@ export class EntityService<TEntity> extends Service implements IEntityService<TE
                         return entity;
                     }
                 } else {
-                    return Promise.reject(this.convertValidationError(errorTracker, errors, null));
+                    return Promise.reject(EntityService.convertValidationError(errorTracker, errors, null));
                 }
             });
     }
@@ -324,6 +341,13 @@ export class EntityService<TEntity> extends Service implements IEntityService<TE
             }
         }
 
+        // add $operation back
+        Object.getOwnPropertyNames(input).forEach((name)=>{
+            if (name.startsWith("$")) {
+                entity[name] = input[name]
+            }
+        })
+
         return entity
     }
 
@@ -353,7 +377,7 @@ export class EntityService<TEntity> extends Service implements IEntityService<TE
     /**
      * convert ValidationError from package class-validator to FultonError
      */
-    private convertValidationError(fultonError: FultonError, errors: ValidationError[], parent: string): FultonError {
+    private static convertValidationError(fultonError: FultonError, errors: ValidationError[], parent: string): FultonError {
         for (const error of errors) {
             let property = parent ? `${parent}.${error.property}` : error.property
 

@@ -1,4 +1,4 @@
-import { FindResult, QueryParams, Type } from '../../interfaces';
+import { FindResult, QueryParams, Type, UpdateQuery } from '../../interfaces';
 import { injectable } from '../../alias';
 
 import { FultonError, FultonStackError } from "../../common";
@@ -60,7 +60,7 @@ export abstract class EntityRunner {
         return this.createManyCore(repository, entities)
     }
 
-    update<TEntity>(repository: Repository<TEntity>, id: any, update: TEntity): Promise<void> {
+    update<TEntity>(repository: Repository<TEntity>, id: any, update: Partial<TEntity> | UpdateQuery<TEntity>): Promise<void> {
         id = this.convertId(repository.metadata, id);
 
         if (!id) {
@@ -129,11 +129,9 @@ export abstract class EntityRunner {
             return;
         }
 
-        for (const name of Object.getOwnPropertyNames(filter)) {
+        Object.getOwnPropertyNames(filter).forEach((name) => {
             let value = filter[name];
-            if (value == null) {
-                continue;
-            }
+            if (value == null) return;
 
             errorTracker.push(name);
 
@@ -253,7 +251,7 @@ export abstract class EntityRunner {
             }
 
             errorTracker.pop();
-        }
+        })
     }
 
     /** Convert Value base on the type or ColumnMetadata */
@@ -273,6 +271,8 @@ export abstract class EntityRunner {
             } else {
                 type = metadata;
             }
+
+            if (typeof type == "string") type = type.toLocaleLowerCase()
 
             if (type == null) {
                 // try use extended convertValue

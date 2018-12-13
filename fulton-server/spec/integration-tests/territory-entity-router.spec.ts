@@ -252,7 +252,6 @@ describe('TerritoryEntityRouter', () => {
         expect(result.response.statusCode).toEqual(202);
     });
 
-
     it('should load a territory with categories', async () => {
         let result = await httpTester.get("/territory/1581", {
             includes: ["categories"]

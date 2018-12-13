@@ -74,4 +74,30 @@ describe('EntityService', () => {
 
         expect(result).toBeGreaterThan(1);
     });
+
+    it('should update fail by wrong id', () => {
+        let es = app.getEntityService(Territory);
+
+        return es.update("1", { territoryDescription: "abc" }).then(() => {
+            fail("should fail")
+        }).catch((e) => {
+            expect(e.code).toBe("unmatched_id")
+        })
+    });
+
+    fit('should update and embedded objects', async () => {
+        let es = app.getEntityService(Territory);
+
+        await es.update(1581, { territoryDescription: "cba", $push: { "categories": { id: "1234" } } })
+
+        let t = await es.findById(1581)
+
+        expect(t.territoryDescription).toEqual("cba")
+        expect(t.categories.length).toEqual(3)
+
+        await es.update(1581, { $pull: { "categories": { id: "1234" } } })
+
+        t = await es.findById(1581)
+        expect(t.categories.length).toEqual(2)
+    });
 });

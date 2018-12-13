@@ -276,13 +276,13 @@ export class IdentityOptions {
     init() {
         this.enabled = Env.getBoolean(`${this.appName}.options.identity.enabled`, this.enabled)
 
-        for (const name of Object.getOwnPropertyNames(this)) {
+        Object.getOwnPropertyNames(this).forEach((name)=>{
             var prop: Options = lodash.get(this, name);
 
             if (prop && prop.init) {
                 prop.init();
             }
-        }
+        })
     }
 
     addStrategy(options: StrategyOptions | OauthStrategyOptions, strategy: Strategy | Type<Strategy>) {

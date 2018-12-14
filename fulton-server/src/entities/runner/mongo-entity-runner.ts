@@ -128,7 +128,7 @@ export class MongoEntityRunner extends EntityRunner {
         delete update[repository.metadata.objectIdColumn.propertyName];
 
         return repository.updateOne({ _id: id }, this.convertUpdate(update)).then((result) => {
-            if (result.modifiedCount == 0) {
+            if (result.matchedCount == 0) {
                 return Promise.reject(new FultonError("unmatched_id"))
             }
         })
@@ -136,7 +136,7 @@ export class MongoEntityRunner extends EntityRunner {
 
     protected updateManyCore<T extends any>(repository: MongoRepository<T>, filter: any, update: T): Promise<number> {
         return repository.updateMany(filter, this.convertUpdate(update)).then((result) => {
-            return result.modifiedCount
+            return result.matchedCount
         })
     }
 

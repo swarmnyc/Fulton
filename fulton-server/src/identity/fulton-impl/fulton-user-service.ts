@@ -130,7 +130,9 @@ export class MongoRunner implements IRunner {
     }
 
     async findUserById(userId: any): Promise<IFultonUser> {
-        return this.userRepository.findOne(userId);
+        return this.userRepository.findOne({
+            "_id": this.convertId(userId)
+        });
     }
 
     async findUserByOauth(type: string, sourceId: string): Promise<IFultonUser> {
@@ -234,7 +236,7 @@ export class FultonUserService implements IUserService<IFultonUser> {
     protected cacheService: ICacheService;
 
     app: IFultonApp;
-    
+
     init() {
         let manager = getManager(this.app.options.identity.databaseConnectionName);
 
@@ -424,6 +426,8 @@ export class FultonUserService implements IUserService<IFultonUser> {
             await this.runner.updateClaim(claim.id, claimUpdate);
 
             userId = claim.userId
+
+            user = await this.runner.findUserById(userId)
         } else {
             // not existed
             if (userId) {
@@ -432,7 +436,7 @@ export class FultonUserService implements IUserService<IFultonUser> {
             } else {
                 // create user
                 let input = lodash.clone<IOauthProfile>(profile)
-                delete input.id 
+                delete input.id
                 input.registeredAt = new Date()
 
                 user = await this.runner.addUser(input);

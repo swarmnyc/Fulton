@@ -1,9 +1,6 @@
-import { DiContainer } from "./alias";
 import { RelatedToMetadata } from './entities/entity-decorators-helpers';
 import { IFultonApp } from "./fulton-app";
-import { IUser, IUserService, OauthStrategyVerifier } from "./identity";
-import { QueryParams } from "./interfaces";
-
+import { OauthStrategyVerifier } from "./identity";
 // custom types for helping development;
 declare global {
     interface String {

@@ -3,7 +3,7 @@ import { Middleware } from "../alias";
 import { Env } from '../helpers/env';
 import { AppMode, Type } from '../interfaces';
 import { Options } from '../options/options';
-import { IIdentityRouter, IUser, IUserService, Strategy } from './interfaces';
+import { IIdentityRouter, IUser, IIdentityService, Strategy } from './interfaces';
 import { AccessTokenOptions } from './options/access-token-options';
 import { BearerStrategyOptions } from './options/bearer-strategy-options';
 import { FacebookStrategyOptions } from './options/facebook-strategy-options';
@@ -39,14 +39,14 @@ export class IdentityOptions {
     userEntity: Type<IUser>;
 
     /**
-     * the type of UserService
-     * the default value is FultonUserService
+     * the type of identityService
+     * the default value is FultonIdentityService
      * it can be used like
-     * `req.userService`
+     * `req.identityService`
      * 
      * you can custom user service to change the behaviors;
      */
-    userService: Type<IUserService<IUser>>;
+    identityService: Type<IIdentityService<IUser>>;
 
     /**
      * the instance or type of IdentityRouter
@@ -147,7 +147,7 @@ export class IdentityOptions {
      *     // and add this action.
      *     @httpPost("/register"))
      *     register(req: Request, res: Response) {
-     *         req.userService
+     *         req.identityService
      *            .register(req.body)
      *            .then(async(user)=> {
      *                  res.redirect("/");

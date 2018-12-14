@@ -1,20 +1,13 @@
 import * as lodash from 'lodash';
-
-import { OperationOneResult, OperationManyResult, OperationResult, QueryParams } from "../../src/interfaces";
-import { Request, Response, injectable } from "../../src/alias";
-import { HttpResult, HttpTester } from "../../src/test/http-tester";
-
-import { Category } from '../entities/category';
-import { MongoHelper } from "../helpers/mongo-helper";
-import { Repository } from "typeorm";
-import { Territory } from '../entities/territory';
-import { UserServiceMock } from "../helpers/user-service-mock";
-import { sampleData } from "../support/sample-data";
+import { FultonApp } from '../../src/fulton-app';
+import { OperationManyResult, OperationOneResult } from "../../src/interfaces";
+import { FultonAppOptions } from '../../src/options/fulton-app-options';
 import { EntityRouter } from '../../src/routers/entity-router';
 import { entityRouter } from '../../src/routers/route-decorators';
-import { FultonApp } from '../../src/fulton-app';
-import { FultonAppOptions } from '../../src/options/fulton-app-options';
-
+import { HttpTester } from "../../src/test/http-tester";
+import { Category } from '../entities/category';
+import { MongoHelper } from "../helpers/mongo-helper";
+import { sampleData } from "../support/sample-data";
 
 @entityRouter("categories", Category)
 class CategoryRouter extends EntityRouter<Category>{ }

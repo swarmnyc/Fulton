@@ -4,7 +4,7 @@ import { AccessToken, IOauthProfile, IUser, StrategyVerifier, StrategyVerifyDone
 import { OauthStrategyOptions } from './options/oauth-strategy-options';
 
 export function defaultLoginStrategyVerifier(req: Request, username: string, password: string, done: StrategyVerifyDone) {
-    req.userService
+    req.identityService
         .login(username, password)
         .then((user: IUser) => {
             done(null, user);
@@ -19,7 +19,7 @@ export function defaultLoginStrategyVerifier(req: Request, username: string, pas
  */
 export async function defaultBearerStrategyVerifier(req: Request, token: string, done: StrategyVerifyDone) {
     try {
-        let user = await req.userService.loginByAccessToken(token);
+        let user = await req.identityService.loginByAccessToken(token);
 
         if (user) {
             user.currentToken = token
@@ -35,7 +35,7 @@ export async function defaultBearerStrategyVerifier(req: Request, token: string,
 }
 
 /**
- * the wrapper of auth verifier, the purpose of it is to call req.userService.loginByOauth with the formated parameters.
+ * the wrapper of auth verifier, the purpose of it is to call req.identityService.loginByOauth with the formated parameters.
  */
 export function defaultOauthStrategyVerifierFn(options: OauthStrategyOptions): StrategyVerifier {
     return (req: Request, access_token: string, fresh_token: string, profile: IOauthProfile, done: StrategyVerifyDone) => {
@@ -52,7 +52,7 @@ export function defaultOauthStrategyVerifierFn(options: OauthStrategyOptions): S
         // if the state has value, it should be userId
         var userId = req.query["state"];
 
-        req.userService
+        req.identityService
             .loginByOauth(userId, token, profile)
             .then((user: IUser) => {
                 done(null, user);

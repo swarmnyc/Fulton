@@ -3,7 +3,7 @@ import * as lodash from 'lodash';
 import { EntityService } from '../../src/entities/entity-service';
 import { FultonApp } from '../../src/fulton-app';
 import { FultonUser } from '../../src/identity/fulton-impl/fulton-user';
-import { FultonUserService } from '../../src/identity/fulton-impl/fulton-user-service';
+import { FultonIdentityService } from '../../src/identity/fulton-impl/fulton-identity-service';
 import { ICacheServiceFactory } from '../../src/interfaces';
 import { DiKeys } from '../../src/keys';
 import { FultonAppOptions } from '../../src/options/fulton-app-options';
@@ -224,33 +224,33 @@ describe('Memory Cache Service', () => {
     });
 
     it('should cache user by token', async () => {
-        let userService = app.userService as FultonUserService
+        let identityService = app.identityService as FultonIdentityService
 
-        let cacheService = userService["cacheService"] as MemoryCacheService
+        let cacheService = identityService["cacheService"] as MemoryCacheService
         let spyGet = spyOn(cacheService, "get").and.callThrough()
         let spySet = spyOn(cacheService, "set").and.callThrough()
 
-        let user = await userService.register({
+        let user = await identityService.register({
             email: "test@test.com",
             username: "test",
             password: "test123"
         })
 
-        let token1 = await userService.issueAccessToken(user)
+        let token1 = await identityService.issueAccessToken(user)
 
-        await userService.loginByAccessToken(token1.access_token)
+        await identityService.loginByAccessToken(token1.access_token)
 
         expect(spyGet.calls.count()).toEqual(2)
         expect(spySet.calls.count()).toEqual(2)
 
-        let fetchedUser = await userService.loginByAccessToken(token1.access_token)
+        let fetchedUser = await identityService.loginByAccessToken(token1.access_token)
         expect(fetchedUser.constructor).toEqual(FultonUser);
 
         expect(spyGet.calls.count()).toEqual(3)
         expect(spySet.calls.count()).toEqual(2)
 
-        let token2 = await userService.issueAccessToken(user)
-        await userService.loginByAccessToken(token2.access_token)
+        let token2 = await identityService.issueAccessToken(user)
+        await identityService.loginByAccessToken(token2.access_token)
 
         let memoryCache = cacheService["cache"]
         expect(memoryCache.length).toEqual(3)
@@ -261,58 +261,58 @@ describe('Memory Cache Service', () => {
         expect(keys).toContain(`token:${token2.access_token}`)
 
         // clean cache
-        await userService.updateProfile(user.id, { displayName: "test" })
+        await identityService.updateProfile(user.id, { displayName: "test" })
 
         expect(memoryCache.length).toEqual(0)
     });
 
     it('should cache users by tokens isolate', async () => {
-        let userService = app.userService as FultonUserService
-        let cacheService = userService["cacheService"] as MemoryCacheService
+        let identityService = app.identityService as FultonIdentityService
+        let cacheService = identityService["cacheService"] as MemoryCacheService
 
-        let user1 = await userService.register({
+        let user1 = await identityService.register({
             email: "test1@test.com",
             username: "test1",
             password: "test123"
         })
 
-        let user2 = await userService.register({
+        let user2 = await identityService.register({
             email: "test2@test.com",
             username: "test2",
             password: "test123"
         })
 
-        let token1 = await userService.issueAccessToken(user1)
-        let token2 = await userService.issueAccessToken(user2)
+        let token1 = await identityService.issueAccessToken(user1)
+        let token2 = await identityService.issueAccessToken(user2)
 
-        await userService.loginByAccessToken(token1.access_token)
-        await userService.loginByAccessToken(token2.access_token)
+        await identityService.loginByAccessToken(token1.access_token)
+        await identityService.loginByAccessToken(token2.access_token)
 
         let memoryCache = cacheService["cache"]
         expect(memoryCache.length).toEqual(4)
 
         // clean cache
-        await userService.updateProfile(user1.id, { displayName: "test" })
+        await identityService.updateProfile(user1.id, { displayName: "test" })
 
         expect(memoryCache.length).toEqual(2)
     });
 
     it('should cache fit by wrong token', async () => {
-        let userService = app.userService as FultonUserService
+        let identityService = app.identityService as FultonIdentityService
 
-        let cacheService = userService["cacheService"]
+        let cacheService = identityService["cacheService"]
         let spyGet = spyOn(cacheService, "get").and.callThrough()
         let spySet = spyOn(cacheService, "set").and.callThrough()
 
         let token = "eyJhbGciOiJIUzI1NiJ9.eyJpZCI6IjViZmYyNTIzYTZkNDEzYjMwY2ZiMTE0YiIsInRzIjoxNTQzNDQ3ODQzMzM5fQ.HYjlzIzvezTnWrZA50VKgZ_OksuqCkckVqqQnOqoriE"
 
-        let fetchedUser = await userService.loginByAccessToken(token)
+        let fetchedUser = await identityService.loginByAccessToken(token)
         expect(fetchedUser).toBeNull()
 
         expect(spyGet.calls.count()).toEqual(1)
         expect(spySet.calls.count()).toEqual(1)
 
-        fetchedUser = await userService.loginByAccessToken(token)
+        fetchedUser = await identityService.loginByAccessToken(token)
         expect(fetchedUser).toBeNull()
 
         expect(spyGet.calls.count()).toEqual(2)

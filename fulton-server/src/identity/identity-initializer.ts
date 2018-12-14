@@ -3,18 +3,18 @@ import * as passport from 'passport';
 import { IFultonApp } from '../fulton-app';
 import { EventKeys } from '../keys';
 import { defaultAuthenticate } from './authenticate-middlewares';
-import { IIdentityRouter, IUser, IUserService } from './interfaces';
+import { IIdentityRouter } from './interfaces';
 import { OauthStrategyOptions } from './options/oauth-strategy-options';
 import { StrategyOptions } from './options/strategy-options';
 
 module.exports = async function identityInitializer(app: IFultonApp) {
     let opts = app.options.identity;
 
-    // assign userService
-    app.userService = new opts.userService()
-    app.express.request.constructor.prototype.userService = app.userService;
-    app.userService.app = app
-    app.userService.init()
+    // assign identityService
+    app.identityService = new opts.identityService()
+    app.express.request.constructor.prototype.identityService = app.identityService;
+    app.identityService.app = app
+    app.identityService.init()
 
     let router: IIdentityRouter;
     if (opts.router instanceof Function) {

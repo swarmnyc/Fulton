@@ -1,5 +1,5 @@
 import { Strategy as LocalStrategy } from 'passport-local';
-import { UserServiceMock } from "../../spec/helpers/user-service-mock";
+import { IdentityServiceMock } from "../../spec/helpers/user-service-mock";
 import { FultonApp } from "../fulton-app";
 import { FultonAppOptions } from "../options/fulton-app-options";
 import { HttpTester } from "../test/http-tester";
@@ -11,7 +11,7 @@ import { GoogleStrategy } from "./strategies/google-strategy";
 class MyApp extends FultonApp {
     protected onInit(options: FultonAppOptions): void | Promise<void> {
         this.options.identity.enabled = true;
-        this.options.identity.userService = UserServiceMock;
+        this.options.identity.identityService = IdentityServiceMock;
         this.options.identity.login.enabled = false;
         this.options.identity.register.enabled = false;
         this.options.identity.bearer.enabled = false;

@@ -39,9 +39,9 @@ describe('Custom User', () => {
     });
 
     it('should save extra fields', async () => {
-        let user = await app.userService.loginByOauth(null, { provider: "Test" }, { id: "testId", displayName: "test", contacts: ["a", "b", "c"], no: "abcd" })
+        let user = await app.identityService.loginByOauth(null, { provider: "Test" }, { id: "testId", displayName: "test", contacts: ["a", "b", "c"], no: "abcd" })
 
-        let actualUser = await app.userService.getUser(user.id)
+        let actualUser = await app.identityService.getUser(user.id)
 
         expect(actualUser.displayName).toEqual("test");
         expect(actualUser.contacts).toEqual(["a", "b", "c"]);

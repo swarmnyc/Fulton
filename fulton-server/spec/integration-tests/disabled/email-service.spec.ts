@@ -58,7 +58,7 @@ xdescribe('Email Service', () => {
     });
 
     it('should send email welcome email', (done) => {
-        app.userService.register({
+        app.identityService.register({
             username: "Tester",
             email: process.env["tester_email"],
             password: "abcd1234"

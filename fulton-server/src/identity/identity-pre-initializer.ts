@@ -1,6 +1,6 @@
 import { IFultonApp } from '../fulton-app';
 import { FultonIdentityRouter } from './fulton-impl/fulton-identity-router';
-import { FultonUserService } from './fulton-impl/fulton-user-service';
+import { FultonIdentityService } from './fulton-impl/fulton-identity-service';
 import { defaultBearerStrategyVerifier, defaultLoginStrategyVerifier, defaultOauthStrategyVerifierFn } from "./identity-defaults";
 import { FultonUserClaims, FultonUserAccessToken, FultonUser } from "./fulton-impl/fulton-user";
 
@@ -11,8 +11,8 @@ import { FultonUserClaims, FultonUserAccessToken, FultonUser } from "./fulton-im
 module.exports = async function (app: IFultonApp) {
     let opts = app.options.identity;
 
-    if (opts.userService == null) {
-        opts.userService = FultonUserService
+    if (opts.identityService == null) {
+        opts.identityService = FultonIdentityService
 
         // add default entities, typeorm needs them to works
         if (opts.userEntity == null) {

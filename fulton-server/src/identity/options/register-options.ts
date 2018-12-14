@@ -23,7 +23,7 @@ import { IdentityNotificationOptions } from './notification-options';
  *     // and add this action.
  *     @httpPost("/register"))
  *     register(req: Request, res: Response) {
- *         req.userService
+ *         req.identityService
  *            .register(req.body)
  *            .then(async(user)=> {
  *                  res.redirect("/");

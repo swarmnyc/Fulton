@@ -2,7 +2,7 @@ import * as lodash from 'lodash';
 import { EntityService } from '../../src/entities/entity-service';
 import { FultonApp } from '../../src/fulton-app';
 import { FultonUser } from '../../src/identity/fulton-impl/fulton-user';
-import { FultonUserService } from '../../src/identity/fulton-impl/fulton-user-service';
+import { FultonIdentityService } from '../../src/identity/fulton-impl/fulton-identity-service';
 import { ICacheServiceFactory } from '../../src/interfaces';
 import { DiKeys } from '../../src/keys';
 import { FultonAppOptions } from '../../src/options/fulton-app-options';
@@ -160,26 +160,26 @@ describe('Redis Cache Service', () => {
     });
 
     it('should cache user by token', async () => {
-        let userService = app.userService as FultonUserService
+        let identityService = app.identityService as FultonIdentityService
 
-        let cacheService = userService["cacheService"]
+        let cacheService = identityService["cacheService"]
         let spyGet = spyOn(cacheService, "get").and.callThrough()
         let spySet = spyOn(cacheService, "set").and.callThrough()
 
-        let user = await userService.register({
+        let user = await identityService.register({
             email: "test@test.com",
             username: "test",
             password: "test123"
         })
 
-        let token = await userService.issueAccessToken(user)
+        let token = await identityService.issueAccessToken(user)
 
-        let fetchedUser = await userService.loginByAccessToken(token.access_token)
+        let fetchedUser = await identityService.loginByAccessToken(token.access_token)
         await sleep(100)
         expect(spyGet.calls.count()).toEqual(2)
         expect(spySet.calls.count()).toEqual(2)
 
-        fetchedUser = await userService.loginByAccessToken(token.access_token)
+        fetchedUser = await identityService.loginByAccessToken(token.access_token)
         expect(fetchedUser.constructor).toEqual(FultonUser);
 
         expect(spyGet.calls.count()).toEqual(3)
@@ -187,21 +187,21 @@ describe('Redis Cache Service', () => {
     });
 
     it('should cache fit by wrong token', async () => {
-        let userService = app.userService as FultonUserService
+        let identityService = app.identityService as FultonIdentityService
 
-        let cacheService = userService["cacheService"]
+        let cacheService = identityService["cacheService"]
         let spyGet = spyOn(cacheService, "get").and.callThrough()
         let spySet = spyOn(cacheService, "set").and.callThrough()
 
         let token = "eyJhbGciOiJIUzI1NiJ9.eyJpZCI6IjViZmYyNTIzYTZkNDEzYjMwY2ZiMTE0YiIsInRzIjoxNTQzNDQ3ODQzMzM5fQ.HYjlzIzvezTnWrZA50VKgZ_OksuqCkckVqqQnOqoriE"
 
-        let fetchedUser = await userService.loginByAccessToken(token)
+        let fetchedUser = await identityService.loginByAccessToken(token)
         expect(fetchedUser).toBeNull()
 
         expect(spyGet.calls.count()).toEqual(1)
         expect(spySet.calls.count()).toEqual(1)
 
-        fetchedUser = await userService.loginByAccessToken(token)
+        fetchedUser = await identityService.loginByAccessToken(token)
         expect(fetchedUser).toBeNull()
 
         expect(spyGet.calls.count()).toEqual(2)

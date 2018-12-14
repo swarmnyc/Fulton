@@ -2,10 +2,9 @@ import * as lodash from 'lodash';
 import { FultonError } from '../../src/common/fulton-error';
 import { FultonApp } from "../../src/fulton-app";
 import { FultonUser } from '../../src/identity/fulton-impl/fulton-user';
-import { AccessToken, IFultonUserClaims, IOauthProfile, IUserService, RegisterModel, IUser } from '../../src/identity/interfaces';
-import { Type } from "../../src/interfaces";
+import { AccessToken, IFultonUserClaims, IIdentityService, IOauthProfile, IUser, RegisterModel } from '../../src/identity/interfaces';
 
-export class UserServiceMock implements IUserService<IUser> {
+export class IdentityServiceMock implements IIdentityService<IUser> {
     app: FultonApp
 
     init() {
@@ -122,6 +121,10 @@ export class UserServiceMock implements IUserService<IUser> {
     }
 
     getUserClaims(userId: any): Promise<IFultonUserClaims[]> {
+        throw new Error("Method not implemented.");
+    }
+
+    cleanUserCache(userId: any): void {
         throw new Error("Method not implemented.");
     }
 }

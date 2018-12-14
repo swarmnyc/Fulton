@@ -1,4 +1,4 @@
-import { UserServiceMock } from "../../spec/helpers/user-service-mock";
+import { IdentityServiceMock } from "../../spec/helpers/user-service-mock";
 import { Request, Response } from "../alias";
 import { FultonApp } from "../fulton-app";
 import { FultonAppOptions } from "../options/fulton-app-options";
@@ -31,7 +31,7 @@ export class TestRouter2 extends Router {
 class MyApp extends FultonApp {
     protected onInit(options: FultonAppOptions): void | Promise<void> {
         this.options.identity.enabled = true;
-        this.options.identity.userService = UserServiceMock;
+        this.options.identity.identityService = IdentityServiceMock;
 
         this.options.identity.google.enabled = true;
         this.options.identity.google.clientId = "test";
@@ -60,7 +60,7 @@ class MyApp extends FultonApp {
 }
 
 // launch web server to test
-describe('Identity local and bearer on UserServiceMock', () => {
+describe('Identity local and bearer on IdentityServiceMock', () => {
     let app: MyApp;
     let httpTester: HttpTester;
 

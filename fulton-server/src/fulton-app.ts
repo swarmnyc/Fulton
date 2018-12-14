@@ -14,7 +14,7 @@ import { fultonDebug, fultonDebugMaster } from './helpers/debug';
 import { Env } from './helpers/env';
 import { Helper } from './helpers/helper';
 import { ClassProvider, FactoryProvider, FunctionProvider, Provider, TypeProvider, ValueProvider } from './helpers/type-helpers';
-import { IUser, IUserService } from './identity/interfaces';
+import { IUser, IIdentityService } from './identity/interfaces';
 import { AppMode, EntityServiceFactory, ICacheServiceFactory, ICacheService, IEntityService, INotificationService, NotificationMessage, Type, TypeIdentifier } from './interfaces';
 import { DiContainer, Response } from './alias';
 import { DiKeys, EventKeys } from './keys';
@@ -22,8 +22,6 @@ import { defaultHttpLoggerHandler } from './middlewares/http-logger';
 import { FultonAppOptions } from './options/fulton-app-options';
 import { BaseOptions } from './options/options';
 import { Router } from './routers/router';
-
-
 
 // don't load too modules classes here, it will cause cyclical dependencies and cause very hard to debug and wired Error.
 
@@ -69,7 +67,7 @@ export interface IFultonApp {
     /**
      * user service, created during init() if options.identity.enabled = true.
      */
-    userService: IUserService<IUser>;
+    identityService: IIdentityService<IUser>;
 
     /**
      * the instance of http server of nodejs, created during start()
@@ -173,7 +171,7 @@ export abstract class FultonApp implements IFultonApp {
 
     events: EventEmitter;
 
-    userService: IUserService<IUser>;
+    identityService: IIdentityService<IUser>;
 
     httpServer: http.Server;
 
@@ -604,15 +602,7 @@ export abstract class FultonApp implements IFultonApp {
     }
 
     protected initServer(): void | Promise<void> {
-        this.express = express();
-        this.express.request.constructor.prototype.fultonApp = this;
-        this.express.response.constructor.prototype.sendData = function (data: any, status: number = 200) {
-            this.status(200).send({ data: data })
-        };
-
-        this.express.disable('x-powered-by');
-
-        this.events.emit(EventKeys.AppDidInitServer, this);
+        return require('./initializers/server-initializer')(this)
     }
 
     protected initSecurity(): void | Promise<void> {
@@ -692,6 +682,13 @@ export abstract class FultonApp implements IFultonApp {
 
     // private functions
     private serve = (req: any, res: any) => {
+        // add a shortcut for req.body.data with type
+        Object.defineProperty(req, "bodyData", {
+            get: function () {
+                return this.body && this.body.data
+            }
+        })
+
         this.baseUrl = Helper.baseUrlRaw(req)
         if (this.options.miscellaneous.zoneEnabled) {
             Zone.current.fork({

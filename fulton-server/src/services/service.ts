@@ -15,8 +15,8 @@ export abstract class Service {
     }
 
     getCurrentUser(): IUser {
-        if (this.app && this.app.userService) {
-            return this.app.userService.getCurrentUser()
+        if (this.app && this.app.identityService) {
+            return this.app.identityService.getCurrentUser()
         }
     }
 }

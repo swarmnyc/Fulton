@@ -14,7 +14,7 @@ import { ICacheService, NotificationMessage, Type, Dict } from '../../interfaces
 import { injectable, Request } from '../../alias';
 import { EventKeys } from '../../keys';
 import { IdentityOptions } from '../identity-options';
-import { AccessToken, ForgotPasswordModel, ForgotPasswordNotificationModel, IFultonUser, IFultonUserClaims, IOauthProfile, IUserService, RegisterModel, UpdateLocalModel, WelcomeNotificationModel } from '../interfaces';
+import { AccessToken, ForgotPasswordModel, ForgotPasswordNotificationModel, IFultonUser, IFultonUserClaims, IOauthProfile, IIdentityService, RegisterModel, UpdateLocalModel, WelcomeNotificationModel } from '../interfaces';
 import { FultonUser, FultonUserAccessToken, FultonUserClaims } from './fulton-user';
 
 interface JWTPayload {
@@ -227,7 +227,7 @@ export class MongoRunner implements IRunner {
 }
 
 @injectable()
-export class FultonUserService implements IUserService<IFultonUser> {
+export class FultonIdentityService implements IIdentityService<IFultonUser> {
     private CacheMaxAge = 30_000 // only cache for 3 minute
 
     protected runner: IRunner;
@@ -246,7 +246,7 @@ export class FultonUserService implements IUserService<IFultonUser> {
             //this.runner = new SqlRunner(manager)
         }
 
-        this.cacheService = this.app.getCacheService("FultonUserService")
+        this.cacheService = this.app.getCacheService("UserIdentityService")
     }
 
     protected get options(): IdentityOptions {
@@ -670,12 +670,24 @@ export class FultonUserService implements IUserService<IFultonUser> {
         return this.runner.findClaims(userId);
     }
 
-    revokeAccessToken(userId: string, token: string): Promise<any> {
+    revokeAccessToken(userId: any, token: string): Promise<any> {
         return this.runner.revokeAccessToken(userId, token);
     }
 
-    revokeAllAccessTokens(userId: string): Promise<any> {
+    revokeAllAccessTokens(userId: any): Promise<any> {
         return this.runner.revokeAllAccessTokens(userId);
+    }
+
+    cleanUserCache(userId: any) {
+        // clear user cache
+        let trackCacheKey = `user:${userId}`
+        this.cacheService.get(trackCacheKey).then((keys: string[]) => {
+            keys.forEach((key) => {
+                this.cacheService.delete(key)
+            })
+
+            this.cacheService.delete(trackCacheKey)
+        })
     }
 
     protected get jwtSecret(): string | Buffer {
@@ -825,18 +837,6 @@ export class FultonUserService implements IUserService<IFultonUser> {
             });
 
             return promise
-        })
-    }
-
-    protected cleanUserCache(userId: string) {
-        // clear user cache
-        let trackCacheKey = `user:${userId}`
-        this.cacheService.get(trackCacheKey).then((keys: string[]) => {
-            keys.forEach((key) => {
-                this.cacheService.delete(key)
-            })
-
-            this.cacheService.delete(trackCacheKey)
         })
     }
 }

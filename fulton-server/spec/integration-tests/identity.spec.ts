@@ -2,7 +2,7 @@ import { getMongoRepository } from "typeorm";
 import { FultonApp } from '../../src/fulton-app';
 import * as cryptoHelper from '../../src/helpers/crypto-helper';
 import { FultonUser, FultonUserAccessToken, FultonUserClaims } from "../../src/identity/fulton-impl/fulton-user";
-import { FultonUserService } from '../../src/identity/fulton-impl/fulton-user-service';
+import { FultonIdentityService } from '../../src/identity/fulton-impl/fulton-identity-service';
 import { AccessToken, IOauthProfile } from '../../src/identity/interfaces';
 import { Request, Response } from "../../src/alias";
 import { FultonAppOptions } from '../../src/options/fulton-app-options';
@@ -194,7 +194,7 @@ describe('Identity Integration Test', () => {
 
     // for oauth 
     it('should create a user by oauth login', async () => {
-        let userService = app.userService as FultonUserService
+        let identityService = app.identityService as FultonIdentityService
         let accessToken: AccessToken = {
             provider: "TEST",
             access_token: "TOKEN"
@@ -205,7 +205,7 @@ describe('Identity Integration Test', () => {
             email: "test@test.com"
         }
 
-        var user = await userService.loginByOauth(null, accessToken, profile);
+        var user = await identityService.loginByOauth(null, accessToken, profile);
         expect(user).not.toBeNull()
 
         var userRepository = getMongoRepository(FultonUser)
@@ -219,9 +219,9 @@ describe('Identity Integration Test', () => {
     })
 
     it('should create link to the user by oauth login', async () => {
-        let userService = app.userService as FultonUserService
+        let identityService = app.identityService as FultonIdentityService
 
-        var user1 = await userService.register({
+        var user1 = await identityService.register({
             username: "test",
             email: "test@test.com",
             password: "test1234"
@@ -237,7 +237,7 @@ describe('Identity Integration Test', () => {
             email: "test@test.com"
         }
 
-        let user2 = await userService.loginByOauth(user1.id, accessToken, profile);
+        let user2 = await identityService.loginByOauth(user1.id, accessToken, profile);
         expect(user1.id).toEqual(user2.id)
 
         var userRepository = getMongoRepository(FultonUser)
@@ -251,7 +251,7 @@ describe('Identity Integration Test', () => {
     })
 
     it('should create fail to link user by oauth login', async () => {
-        let userService = app.userService as FultonUserService
+        let identityService = app.identityService as FultonIdentityService
 
         let accessToken: AccessToken = {
             provider: "TEST",
@@ -264,10 +264,10 @@ describe('Identity Integration Test', () => {
             email: "test@test.com"
         }
 
-        await userService.loginByOauth(null, accessToken, profile);
+        await identityService.loginByOauth(null, accessToken, profile);
 
         try {
-            await userService.loginByOauth("test-2", accessToken, profile);
+            await identityService.loginByOauth("test-2", accessToken, profile);
             fail()
         } catch (e) {
             expect(e.error.code).toEqual("existed")

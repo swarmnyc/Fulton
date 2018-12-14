@@ -128,7 +128,7 @@ export class FultonIdentityRouter implements IIdentityRouter {
         input.password = input[opts.passwordField];
         input.email = input[opts.emailField];
 
-        req.userService
+        req.identityService
             .register(input)
             .then((user: IUser) => {
                 // passport.login
@@ -160,7 +160,7 @@ export class FultonIdentityRouter implements IIdentityRouter {
 
         if (username || email) {
             // send notification
-            req.userService
+            req.identityService
                 .forgotPassword(username || email)
                 .then((result) => {
                     res.send({
@@ -177,7 +177,7 @@ export class FultonIdentityRouter implements IIdentityRouter {
         let code = req.query.code || req.body.code;
 
         if (token && code) {
-            req.userService
+            req.identityService
                 .verifyResetPassword(token, code)
                 .then(() => {
                     res.send({
@@ -196,7 +196,7 @@ export class FultonIdentityRouter implements IIdentityRouter {
         let password = req.body.password;
 
         if (token && code && password) {
-            req.userService
+            req.identityService
                 .resetPassword(token, code, password)
                 .then(() => {
                     res.send({
@@ -217,7 +217,7 @@ export class FultonIdentityRouter implements IIdentityRouter {
             let task: Promise<void>;
 
             if (all) {
-                task = req.userService.revokeAllAccessTokens(req.user.id)
+                task = req.identityService.revokeAllAccessTokens(req.user.id)
             } else {
                 let token = req.user.currentToken;
 
@@ -225,7 +225,7 @@ export class FultonIdentityRouter implements IIdentityRouter {
                     return next(new FultonError(ErrorCodes.Unknown));
                 }
 
-                task = req.userService.revokeAccessToken(req.user.id, token)
+                task = req.identityService.revokeAccessToken(req.user.id, token)
             }
 
             task.then(() => {
@@ -265,7 +265,7 @@ export class FultonIdentityRouter implements IIdentityRouter {
 
     updateProfile(req: Request, res: Response, next: NextFunction) {
         if (req.isAuthenticated()) {
-            req.userService.updateProfile(req.user.id, req.body).then(() => {
+            req.identityService.updateProfile(req.user.id, req.body).then(() => {
                 res.send({
                     status: 200
                 })
@@ -277,7 +277,7 @@ export class FultonIdentityRouter implements IIdentityRouter {
 
     updateLocalClaim(req: Request, res: Response, next: NextFunction) {
         if (req.isAuthenticated()) {
-            req.userService.updateLocalClaim(req.user.id, req.body).then(() => {
+            req.identityService.updateLocalClaim(req.user.id, req.body).then(() => {
                 res.send({
                     status: 200
                 })
@@ -351,7 +351,7 @@ export class FultonIdentityRouter implements IIdentityRouter {
     }
 
     async issueAccessToken(req: Request, res: Response) {
-        let accessToken = await req.userService.issueAccessToken(req.user);
+        let accessToken = await req.identityService.issueAccessToken(req.user);
         res.send(accessToken);
     }
 

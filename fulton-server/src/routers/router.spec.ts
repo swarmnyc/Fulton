@@ -4,6 +4,7 @@ import { authenticate } from '../identity/authenticate-middlewares';
 import { errorHandler, httpDelete, httpGet, httpPost, httpPut, router } from './route-decorators';
 import { Router } from "./router";
 import { IFultonApp } from "../fulton-app";
+import { Territory } from "../../spec/entities/territory";
 
 let middleware: Middleware = function () {
 }
@@ -47,12 +48,21 @@ export class RouterD extends RouterA {
     delete() { }
 }
 
+interface Food {
+    name: string
+}
+
 // router level authorization
 @router("/Food")
 export class FoodRouter extends Router {
     // all actions needs to be authorized
     @httpGet()
     list(req: Request, res: Response) { }
+
+    @httpPost()
+    create(req: Request<Food>, res: Response) {
+        let name = req.bodyData.name
+    }
 
     @httpGet("/:id")
     detail(req: Request, res: Response) { }

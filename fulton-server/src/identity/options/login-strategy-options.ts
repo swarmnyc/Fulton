@@ -55,7 +55,7 @@ export class LoginStrategyOptions extends StrategyOptions {
      * 
      * ### customizing example
      * verifier = (req: Request, username: string, password: string, done: LocalStrategyVerifyDone) => {
-     *     req.userService
+     *     req.identityService
      *         .login(username, password)
      *         .then((user) => {
      *             done(null, user);

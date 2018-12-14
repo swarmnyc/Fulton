@@ -69,7 +69,7 @@ export interface IIdentityRouter {
     oauthCallbackFn(options: OauthStrategyOptions): Middleware
 }
 
-export interface IUserService<T extends IUser> {
+export interface IIdentityService<T extends IUser> {
     app: IFultonApp;
 
     init(): void;
@@ -95,6 +95,7 @@ export interface IUserService<T extends IUser> {
     getCurrentUser(): T;
     revokeAccessToken(userId: string, token: string): Promise<void>;
     revokeAllAccessTokens(userId: string): Promise<void>;
+    cleanUserCache(userId: any): void;
     //refreshAccessToken(token: string): Promise<AccessToken>;
     //removeUserIdentities(...identities:IFultonIdentity[]): Promise<any>;
 }

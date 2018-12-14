@@ -15,7 +15,7 @@ export class BearerStrategyOptions extends StrategyOptions {
      *         done(null, false);
      *     }
      * 
-     *     let user = await req.userService.findByAccessToken(token);
+     *     let user = await req.identityService.findByAccessToken(token);
      * 
      *     if (user) {
      *         return done(null, user);

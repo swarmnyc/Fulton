@@ -254,6 +254,8 @@ export abstract class FultonApp implements IFultonApp {
             this.events.emit(EventKeys.AppDidInit, this);
 
             fultonDebugMaster("app", this.outputOptions("Initializing with options:\t%O\t"))
+
+            await this.didInit()
         } catch (error) {
             fultonDebug("app", this.outputOptions("App Init failed with:\t%O\t"))
             //FultonLog.error("App Init failed by", error)
@@ -604,6 +606,9 @@ export abstract class FultonApp implements IFultonApp {
     protected initServer(): void | Promise<void> {
         this.express = express();
         this.express.request.constructor.prototype.fultonApp = this;
+        this.express.response.constructor.prototype.sendData = function (data: any, status: number = 200) {
+            this.status(200).send({ data: data })
+        };
 
         this.express.disable('x-powered-by');
 
@@ -679,6 +684,11 @@ export abstract class FultonApp implements IFultonApp {
      * @param options the options for start app
      */
     protected abstract onInit(options: FultonAppOptions): void | Promise<void>;
+
+    /**
+     * a function that is called after init.
+     */
+    protected didInit(): void | Promise<void> { }
 
     // private functions
     private serve = (req: any, res: any) => {

@@ -15,3 +15,4 @@ export { ObjectId } from 'bson';
 
 export * from "./entity-decorators";
 export * from "./entity-service";
+export * from "./client-security";

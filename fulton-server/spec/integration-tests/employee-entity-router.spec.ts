@@ -18,7 +18,7 @@ class EmployeeEntityRouter extends EntityRouter<Employee>{
     @httpGet("/count")
     async count(req: Request, res: Response) {
         let result = await this.entityService.count(req.queryParams)
-        res.send({ data: result })
+        res.sendData(result)
     }
 }
 

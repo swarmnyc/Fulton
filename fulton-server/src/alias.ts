@@ -43,7 +43,9 @@ export interface Request extends express.Request {
 /**
  * extends express.Response
  */
-export interface Response extends express.Response { }
+export interface Response extends express.Response {
+    sendData(data: any, status?: number): Response
+}
 
 /**
  * alias for express.RequestHandler

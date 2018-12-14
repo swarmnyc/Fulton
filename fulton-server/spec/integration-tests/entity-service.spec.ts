@@ -85,7 +85,7 @@ describe('EntityService', () => {
         })
     });
 
-    fit('should update and embedded objects', async () => {
+    it('should update and embedded objects', async () => {
         let es = app.getEntityService(Territory);
 
         await es.update(1581, { territoryDescription: "cba", $push: { "categories": { id: "1234" } } })

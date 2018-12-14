@@ -4,7 +4,7 @@ import { EntityMetadata } from 'typeorm/metadata/EntityMetadata';
 import { Category } from '../../spec/entities/category';
 import { Customer } from '../../spec/entities/customer';
 import { Employee } from '../../spec/entities/employee';
-import { Territory } from '../../spec/entities/territory';
+import { Territory, TerritoryDetail } from '../../spec/entities/territory';
 import { createFakeConnection } from '../../spec/helpers/entity-helper';
 import { FultonError, FultonStackError } from '../common/fulton-error';
 import { FultonApp } from '../fulton-app';
@@ -23,6 +23,7 @@ describe('entity service', () => {
     let employeeMetadata: EntityMetadata;
     let categoryMetadata: EntityMetadata;
     let customerMetadata: EntityMetadata;
+    let territoryMetadata: EntityMetadata;
 
     beforeAll(() => {
         let app = new MyApp();
@@ -42,6 +43,7 @@ describe('entity service', () => {
         employeeMetadata = app.entityMetadatas.get(Employee);
         categoryMetadata = app.entityMetadatas.get(Category);
         customerMetadata = app.entityMetadatas.get(Customer);
+        territoryMetadata = app.entityMetadatas.get(Territory);
     });
 
     it('should convert query params for plan properties', async () => {
@@ -706,6 +708,25 @@ describe('entity service', () => {
                         }
                     }
                 ]
+            }
+        })
+    });
+
+    it('should convert query chain filter', async () => {
+        let queryParams: QueryParams = {
+            needAdjust: true,
+            filter: {
+                "categories.id": "000000000000000000000001",
+                "detail.id": "000000000000000000000001"
+            }
+        };
+
+        service["runner"]["adjustParams"](territoryMetadata, queryParams);
+
+        expect(queryParams).toEqual({
+            filter: {
+                "categories.id": new ObjectId("000000000000000000000001"),
+                "detail.id": new ObjectId("000000000000000000000001")
             }
         })
     });

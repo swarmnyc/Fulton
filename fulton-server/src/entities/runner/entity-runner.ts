@@ -8,7 +8,9 @@ import { EntityMetadata } from 'typeorm/metadata/EntityMetadata';
 import { Helper } from '../../helpers';
 import { Repository } from "typeorm";
 import { fultonDebug } from '../../helpers/debug';
+import { EmbeddedMetadata } from "typeorm/metadata/EmbeddedMetadata";
 
+let nameChainReg = /^(.+?)\.(.*)$/
 let funcReg = /^((?:num)|(?:int)|(?:date)|(?:bool)|(?:ObjectId))\((.+)\)$/
 
 /** the real runner of entity service, it can be Mongo runner or Sql Runner */
@@ -42,7 +44,7 @@ export abstract class EntityRunner {
     }
 
     count<TEntity>(repository: Repository<TEntity>, queryParams?: QueryParams): Promise<number> {
-        let error = this.adjustParams(repository.metadata, queryParams, true);
+        let error = this.adjustParams(repository.metadata, queryParams);
         if (error) {
             return Promise.reject(error);
         }
@@ -71,7 +73,7 @@ export abstract class EntityRunner {
     }
 
     updateMany<TEntity>(repository: Repository<TEntity>, filter: any, update: any): Promise<number> {
-        let error = this.adjustParams(repository.metadata, { filter: filter }, true);
+        let error = this.adjustParams(repository.metadata, { filter: filter, needAdjust: true });
         if (error) {
             return Promise.reject(error);
         }
@@ -90,7 +92,7 @@ export abstract class EntityRunner {
     }
 
     deleteMany<TEntity>(repository: Repository<TEntity>, filter: any): Promise<number> {
-        let error = this.adjustParams(repository.metadata, { filter: filter }, true);
+        let error = this.adjustParams(repository.metadata, { filter: filter, needAdjust: true });
         if (error) {
             return Promise.reject(error);
         }
@@ -101,7 +103,7 @@ export abstract class EntityRunner {
     /** 
      * adjust filter, because some properties are miss type QueryString is always string, but some params int or date
      */
-    protected adjustParams<T>(metadata: EntityMetadata, params: QueryParams, onlyFilter: boolean = false): FultonError {
+    protected adjustParams<T>(metadata: EntityMetadata, params: QueryParams): FultonError {
         // only adjust if it needs
         if (params && params.needAdjust) {
             let errorTracker = new FultonStackError("invalid_query_parameters");
@@ -124,7 +126,7 @@ export abstract class EntityRunner {
      * adjust filter, because some properties are miss type QueryString is always string, but some params int or date
      * support some mongo query operators https://docs.mongodb.com/manual/reference/operator/query/
      */
-    adjustFilter<T>(metadata: EntityMetadata, filter: any, targetColumn: ColumnMetadata, errorTracker: FultonStackError, level: number = 0): void {
+    adjustFilter<T>(metadata: EntityMetadata | EmbeddedMetadata, filter: any, targetColumn: ColumnMetadata, errorTracker: FultonStackError, level: number = 0): void {
         if (typeof filter != "object") {
             return;
         }
@@ -201,13 +203,33 @@ export abstract class EntityRunner {
                         break;
                 }
             } else {
-                let embeddedMetadata = metadata ? metadata.findEmbeddedWithPropertyPath(name) : null;
+                let originName = name
+                let chainMatch = nameChainReg.exec(name)
+                if (chainMatch) {
+                    // "for name1.name2"
+                    name = chainMatch[1]
+
+                    value = {
+                        [chainMatch[2]]: value
+                    }
+                }
+
+                let embeddedMetadata: EmbeddedMetadata;
+
+                if (metadata instanceof EntityMetadata) {
+                    embeddedMetadata = metadata ? metadata.findEmbeddedWithPropertyPath(name) : null
+                }
 
                 if (embeddedMetadata) {
                     // for embedded object column
-                    let targetMetadata = this.entityMetadatas.get(embeddedMetadata.type as Type);
+                    let targetMetadata = this.entityMetadatas.get(embeddedMetadata.type as Type) || embeddedMetadata;
                     if (targetMetadata) {
-                        this.adjustFilter(targetMetadata, value, null, errorTracker);
+                        this.adjustFilter(targetMetadata, value, null, errorTracker, level + 1);
+
+                        if (chainMatch) {
+                            // rollback the update
+                            filter[originName] = value[chainMatch[2]]
+                        }
                     }
                 } else {
                     // for normal column
@@ -222,7 +244,7 @@ export abstract class EntityRunner {
                                     // for sql relationships
                                     targetMetadata = columnMetadata.relationMetadata.inverseEntityMetadata;
                                     level = level + 1;
-                                } else if (metadata.relatedToMetadata[name]) {
+                                } else if (metadata instanceof EntityMetadata && metadata.relatedToMetadata[name]) {
                                     // for mongo relationships
                                     targetMetadata = this.entityMetadatas.get(metadata.relatedToMetadata[name]);
                                     columnMetadata = null;
@@ -230,10 +252,15 @@ export abstract class EntityRunner {
                                 }
 
                                 this.adjustFilter(targetMetadata, value, columnMetadata, errorTracker, level);
+
+                                if (chainMatch) {
+                                    // rollback the update
+                                    filter[originName] = value[chainMatch[2]]
+                                }
                             }
                         } else {
                             // { filter: { name: value }}
-                            filter[name] = this.convertValue(columnMetadata, value, errorTracker);
+                            filter[originName] = this.convertValue(columnMetadata, value, errorTracker);
                         }
 
                         if (level == 0) {
@@ -245,7 +272,7 @@ export abstract class EntityRunner {
                         this.adjustFilter(null, value, null, errorTracker, level + 1);
                     } else if (typeof value == "string") {
                         // try to convert string
-                        filter[name] = this.convertValue(columnMetadata, value, errorTracker);
+                        filter[originName] = this.convertValue(columnMetadata, value, errorTracker);
                     }
                 }
             }
@@ -337,12 +364,16 @@ export abstract class EntityRunner {
 
     protected abstract deleteManyCore<TEntity>(repository: Repository<TEntity>, query: any): Promise<number>;
 
-    protected getColumnMetadata(metadata: EntityMetadata, name: string): ColumnMetadata {
+    protected getColumnMetadata(metadata: EntityMetadata | EmbeddedMetadata, name: string): ColumnMetadata {
         if (metadata && name) {
-            if ((name == "id" || name == "_id")) {
-                return metadata.primaryColumns[0];
+            if (metadata instanceof EntityMetadata) {
+                if ((name == "id" || name == "_id")) {
+                    return metadata.primaryColumns[0];
+                } else {
+                    return metadata.ownColumns.find((col) => col.propertyName == name);
+                }
             } else {
-                return metadata.ownColumns.find((col) => col.propertyName == name);
+                return metadata.columns.find((col) => col.propertyName == name);
             }
         }
     }

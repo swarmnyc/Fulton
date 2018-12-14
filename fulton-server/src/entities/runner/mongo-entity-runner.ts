@@ -152,7 +152,7 @@ export class MongoEntityRunner extends EntityRunner {
 
     protected extendedConvertValue(metadata: string | ColumnMetadata, value: any, errorTracker: FultonStackError): any {
         if (metadata != null && value != null) {
-            let type;
+            let type: any;
             if (metadata instanceof ColumnMetadata) {
                 type = metadata.type;
 
@@ -163,7 +163,7 @@ export class MongoEntityRunner extends EntityRunner {
                 type = metadata;
             }
 
-            if (("ObjectId".same(type)) && value.constructor.name != "ObjectID") {
+            if ((type == ObjectId || "ObjectId".same(type)) && value.constructor.name != "ObjectID") {
                 try {
                     return new ObjectId(value);
                 } catch  {
@@ -378,7 +378,7 @@ export class MongoEntityRunner extends EntityRunner {
     }
 
     private convertUpdate(input: any): any {
-        Object.getOwnPropertyNames(input).forEach((name)=>{
+        Object.getOwnPropertyNames(input).forEach((name) => {
             if (!name.startsWith("$")) {
                 if (input["$set"] == null) {
                     input["$set"] = {}

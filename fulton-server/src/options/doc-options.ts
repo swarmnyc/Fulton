@@ -37,16 +37,5 @@ export class DocOptions extends BaseOptions<DocOptions> {
 
     init?(): void {
         this.enabled = Env.getBoolean(`${this.appName}.options.docs.enabled`, this.enabled);
-
-        if (this.info == null) {
-            // TODO: get more information
-            let info = require(global.process.cwd() + "/package.json");
-
-            this.info = {
-                title: info.displayName || info.name,
-                description: info.description,
-                version: info.version
-            }
-        }
     }
 }

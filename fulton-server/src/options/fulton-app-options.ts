@@ -228,7 +228,11 @@ export class FultonAppOptions {
      * get env value by add prefix {appName}.options.
      * @param name the name of the option
      */
-    getOption(name: string): string {
-        return process.env[`${this.appName}.options.${name}`]
+    getOption(name: string, fromApp: boolean = false): string {
+        if (fromApp) {
+            return process.env[`${this.appName}.${name}`]
+        } else {
+            return process.env[`${this.appName}.options.${name}`]
+        }
     }
 }

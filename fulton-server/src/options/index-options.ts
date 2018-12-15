@@ -27,9 +27,5 @@ export class IndexOptions extends BaseOptions<IndexOptions> {
 
     init?(): void {
         this.enabled = Env.getBoolean(`${this.appName}.options.index.enabled`, this.enabled)
-
-        if (this.message == null && this.handler == null && this.filepath == null) {
-            this.message = `${this.appName} works.`
-        }
     }
 }

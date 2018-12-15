@@ -34,6 +34,11 @@ export interface IFultonApp {
     readonly appName: string;
 
     /**
+     * app version, the value is from the version of package.json or env["${appName}.version"].
+     */
+    readonly appVersion: string;
+
+    /**
      * app mode.
      */
     readonly mode: AppMode;
@@ -52,7 +57,6 @@ export interface IFultonApp {
      * options for Fulton
      */
     options: FultonAppOptions;
-
 
     /**
      * the EventEmitter, see EventKeys for all the events
@@ -163,6 +167,8 @@ export abstract class FultonApp implements IFultonApp {
 
     appName: string;
 
+    appVersion: string;
+
     express: Express;
 
     container: DiContainer;
@@ -199,6 +205,13 @@ export abstract class FultonApp implements IFultonApp {
         this.entityMetadatas = new Map();
         this.dbConnections = [];
         this.routers = [];
+
+        this.appVersion = this.options.getOption("version", true)
+        if (this.appVersion == null) {
+            this.appVersion = require(global.process.cwd() + "/package.json").version
+        }
+
+        console.log(this.appVersion)
     }
 
     async init(): Promise<void> {
@@ -514,6 +527,10 @@ export abstract class FultonApp implements IFultonApp {
         } else if (this.options.index.message) {
             this.express.all("/", (res, req) => {
                 req.send(this.options.index.message);
+            });
+        } else {
+            this.express.all("/", (res, req) => {
+                req.send(`${this.appName}@${this.appVersion} works.`);
             });
         }
 

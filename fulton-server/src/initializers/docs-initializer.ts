@@ -13,6 +13,17 @@ module.exports = function (app: FultonApp) {
     let options = app.options.docs;
     let docs: OpenApiSpec;
 
+    if (options.info == null) {
+        // TODO: get more information
+        let info = require(global.process.cwd() + "/package.json");
+
+        options.info = {
+            title: info.displayName || info.name,
+            description: info.description,
+            version: app.appVersion
+        }
+    }
+
     if (options.docsFilePath) {
         docs = JSON.parse(fs.readFileSync(options.docsFilePath).toString());
     } else {
@@ -302,7 +313,7 @@ function generateAuthDefinitions(app: FultonApp, docs: OpenApiSpec) {
         let requirePath = toPath(options.forgotPassword.requirePath);
 
         docs.paths[requirePath] = {
-            post:{
+            post: {
                 summary: "forgot-password",
                 description: "require reset password by sending username or email to get reset token and code.",
                 tags: ["Identity"],
@@ -332,7 +343,7 @@ function generateAuthDefinitions(app: FultonApp, docs: OpenApiSpec) {
         let verifyPath = toPath(options.forgotPassword.verifyPath);
 
         docs.paths[verifyPath] = {
-            post:{
+            post: {
                 summary: "verify-reset-password",
                 description: "verify token and code",
                 tags: ["Identity"],
@@ -356,7 +367,7 @@ function generateAuthDefinitions(app: FultonApp, docs: OpenApiSpec) {
         let resetPath = toPath(options.forgotPassword.resetPath);
 
         docs.paths[resetPath] = {
-            post:{
+            post: {
                 summary: "reset-password",
                 description: "let the user reset password",
                 tags: ["Identity"],
@@ -384,7 +395,7 @@ function generateAuthDefinitions(app: FultonApp, docs: OpenApiSpec) {
                     }
                 ]
             }
-            
+
         };
     }
 

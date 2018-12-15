@@ -223,4 +223,12 @@ export class FultonAppOptions {
             }
         })
     }
+
+    /**
+     * get env value by add prefix {appName}.options.
+     * @param name the name of the option
+     */
+    getOption(name: string): string {
+        return process.env[`${this.appName}.options.${name}`]
+    }
 }

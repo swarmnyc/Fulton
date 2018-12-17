@@ -71,7 +71,7 @@ export class LoggingOptions extends BaseOptions<LoggingOptions> {
         if (this.httpLoggerOptions == null) {
             this.httpLoggerOptions = {
                 console: {
-                    colorize: true,
+                    colorize: this.defaultLoggerColorized,
                     level: "info",
                     showLevel: false,
                     label: "Http"

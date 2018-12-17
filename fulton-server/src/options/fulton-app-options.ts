@@ -1,6 +1,6 @@
 import * as lodash from 'lodash';
 import { Middleware } from "../alias";
-import { Provider } from '../helpers';
+import { Provider, Env } from '../helpers';
 import { IdentityOptions } from '../identity/identity-options';
 import { AppMode, Type } from '../interfaces';
 import { CacheOptions } from './cache-options';
@@ -230,9 +230,9 @@ export class FultonAppOptions {
      */
     getOption(name: string, fromApp: boolean = false): string {
         if (fromApp) {
-            return process.env[`${this.appName}.${name}`]
+            return Env.get(`${this.appName}.${name}`)
         } else {
-            return process.env[`${this.appName}.options.${name}`]
+            return Env.get(`${this.appName}.options.${name}`)
         }
     }
 }

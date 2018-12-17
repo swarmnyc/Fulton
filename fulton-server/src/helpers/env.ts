@@ -5,7 +5,18 @@ import { Helper } from "./helper";
  */
 export let Env = {
     get(name: string, defaultValue?: string): string {
-        return process.env[name] || defaultValue;
+        var name = name.replace(/\./g, "[._]")
+        var reg = new RegExp(`^${name}$`, "i")
+        var value;
+
+        for (const key in process.env) {
+            if (reg.test(key)){
+                value = process.env[key]
+                break;
+            }
+        }
+
+        return value || defaultValue;
     },
 
     /**
@@ -44,7 +55,7 @@ export let Env = {
      * parse all env, if it matches the pattern, put the value into options
      */
     parse(pattern: RegExp, options: any): void {
-         
+
         for (const key in process.env) {
             let propName, value;
             let match = pattern.exec(key)

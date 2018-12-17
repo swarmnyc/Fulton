@@ -210,8 +210,6 @@ export abstract class FultonApp implements IFultonApp {
         if (this.appVersion == null) {
             this.appVersion = require(global.process.cwd() + "/package.json").version
         }
-
-        console.log(this.appVersion)
     }
 
     async init(): Promise<void> {

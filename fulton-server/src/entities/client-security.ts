@@ -1,6 +1,6 @@
 import { Column, Entity, PrimaryColumn } from 'typeorm';
 
-@Entity("client-securities")
+@Entity("client_securities")
 export class ClientSecurity {
     @PrimaryColumn()
     id: any;

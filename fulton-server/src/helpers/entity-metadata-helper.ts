@@ -1,4 +1,4 @@
-import { Type } from "../interfaces";
+import { Type } from "../types";
 import { EntityMetadata } from "typeorm/metadata/EntityMetadata";
 import { Connection, getMetadataArgsStorage } from "typeorm";
 import { ColumnMetadata } from "typeorm/metadata/ColumnMetadata";

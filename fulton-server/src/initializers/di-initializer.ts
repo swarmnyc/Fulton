@@ -1,6 +1,6 @@
 import { Container, interfaces } from 'inversify';
 import { DiKeys, EventKeys } from '../keys';
-import { EntityServiceFactory, Type } from '../interfaces';
+import { EntityServiceFactory, Type } from '../types';
 import { IFultonApp } from '../fulton-app';
 
 module.exports = function (app: IFultonApp) {

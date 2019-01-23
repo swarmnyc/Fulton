@@ -1,4 +1,4 @@
-import { FindResult, QueryParams, Type, UpdateQuery } from '../../interfaces';
+import { FindResult, QueryParams, Type, UpdateQuery } from '../../types';
 import { injectable } from '../../alias';
 
 import { FultonError, FultonStackError } from "../../common";

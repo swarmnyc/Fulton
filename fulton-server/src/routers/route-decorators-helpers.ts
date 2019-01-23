@@ -1,6 +1,6 @@
 import { Middleware } from "../alias";
 import { Keys } from "../constants";
-import { AbstractType, PathIdentifier, RouterActionDocOptions, RouterDocOptions, Type } from '../interfaces';
+import { AbstractType, PathIdentifier, RouterActionDocOptions, RouterDocOptions, Type } from '../types';
 
 export interface RouterMetadata {
     path: PathIdentifier,

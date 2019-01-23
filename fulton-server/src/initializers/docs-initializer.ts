@@ -5,7 +5,7 @@ import { MimeTypes } from '../constants';
 import { FultonApp } from '../fulton-app';
 import { Helper } from '../helpers/helper';
 import { OauthStrategyOptions } from '../identity/options/oauth-strategy-options';
-import { PathIdentifier, Type } from '../interfaces';
+import { PathIdentifier, Type } from '../types';
 import { EventKeys } from '../keys';
 import { EntityRouter } from '../routers/entity-router';
 

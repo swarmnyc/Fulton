@@ -3,7 +3,7 @@ import { ConnectionOptions } from "typeorm";
 import { ClientSecurity } from '../entities/client-security';
 import { getRelatedToMetadata } from '../entities/entity-decorators-helpers';
 import { FultonApp } from '../fulton-app';
-import { Type } from '../interfaces';
+import { Type } from '../types';
 import { EventKeys } from "../keys";
 
 module.exports = async function (app: FultonApp): Promise<any> {

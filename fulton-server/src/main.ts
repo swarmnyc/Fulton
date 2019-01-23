@@ -2,7 +2,7 @@
 
 import "./load-modules"
 export * from "./alias";
-export * from "./interfaces";
+export * from "./types";
 export * from "./keys";
 
 export * from "./fulton-app";

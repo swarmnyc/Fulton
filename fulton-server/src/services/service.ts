@@ -1,7 +1,7 @@
 import { DiKeys } from '../keys';
 import { IFultonApp } from '../fulton-app';
 import { inject, injectable } from '../alias';
-import { IUser } from '../identity/interfaces';
+import { IUser } from '../identity/types';
 
 /**
  * Fulton Service

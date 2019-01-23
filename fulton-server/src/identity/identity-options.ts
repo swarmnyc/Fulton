@@ -1,9 +1,9 @@
 import * as lodash from 'lodash';
 import { Middleware } from "../alias";
 import { Env } from '../helpers/env';
-import { AppMode, Type } from '../interfaces';
+import { AppMode, Type } from '../types';
 import { Options } from '../options/options';
-import { IIdentityRouter, IUser, IIdentityService, Strategy } from './interfaces';
+import { IIdentityRouter, IUser, IIdentityService, Strategy } from './types';
 import { AccessTokenOptions } from './options/access-token-options';
 import { BearerStrategyOptions } from './options/bearer-strategy-options';
 import { FacebookStrategyOptions } from './options/facebook-strategy-options';

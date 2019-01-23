@@ -4,7 +4,7 @@ import { FultonApp } from "../fulton-app";
 import { FultonAppOptions } from "../options/fulton-app-options";
 import { HttpTester } from "../test/http-tester";
 import { defaultLoginStrategyVerifier, defaultOauthStrategyVerifierFn } from './identity-defaults';
-import { AccessToken } from './interfaces';
+import { AccessToken } from './types';
 import { OauthStrategyOptions } from './options/oauth-strategy-options';
 import { GoogleStrategy } from "./strategies/google-strategy";
 

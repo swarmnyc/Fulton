@@ -1,6 +1,6 @@
 import * as redis from "redis";
 import { FultonLog } from "../../fulton-log";
-import { ICacheService, ICacheServiceFactory } from "../../interfaces";
+import { ICacheService, ICacheServiceFactory } from "../../types";
 import { Service } from "../service";
 
 export default class RedisCacheServiceFactory extends Service implements ICacheServiceFactory {

@@ -1,6 +1,6 @@
 import { Request } from '../alias';
 import { FultonLog } from '../fulton-log';
-import { AccessToken, IOauthProfile, IUser, StrategyVerifier, StrategyVerifyDone } from './interfaces';
+import { AccessToken, IOauthProfile, IUser, StrategyVerifier, StrategyVerifyDone } from './types';
 import { OauthStrategyOptions } from './options/oauth-strategy-options';
 
 export function defaultLoginStrategyVerifier(req: Request, username: string, password: string, done: StrategyVerifyDone) {

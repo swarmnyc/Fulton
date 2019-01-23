@@ -1,8 +1,8 @@
 import { Middleware } from "../../alias";
 import { Env } from '../../helpers';
-import { PathIdentifier } from '../../interfaces';
+import { PathIdentifier } from '../../types';
 import { BaseOptions } from '../../options/options';
-import { AuthenticateOptions } from '../interfaces';
+import { AuthenticateOptions } from '../types';
 
 /**
  * the setting for logout to revoke access token

@@ -1,6 +1,6 @@
 import { Env } from '../helpers';
 import { BaseOptions } from './options';
-import { Type, IEmailService } from '../interfaces';
+import { Type, IEmailService } from '../types';
 
 export class EmailOptions extends BaseOptions<EmailOptions>{
     /**

@@ -4,7 +4,7 @@ import { EventKeys } from '../keys';
 import { IFultonApp } from '../fulton-app';
 import { MimeTypes } from '../constants';
 import { queryParamsParser } from '../middlewares/query-params-parser';
-import { Type } from '../interfaces';
+import { Type } from '../types';
 
 module.exports = function (app: IFultonApp) {
     if (app.options.formatter.json) {

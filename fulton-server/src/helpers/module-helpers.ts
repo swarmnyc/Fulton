@@ -1,7 +1,7 @@
 import * as fs from "fs"
 import * as path from "path"
 
-import { Type, AbstractType } from "../interfaces";
+import { Type, AbstractType } from "../types";
 
 const supportExtensions = [".js", ".ts"];
 

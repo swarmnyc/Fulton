@@ -1,5 +1,5 @@
 import { Env } from '../helpers';
-import { Type } from '../interfaces';
+import { Type } from '../types';
 import { BaseOptions } from './options';
 import { Middleware } from "../alias";
 

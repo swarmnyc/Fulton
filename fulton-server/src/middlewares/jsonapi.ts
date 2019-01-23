@@ -6,9 +6,9 @@ import { FultonApp } from '../fulton-app';
 import { Helper } from '../helpers/helper';
 import { JsonApiConverter, JsonApiData, JsonApiLinks, JsonApiRootLinks, JsonApiSerializeOptions, JsonApiTypeOptions } from '../helpers/jsonapi-converter';
 import { MimeTypes } from '../constants';
-import { OperationManyResult, OperationOneResult, Type } from '../interfaces';
+import { OperationManyResult, OperationOneResult, Type } from '../types';
 import { Request, Response, NextFunction } from '../alias';
-import { OperationResultPagination } from '../interfaces';
+import { OperationResultPagination } from '../types';
 import { Router } from '../routers/router';
 
 module.exports = function (app: FultonApp) {

@@ -1,6 +1,6 @@
 import { BaseOptions } from '../../options/options';
 import { Env } from '../../helpers';
-import { Dict } from '../../interfaces';
+import { Dict } from '../../types';
 
 export class IdentityEmailNotificationOptions extends BaseOptions<IdentityEmailNotificationOptions> {
     /**

@@ -1,5 +1,5 @@
 import { Env } from '../helpers';
-import { SmsNotificationProvider, Type } from '../interfaces';
+import { SmsNotificationProvider, Type } from '../types';
 import { BaseOptions } from './options';
 
 export interface SmsNotificationProviderConfigs {

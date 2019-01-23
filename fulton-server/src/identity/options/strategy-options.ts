@@ -1,6 +1,6 @@
-import { HttpMethod, PathIdentifier } from '../../interfaces';
+import { HttpMethod, PathIdentifier } from '../../types';
 import { BaseOptions } from '../../options/options';
-import { AuthenticateOptions, StrategyVerifier } from '../interfaces';
+import { AuthenticateOptions, StrategyVerifier } from '../types';
 
 export class StrategyOptions extends BaseOptions<StrategyOptions> {
     /**

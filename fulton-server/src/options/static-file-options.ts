@@ -1,7 +1,7 @@
 import { ServeStaticOptions } from 'serve-static';
 import { Middleware } from "../alias";
 import { Env } from '../helpers';
-import { PathIdentifier } from '../interfaces';
+import { PathIdentifier } from '../types';
 import { BaseOptions } from './options';
 
 export class StaticFilesOptions extends BaseOptions<StaticFilesOptions> {

@@ -1,5 +1,5 @@
 import * as lodash from 'lodash';
-import { FultonErrorObject, FultonErrorDetail, FultonErrorDetailItem } from '../interfaces';
+import { FultonErrorObject, FultonErrorDetail, FultonErrorDetailItem } from '../types';
 
 export enum ErrorCodes {
     Unknown = "unknown_error",

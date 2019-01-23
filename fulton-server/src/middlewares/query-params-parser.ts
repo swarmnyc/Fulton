@@ -1,4 +1,4 @@
-import { QueryParams, QueryColumnOptions } from "../interfaces";
+import { QueryParams, QueryColumnOptions } from "../types";
 import { Request, Response, NextFunction } from "../alias";
 import { Helper } from "../helpers/helper";
 

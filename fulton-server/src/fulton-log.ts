@@ -1,7 +1,7 @@
 import * as winston from "winston";
 import { NPMLoggingLevel } from "winston";
 import { addProcessInfo } from './helpers/debug';
-import { Dict } from "./interfaces";
+import { Dict } from "./types";
 
 
 /**

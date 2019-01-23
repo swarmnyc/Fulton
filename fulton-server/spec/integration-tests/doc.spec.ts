@@ -2,7 +2,7 @@ import { Connection } from "typeorm";
 import { injectable } from "../../src/alias";
 import { getRelatedToMetadata } from '../../src/entities/entity-decorators-helpers';
 import { FultonApp } from '../../src/fulton-app';
-import { IEntityService, OperationManyResult, QueryParams, Type } from "../../src/interfaces";
+import { IEntityService, OperationManyResult, QueryParams, Type } from "../../src/types";
 import { FultonAppOptions } from '../../src/options/fulton-app-options';
 import { EntityRouter } from '../../src/routers/entity-router';
 import { entityRouter } from '../../src/routers/route-decorators';

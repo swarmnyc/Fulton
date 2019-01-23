@@ -1,6 +1,6 @@
 import { Middleware } from "../alias";
 import { Env } from '../helpers';
-import { CacheProvider, ICacheServiceFactory, Type } from '../interfaces';
+import { CacheProvider, ICacheServiceFactory, Type } from '../types';
 import { BaseOptions } from './options';
 
 export interface CacheProviderConfigs {

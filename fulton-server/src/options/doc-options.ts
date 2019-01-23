@@ -1,6 +1,6 @@
 import { InfoObject } from '@loopback/openapi-spec';
 import { Env } from '../helpers';
-import { PathIdentifier } from '../interfaces';
+import { PathIdentifier } from '../types';
 import { BaseOptions } from './options';
 
 export class DocOptions extends BaseOptions<DocOptions> {

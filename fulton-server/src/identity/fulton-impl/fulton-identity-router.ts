@@ -6,7 +6,7 @@ import { IFultonApp } from "../../fulton-app";
 import { FultonLog } from "../../fulton-log";
 import { Helper } from '../../helpers';
 import { IdentityOptions } from "../identity-options";
-import { IIdentityRouter, IUser, OauthAuthenticateOptions } from "../interfaces";
+import { IIdentityRouter, IUser, OauthAuthenticateOptions } from "../types";
 import { OauthStrategyOptions } from '../options/oauth-strategy-options';
 import { StrategyOptions } from '../options/strategy-options';
 

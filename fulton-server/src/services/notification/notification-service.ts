@@ -1,4 +1,4 @@
-import { IEmailService, INotificationService, IPushNotificationService, ISmsNotificationService, NotificationMessage } from '../../interfaces';
+import { IEmailService, INotificationService, IPushNotificationService, ISmsNotificationService, NotificationMessage } from '../../types';
 import { DiKeys } from '../../keys';
 import { NotificationOptions } from '../../options/notification-options';
 import { Service } from '../service';

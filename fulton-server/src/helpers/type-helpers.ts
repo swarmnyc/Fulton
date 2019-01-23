@@ -1,4 +1,4 @@
-import { Type, TypeIdentifier } from '../interfaces';
+import { Type, TypeIdentifier } from '../types';
 import { DiContainer } from '../alias';
 import { isFunction } from "util";
 

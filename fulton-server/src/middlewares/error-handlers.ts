@@ -11,7 +11,7 @@ export function defaultErrorHandler(err: any, req: Request, res: Response, next:
             { httpHeaders: req.headers, httpBody: req.body },
             err.stack || err);
 
-        res.sendStatus(500).end();
+        res.sendStatus(500);
     }
 }
 

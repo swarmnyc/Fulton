@@ -3,7 +3,7 @@ import { Repository } from "typeorm";
 import { injectable, Request, Response } from "../../src/alias";
 import { EntityService } from '../../src/entities/entity-service';
 import { FultonApp } from '../../src/fulton-app';
-import { OperationManyResult, OperationOneResult, QueryParams, Dict } from "../../src/interfaces";
+import { OperationManyResult, OperationOneResult, QueryParams, Dict } from "../../src/types";
 import { FultonAppOptions } from '../../src/options/fulton-app-options';
 import { EntityRouter } from '../../src/routers/entity-router';
 import { httpGet, router } from '../../src/routers/route-decorators';

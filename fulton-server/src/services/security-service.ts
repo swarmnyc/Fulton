@@ -1,6 +1,6 @@
 import { ClientSecurity } from '../entities/client-security';
 import { EntityService } from '../entities/entity-service';
-import { ISecurityService } from '../interfaces';
+import { ISecurityService } from '../types';
 import { Request } from '../alias';
 import { Service } from './service';
 import { OauthStrategyOptions } from "../identity/options/oauth-strategy-options";

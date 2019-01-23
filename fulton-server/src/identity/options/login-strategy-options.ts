@@ -1,6 +1,6 @@
 import * as lodash from 'lodash';
 import { Env } from '../../helpers';
-import { LocalStrategyVerifier } from '../interfaces';
+import { LocalStrategyVerifier } from '../types';
 import { StrategyOptions } from './strategy-options';
 
 /**

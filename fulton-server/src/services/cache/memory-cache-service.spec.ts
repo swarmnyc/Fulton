@@ -1,6 +1,6 @@
 import { sleep } from "../../../spec/helpers/test-helper";
 import { FultonApp } from "../../fulton-app";
-import { ICacheServiceFactory } from "../../interfaces";
+import { ICacheServiceFactory } from "../../types";
 import { DiKeys } from "../../keys";
 import { FultonAppOptions } from "../../options/fulton-app-options";
 

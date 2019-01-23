@@ -1,5 +1,5 @@
 import { Connection } from 'typeorm';
-import { Type } from '../../src/interfaces';
+import { Type } from '../../src/types';
 import { IFultonApp } from '../../src/fulton-app';
 import { getRelatedToMetadata } from '../../src/entities/entity-decorators-helpers';
 

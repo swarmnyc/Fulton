@@ -1,5 +1,5 @@
 import { EntityRouterMetadata, RouterMetadata, RouterActionMetadata } from "./route-decorators-helpers";
-import { HttpMethod, PathIdentifier, RouterActionDocOptions, RouterDocOptions, Type } from "../interfaces";
+import { HttpMethod, PathIdentifier, RouterActionDocOptions, RouterDocOptions, Type } from "../types";
 import { injectable, Middleware } from "../alias";
 import { Keys } from "../constants";
 import { isFunction } from "util";

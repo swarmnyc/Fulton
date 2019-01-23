@@ -1,5 +1,5 @@
 import { Env } from '../../helpers';
-import { IOauthProfile } from '../interfaces';
+import { IOauthProfile } from '../types';
 import { OauthStrategyOptions } from './oauth-strategy-options';
 
 /**

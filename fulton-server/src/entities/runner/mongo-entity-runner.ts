@@ -5,7 +5,7 @@ import { EntityMetadata } from 'typeorm/metadata/EntityMetadata';
 import { injectable } from '../../alias';
 import { FultonError } from '../../common';
 import { FultonStackError } from '../../common/fulton-error';
-import { FindResult, QueryColumnOptions, QueryParams } from '../../interfaces';
+import { FindResult, QueryColumnOptions, QueryParams } from '../../types';
 import { EntityRunner } from './entity-runner';
 
 interface IncludeOptions {

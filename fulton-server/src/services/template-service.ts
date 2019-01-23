@@ -1,5 +1,5 @@
 import * as lodash from 'lodash';
-import { ITemplateService } from '../interfaces';
+import { ITemplateService } from '../types';
 import { Service } from './service';
 import * as fs from 'fs';
 import { TemplateExecutor } from 'lodash';

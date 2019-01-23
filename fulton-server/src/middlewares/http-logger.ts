@@ -3,7 +3,7 @@ import { LoggerOptions } from "winston";
 import { Middleware, NextFunction, Request, Response } from "../alias";
 import { FultonLog } from "../fulton-log";
 import { addProcessInfo, fultonDebug } from '../helpers/debug';
-import { Dict } from "../interfaces";
+import { Dict } from "../types";
 
 // inspired from https://github.com/bithavoc/express-winston/blob/master/index.js
 

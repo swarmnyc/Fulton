@@ -6,7 +6,7 @@ import { EntityMetadata } from 'typeorm/metadata/EntityMetadata';
 import { injectable } from '../alias';
 import { FultonError, FultonStackError } from '../common/fulton-error';
 import { fultonDebug } from '../helpers/debug';
-import { ICacheService, IEntityService, OperationManyResult, QueryParams, Type, UpdateQuery } from '../interfaces';
+import { ICacheService, IEntityService, OperationManyResult, QueryParams, Type, UpdateQuery } from '../types';
 import { DiKeys } from '../keys';
 import { Service } from '../services';
 import { EntityRunner } from './runner/entity-runner';

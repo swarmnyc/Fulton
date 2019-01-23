@@ -1,4 +1,4 @@
-import { OperationManyResult, QueryParams, IEntityService, Type } from "../../src/interfaces";
+import { OperationManyResult, QueryParams, IEntityService, Type } from "../../src/types";
 import { injectable } from "../../src/alias";
 
 @injectable()

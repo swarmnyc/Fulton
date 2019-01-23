@@ -2,7 +2,7 @@ import * as lodash from 'lodash';
 import { FultonError } from '../common';
 import { FultonApp } from '../fulton-app';
 import { EventKeys, DiKeys } from '../keys';
-import { ISecurityService } from '../interfaces';
+import { ISecurityService } from '../types';
 
 module.exports = function (app: FultonApp) {
     if (lodash.some(app.options.security.middlewares)) {

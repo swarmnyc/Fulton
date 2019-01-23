@@ -1,4 +1,4 @@
-import { ICacheServiceFactory, ICacheService } from "../../interfaces";
+import { ICacheServiceFactory, ICacheService } from "../../types";
 import { Service } from "../service";
 import * as Cache from "lru-cache"
 

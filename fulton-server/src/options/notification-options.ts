@@ -1,5 +1,5 @@
 import { Env } from '../helpers/env';
-import { Dict, Type } from '../interfaces';
+import { Dict, Type } from '../types';
 import { EmailOptions } from './notification-email-options';
 import { PushNotificationOptions } from './notification-pn-options';
 import { SmsNotificationOptions } from './notification-sms-options';

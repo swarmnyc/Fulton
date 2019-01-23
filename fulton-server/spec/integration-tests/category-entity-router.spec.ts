@@ -1,6 +1,6 @@
 import * as lodash from 'lodash';
 import { FultonApp } from '../../src/fulton-app';
-import { OperationManyResult, OperationOneResult } from "../../src/interfaces";
+import { OperationManyResult, OperationOneResult } from "../../src/types";
 import { FultonAppOptions } from '../../src/options/fulton-app-options';
 import { EntityRouter } from '../../src/routers/entity-router';
 import { entityRouter } from '../../src/routers/route-decorators';

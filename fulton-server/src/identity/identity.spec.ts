@@ -5,7 +5,7 @@ import { FultonAppOptions } from "../options/fulton-app-options";
 import { httpGet, Router, router } from '../routers';
 import { HttpTester } from "../test/http-tester";
 import { authorizedByRole, authorizedByRoles } from './authorizes-middlewares';
-import { AccessToken, IFultonUser } from './interfaces';
+import { AccessToken, IFultonUser } from './types';
 
 @router("/test")
 export class TestRouter extends Router {

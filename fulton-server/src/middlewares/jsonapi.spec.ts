@@ -4,7 +4,7 @@ import { Employee } from '../../spec/entities/employee';
 import { Territory } from '../../spec/entities/territory';
 import { getRelatedToMetadata } from "../entities/entity-decorators-helpers";
 import { FultonApp } from '../fulton-app';
-import { IEntityService, OperationManyResult, QueryParams, Type, Dict } from "../interfaces";
+import { IEntityService, OperationManyResult, QueryParams, Type, Dict } from "../types";
 import { Request, Response } from "../alias";
 import { FultonAppOptions } from '../options/fulton-app-options';
 import { EntityRouter, entityRouter } from '../routers';

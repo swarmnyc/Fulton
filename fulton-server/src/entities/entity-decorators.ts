@@ -1,5 +1,5 @@
 import { column, objectIdColumn } from "./index";
-import { Type } from "../interfaces";
+import { Type } from "../types";
 import { RelatedToMetadata } from "./entity-decorators-helpers";
 import { Keys } from "../constants";
 import { ColumnOptions } from "typeorm";

@@ -2,7 +2,7 @@ import * as lodash from 'lodash';
 import { Middleware } from "../alias";
 import { Provider, Env } from '../helpers';
 import { IdentityOptions } from '../identity/identity-options';
-import { AppMode, Type } from '../interfaces';
+import { AppMode, Type } from '../types';
 import { CacheOptions } from './cache-options';
 import { CompressionOptions } from './compression-options';
 import { CorsOptions } from './cors-options';

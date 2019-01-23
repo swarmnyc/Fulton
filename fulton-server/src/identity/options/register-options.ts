@@ -1,7 +1,7 @@
 import { Env } from '../../helpers';
-import { PathIdentifier } from '../../interfaces';
+import { PathIdentifier } from '../../types';
 import { BaseOptions } from '../../options/options';
-import { AuthenticateOptions } from '../interfaces';
+import { AuthenticateOptions } from '../types';
 import { IdentityNotificationOptions } from './notification-options';
 
 /**

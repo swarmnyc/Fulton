@@ -1,5 +1,5 @@
 import { AwsClient } from '../../helpers/aws-client';
-import { ISmsNotificationService, SmsMessage } from '../../interfaces';
+import { ISmsNotificationService, SmsMessage } from '../../types';
 import { Service } from '../service';
 
 export default class AwsSmsNotificationService extends Service implements ISmsNotificationService {

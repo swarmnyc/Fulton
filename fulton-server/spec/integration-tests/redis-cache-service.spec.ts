@@ -3,7 +3,7 @@ import { EntityService } from '../../src/entities/entity-service';
 import { FultonApp } from '../../src/fulton-app';
 import { FultonUser } from '../../src/identity/fulton-impl/fulton-user';
 import { FultonIdentityService } from '../../src/identity/fulton-impl/fulton-identity-service';
-import { ICacheServiceFactory } from '../../src/interfaces';
+import { ICacheServiceFactory } from '../../src/types';
 import { DiKeys } from '../../src/keys';
 import { FultonAppOptions } from '../../src/options/fulton-app-options';
 import { Category } from '../entities/category';

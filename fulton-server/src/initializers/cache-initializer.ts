@@ -1,6 +1,6 @@
 import * as lodash from 'lodash';
 import { FultonApp } from '../fulton-app';
-import { ICacheServiceFactory } from '../interfaces';
+import { ICacheServiceFactory } from '../types';
 import { DiKeys } from '../keys';
 
 module.exports = function (app: FultonApp) {

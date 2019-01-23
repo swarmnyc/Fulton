@@ -1,6 +1,6 @@
 import { IncomingMessage } from 'http';
 import * as https from 'https';
-import { Dict } from '../interfaces';
+import { Dict } from '../types';
 import { Helper } from './helper';
 
 import qs = require('qs');

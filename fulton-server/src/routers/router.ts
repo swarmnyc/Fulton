@@ -9,85 +9,83 @@ import { FullRouterMetadata, getFullRouterActionMetadata } from "./route-decorat
 
 /**
  * Express Router Wrap
- * 
+ *
  * ## example
- * 
+ *
  * ```
  * @router("/Food")
  * export class FoodRouter extends Router {
  *    @httpGet()
- *    list(req: Request, res: Response) { 
+ *    list(req: Request, res: Response) {
  *    }
- * 
+ *
  *    @httpGet("/:id")
- *    detail(req: Request, res: Response, next: NextFunction) { 
+ *    detail(req: Request, res: Response, next: NextFunction) {
  *    }
- * 
+ *
  *    @httpPost("/")
- *    create(req: Request, res: Response) { 
+ *    create(req: Request, res: Response) {
  *    }
  * }
  * ```
- * 
+ *
  */
 @injectable()
 export abstract class Router {
-    public metadata: FullRouterMetadata
-    protected router: Router;
+	public metadata: FullRouterMetadata
 
-    @inject(DiKeys.FultonApp)
-    protected app: IFultonApp;
+	@inject(DiKeys.FultonApp)
+	protected app: IFultonApp;
 
-    constructor() {
-        this.loadMetadata();
-    }
+	constructor() {
+		this.loadMetadata();
+	}
 
-    protected loadMetadata() {
-        this.metadata = getFullRouterActionMetadata(this.constructor, Router);
-    }
+	protected loadMetadata() {
+		this.metadata = getFullRouterActionMetadata(this.constructor, Router);
+	}
 
-    init() {
-        //TODO: verify metadata;
-        this.onInit();
+	init() {
+		//TODO: verify metadata;
+		this.onInit();
 
-        assert(this.metadata.router, `${this.constructor.name} don't have @router(path) decorator`)
-        if (this.metadata.router)
+		assert(this.metadata.router, `${this.constructor.name} don't have @router(path) decorator`)
 
-            var router = ExpressRouter();
+		var router = ExpressRouter();
 
-        if (lodash.some(this.metadata.router.middlewares)) {
-            router.use(...this.metadata.router.middlewares);
-        }
+		if (this.metadata.router && lodash.some(this.metadata.router.middlewares)) {
+			router.use(...this.metadata.router.middlewares);
+		}
 
-        this.metadata.actions.forEach((action) => {
-            let routeMethod: IRouterMatcher<any> = lodash.get(router, action.method);
-            let middlewares: Middleware[] = [];
+		this.metadata.actions.forEach((action) => {
+			let routeMethod: IRouterMatcher<any> = lodash.get(router, action.method);
+			let middlewares: Middleware[] = [];
 
-            if (lodash.some(action.middlewares)) {
-                middlewares.push(...action.middlewares);
-            }
+			if (lodash.some(action.middlewares)) {
+				middlewares.push(...action.middlewares);
+			}
 
-            let method: Middleware = lodash.get(this, action.property);
-            method = method.bind(this);
-            middlewares.push(method);
+			let method: Middleware = lodash.get(this, action.property);
+			method = method.bind(this);
+			middlewares.push(method);
 
-            routeMethod.call(router, action.path, middlewares)
-        })
+			routeMethod.call(router, action.path, middlewares)
+		})
 
-        if (this.metadata.errorhandler) {
-            router.use(lodash.get(router, this.metadata.errorhandler));
-        }
+		if (this.metadata.errorhandler) {
+			router.use(lodash.get(router, this.metadata.errorhandler));
+		}
 
-        this.app.express.use(this.metadata.router.path, router);
-    }
+		this.app.express.use(this.metadata.router.path, router);
+	}
 
     /**
-     * custom function for initialization 
+     * custom function for initialization
      */
-    protected onInit() { }
+	protected onInit() { }
 
     /**
      * custom function for documentation
      */
-    protected onDocument(docs: OpenApiSpec) { }
+	protected onDocument(docs: OpenApiSpec) { }
 }

@@ -3,7 +3,7 @@ import * as passport from 'passport';
 import { IFultonApp } from '../fulton-app';
 import { EventKeys } from '../keys';
 import { defaultAuthenticate } from './authenticate-middlewares';
-import { IIdentityRouter } from './interfaces';
+import { IIdentityRouter } from './types';
 import { OauthStrategyOptions } from './options/oauth-strategy-options';
 import { StrategyOptions } from './options/strategy-options';
 

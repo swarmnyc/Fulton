@@ -1,6 +1,6 @@
 import { Env } from '../helpers';
 import { BaseOptions } from './options';
-import { Type, PushNotificationProvider } from '../interfaces';
+import { Type, PushNotificationProvider } from '../types';
 
 export interface FcmPushNotificationConfig {
     type?: string

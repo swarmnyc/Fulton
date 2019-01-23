@@ -1,6 +1,6 @@
 import { FultonApp } from '../../src/fulton-app';
 import { Request, Response } from "../../src/alias";
-import { OperationManyResult, OperationOneResult, QueryParams } from "../../src/interfaces";
+import { OperationManyResult, OperationOneResult, QueryParams } from "../../src/types";
 import { FultonAppOptions } from '../../src/options/fulton-app-options';
 import { EntityRouter } from '../../src/routers/entity-router';
 import { entityRouter, httpGet } from '../../src/routers/route-decorators';

@@ -1,5 +1,5 @@
 import { Middleware, NextFunction, Request, Response } from "../alias";
-import { AuthenticateOptions } from "./interfaces";
+import { AuthenticateOptions } from "./types";
 
 let passport:any 
 function requirePassport(){

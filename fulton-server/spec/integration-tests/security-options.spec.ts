@@ -1,7 +1,7 @@
 import { DiKeys, EventKeys } from '../../src/keys';
 import { FultonApp } from '../../src/fulton-app';
 import { FultonAppOptions } from '../../src/options/fulton-app-options';
-import { IEmailService } from '../../src/interfaces';
+import { IEmailService } from '../../src/types';
 
 import { ClientSecurity } from '../../src/entities/client-security';
 import { EntityService } from '../../src/entities/entity-service';

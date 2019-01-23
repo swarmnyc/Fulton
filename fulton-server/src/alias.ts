@@ -1,8 +1,8 @@
 import * as express from "express";
 import { inject as inversifyInject, injectable as inversifyInjectable, optional as inversifyOptional, interfaces } from "inversify";
-import { IUser, IIdentityService } from "./identity/interfaces";
+import { IUser, IIdentityService } from "./identity/types";
 import { IFultonApp } from "./fulton-app";
-import { QueryParams } from "./interfaces";
+import { QueryParams } from "./types";
 
 /**
  * alias for inversify.injectable

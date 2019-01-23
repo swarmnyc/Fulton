@@ -3,7 +3,7 @@ import { JWT } from 'google-auth-library';
 import { Credentials } from 'google-auth-library/build/src/auth/credentials';
 import * as https from 'https';
 import { FultonLog } from '../../fulton-log';
-import { IPushNotificationService } from '../../interfaces';
+import { IPushNotificationService } from '../../types';
 import { PushNotificationProviderConfigs } from '../../options/notification-pn-options';
 import { Service } from '../service';
 

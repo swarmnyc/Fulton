@@ -3,7 +3,7 @@ import { FultonApp } from '../../src/fulton-app';
 import * as cryptoHelper from '../../src/helpers/crypto-helper';
 import { FultonUser, FultonUserAccessToken, FultonUserClaims } from "../../src/identity/fulton-impl/fulton-user";
 import { FultonIdentityService } from '../../src/identity/fulton-impl/fulton-identity-service';
-import { AccessToken, IOauthProfile } from '../../src/identity/interfaces';
+import { AccessToken, IOauthProfile } from '../../src/identity/types';
 import { Request, Response } from "../../src/alias";
 import { FultonAppOptions } from '../../src/options/fulton-app-options';
 import { HttpResult, HttpTester } from "../../src/test/http-tester";

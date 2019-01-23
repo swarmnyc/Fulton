@@ -8,7 +8,7 @@ import { Territory, TerritoryDetail } from '../../spec/entities/territory';
 import { createFakeConnection } from '../../spec/helpers/entity-helper';
 import { FultonError, FultonStackError } from '../common/fulton-error';
 import { FultonApp } from '../fulton-app';
-import { QueryParams } from '../interfaces';
+import { QueryParams } from '../types';
 import { FultonAppOptions } from '../options/fulton-app-options';
 import { EntityService } from './entity-service';
 import { MongoEntityRunner } from './runner/mongo-entity-runner';

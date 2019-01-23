@@ -2,7 +2,7 @@ import * as mailer from 'nodemailer';
 import { Transporter } from 'nodemailer';
 import { Options as MailOptions } from 'nodemailer/lib/mailer';
 import { FultonLog } from '../../fulton-log';
-import { EmailMessage, IEmailService, ITemplateService } from '../../interfaces';
+import { EmailMessage, IEmailService, ITemplateService } from '../../types';
 import { DiKeys } from '../../keys';
 import { Service } from '../service';
 

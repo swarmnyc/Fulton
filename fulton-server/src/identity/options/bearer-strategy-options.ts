@@ -1,6 +1,6 @@
 import { Env } from '../../helpers';
 import { StrategyOptions } from './strategy-options';
-import { TokenStrategyVerifier } from '../interfaces';
+import { TokenStrategyVerifier } from '../types';
 
 /**
  * options for passport bearer strategy

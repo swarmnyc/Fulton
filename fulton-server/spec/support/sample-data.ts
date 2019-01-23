@@ -3,7 +3,7 @@ import { Customer } from '../entities/customer';
 import { Employee } from '../entities/employee';
 import { ObjectId } from 'bson';
 import { Territory } from '../entities/territory';
-import { Type } from '../../src/interfaces';
+import { Type } from '../../src/types';
 
 function NumberInt(value: number): number {
 	return value;

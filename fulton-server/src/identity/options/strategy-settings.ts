@@ -1,6 +1,6 @@
 import { OauthStrategyOptions } from './oauth-strategy-options';
-import { Strategy } from '../interfaces';
-import { Type } from '../../interfaces';
+import { Strategy } from '../types';
+import { Type } from '../../types';
 import { StrategyOptions } from './strategy-options';
 
 export interface StrategySettings {

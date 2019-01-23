@@ -2,7 +2,7 @@ import * as lodash from 'lodash';
 import { FultonError } from '../../src/common/fulton-error';
 import { FultonApp } from "../../src/fulton-app";
 import { FultonUser } from '../../src/identity/fulton-impl/fulton-user';
-import { AccessToken, IFultonUserClaims, IIdentityService, IOauthProfile, IUser, RegisterModel } from '../../src/identity/interfaces';
+import { AccessToken, IFultonUserClaims, IIdentityService, IOauthProfile, IUser, RegisterModel } from '../../src/identity/types';
 
 export class IdentityServiceMock implements IIdentityService<IUser> {
     app: FultonApp

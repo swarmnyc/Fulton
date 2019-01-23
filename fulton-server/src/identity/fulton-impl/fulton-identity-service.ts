@@ -10,11 +10,11 @@ import { ErrorCodes } from '../../common/fulton-error';
 import { IFultonApp } from '../../fulton-app';
 import { codeGenerate, numberCodeGenerate, timingSafeEqual } from '../../helpers/crypto-helper';
 import { Helper } from '../../helpers/helper';
-import { ICacheService, NotificationMessage, Type, Dict } from '../../interfaces';
+import { ICacheService, NotificationMessage, Type, Dict } from '../../types';
 import { injectable, Request } from '../../alias';
 import { EventKeys } from '../../keys';
 import { IdentityOptions } from '../identity-options';
-import { AccessToken, ForgotPasswordModel, ForgotPasswordNotificationModel, IFultonUser, IFultonUserClaims, IOauthProfile, IIdentityService, RegisterModel, UpdateLocalModel, WelcomeNotificationModel } from '../interfaces';
+import { AccessToken, ForgotPasswordModel, ForgotPasswordNotificationModel, IFultonUser, IFultonUserClaims, IOauthProfile, IIdentityService, RegisterModel, UpdateLocalModel, WelcomeNotificationModel } from '../types';
 import { FultonUser, FultonUserAccessToken, FultonUserClaims } from './fulton-user';
 
 interface JWTPayload {
@@ -80,7 +80,7 @@ export class MongoRunner implements IRunner {
     }
 
     updateMetadata(metadata: EntityMetadata) {
-        // make metadata for mongo 
+        // make metadata for mongo
         let idColumn = metadata.ownColumns.find((c) => c.propertyName == "id")
 
         idColumn.isObjectId = true;
@@ -305,7 +305,8 @@ export class FultonIdentityService implements IIdentityService<IFultonUser> {
             displayName: input.username,
             email: input.email,
             portraitUrl: input.portraitUrl,
-            registeredAt: new Date()
+			registeredAt: new Date(),
+			updatedAt: new Date()
         } as IFultonUser;
 
         if (registerOptions.otherFields.length > 0) {
@@ -369,7 +370,7 @@ export class FultonIdentityService implements IIdentityService<IFultonUser> {
                 claimUpdate.loginTryCount = 0
                 claimUpdate.loginFailedAt = null
             } else {
-                // login failed 
+                // login failed
                 if (claim.loginFailedAt && (Date.now() - claim.loginFailedAt.valueOf() < this.options.login.lockTime)) {
                     claimUpdate.loginTryCount = claim.loginTryCount + 1
                 } else {
@@ -431,13 +432,14 @@ export class FultonIdentityService implements IIdentityService<IFultonUser> {
         } else {
             // not existed
             if (userId) {
-                // link to current user   
+                // link to current user
                 userId = this.runner.convertId(userId)
             } else {
                 // create user
                 let input = lodash.clone<IOauthProfile>(profile)
                 delete input.id
-                input.registeredAt = new Date()
+				input.registeredAt = new Date()
+				input.updatedAt = new Date()
 
                 user = await this.runner.addUser(input);
                 userId = user.id;
@@ -499,6 +501,7 @@ export class FultonIdentityService implements IIdentityService<IFultonUser> {
     async updateProfile(userId: any, input: any): Promise<void> {
         if (input == null) throw new FultonError(ErrorCodes.Invalid);
         input = lodash.pick(input, this.options.profile.updatableFields)
+		input.updatedAt = new Date()
 
         let promise = this.runner.updateUser(userId, input);
 

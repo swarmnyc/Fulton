@@ -4,7 +4,7 @@ import { IFultonApp } from './fulton-app';
 import { FultonLog } from './fulton-log';
 import { Env } from './helpers';
 import { fultonDebug } from './helpers/debug';
-import { Type } from './interfaces';
+import { Type } from './types';
 
 export type LaunchTask = (app: IFultonApp) => Promise<any>
 

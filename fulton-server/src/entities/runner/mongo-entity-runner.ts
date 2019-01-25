@@ -7,17 +7,14 @@ import { FultonError } from '../../common';
 import { FultonStackError } from '../../common/fulton-error';
 import { FindResult, QueryColumnOptions, QueryParams } from '../../types';
 import { EntityRunner } from './entity-runner';
-
-interface IncludeOptions {
-    [key: string]: IncludeOptions | false
-}
+import * as lodash from 'lodash'
 
 @injectable()
 export class MongoEntityRunner extends EntityRunner {
     updateIdMetadata<T>(repository: MongoRepository<T>) {
         let metadata = repository.metadata
 
-        // make metadata for mongo 
+        // make metadata for mongo
         let idColumn = metadata.ownColumns.find((c) => c.propertyName == "id")
 
         if (idColumn && idColumn.isObjectId == false) {
@@ -33,8 +30,8 @@ export class MongoEntityRunner extends EntityRunner {
 
     /**
      * use provided repository to find entities
-     * @param repository 
-     * @param queryParams 
+     * @param repository
+     * @param queryParams
      */
     protected async findCore<T>(repository: MongoRepository<T>, queryParams: QueryParams = {}): Promise<FindResult<T>> {
         let skip;
@@ -58,7 +55,7 @@ export class MongoEntityRunner extends EntityRunner {
         ]);
 
         if (data.length > 0 && queryParams.includes) {
-            await this.processIncludes(repository, data, queryParams.includes);
+            await this.processIncludes(repository, data, queryParams);
         }
 
         return { data: data, total: count };
@@ -66,8 +63,8 @@ export class MongoEntityRunner extends EntityRunner {
 
     /**
      * use provided repository to find one entity
-     * @param repository 
-     * @param queryParams 
+     * @param repository
+     * @param queryParams
      */
     protected async findOneCore<T>(repository: MongoRepository<T>, queryParams: QueryParams = {}): Promise<T> {
         let repo = (<any>repository as MongoRepository<T>);
@@ -80,7 +77,7 @@ export class MongoEntityRunner extends EntityRunner {
         const data = result.length > 0 ? result[0] : null
 
         if (data && queryParams.includes) {
-            await this.processIncludes(repo, data, queryParams.includes);
+            await this.processIncludes(repo, data, queryParams);
         }
 
         return data
@@ -176,7 +173,7 @@ export class MongoEntityRunner extends EntityRunner {
     }
 
     /**
-     * adjust filter like change id to _id, change $like to {$regex, $options} 
+     * adjust filter like change id to _id, change $like to {$regex, $options}
      */
     protected extendedAdjustFilter<T>(filter: any, name: string, value: string, targetColumn: ColumnMetadata, errorTracker: FultonStackError): void {
         if (name == "$like") {
@@ -195,18 +192,22 @@ export class MongoEntityRunner extends EntityRunner {
         }
     }
 
-    protected processIncludes<T>(repository: MongoRepository<T>, data: T | T[], includes: string[]): Promise<any> {
-        let includeOptions = this.transformIncludes(includes);
+    protected processIncludes<T>(repository: MongoRepository<T>, data: T | T[], queryParams: QueryParams): Promise<any> {
+        let includeProjection = queryParams.includeProjection || {}
 
-        if (data instanceof Array) {
-            let tasks = data.map((d) => {
-                return this.processIncludeInternal(repository, d, includeOptions);
+        let task = Promise.resolve()
+
+        queryParams.includes.forEach((include) => {
+            task = task.then(() => {
+                let nameChain = include.split(".")
+                let repo = this.findIncludeRepo(repository, nameChain, 0)
+                if (repo) {
+                    return this.processIncludeInternal(repo, data, nameChain, includeProjection[include])
+                }
             })
+        })
 
-            return Promise.all(tasks);
-        } else if (data) {
-            return this.processIncludeInternal(repository, data, includeOptions);
-        }
+        return task
     }
 
 
@@ -254,7 +255,7 @@ export class MongoEntityRunner extends EntityRunner {
 
     /**
      * transform select to projection
-     * @param queryParams 
+     * @param queryParams
      */
     private transformSelect(select: string[]): QueryColumnOptions {
         let options: QueryColumnOptions = {};
@@ -268,7 +269,7 @@ export class MongoEntityRunner extends EntityRunner {
 
     /**
      * merge metadata to projection
-     * @param queryParams 
+     * @param queryParams
      */
     private mergeProjection(metadata: EntityMetadata, projection: QueryColumnOptions = {}): QueryColumnOptions {
         metadata.columns.forEach((c) => {
@@ -290,91 +291,76 @@ export class MongoEntityRunner extends EntityRunner {
         }
     }
 
-    /**
-     * transform ["author", "author.tag"] to { author: { tag: false }}
-     * @param includes 
-     */
-    private transformIncludes(includes: string[]): IncludeOptions {
-        let options: IncludeOptions = {};
+    private findIncludeRepo(repository: MongoRepository<any>, nameChain: string[], index: number): MongoRepository<any> {
+        let relType = repository.metadata.relatedToMetadata[nameChain[index]]
+        if (relType == null) return null
 
-        for (const include of includes) {
-            let columns = include.split(".");
-            let target = options;
-
-            for (let i = 1; i <= columns.length; i++) {
-                let column = columns[i - 1];
-                if (i == columns.length) {
-                    target[column] = false;
-                } else {
-                    if (target[column]) {
-                        target = target[column] as IncludeOptions;
-                    } else {
-                        target = target[column] = {} as IncludeOptions;
-                    }
-                }
-            }
-
+        let relRepo = getMongoRepository(relType);
+        if (index == nameChain.length - 1) {
+            return relRepo
+        } else {
+            return this.findIncludeRepo(relRepo, nameChain, index + 1)
         }
-
-        return options;
     }
 
-    private processIncludeInternal(repository: MongoRepository<any>, target: any, options: IncludeOptions): Promise<any> {
-        //TODO: should cover more situations and better performance
-        let tasks = Object.getOwnPropertyNames(options).map((columnName): Promise<any> => {
-            let relatedToMetadata = repository.metadata.relatedToMetadata;
+    private flatItems(arr: any[], data: any, nameChain: string[], index: number) {
+        let refItem = data[nameChain[index]]
 
-            if (relatedToMetadata == null || relatedToMetadata[columnName] == null) {
-                return;
-            }
+        if (refItem == null) return
 
-            let relItems = target[columnName];
-            if (relItems == null) {
-                return;
-            }
-
-            let relType = relatedToMetadata[columnName];
-            let relRepo = getMongoRepository(relType);
-
-            let fetchSubInclude = async (ref: any): Promise<any> => {
-                // includes sub-columns
-                if (options[columnName]) {
-                    await this.processIncludeInternal(relRepo, ref, options[columnName] as IncludeOptions);
-                }
-
-                return ref;
-            }
-
-            let fetchTask;
-            if (relItems instanceof Array) {
-                if (relItems.length == 0) {
-                    return;
-                }
-
-                let ids = relItems.map((item) => item[relRepo.metadata.objectIdColumn.propertyName] || item._id);
-
-                fetchTask = this.find(relRepo, { filter: { "_id": { "$in": ids } } }).then((result) => {
-                    let refs = result.data;
-                    if (refs.length == 0) {
-                        return [];
-                    } else {
-                        return Promise.all(refs.map(fetchSubInclude)).then(() => {
-                            return refs;
-                        });
-                    }
-                });
+        if (index == nameChain.length - 1) {
+            if (refItem instanceof Array) {
+                arr.push(...refItem)
             } else {
-                let id = relItems[relRepo.metadata.objectIdColumn.propertyName] || relItems._id;
-
-                fetchTask = this.findOne(relRepo, { filter: { "_id": id } }).then(fetchSubInclude);
+                arr.push(refItem)
             }
+        } else {
+            if (refItem instanceof Array) {
+                refItem.forEach((i) => {
+                    this.flatItems(arr, i, nameChain, index + 1)
+                })
+            } else {
+                this.flatItems(arr, refItem, nameChain, index + 1)
+            }
+        }
+    }
 
-            return fetchTask.then(data => {
-                target[columnName] = data;
-            });
+    private async processIncludeInternal<T>(repository: MongoRepository<T>, data: T | T[], columnNameChain: string[], projection: QueryColumnOptions): Promise<void> {
+        //TODO: should cover more situations and better performance
+        let relItems: any[] = []
+
+        if (data instanceof Array) {
+            data.forEach((d) => {
+                this.flatItems(relItems, d, columnNameChain, 0)
+            })
+        } else {
+            this.flatItems(relItems, data, columnNameChain, 0)
+        }
+
+        if (relItems.length == 0) return
+
+        let ids = new Set();
+
+        relItems.forEach((item) => ids.add(item[repository.metadata.objectIdColumn.propertyName] || item._id))
+
+        let items = await this.find(repository, { filter: { "_id": { "$in": Array.from(ids) } }, projection: projection })
+
+        relItems.forEach(relItem => {
+            let id = relItem[repository.metadata.objectIdColumn.propertyName] || relItem._id
+            let item = items.data.find((d: any) => {
+                let rId = d[repository.metadata.objectIdColumn.propertyName] || d._id
+                if (id.equals) {
+                    return id.equals(rId)
+                } else {
+                    return id == rId
+                }
+            })
+
+            if (item) {
+                Object.assign(relItem, item)
+                relItem.constructor = item.constructor
+            }
         });
-
-        return Promise.all(tasks);
     }
 
     private convertUpdate(input: any): any {

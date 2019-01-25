@@ -215,6 +215,26 @@ describe('EmployeeEntityRouter', () => {
         });
     });
 
+    it('should load employees with territories and projection', async () => {
+        let result = await httpTester.get("/employees", {
+            includes: ["territories"],
+            includeProjection: {
+                "territories": {
+                    regionId: 0
+                }
+            }
+        } as QueryParams)
+
+        let queryResult: OperationManyResult<Employee> = result.body;
+
+        queryResult.data.forEach(employee => {
+            if (employee.territories && employee.territories.length > 0) {
+                expect(employee.territories[0].territoryDescription).toBeDefined()
+                expect(employee.territories[0].regionId).toBeUndefined()
+            }
+        });
+    });
+
     it('should load a employee with territories', async () => {
         let result = await httpTester.get("/employees/1", {
             includes: ["territories"]
@@ -232,7 +252,7 @@ describe('EmployeeEntityRouter', () => {
 
     it('should load a employee with territories.category', async () => {
         let result = await httpTester.get("/employees/1", {
-            includes: ["territories.categories"]
+            includes: ["territories", "territories.categories"]
         })
 
         let queryResult: OperationOneResult<Employee> = result.body;

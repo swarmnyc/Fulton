@@ -136,6 +136,12 @@ export function queryParamsParser(req: Request, res: Response, next: NextFunctio
                         params.includes = parseArray(value);
                     }
                     break;
+                case "includeProjection":
+                    params.includeProjection = value;
+                    Object.getOwnPropertyNames(value).forEach((name) => {
+                        value[name] = parseOptionsObject(value[name])
+                    })
+                    break;
                 case "pagination":
                     if (typeof value == "object") {
                         params.pagination = {

@@ -66,7 +66,7 @@ export default class FcmPushNotificationService extends Service implements IPush
 
                 req.write(body)
                 req.end()
-            })
+            }).catch(reject)
         });
     }
 

@@ -60,7 +60,7 @@ export interface IFultonApp {
 
     /**
      * the EventEmitter, see EventKeys for all the events
-     * 
+     *
      * ## example
      * ```
      * app.events.on(EventKeys.AppDidInit, (app:FultonApp)=>{});
@@ -152,14 +152,14 @@ export interface IFultonApp {
 
     /**
      * call NotificationService to send messages, message can be email, sms or push-notification
-     * @param messages 
+     * @param messages
      */
     sendNotifications(...messages: NotificationMessage[]): Promise<void>;
 }
 
 /**
  * The app of Fulton Server, it is the main class of Fulton Server
- * 
+ *
  * `onInit` is the required function when extends from FultonApp
  */
 export abstract class FultonApp implements IFultonApp {
@@ -196,7 +196,7 @@ export abstract class FultonApp implements IFultonApp {
     notificationService: INotificationService;
 
     /**
-     * @param mode There are some different default values for api and web-view. 
+     * @param mode There are some different default values for api and web-view.
      */
     constructor(appName?: string, public mode: AppMode = "api") {
         this.appName = appName || this.constructor.name;
@@ -421,7 +421,7 @@ export abstract class FultonApp implements IFultonApp {
     }
 
     sendNotifications(...messages: NotificationMessage[]): Promise<void> {
-        if (!this.options.notification.enabled) return
+        if (!this.options.notification.enabled) return Promise.resolve()
 
         if (this.notificationService == null) {
             this.notificationService = this.getInstance(DiKeys.NotificationService)
@@ -743,7 +743,7 @@ export abstract class FultonApp implements IFultonApp {
             var opt = lodash.cloneDeepWith(this.options, (value, key, o, s) => {
                 if (key != null && typeof value == "object") {
                     if (value instanceof BaseOptions) {
-                        // sub options 
+                        // sub options
                         return lodash.toPlainObject(value)
                     } else if (!(value instanceof Date || value instanceof Array)) {
                         // other object

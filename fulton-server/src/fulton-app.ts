@@ -232,6 +232,8 @@ export abstract class FultonApp implements IFultonApp {
             await this.initServices();
 
             /* start express middlewares */
+            await this.initHealthChecking()
+
             await this.initHttpLogging();
 
             await this.initCors();
@@ -466,6 +468,13 @@ export abstract class FultonApp implements IFultonApp {
         if (this.options.docs.enabled) {
             require("./initializers/docs-initializer")(this);
         }
+    }
+
+    protected initHealthChecking(): void | Promise<void> {
+        // TODO: check more and be able to custom option
+        this.express.get("/health", (req, res) => {
+            res.sendStatus(200)
+        })
     }
 
     protected initErrorHandler(): void | Promise<void> {

@@ -14,11 +14,11 @@ export class ErrorHandlerOptions extends BaseOptions<ErrorHandlerOptions> {
     error404Middlewares?: Middleware[] = []
 
     init?(): void {
-        if (this.error404Middlewares || this.error404Middlewares.length == 0) {
+        if (this.errorMiddlewares == null || this.errorMiddlewares.length == 0) {
             this.errorMiddlewares = [defaultErrorHandler]
         }
 
-        if (this.error404Middlewares || this.error404Middlewares.length == 0) {
+        if (this.error404Middlewares == null || this.error404Middlewares.length == 0) {
             this.error404Middlewares = [default404ErrorHandler]
         }
     }

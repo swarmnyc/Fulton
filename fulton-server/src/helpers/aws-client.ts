@@ -165,22 +165,23 @@ export class AwsClient {
         return year + month + date + "T" + hours + mins + secs + "Z";
     }
 
-    request(options: AwsRequestOptions): Promise<AwsResponse> {
+    request(options: AwsRequestOptions): Promise<string> {
         return new Promise((resolve, reject) => {
             this.prepareRequest(options)
 
             let req = https.request(options, (response) => {
+                let body = ""
+
                 response.on('data', (chunk) => {
-                    let res = response as AwsResponse
-                    if (res.body) {
-                        res.body += chunk.toString()
-                    } else {
-                        res.body = chunk.toString()
-                    }
+                    body += chunk.toString()
                 });
 
                 response.on('end', () => {
-                    resolve(response as AwsResponse)
+                    if (response.statusCode >= 400) {
+                        reject(body)
+                    } else {
+                        resolve(body)
+                    }
                 });
             })
 

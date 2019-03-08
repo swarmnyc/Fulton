@@ -719,9 +719,11 @@ export abstract class FultonApp implements IFultonApp {
                 name: this.appName,
                 properties: { req, res },
                 onHandleError: (parentZoneDelegate: ZoneDelegate, currentZone: Zone, targetZone: Zone, error: any) => {
-                    this.options.errorHandler.errorMiddlewares.forEach((handler) => {
+                    let handler = this.options.errorHandler.errorMiddlewares[0];
+
+                    if (handler) {
                         handler(error, req, res, null)
-                    });
+                    }
 
                     return false;
                 }

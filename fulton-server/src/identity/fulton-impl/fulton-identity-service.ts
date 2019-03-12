@@ -685,10 +685,12 @@ export class FultonIdentityService implements IIdentityService<IFultonUser> {
         // clear user cache
         let trackCacheKey = `user:${userId}`
         this.cacheService.get(trackCacheKey).then((keys: string[]) => {
-            keys.forEach((key) => {
-                this.cacheService.delete(key)
-            })
-
+            if (keys){
+                keys.forEach((key) => {
+                    this.cacheService.delete(key)
+                })
+            }
+            
             this.cacheService.delete(trackCacheKey)
         })
     }

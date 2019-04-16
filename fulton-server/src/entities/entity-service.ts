@@ -149,12 +149,17 @@ export class EntityService<TEntity> extends Service implements IEntityService<TE
             return this.runner
                 .find(this.mainRepository, queryParams)
                 .then((result) => {
+                    let index = lodash.get(queryParams, "pagination.index") || 0
+                    let size = lodash.get(queryParams, "pagination.size") || result.total
+                    let total = result.total
+                    let hasMore = total > (size * (index + 1))
                     return {
                         data: result.data,
                         pagination: {
-                            total: result.total,
-                            index: lodash.get(queryParams, "pagination.index") || 0,
-                            size: lodash.get(queryParams, "pagination.size") || result.total
+                            total,
+                            index,
+                            size,
+                            hasMore
                         }
                     }
                 })
@@ -342,7 +347,7 @@ export class EntityService<TEntity> extends Service implements IEntityService<TE
         }
 
         // add $operation back
-        Object.getOwnPropertyNames(input).forEach((name)=>{
+        Object.getOwnPropertyNames(input).forEach((name) => {
             if (name.startsWith("$")) {
                 entity[name] = input[name]
             }

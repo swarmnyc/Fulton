@@ -118,6 +118,7 @@ export interface OperationResultPagination {
 	total?: number;
 	index?: number;
 	size?: number;
+	hasMore?: boolean;
 }
 
 export interface OperationManyResult<T=any> extends OperationResult {

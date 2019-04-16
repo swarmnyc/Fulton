@@ -100,4 +100,47 @@ describe('EntityService', () => {
         t = await es.findById(1581)
         expect(t.categories.length).toEqual(2)
     });
+
+    fit('should work with pagination', async () => {
+        let es = app.getEntityService(Territory);
+
+        let result = await es.find({
+            pagination: {
+                index: 1,
+                size: 10
+            }
+        })
+
+        expect(result.pagination.hasMore).toBe(true)
+        expect(result.pagination.index).toBe(1)
+        expect(result.pagination.size).toBe(10)
+        expect(result.pagination.total).toBe(53)
+
+        es = app.getEntityService(Territory);
+
+        result = await es.find({
+            pagination: {
+                size: 53
+            }
+        })
+
+        expect(result.pagination.hasMore).toBe(false)
+        expect(result.pagination.index).toBe(0)
+        expect(result.pagination.size).toBe(53)
+        expect(result.pagination.total).toBe(53)
+
+        es = app.getEntityService(Territory);
+
+        result = await es.find({
+            pagination: {
+                index: 1,
+                size: 50
+            }
+        })
+
+        expect(result.pagination.hasMore).toBe(false)
+        expect(result.pagination.index).toBe(1)
+        expect(result.pagination.size).toBe(50)
+        expect(result.pagination.total).toBe(53)
+    });
 });
